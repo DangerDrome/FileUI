@@ -36,6 +36,12 @@ class App {
 
         // Activity Panel
         this.activityPanel = document.querySelector('.activity-panel');
+
+        // Explorer Actions
+        this.newFileBtn = document.getElementById('new-file-btn');
+        this.newFolderBtn = document.getElementById('new-folder-btn');
+        this.refreshExplorerBtn = document.getElementById('refresh-explorer-btn');
+        this.collapseExplorerBtn = document.getElementById('collapse-explorer-btn');
     }
 
     /**
@@ -56,6 +62,7 @@ class App {
         this.#initRightPanelResizer();
         this.#initActivityPanel();
         this.#initHeaderActions();
+        this.#initExplorerActions();
     }
 
     /**
@@ -146,6 +153,42 @@ class App {
             this.#logEvent(`Switched to ${targetViewName} view`);
             this.leftPanel.querySelector(`.left-panel-view[data-view="${targetViewName}"]`)?.classList.remove('hidden');
         });
+    }
+
+    /**
+     * Initializes the action buttons in the Explorer panel header.
+     * @private
+     */
+    #initExplorerActions() {
+        if (this.newFileBtn) {
+            this.newFileBtn.addEventListener('click', () => {
+                this.#logEvent("Clicked 'New File' (placeholder action)");
+                // Future implementation: prompt for filename and create it
+            });
+        }
+
+        if (this.newFolderBtn) {
+            this.newFolderBtn.addEventListener('click', () => {
+                this.#logEvent("Clicked 'New Folder' (placeholder action)");
+                // Future implementation: prompt for folder name and create it
+            });
+        }
+
+        if (this.collapseExplorerBtn) {
+            this.collapseExplorerBtn.addEventListener('click', () => {
+                const openFolders = this.leftPanel.querySelectorAll('.file-tree .folder.open');
+                openFolders.forEach(folder => {
+                    folder.classList.remove('open');
+                });
+                this.#logEvent("Collapsed all folders in explorer");
+            });
+        }
+
+        if (this.refreshExplorerBtn) {
+            this.refreshExplorerBtn.addEventListener('click', () => {
+                this.#logEvent("Refreshed explorer (placeholder action)");
+            });
+        }
     }
 
     /**

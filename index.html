@@ -41,7 +41,23 @@
         <div class="panel left-panel">
             <!-- Explorer View -->
             <div class="left-panel-view" data-view="Explorer">
-                <h3>Explorer</h3>
+                <div class="panel-view-header">
+                    <h3>Explorer</h3>
+                    <div class="panel-header-actions">
+                        <button id="new-file-btn" class="header-action-btn" aria-label="New File">
+                            <i data-lucide="file-plus-2"></i>
+                        </button>
+                        <button id="new-folder-btn" class="header-action-btn" aria-label="New Folder">
+                            <i data-lucide="folder-plus"></i>
+                        </button>
+                        <button id="refresh-explorer-btn" class="header-action-btn" aria-label="Refresh Explorer">
+                            <i data-lucide="refresh-cw"></i>
+                        </button>
+                        <button id="collapse-explorer-btn" class="header-action-btn" aria-label="Collapse Folders in Explorer">
+                            <i data-lucide="folder-minus"></i>
+                        </button>
+                    </div>
+                </div>
                 <ul class="file-tree">
                     <li class="folder open">
                         <div class="file-tree-item">

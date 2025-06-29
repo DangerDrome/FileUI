@@ -746,6 +746,8 @@ body.is-resizing-v {
 .terminal-input-line {
     display: flex;
     line-height: 1.7;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
 }
 
 .terminal-prompt {
@@ -755,6 +757,7 @@ body.is-resizing-v {
 
 .terminal-prompt-path {
     color: var(--color-accent);
+    font-weight: bold;
 }
 .terminal-prompt-arrow {
     font-weight: bold;
@@ -962,6 +965,24 @@ body.is-resizing-v {
     font-family: var(--font-family-monospace, monospace);
     align-items: center;
     margin-bottom: 0.5em;
+    position: relative;
+}
+.terminal-ll-grid > span {
+    position: relative;
+    background: none;
+}
+.terminal-ll-grid > span:not(:last-child) {
+    /* Add a dotted line to the right of each column except the last */
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent,
+        transparent 95%,
+        var(--color-border) 95%,
+        var(--color-border) 100%
+    );
+    background-size: 4px 1px;
+    background-repeat: repeat-y;
+    background-position: right center;
 }
 .terminal-ll-type {
     color: var(--color-text-tertiary);

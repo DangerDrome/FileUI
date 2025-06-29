@@ -374,6 +374,7 @@ class App {
                 break;
             case 'clear':
                 this.terminalOutput.innerHTML = '';
+                this.#createInputLine();
                 return; // No response needed
             case 'date':
                 response = new Date().toLocaleString();
@@ -421,13 +422,21 @@ class App {
         if (inlineList) {
             p.classList.add('terminal-inline-list');
         }
-        // Special handling for ll JSON array
+        // Special handling for ll and tree JSON arrays
         let isLLGrid = false;
+        let isTree = false;
         let llData = null;
+        let treeData = null;
         if (!isUserInput && message && message.startsWith('[') && message.endsWith(']')) {
             try {
-                llData = JSON.parse(message);
-                isLLGrid = Array.isArray(llData);
+                const arr = JSON.parse(message);
+                if (Array.isArray(arr) && arr.length && arr[0].date) {
+                    llData = arr;
+                    isLLGrid = true;
+                } else if (Array.isArray(arr) && arr.length && arr[0].linePrefix !== undefined) {
+                    treeData = arr;
+                    isTree = true;
+                }
             } catch {}
         }
         if (isLLGrid) {
@@ -468,6 +477,40 @@ class App {
                 grid.appendChild(nameSpan);
             });
             p.appendChild(grid);
+        } else if (isTree) {
+            // Render tree with icons and color
+            const treeDiv = document.createElement('div');
+            treeData.forEach(entry => {
+                const line = document.createElement('div');
+                line.style.whiteSpace = 'pre';
+                // Color code and icon logic
+                let fileClass = 'file-type-default';
+                if (entry.iconName === 'folder') fileClass = '';
+                else if (/\.css$/i.test(entry.name)) fileClass = 'file-type-css';
+                else if (/\.(js|jsx|ts|tsx)$/i.test(entry.name)) fileClass = 'file-type-js';
+                else if (/\.(html|htm)$/i.test(entry.name)) fileClass = 'file-type-html';
+                else if (/\.(md|markdown)$/i.test(entry.name)) fileClass = 'file-type-md';
+                else if (/\.json$/i.test(entry.name)) fileClass = 'file-type-json';
+                else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(entry.name)) fileClass = 'file-type-image';
+                else if (/\.(mp4|mov|avi|webm|mkv)$/i.test(entry.name)) fileClass = 'file-type-video';
+                // Icon
+                const icon = document.createElement('i');
+                icon.setAttribute('data-lucide', entry.iconName);
+                icon.style.marginRight = '8px';
+                icon.style.verticalAlign = 'middle';
+                icon.style.width = '16px';
+                icon.style.height = '16px';
+                // Name
+                const nameSpan = document.createElement('span');
+                if (fileClass) nameSpan.className = fileClass;
+                nameSpan.appendChild(icon);
+                nameSpan.appendChild(document.createTextNode(entry.name));
+                // Line
+                line.textContent = entry.linePrefix;
+                line.appendChild(nameSpan);
+                treeDiv.appendChild(line);
+            });
+            p.appendChild(treeDiv);
         } else if (isUserInput) {
             p.classList.add('user-input');
             const prompt = document.createElement('span');
@@ -1203,7 +1246,7 @@ class App {
             return 'Error: Current directory not found in file tree.';
         }
 
-        let tree = '';
+        let tree = [];
         const buildTree = (element, prefix = '', isLast = true) => {
             const nestedList = element.querySelector('.nested-list');
             if (!nestedList) return;
@@ -1212,24 +1255,21 @@ class App {
             items.forEach((item, index) => {
                 const isLastItem = index === items.length - 1;
                 const itemElement = item.querySelector('.file-tree-item');
-                const name = itemElement?.querySelector('span')?.textContent.trim();
+                const name = itemElement?.querySelector('span:last-of-type')?.textContent.trim();
                 const isFolder = item.classList.contains('folder');
-                
-                // Get the actual icon from the file tree
                 const iconElement = itemElement?.querySelector('.file-icon');
                 const iconName = iconElement?.getAttribute('data-lucide') || (isFolder ? 'folder' : 'file');
-                
-                tree += `${prefix}${isLastItem ? '└── ' : '├── '}${iconName} ${name}\n`;
-                
+                const linePrefix = prefix + (isLastItem ? '└── ' : '├── ');
+                tree.push({linePrefix, iconName, name});
                 if (isFolder) {
                     const newPrefix = prefix + (isLastItem ? '    ' : '│   ');
                     buildTree(item, newPrefix, false);
                 }
             });
         };
-        
         buildTree(currentPath);
-        return tree || 'Directory is empty.';
+        if (tree.length === 0) return 'Directory is empty.';
+        return JSON.stringify(tree);
     }
 
     /**
@@ -1259,6 +1299,39 @@ class App {
         }
         
         return currentElement;
+    }
+
+    // Helper to create and initialize the terminal input line
+    #createInputLine() {
+        const inputLine = document.createElement('div');
+        inputLine.className = 'terminal-input-line';
+        inputLine.innerHTML = `
+            <span class="terminal-prompt"></span>
+            <input type="text" id="terminal-input" class="terminal-input" autofocus>
+        `;
+        this.terminalOutput.appendChild(inputLine);
+        // Update prompt and cursor
+        this.#updateInputPrompt();
+        this.terminalInput = inputLine.querySelector('.terminal-input');
+        // Re-initialize input events and custom cursor
+        this.terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const command = this.terminalInput.value.trim();
+                if (command) {
+                    this.#logToTerminal(command, true);
+                    this.#processTerminalCommand(command);
+                    this.terminalInput.value = '';
+                    this.#updateInputPrompt();
+                }
+                this.terminalInput.focus();
+            }
+        });
+        this.terminalInput.addEventListener('input', () => this.#updateCustomCursor());
+        this.terminalInput.addEventListener('click', () => this.#updateCustomCursor());
+        this.terminalInput.addEventListener('keyup', () => this.#updateCustomCursor());
+        this.#createCustomCursor();
+        this.#updateCustomCursor();
     }
 }
 

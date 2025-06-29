@@ -512,15 +512,7 @@ class App {
                 dateSpan.textContent = entry.date;
                 grid.appendChild(dateSpan);
                 // Name column (icon + color)
-                let fileClass = 'file-type-default';
-                if (entry.iconName === 'folder') fileClass = '';
-                else if (/\.css$/i.test(entry.name)) fileClass = 'file-type-css';
-                else if (/\.(js|jsx|ts|tsx)$/i.test(entry.name)) fileClass = 'file-type-js';
-                else if (/\.(html|htm)$/i.test(entry.name)) fileClass = 'file-type-html';
-                else if (/\.(md|markdown)$/i.test(entry.name)) fileClass = 'file-type-md';
-                else if (/\.json$/i.test(entry.name)) fileClass = 'file-type-json';
-                else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(entry.name)) fileClass = 'file-type-image';
-                else if (/\.(mp4|mov|avi|webm|mkv)$/i.test(entry.name)) fileClass = 'file-type-video';
+                const fileClass = entry.iconName === 'folder' ? '' : this.#getFileTypeClass(entry.name);
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'terminal-ll-name' + (fileClass ? ' ' + fileClass : '');
                 const icon = document.createElement('i');
@@ -541,15 +533,7 @@ class App {
                 const line = document.createElement('div');
                 line.style.whiteSpace = 'pre';
                 // Color code and icon logic
-                let fileClass = 'file-type-default';
-                if (entry.iconName === 'folder') fileClass = '';
-                else if (/\.css$/i.test(entry.name)) fileClass = 'file-type-css';
-                else if (/\.(js|jsx|ts|tsx)$/i.test(entry.name)) fileClass = 'file-type-js';
-                else if (/\.(html|htm)$/i.test(entry.name)) fileClass = 'file-type-html';
-                else if (/\.(md|markdown)$/i.test(entry.name)) fileClass = 'file-type-md';
-                else if (/\.json$/i.test(entry.name)) fileClass = 'file-type-json';
-                else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(entry.name)) fileClass = 'file-type-image';
-                else if (/\.(mp4|mov|avi|webm|mkv)$/i.test(entry.name)) fileClass = 'file-type-video';
+                const fileClass = entry.iconName === 'folder' ? '' : this.#getFileTypeClass(entry.name);
                 // Icon
                 const icon = document.createElement('i');
                 icon.setAttribute('data-lucide', entry.iconName);
@@ -595,15 +579,7 @@ class App {
                         const fileName = iconMatch[2].trim();
                         const fileType = iconMatch[3];
                         // Determine file type class
-                        let fileClass = 'file-type-default';
-                        if (iconName === 'folder') fileClass = '';
-                        else if (/\.css$/i.test(fileName)) fileClass = 'file-type-css';
-                        else if (/\.(js|jsx|ts|tsx)$/i.test(fileName)) fileClass = 'file-type-js';
-                        else if (/\.(html|htm)$/i.test(fileName)) fileClass = 'file-type-html';
-                        else if (/\.(md|markdown)$/i.test(fileName)) fileClass = 'file-type-md';
-                        else if (/\.json$/i.test(fileName)) fileClass = 'file-type-json';
-                        else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(fileName)) fileClass = 'file-type-image';
-                        else if (/\.(mp4|mov|avi|webm|mkv)$/i.test(fileName)) fileClass = 'file-type-video';
+                        const fileClass = (iconName === 'folder' || fileType === 'folder') ? '' : this.#getFileTypeClass(fileName);
                         // Create icon element
                         const icon = document.createElement('i');
                         icon.setAttribute('data-lucide', iconName);
@@ -746,38 +722,15 @@ class App {
      * @private
      */
     #setActiveTab(tabElement) {
-        if (!tabElement || !this.tabsContainer || !this.editorContent) {
+        const containingPane = tabElement?.closest('.split-pane');
+        if (containingPane) {
+            this.#setActiveTabForPane(tabElement, containingPane);
+        } else if (!tabElement) {
+            // This is a fallback for the very rare case where the last tab in the
+            // original, non-split pane is closed. We don't have a pane context,
+            // so we manually clear the original breadcrumb bar and editor.
             this.#updateBreadcrumbs(null);
             if (this.editorContent) this.editorContent.textContent = 'No file open.';
-            return;
-        }
-
-        // Deactivate current active tab
-        this.tabsContainer.querySelector('.tab-item.active')?.classList.remove('active');
-
-        // Activate the new one
-        tabElement.classList.add('active');
-
-        // Update editor content and breadcrumbs
-        const fileName = tabElement.dataset.filename;
-        let filePath = tabElement.dataset.path ? JSON.parse(tabElement.dataset.path) : null;
-        
-        if (!filePath && fileName) {
-            const fileTreeElement = this.#findFileElementInTree(fileName);
-            if (fileTreeElement) {
-                filePath = this.#getPathForFileElement(fileTreeElement);
-                tabElement.dataset.path = JSON.stringify(filePath);
-            } else {
-                filePath = [fileName]; // Fallback for files not in the tree
-            }
-        }
-        
-        this.#updateBreadcrumbs(filePath);
-
-        if (fileName) {
-            this.editorContent.textContent = `Content for ${fileName} would be displayed here.`;
-        } else {
-            this.editorContent.textContent = 'No file open.';
         }
     }
 
@@ -892,6 +845,23 @@ class App {
     }
 
     /**
+     * Gets the CSS class for a file based on its name.
+     * @param {string} fileName The name of the file.
+     * @returns {string} The CSS class name.
+     * @private
+     */
+    #getFileTypeClass(fileName) {
+        if (/\.css$/i.test(fileName)) return 'file-type-css';
+        if (/\.(js|jsx|ts|tsx)$/i.test(fileName)) return 'file-type-js';
+        if (/\.(html|htm)$/i.test(fileName)) return 'file-type-html';
+        if (/\.(md|markdown)$/i.test(fileName)) return 'file-type-md';
+        if (/\.json$/i.test(fileName)) return 'file-type-json';
+        if (/\.(png|jpe?g|gif|svg|webp)$/i.test(fileName)) return 'file-type-image';
+        if (/\.(mp4|mov|avi|webm|mkv)$/i.test(fileName)) return 'file-type-video';
+        return 'file-type-default';
+    }
+
+    /**
      * Opens a file in a new tab, or focuses the tab if already open.
      * It also creates the close button for the new tab.
      * @param {string} fileName The name of the file to open.
@@ -952,15 +922,15 @@ class App {
         } else {
             // Tab doesn't exist, create it in the target tabs container
             const newTab = document.createElement('div');
-            newTab.className = 'tab-item';
+            const fileClass = this.#getFileTypeClass(fileName);
+            newTab.className = `tab-item ${fileClass}`;
             newTab.draggable = true;
             newTab.dataset.filename = fileName;
             if (filePath) {
                 newTab.dataset.path = JSON.stringify(filePath);
             }
-            const iconName = this.#getFileIcon(fileName);
             newTab.innerHTML = `
-                <i data-lucide="${iconName}" class="tab-icon"></i>
+                <i data-lucide="${this.#getFileIcon(fileName)}" class="tab-icon"></i>
                 <span>${fileName}</span>
                 <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
             `;
@@ -1040,15 +1010,15 @@ class App {
             } else {
                 // Tab doesn't exist anywhere, create it
                 const newTab = document.createElement('div');
-                newTab.className = 'tab-item';
+                const fileClass = this.#getFileTypeClass(fileName);
+                newTab.className = `tab-item ${fileClass}`;
                 newTab.draggable = true;
                 newTab.dataset.filename = fileName;
                 if (filePath) {
                     newTab.dataset.path = JSON.stringify(filePath);
                 }
-                const iconName = this.#getFileIcon(fileName);
                 newTab.innerHTML = `
-                    <i data-lucide="${iconName}" class="tab-icon"></i>
+                    <i data-lucide="${this.#getFileIcon(fileName)}" class="tab-icon"></i>
                     <span>${fileName}</span>
                     <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
                 `;
@@ -1094,18 +1064,21 @@ class App {
     #closeTab(tabToClose) {
         if (!tabToClose) return;
 
+        const containingPane = tabToClose.closest('.split-pane');
+        if (containingPane) {
+            this.#closeTabInPane(tabToClose, containingPane);
+            return;
+        }
+
+        // Fallback for non-pane contexts (should be rare)
         let tabToActivate = null;
         if (tabToClose.classList.contains('active')) {
-            // If the closed tab was active, find a new one to activate
             tabToActivate = tabToClose.previousElementSibling || tabToClose.nextElementSibling;
             this.#logEvent(`Closed tab: ${tabToClose.dataset.filename}`);
         }
 
-        // Remove the tab from the DOM
         tabToClose.remove();
 
-        // If we determined a new tab should be active, activate it.
-        // This also handles the case where the last tab is closed (tabToActivate will be null)
         if (tabToClose.classList.contains('active')) {
             this.#setActiveTab(tabToActivate);
         }
@@ -1345,6 +1318,16 @@ class App {
     }
 
     #initTabs() {
+        this.tabsContainer.querySelectorAll('.tab-item').forEach(tab => {
+            const fileName = tab.dataset.filename;
+            if (fileName) {
+                const fileClass = this.#getFileTypeClass(fileName);
+                if (fileClass) {
+                    tab.classList.add(fileClass);
+                }
+            }
+        });
+
         this.#initTabGroup(
             this.tabsContainer,
             (tab) => this.#setActiveTab(tab),
@@ -1438,6 +1421,23 @@ class App {
     #initFileTree() {
         const fileTree = this.leftPanel?.querySelector('.file-tree');
         if (!fileTree) return;
+
+        // Apply color coding to files
+        fileTree.querySelectorAll('.file-tree-item').forEach(item => {
+            const parentLi = item.parentElement;
+            if (parentLi && !parentLi.classList.contains('folder')) {
+                const fileName = item.textContent.trim();
+                if (fileName) {
+                    const fileClass = this.#getFileTypeClass(fileName);
+                    if (fileClass) {
+                        const icon = item.querySelector('i');
+                        if (icon) {
+                            icon.classList.add(fileClass);
+                        }
+                    }
+                }
+            }
+        });
 
         fileTree.addEventListener('click', (e) => {
             const item = e.target.closest('.file-tree-item');
@@ -1881,7 +1881,7 @@ class App {
         const tabs = document.createElement('div');
         tabs.className = 'tabs';
         tabs.innerHTML = `
-            <div class="tab-item active" data-filename="untitled" draggable="true">
+            <div class="tab-item active file-type-default" data-filename="untitled" draggable="true">
                 <i data-lucide="file" class="tab-icon"></i>
                 <span>untitled</span>
                 <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
@@ -2006,11 +2006,21 @@ class App {
      * @private
      */
     #setActiveTabForPane(tabElement, paneElement) {
-        if (!tabElement || !paneElement) return;
+        if (!paneElement) return;
 
         const paneId = paneElement.dataset.paneId;
         const paneInfo = this.activePanes.get(paneId);
         if (!paneInfo) return;
+
+        // Handle case where last tab is closed (tabElement is null)
+        if (!tabElement) {
+            paneInfo.tabs.querySelector('.tab-item.active')?.classList.remove('active');
+            paneInfo.activeTab = null;
+            const editorContent = paneElement.querySelector('.editor-content p');
+            if (editorContent) editorContent.textContent = 'No file open. Select a file from the explorer.';
+            this.#updateBreadcrumbsForPane(null, paneElement);
+            return;
+        }
 
         // Check if we're activating a real file and there's an untitled tab
         const fileName = tabElement.dataset.filename;
@@ -2085,15 +2095,17 @@ class App {
         }
 
         // Otherwise, proceed with normal tab closing
+        const wasActive = tabToClose.classList.contains('active');
         let tabToActivate = null;
-        if (tabToClose.classList.contains('active')) {
+        if (wasActive) {
+            // If the closed tab was active, find a new one to activate
             tabToActivate = tabToClose.previousElementSibling || tabToClose.nextElementSibling;
-            this.#logEvent(`Closed tab: ${tabToClose.dataset.filename}`);
         }
-
+        
+        this.#logEvent(`Closed tab: ${tabToClose.dataset.filename}`);
         tabToClose.remove();
 
-        if (tabToClose.classList.contains('active') && tabToActivate) {
+        if (wasActive) {
             this.#setActiveTabForPane(tabToActivate, paneElement);
         }
     }
@@ -2209,10 +2221,15 @@ class App {
             const isLast = index === path.length - 1;
 
             if (isLast) {
+                // The file itself, wrapped for color coding
                 const fileIcon = this.#getFileIcon(segment);
-                container.innerHTML += `<i data-lucide="${fileIcon}" class="breadcrumb-icon"></i>`;
-                container.innerHTML += `<span class="breadcrumb-item active">${segment}</span>`;
+                const fileClass = this.#getFileTypeClass(segment);
+                container.innerHTML += `<span class="breadcrumb-file-item ${fileClass}">
+                    <i data-lucide="${fileIcon}" class="breadcrumb-icon"></i>
+                    <span class="breadcrumb-item active">${segment}</span>
+                </span>`;
             } else {
+                // A parent folder
                 container.innerHTML += `<i data-lucide="folder" class="breadcrumb-icon"></i>`;
                 container.innerHTML += `<span class="breadcrumb-item">${segment}</span>`;
                 container.innerHTML += `<i data-lucide="chevron-right" class="breadcrumb-separator"></i>`;

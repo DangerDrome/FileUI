@@ -148,6 +148,16 @@
     /* Body States */
     --body-resizing-cursor-h: col-resize;
     --body-resizing-cursor-v: row-resize;
+
+    /* File Type Colors */
+    --color-file-type-html: #f7b2ad;
+    --color-file-type-css: #7ec4cf;
+    --color-file-type-js: #ffe066;
+    --color-file-type-json: #c3aed6;
+    --color-file-type-md: #b5ead7;
+    --color-file-type-image: #b2c7e1;
+    --color-file-type-video: #f6c1c7;
+    --color-file-type-default: #e0e0e0;
 }
 
 /* --- GLOBAL RESETS & STYLES --- */
@@ -569,6 +579,7 @@ body.is-resizing-v {
 
 .file-tree-item.selected {
     background-color: var(--color-bg-header);
+    color: #fff;
 }
 
 /* File Tree Interactivity */
@@ -1081,8 +1092,13 @@ body.is-resizing .split-pane {
 .breadcrumbs {
     display: flex;
     align-items: center;
-    gap: var(--breadcrumb-gap);
-    color: var(--color-text-tertiary);
+    gap: 0.25rem;
+}
+
+.breadcrumb-file-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .breadcrumb-item {
@@ -1097,6 +1113,7 @@ body.is-resizing .split-pane {
 
 .breadcrumb-item.active {
     color: var(--color-text-primary);
+    font-weight: 500;
 }
 
 .breadcrumb-icon, .breadcrumb-separator {
@@ -1133,14 +1150,24 @@ body.is-resizing .split-pane {
     min-width: 0;
 }
 
-.file-type-css { color: #7ec4cf; }
-.file-type-js { color: #ffe066; }
-.file-type-html { color: #f7b2ad; }
-.file-type-md { color: #b5ead7; }
-.file-type-json { color: #c3aed6; }
-.file-type-default { color: #e0e0e0; }
-.file-type-image { color: #b2c7e1; }
-.file-type-video { color: #f6c1c7; }
+.file-type-html { color: var(--color-file-type-html); }
+.file-type-css { color: var(--color-file-type-css); }
+.file-type-js { color: var(--color-file-type-js); }
+.file-type-json { color: var(--color-file-type-json); }
+.file-type-md { color: var(--color-file-type-md); }
+.file-type-image { color: var(--color-file-type-image); }
+.file-type-video { color: var(--color-file-type-video); }
+.file-type-default { color: var(--color-text-secondary); }
+
+/* Ensure icons inside colored items also get the color */
+.file-type-html i, .file-type-html .file-icon, .file-type-html .tab-icon { color: var(--color-file-type-html); }
+.file-type-css i, .file-type-css .file-icon, .file-type-css .tab-icon { color: var(--color-file-type-css); }
+.file-type-js i, .file-type-js .file-icon, .file-type-js .tab-icon { color: var(--color-file-type-js); }
+.file-type-json i, .file-type-json .file-icon, .file-type-json .tab-icon { color: var(--color-file-type-json); }
+.file-type-md i, .file-type-md .file-icon, .file-type-md .tab-icon { color: var(--color-file-type-md); }
+.file-type-image i, .file-type-image .file-icon, .file-type-image .tab-icon { color: var(--color-file-type-image); }
+.file-type-video i, .file-type-video .file-icon, .file-type-video .tab-icon { color: var(--color-file-type-video); }
+.file-type-default i, .file-type-default .file-icon, .file-type-default .tab-icon { color: var(--color-text-secondary); }
 
 .terminal-ll-grid {
     display: grid;

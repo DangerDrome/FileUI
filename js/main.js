@@ -46,6 +46,9 @@ class App {
         this.newFolderBtn = document.getElementById('new-folder-btn');
         this.refreshExplorerBtn = document.getElementById('refresh-explorer-btn');
         this.collapseExplorerBtn = document.getElementById('collapse-explorer-btn');
+
+        this.commandHistory = [];
+        this.historyIndex = -1;
     }
 
     /**
@@ -256,19 +259,52 @@ class App {
                 e.preventDefault();
                 const command = this.terminalInput.value.trim();
                 if (command) {
+                    this.commandHistory.push(command);
+                    this.historyIndex = this.commandHistory.length;
                     this.#logToTerminal(command, true);
                     this.#processTerminalCommand(command);
                     this.terminalInput.value = '';
                     this.#updateInputPrompt();
                 }
                 this.terminalInput.focus();
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                this.#handleTabCompletion();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.#handleHistoryNavigation(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.#handleHistoryNavigation(1);
             }
         });
-
-        // Update cursor position on input
         this.terminalInput.addEventListener('input', () => this.#updateCustomCursor());
         this.terminalInput.addEventListener('click', () => this.#updateCustomCursor());
         this.terminalInput.addEventListener('keyup', () => this.#updateCustomCursor());
+    }
+
+    #handleTabCompletion() {
+        const input = this.terminalInput.value;
+        const parts = input.split(/\s+/);
+        const last = parts[parts.length - 1];
+        const currentPath = this.#getCurrentPathElement();
+        if (!currentPath) return;
+        const nestedList = currentPath.querySelector('.nested-list');
+        if (!nestedList) return;
+        const names = Array.from(nestedList.querySelectorAll('.file-tree-item span:last-of-type'))
+            .map(span => span.textContent.trim());
+        const matches = names.filter(name => name.startsWith(last));
+        if (matches.length === 1) {
+            // Single match: autocomplete
+            parts[parts.length - 1] = matches[0];
+            this.terminalInput.value = parts.join(' ');
+            this.#updateCustomCursor();
+            this.terminalInput.focus();
+        } else if (matches.length > 1) {
+            // Multiple matches: show in terminal
+            this.#logToTerminal(matches.join('    '), false, true);
+            this.terminalInput.focus();
+        }
     }
 
     /**
@@ -1332,6 +1368,20 @@ class App {
         this.terminalInput.addEventListener('keyup', () => this.#updateCustomCursor());
         this.#createCustomCursor();
         this.#updateCustomCursor();
+    }
+
+    #handleHistoryNavigation(direction) {
+        if (!this.commandHistory.length) return;
+        this.historyIndex += direction;
+        if (this.historyIndex < 0) this.historyIndex = 0;
+        if (this.historyIndex >= this.commandHistory.length) {
+            this.historyIndex = this.commandHistory.length;
+            this.terminalInput.value = '';
+        } else {
+            this.terminalInput.value = this.commandHistory[this.historyIndex];
+        }
+        this.#updateCustomCursor();
+        this.terminalInput.focus();
     }
 }
 

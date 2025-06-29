@@ -12,6 +12,10 @@
 <body>
     <header class="main-header">
         <h1>MediaUI</h1>
+        <div class="header-search-container">
+            <i data-lucide="search"></i>
+            <input type="text" class="header-search-input" placeholder="Search...">
+        </div>
         <div class="header-actions">
             <button id="toggle-left-panel-btn" class="header-action-btn active" aria-label="Toggle Left Panel">
                 <i data-lucide="panel-left"></i>
@@ -30,16 +34,14 @@
             <button class="activity-btn active" aria-label="Explorer" data-view="Explorer">
                 <i data-lucide="files"></i>
             </button>
-            <button class="activity-btn" aria-label="Search" data-view="Search">
-                <i data-lucide="search"></i>
-            </button>
-            <button class="activity-btn" aria-label="Settings" data-view="Settings">
+            <button class="activity-btn activity-btn-bottom" aria-label="Settings" data-view="Settings">
                 <i data-lucide="settings"></i>
             </button>
         </div>
         <div class="panel left-panel">
             <!-- Explorer View -->
             <div class="left-panel-view" data-view="Explorer">
+                <h3>Explorer</h3>
                 <ul class="file-tree">
                     <li class="folder open">
                         <div class="file-tree-item">
@@ -66,10 +68,6 @@
                 </ul>
             </div>
             <!-- Search View -->
-            <div class="left-panel-view hidden" data-view="Search">
-                <h3>Search</h3>
-                <input type="text" class="view-input" placeholder="Search files...">
-            </div>
             <!-- Settings View -->
             <div class="left-panel-view hidden" data-view="Settings">
                 <h3>Settings</h3>
@@ -108,10 +106,12 @@
                     <div class="tab-item active" data-view="logs" draggable="true">
                         <i data-lucide="list-checks" class="tab-icon"></i>
                         <span>Logs</span>
+                        <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
                     </div>
                     <div class="tab-item" data-view="terminal" draggable="true">
                         <i data-lucide="terminal-square" class="tab-icon"></i>
                         <span>Terminal</span>
+                        <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
                     </div>
                 </div>
                 <div class="bottom-panel-content">

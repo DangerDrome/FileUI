@@ -473,16 +473,16 @@ class App {
      * Initializes a generic tab group with click, close, and drag-and-drop functionality.
      * @param {HTMLElement} container The container element for the tab group.
      * @param {Function} onActivate A callback function to run when a tab is activated.
+     * @param {Function} [onClose] An optional callback function to run when a tab's close button is clicked.
      * @private
      */
-    #initTabGroup(container, onActivate) {
+    #initTabGroup(container, onActivate, onClose) {
         if (!container) return;
 
         container.addEventListener('click', (e) => {
             const closeBtn = e.target.closest('.tab-close-btn');
-            if (closeBtn) {
-                // This only applies to file tabs which have close buttons
-                this.#closeTab(closeBtn.closest('.tab-item'));
+            if (closeBtn && onClose) {
+                onClose(closeBtn.closest('.tab-item'));
                 return;
             }
 
@@ -524,8 +524,11 @@ class App {
     }
 
     #initTabs() {
-        const onActivate = (tab) => this.#setActiveTab(tab);
-        this.#initTabGroup(this.tabsContainer, onActivate);
+        this.#initTabGroup(
+            this.tabsContainer,
+            (tab) => this.#setActiveTab(tab),
+            (tab) => this.#closeTab(tab)
+        );
     }
 
     /**
@@ -538,7 +541,25 @@ class App {
             this.bottomPanel.querySelectorAll('.bottom-panel-view').forEach(v => v.classList.add('hidden'));
             this.bottomPanel.querySelector(`#${targetViewName}`)?.classList.remove('hidden');
         };
-        this.#initTabGroup(this.bottomTabsContainer, onActivate);
+
+        const onClose = (tabToClose) => {
+            if (!tabToClose) return;
+            const wasActive = tabToClose.classList.contains('active');
+            let tabToActivate = wasActive ? (tabToClose.previousElementSibling || tabToClose.nextElementSibling) : null;
+            
+            this.#logEvent(`Closed tab: ${tabToClose.dataset.view}`);
+            tabToClose.remove();
+
+            if (wasActive && tabToActivate) {
+                tabToActivate.classList.add('active');
+                onActivate(tabToActivate);
+            } else if (!this.bottomTabsContainer.querySelector('.tab-item')) {
+                // All tabs are closed, hide the panel
+                this.toggleTerminalBtn.click();
+            }
+        };
+
+        this.#initTabGroup(this.bottomTabsContainer, onActivate, onClose);
     }
 
     #initFileTree() {

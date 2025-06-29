@@ -1,0 +1,520 @@
+/* 
+ * MediaUI - Main Style Sheet
+ */
+
+/* 🎨 --- THEME VARIABLES --- 🎨 */
+:root {
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    
+    /* Colors */
+    --color-bg: #1e1e1e;
+    --color-bg-panel: #252526;
+    --color-bg-header: #333333;
+    --color-bg-footer: #007acc;
+    --color-border: #3c3c3c;
+    --color-tab-active-bg: #1e1e1e;
+    --color-tab-inactive-bg: #2d2d2d;
+    --color-text: #cccccc;
+    --color-text-accent: #ffffff;
+    --color-text-secondary: #8c8c8c;
+    --color-success: #28a745;
+    --color-error: #dc3545;
+    --color-icon: #cccccc;
+ 
+    /* Spacing */
+    --spacing-unit: 8px;
+}
+
+/* --- GLOBAL RESETS & STYLES --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- ICON OVERRIDES --- */
+/* Force a thinner stroke on all Lucide icons */
+.lucide {
+    stroke-width: 1.5;
+}
+
+/* --- MAIN LAYOUT --- */
+.main-header, .main-footer {
+    flex-shrink: 0;
+    background-color: var(--color-bg-header);
+    padding: calc(var(--spacing-unit) * 1.5);
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-footer {
+    background-color: var(--color-bg-footer);
+    color: var(--color-text-accent);
+    padding: calc(var(--spacing-unit) / 2) var(--spacing-unit);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+/* Make buttons inside the footer smaller to fit the new height */
+.main-footer .button-secondary {
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.panel {
+    background-color: var(--color-bg-panel);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.left-panel { 
+    flex: 0 0 250px;
+    /* The resizer will act as the border */
+}
+.main-panel { 
+    flex: 1; 
+}
+.right-panel {
+    flex: 0 0 250px;
+    padding: var(--spacing-unit);
+}
+
+/* A class added to the body during resize to prevent text selection */
+body.is-resizing {
+    user-select: none;
+}
+body.is-resizing-h {
+    cursor: col-resize;
+}
+body.is-resizing-v {
+    cursor: row-resize;
+}
+
+.resizer {
+    background-color: var(--color-border);
+    transition: background-color 0.2s ease;
+}
+.resizer:hover,
+.resizer:active {
+    background-color: var(--color-bg-footer);
+}
+
+.resizer-vertical {
+    flex: 0 0 3px;
+    cursor: col-resize;
+}
+
+.resizer-horizontal {
+    flex-shrink: 0;
+    height: 3px;
+    cursor: row-resize;
+}
+
+/* --- COMPONENTS --- */
+
+/* Activity Panel */
+.activity-panel {
+    flex: 0 0 55px;
+    background-color: var(--color-bg-header);
+    padding: var(--spacing-unit) 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-unit);
+    border-right: 1px solid var(--color-border);
+}
+
+.activity-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: calc(var(--spacing-unit) * 1.5);
+    border-radius: 4px;
+    line-height: 0;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.activity-btn:hover {
+    color: var(--color-text-accent);
+}
+
+.activity-btn.active {
+    color: var(--color-text-accent);
+}
+
+.activity-btn.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 25%;
+    height: 50%;
+    width: 3px;
+    background-color: var(--color-text-accent);
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    gap: var(--spacing-unit);
+}
+
+.header-action-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    line-height: 0;
+    transition: all 0.2s ease;
+}
+
+.header-action-btn:hover {
+    background-color: var(--color-bg-panel);
+    color: var(--color-text-accent);
+}
+
+.header-action-btn.active {
+    color: var(--color-bg-footer);
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* A generic button for actions inside a panel view */
+.panel-action-btn {
+    position: absolute;
+    top: var(--spacing-unit);
+    right: var(--spacing-unit);
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    line-height: 0;
+    transition: all 0.2s ease;
+    z-index: 5;
+}
+.panel-action-btn:hover {
+    color: var(--color-text-accent);
+}
+
+/* File Tree */
+.file-tree {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+}
+
+.file-tree ul {
+    list-style: none;
+    padding-left: calc(var(--spacing-unit) * 2);
+    max-height: 1000px; /* A large enough value for smooth transition */
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+.file-tree-item {
+    display: flex;
+    align-items: center;
+    padding: calc(var(--spacing-unit) / 2) var(--spacing-unit);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.file-icon {
+    margin-right: var(--spacing-unit);
+    color: var(--color-icon);
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.twirldown-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: calc(var(--spacing-unit) / 2);
+    transition: transform 0.2s ease-out;
+    flex-shrink: 0;
+}
+
+.twirldown-placeholder {
+    width: 16px;
+    margin-right: calc(var(--spacing-unit) / 2);
+    flex-shrink: 0;
+}
+
+.file-tree-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* File Tree Interactivity */
+.file-tree .folder > .nested-list {
+    max-height: 0; /* Collapsed by default */
+}
+
+.file-tree .folder.open > .nested-list {
+    max-height: 1000px; /* Expanded */
+}
+
+.file-tree .folder.open .twirldown-icon {
+    transform: rotate(90deg);
+}
+
+/* Main Panel Components */
+.tabs {
+    display: flex;
+    flex-shrink: 0;
+    background-color: var(--color-bg-panel);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.tab-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-unit);
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+    cursor: pointer;
+    background-color: var(--color-tab-inactive-bg);
+    border-right: 1px solid var(--color-border);
+    font-size: 14px;
+    padding-right: var(--spacing-unit); /* Reduce right padding to accommodate button */
+}
+
+.tab-item.dragging {
+    opacity: 0.5;
+    background-color: var(--color-bg-footer);
+}
+
+.tab-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--color-icon);
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.tab-item span {
+    flex-grow: 1;
+}
+
+.tab-close-btn {
+    background: none;
+    border: none;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    line-height: 0;
+    transition: background-color 0.2s ease;
+}
+
+.tab-close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.tab-item.active {
+    background-color: var(--color-tab-active-bg);
+    color: var(--color-text-accent);
+}
+
+.editor-content {
+    flex-grow: 1;
+    padding: var(--spacing-unit);
+    overflow-y: auto;
+}
+
+.terminal {
+    display: flex;
+    flex-direction: column;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 13px;
+    overflow: hidden; /* Contains the output and input */
+    cursor: text; /* Indicate that the area is interactive */
+}
+
+.bottom-panel {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-panel);
+}
+
+.bottom-panel-content {
+    flex-grow: 1;
+    overflow: hidden;
+    background-color: #0d0d0d;
+}
+
+.bottom-panel-view {
+    height: 100%;
+    padding: var(--spacing-unit);
+    overflow-y: auto;
+}
+
+.logs-panel {
+    position: relative; /* For positioning the clear button */
+}
+
+.logs-panel p {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+}
+
+.terminal-output {
+    flex-grow: 1;
+    overflow-y: auto;
+    color: var(--color-text);
+}
+
+.terminal-output p {
+    white-space: pre-wrap; /* Respects whitespace and newlines */
+    word-break: break-all;
+}
+
+.terminal-output pre {
+    color: var(--color-text-secondary);
+    line-height: 1.1;
+    margin-bottom: var(--spacing-unit);
+}
+
+.terminal-output .user-input {
+    display: flex;
+}
+
+.terminal-input-line {
+    display: flex;
+}
+
+.terminal-prompt {
+    color: var(--color-text-secondary);
+    margin-right: var(--spacing-unit);
+}
+
+.terminal-input {
+    flex-grow: 1;
+    background-color: transparent;
+    border: none;
+    color: var(--color-text);
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* --- BUTTONS --- */
+.button-primary, .button-secondary {
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.button-primary {
+    background-color: var(--color-bg-footer);
+    color: var(--color-text-accent);
+    border-color: var(--color-bg-footer);
+}
+
+.button-secondary {
+    background-color: var(--color-bg-header);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+.button-primary:hover, .button-secondary:hover {
+    background-color: var(--color-border);
+}
+
+/* --- MODAL --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background-color: var(--color-bg-panel);
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 500px;
+    transform: scale(0.95);
+    transition: transform 0.2s ease-in-out;
+}
+
+.modal-overlay.show .modal {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text);
+    padding: 4px;
+    line-height: 0; /* Helps align the icon */
+}
+
+.modal-body {
+    padding: calc(var(--spacing-unit) * 2);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-unit);
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+    border-top: 1px solid var(--color-border);
+}

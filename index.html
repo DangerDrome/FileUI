@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaUI</title>
+    <!-- Link to MediaUI's CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <header class="main-header">
+        <h1>MediaUI</h1>
+        <div class="header-actions">
+            <button id="toggle-left-panel-btn" class="header-action-btn active" aria-label="Toggle Left Panel">
+                <i data-lucide="panel-left"></i>
+            </button>
+            <button id="toggle-right-panel-btn" class="header-action-btn active" aria-label="Toggle Right Panel">
+                <i data-lucide="panel-right"></i>
+            </button>
+            <button id="toggle-terminal-btn" class="header-action-btn active" aria-label="Toggle Terminal Panel">
+                <i data-lucide="terminal-square"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="activity-panel">
+            <button class="activity-btn active" aria-label="Explorer" data-view="Explorer">
+                <i data-lucide="files"></i>
+            </button>
+            <button class="activity-btn" aria-label="Search" data-view="Search">
+                <i data-lucide="search"></i>
+            </button>
+            <button class="activity-btn" aria-label="Settings" data-view="Settings">
+                <i data-lucide="settings"></i>
+            </button>
+        </div>
+        <div class="panel left-panel">
+            <!-- Explorer View -->
+            <div class="left-panel-view" data-view="Explorer">
+                <ul class="file-tree">
+                    <li class="folder open">
+                        <div class="file-tree-item">
+                            <i data-lucide="chevron-right" class="twirldown-icon"></i>
+                            <i data-lucide="folder" class="file-icon"></i>
+                            <span>css</span>
+                        </div>
+                        <ul class="nested-list">
+                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i>style.css</div></li>
+                        </ul>
+                    </li>
+                    <li class="folder open">
+                        <div class="file-tree-item">
+                            <i data-lucide="chevron-right" class="twirldown-icon"></i>
+                            <i data-lucide="folder" class="file-icon"></i>
+                            <span>js</span>
+                        </div>
+                        <ul class="nested-list">
+                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i>main.js</div></li>
+                        </ul>
+                    </li>
+                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-code" class="file-icon"></i>index.html</div></li>
+                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-text" class="file-icon"></i>README.md</div></li>
+                </ul>
+            </div>
+            <!-- Search View -->
+            <div class="left-panel-view hidden" data-view="Search">
+                <h3>Search</h3>
+                <input type="text" class="view-input" placeholder="Search files...">
+            </div>
+            <!-- Settings View -->
+            <div class="left-panel-view hidden" data-view="Settings">
+                <h3>Settings</h3>
+                <p>Application settings will appear here.</p>
+            </div>
+        </div>
+        <div class="resizer resizer-vertical" id="drag-handle">
+            <!-- This is the draggable handle -->
+        </div>
+        <div class="panel main-panel">
+            <div class="tabs">
+                <div class="tab-item active" data-filename="index.html" draggable="true">
+                    <i data-lucide="file-code" class="tab-icon"></i>
+                    <span>index.html</span>
+                    <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
+                </div>
+                <div class="tab-item" data-filename="style.css" draggable="true">
+                    <i data-lucide="file-type" class="tab-icon"></i>
+                    <span>style.css</span>
+                    <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
+                </div>
+                <div class="tab-item" data-filename="main.js" draggable="true">
+                    <i data-lucide="braces" class="tab-icon"></i>
+                    <span>main.js</span>
+                    <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
+                </div>
+            </div>
+            <div class="editor-content">
+                <p>This is where the content of the selected file will be displayed.</p>
+            </div>
+            <div class="resizer resizer-horizontal" id="terminal-drag-handle">
+                <!-- This is the draggable handle for the terminal -->
+            </div>
+            <div class="bottom-panel" id="bottom-panel">
+                <div class="tabs" id="bottom-tabs">
+                    <div class="tab-item active" data-view="logs" draggable="true">
+                        <i data-lucide="list-checks" class="tab-icon"></i>
+                        <span>Logs</span>
+                    </div>
+                    <div class="tab-item" data-view="terminal" draggable="true">
+                        <i data-lucide="terminal-square" class="tab-icon"></i>
+                        <span>Terminal</span>
+                    </div>
+                </div>
+                <div class="bottom-panel-content">
+                    <div class="bottom-panel-view terminal hidden" id="terminal">
+                        <div class="terminal-output" id="terminal-output">
+<pre>
+
+███╗   ███╗███████╗██████╗ ██╗ █████╗ ██╗   ██╗██╗
+████╗ ████║██╔════╝██╔══██╗██║██╔══██╗██║   ██║██║
+██╔████╔██║█████╗  ██║  ██║██║███████║██║   ██║██║
+██║╚██╔╝██║██╔══╝  ██║  ██║██║██╔══██║██║   ██║██║
+██║ ╚═╝ ██║███████╗██████╔╝██║██║  ██║╚██████╔╝██║
+╚═╝     ╚═╝╚══════╝╚═════╝ ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝    
+</pre>
+                            <p>Welcome to MediaUI. Type 'help' for a list of commands.</p>
+                        </div>
+                        <div class="terminal-input-line">
+                            <span class="terminal-prompt">&gt;</span>
+                            <input type="text" id="terminal-input" class="terminal-input" autofocus>
+                        </div>
+                    </div>
+                    <div class="bottom-panel-view logs-panel" id="logs">
+                        <button id="clear-logs-btn" class="panel-action-btn" aria-label="Clear Logs"><i data-lucide="trash-2"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="resizer resizer-vertical" id="right-drag-handle">
+            <!-- This is the draggable handle for the right panel -->
+        </div>
+        <div class="panel right-panel">
+            <!-- Content for the right panel -->
+            <h3>Inspector</h3>
+            <p>Details or properties can go here.</p>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <span>Status Bar</span>
+        <button id="open-modal-btn" class="button-secondary">Open Modal</button>
+    </footer>
+
+    <!-- Modal Component -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h2>Modal Title</h2>
+                <button class="modal-close-btn" id="modal-close-btn" aria-label="Close modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>This is the body of the modal. You can put any content here, like forms, information, or actions.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="button-secondary" id="modal-cancel-btn">Cancel</button>
+                <button class="button-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link to MediaUI's JavaScript -->
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1066,6 +1066,12 @@ class App {
             const targetPane = targetTabs.closest('.split-pane');
             const finalTab = targetTabs.querySelector(`.tab-item[data-filename="${fileName}"]`);
             if (targetPane && finalTab) {
+                // Add docking animation
+                finalTab.classList.add('tab-docking');
+                setTimeout(() => {
+                    finalTab.classList.remove('tab-docking');
+                }, 300);
+                
                 this.#setActiveTabForPane(finalTab, targetPane);
             } else if (finalTab) {
                 this.#setActiveTab(finalTab);
@@ -1195,6 +1201,14 @@ class App {
                     } else {
                         finalDropContainer.appendChild(this.draggedTab);
                     }
+
+                    // Add docking animation
+                    this.draggedTab.classList.add('tab-docking');
+                    setTimeout(() => {
+                        if (this.draggedTab) {
+                            this.draggedTab.classList.remove('tab-docking');
+                        }
+                    }, 300);
 
                     // Activate the tab in its new pane
                     const newPane = finalDropContainer.closest('.split-pane');
@@ -1808,12 +1822,19 @@ class App {
 
         // Create resizer
         const resizer = document.createElement('div');
-        resizer.className = `split-resizer ${direction}`;
+        resizer.className = `split-resizer ${direction} animate-in`;
         resizer.id = `split-resizer-${++this.splitPaneCounter}`;
 
         // Create second pane (new empty pane)
         const newPaneId = `main-pane-${++this.splitPaneCounter}`;
         const secondPane = this.#createSplitPane(newPaneId);
+
+        // Add animation class based on direction
+        if (direction === 'vertical') {
+            secondPane.classList.add('animate-in-right');
+        } else {
+            secondPane.classList.add('animate-in-bottom');
+        }
 
         // Clear the source pane and add the split container
         sourcePaneElement.innerHTML = '';
@@ -1839,6 +1860,12 @@ class App {
         // Initialize drag events for both panes
         this.#initPaneDragEvents(firstPane);
         this.#initPaneDragEvents(secondPane);
+
+        // Remove animation classes after animation completes
+        setTimeout(() => {
+            secondPane.classList.remove('animate-in-right', 'animate-in-bottom');
+            resizer.classList.remove('animate-in');
+        }, 300);
 
         this.#logEvent(`Split panel ${direction}ly within pane ${sourcePaneElement.dataset.paneId}`);
     }
@@ -2428,6 +2455,12 @@ class App {
         } else {
             newTabs.appendChild(tabElement);
         }
+        
+        // Add docking animation
+        tabElement.classList.add('tab-docking');
+        setTimeout(() => {
+            tabElement.classList.remove('tab-docking');
+        }, 300);
         
         // Check if source pane is now empty
         const sourcePane = this.dragSourceContainer.closest('.split-pane');

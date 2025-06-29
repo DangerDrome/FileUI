@@ -639,6 +639,7 @@ body.is-resizing-v {
     flex-grow: 1;
     display: flex;
     overflow: hidden;
+    transition: gap 0.2s ease;
 }
 
 .split-container.vertical {
@@ -657,6 +658,24 @@ body.is-resizing-v {
     min-width: 200px;
     min-height: 150px; /* Minimum height for horizontal splits */
     position: relative; /* For drop zone indicators */
+    transition: flex-basis 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animation classes for new panes */
+.split-pane.animate-in-right {
+    animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.split-pane.animate-in-left {
+    animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.split-pane.animate-in-bottom {
+    animation: slideInFromBottom 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.split-pane.animate-in-top {
+    animation: slideInFromTop 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .split-pane .tabs {
@@ -671,6 +690,12 @@ body.is-resizing-v {
     background-color: var(--color-border);
     transition: var(--resizer-transition);
     flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.split-resizer.animate-in {
+    animation: fadeIn 0.3s ease-out forwards;
 }
 
 .split-resizer:hover,
@@ -683,9 +708,33 @@ body.is-resizing-v {
     cursor: col-resize;
 }
 
+.split-resizer.vertical.animate-in::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    background: var(--color-accent);
+    animation: expandHeight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 .split-resizer.horizontal {
     height: var(--resizer-size);
     cursor: row-resize;
+}
+
+.split-resizer.horizontal.animate-in::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1px;
+    background: var(--color-accent);
+    animation: expandWidth 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .tab-item {
@@ -698,6 +747,11 @@ body.is-resizing-v {
     border-right: 1px solid var(--color-border);
     font-size: var(--font-size-md);
     padding-right: var(--tab-padding-right); /* Reduce right padding to accommodate button */
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.tab-item.tab-docking {
+    animation: tabDock 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .tab-item.dragging {
@@ -1109,11 +1163,11 @@ body.is-resizing-v {
 .drop-zone-indicator {
     position: absolute;
     background-color: var(--color-accent);
-    opacity: 0.3;
+    opacity: 0;
     pointer-events: none;
     z-index: var(--z-index-layout);
-    transition: opacity 0.2s ease;
     box-shadow: inset 0 0 20px rgba(0, 204, 139, 0.5);
+    animation: fadeInSubtle 0.2s ease-out forwards;
 }
 
 .drop-zone-indicator[data-zone="top"],
@@ -1139,13 +1193,133 @@ body.is-resizing-v {
     width: 60px;
     height: 60px;
     background: var(--color-accent);
-    opacity: 0.5;
+    opacity: 0;
     border-radius: 50%;
-    animation: pulse 1s infinite;
+    animation: pulse 1s infinite 0.3s, fadeInSubtle 0.3s ease-out 0.1s forwards;
+}
+
+.drop-zone-indicator::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 204, 139, 0.1),
+        rgba(0, 204, 139, 0)
+    );
+    animation: shimmer 2s infinite;
 }
 
 @keyframes pulse {
     0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
     50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.3; }
     100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+}
+
+@keyframes shimmer {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+    100% { opacity: 0.3; }
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInSubtle {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.3;
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromBottom {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes expandWidth {
+    from {
+        max-width: 0;
+        opacity: 0;
+    }
+    to {
+        max-width: 100%;
+        opacity: 1;
+    }
+}
+
+@keyframes expandHeight {
+    from {
+        max-height: 0;
+        opacity: 0;
+    }
+    to {
+        max-height: 100%;
+        opacity: 1;
+    }
+}
+
+@keyframes tabDock {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }

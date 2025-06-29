@@ -42,150 +42,148 @@
             <!-- Explorer View -->
             <div class="left-panel-view" data-view="Explorer">
                 <div class="panel-view-header">
-                    <h3>Explorer</h3>
+                    <span class="panel-view-title">Explorer</span>
                     <div class="panel-header-actions">
-                        <button id="new-file-btn" class="header-action-btn" aria-label="New File">
-                            <i data-lucide="file-plus-2"></i>
-                        </button>
-                        <button id="new-folder-btn" class="header-action-btn" aria-label="New Folder">
-                            <i data-lucide="folder-plus"></i>
-                        </button>
-                        <button id="refresh-explorer-btn" class="header-action-btn" aria-label="Refresh Explorer">
-                            <i data-lucide="refresh-cw"></i>
-                        </button>
-                        <button id="collapse-explorer-btn" class="header-action-btn" aria-label="Collapse Folders in Explorer">
-                            <i data-lucide="folder-minus"></i>
-                        </button>
+                        <button id="new-file-btn" class="header-action-btn" aria-label="New File"><i data-lucide="file-plus-2"></i></button>
+                        <button id="new-folder-btn" class="header-action-btn" aria-label="New Folder"><i data-lucide="folder-plus"></i></button>
+                        <button id="refresh-explorer-btn" class="header-action-btn" aria-label="Refresh Explorer"><i data-lucide="refresh-cw"></i></button>
+                        <button id="collapse-explorer-btn" class="header-action-btn" aria-label="Collapse All Folders"><i data-lucide="unfold-vertical"></i></button>
                     </div>
                 </div>
-                <ul class="file-tree">
-                    <li class="folder open">
-                        <div class="file-tree-item">
-                            <i data-lucide="chevron-right" class="twirldown-icon"></i>
-                            <i data-lucide="folder" class="file-icon"></i>
-                            <span>MediaUI</span>
-                        </div>
-                        <ul class="nested-list">
-                            <li class="folder open">
-                                <div class="file-tree-item">
-                                    <i data-lucide="chevron-right" class="twirldown-icon"></i>
-                                    <i data-lucide="folder" class="file-icon"></i>
-                                    <span>css</span>
-                                </div>
-                                <ul class="nested-list">
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>style.css</span></div></li>
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>theme.css</span></div></li>
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>reset.css</span></div></li>
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>dark.css</span></div></li>
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>light.css</span></div></li>
-                                </ul>
-                            </li>
-                            <li class="folder open">
-                                <div class="file-tree-item">
-                                    <i data-lucide="chevron-right" class="twirldown-icon"></i>
-                                    <i data-lucide="folder" class="file-icon"></i>
-                                    <span>js</span>
-                                </div>
-                                <ul class="nested-list">
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>main.js</span></div></li>
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>utils.js</span></div></li>
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>api.js</span></div></li>
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>dom.js</span></div></li>
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>test.js</span></div></li>
-                                    <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>mock.js</span></div></li>
-                                </ul>
-                            </li>
-                            <li class="folder open">
-                                <div class="file-tree-item">
-                                    <i data-lucide="chevron-right" class="twirldown-icon"></i>
-                                    <i data-lucide="folder" class="file-icon"></i>
-                                    <span>images</span>
-                                </div>
-                                <ul class="nested-list">
-                                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="image" class="file-icon"></i><span>logo.png</span></div></li>
-                                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="image" class="file-icon"></i><span>banner.jpg</span></div></li>
-                                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="image" class="file-icon"></i><span>background.webp</span></div></li>
-                                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="image" class="file-icon"></i><span>icon.svg</span></div></li>
-                                </ul>
-                            </li>
-                            <li class="folder open">
-                                <div class="file-tree-item">
-                                    <i data-lucide="chevron-right" class="twirldown-icon"></i>
-                                    <i data-lucide="folder" class="file-icon"></i>
-                                    <span>videos</span>
-                                </div>
-                                <ul class="nested-list">
-                                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="video" class="file-icon"></i><span>intro.mp4</span></div></li>
-                                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="video" class="file-icon"></i><span>trailer.mov</span></div></li>
-                                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="video" class="file-icon"></i><span>clip.webm</span></div></li>
-                                    <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="video" class="file-icon"></i><span>presentation.avi</span></div></li>
-                                </ul>
-                            </li>
-                            <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-code" class="file-icon"></i><span>index.html</span></div></li>
-                            <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-text" class="file-icon"></i><span>README.md</span></div></li>
-                            <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-json" class="file-icon"></i><span>package.json</span></div></li>
-                            <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-json" class="file-icon"></i><span>tsconfig.json</span></div></li>
-                            <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-text" class="file-icon"></i><span>CHANGELOG.md</span></div></li>
-                            <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-text" class="file-icon"></i><span>CONTRIBUTING.md</span></div></li>
-                            <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-code" class="file-icon"></i><span>about.html</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>custom.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>print.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>mobile.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>legacy.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>modern.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>variables.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>overrides.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>animations.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>fonts.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>colors.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>shadows.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>effects.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>mixins.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>helpers.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>responsive.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>grid.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>layout.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>spacing.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>typography.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>icons.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>buttons.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>forms.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>tables.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>modals.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>tooltips.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>popovers.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>dropdowns.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>badges.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>alerts.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>progress.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>cards.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>avatars.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>lists.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>steppers.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>tabs.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>accordions.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>breadcrumbs.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>pagination.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>calendar.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>timeline.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>gallery.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>carousel.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>slider.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>video.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>audio.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>media.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>embed.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>print-preview.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>accessibility.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>testing.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>debug.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>legacy-support.css</span></div></li>
-                            <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>future.css</span></div></li>
-                        </ul>
-                    </li>
-                </ul>
+                <div class="file-tree-container">
+                    <ul class="file-tree">
+                        <li class="folder open">
+                            <div class="file-tree-item">
+                                <i data-lucide="chevron-right" class="twirldown-icon"></i>
+                                <i data-lucide="folder" class="file-icon"></i>
+                                <span>MediaUI</span>
+                            </div>
+                            <ul class="nested-list">
+                                <li class="folder open">
+                                    <div class="file-tree-item">
+                                        <i data-lucide="chevron-right" class="twirldown-icon"></i>
+                                        <i data-lucide="folder" class="file-icon"></i>
+                                        <span>css</span>
+                                    </div>
+                                    <ul class="nested-list">
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>style.css</span></div></li>
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>theme.css</span></div></li>
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>reset.css</span></div></li>
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>dark.css</span></div></li>
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>light.css</span></div></li>
+                                    </ul>
+                                </li>
+                                <li class="folder open">
+                                    <div class="file-tree-item">
+                                        <i data-lucide="chevron-right" class="twirldown-icon"></i>
+                                        <i data-lucide="folder" class="file-icon"></i>
+                                        <span>js</span>
+                                    </div>
+                                    <ul class="nested-list">
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>main.js</span></div></li>
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>utils.js</span></div></li>
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>api.js</span></div></li>
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>dom.js</span></div></li>
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>test.js</span></div></li>
+                                        <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="braces" class="file-icon"></i><span>mock.js</span></div></li>
+                                    </ul>
+                                </li>
+                                <li class="folder open">
+                                    <div class="file-tree-item">
+                                        <i data-lucide="chevron-right" class="twirldown-icon"></i>
+                                        <i data-lucide="folder" class="file-icon"></i>
+                                        <span>images</span>
+                                    </div>
+                                    <ul class="nested-list">
+                                        <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="image" class="file-icon"></i><span>logo.png</span></div></li>
+                                        <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="image" class="file-icon"></i><span>banner.jpg</span></div></li>
+                                        <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="image" class="file-icon"></i><span>background.webp</span></div></li>
+                                        <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="image" class="file-icon"></i><span>icon.svg</span></div></li>
+                                    </ul>
+                                </li>
+                                <li class="folder open">
+                                    <div class="file-tree-item">
+                                        <i data-lucide="chevron-right" class="twirldown-icon"></i>
+                                        <i data-lucide="folder" class="file-icon"></i>
+                                        <span>videos</span>
+                                    </div>
+                                    <ul class="nested-list">
+                                        <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="video" class="file-icon"></i><span>intro.mp4</span></div></li>
+                                        <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="video" class="file-icon"></i><span>trailer.mov</span></div></li>
+                                        <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="video" class="file-icon"></i><span>clip.webm</span></div></li>
+                                        <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="video" class="file-icon"></i><span>presentation.avi</span></div></li>
+                                    </ul>
+                                </li>
+                                <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-code" class="file-icon"></i><span>index.html</span></div></li>
+                                <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-text" class="file-icon"></i><span>README.md</span></div></li>
+                                <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-json" class="file-icon"></i><span>package.json</span></div></li>
+                                <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-json" class="file-icon"></i><span>tsconfig.json</span></div></li>
+                                <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-text" class="file-icon"></i><span>CHANGELOG.md</span></div></li>
+                                <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-text" class="file-icon"></i><span>CONTRIBUTING.md</span></div></li>
+                                <li><div class="file-tree-item" draggable="true"><span class="twirldown-placeholder"></span><i data-lucide="file-code" class="file-icon"></i><span>about.html</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>custom.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>print.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>mobile.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>legacy.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>modern.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>variables.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>overrides.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>animations.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>fonts.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>colors.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>shadows.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>effects.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>mixins.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>helpers.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>responsive.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>grid.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>layout.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>spacing.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>typography.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>icons.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>buttons.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>forms.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>tables.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>modals.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>tooltips.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>popovers.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>dropdowns.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>badges.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>alerts.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>progress.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>cards.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>avatars.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>lists.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>steppers.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>tabs.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>accordions.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>breadcrumbs.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>pagination.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>calendar.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>timeline.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>gallery.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>carousel.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>slider.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>video.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>audio.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>media.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>embed.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>print-preview.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>accessibility.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>testing.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>debug.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>legacy-support.css</span></div></li>
+                                <li><div class="file-tree-item"><span class="twirldown-placeholder"></span><i data-lucide="file-type" class="file-icon"></i><span>future.css</span></div></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <!-- Search View -->
+            <div class="left-panel-view hidden" data-view="search">
+                <h3>Search</h3>
+                <!-- Search functionality will be implemented here -->
+            </div>
             <!-- Settings View -->
             <div class="left-panel-view hidden" data-view="Settings">
                 <h3>Settings</h3>
@@ -198,42 +196,42 @@
         <div class="panel main-panel">
             <div id="main-split-container" class="split-container">
                 <div class="split-pane has-tabs" data-pane-id="main-pane-1">
-                    <div class="tabs">
-                        <div class="tab-item active" data-filename="index.html" draggable="true">
+            <div class="tabs">
+                <div class="tab-item active" data-filename="index.html" draggable="true">
                             <i class="tab-icon" data-lucide="file-code"></i>
-                            <span>index.html</span>
-                            <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
-                        </div>
-                        <div class="tab-item" data-filename="style.css" draggable="true">
+                    <span>index.html</span>
+                    <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
+                </div>
+                <div class="tab-item" data-filename="style.css" draggable="true">
                             <i class="tab-icon" data-lucide="file-type"></i>
-                            <span>style.css</span>
-                            <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
-                        </div>
-                        <div class="tab-item" data-filename="main.js" draggable="true">
+                    <span>style.css</span>
+                    <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
+                </div>
+                <div class="tab-item" data-filename="main.js" draggable="true">
                             <i class="tab-icon" data-lucide="braces"></i>
-                            <span>main.js</span>
-                            <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
-                        </div>
+                    <span>main.js</span>
+                    <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
+                </div>
                         <button class="split-panel-btn" aria-label="Split panel vertically">
                             <i data-lucide="columns-2"></i>
                         </button>
                         <button class="split-panel-btn split-horizontal" aria-label="Split panel horizontally">
                             <i data-lucide="rows-2"></i>
                         </button>
-                    </div>
-                    <div class="breadcrumb-bar hidden">
-                        <div class="breadcrumbs">
-                            <!-- Breadcrumbs will be dynamically inserted here -->
-                        </div>
-                        <div class="breadcrumb-actions">
-                            <button class="header-action-btn" aria-label="More Actions">
-                                <i data-lucide="more-vertical"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="editor-content">
-                        <p>This is where the content of the selected file will be displayed.</p>
-                    </div>
+            </div>
+            <div class="breadcrumb-bar hidden">
+                <div class="breadcrumbs">
+                    <!-- Breadcrumbs will be dynamically inserted here -->
+                </div>
+                <div class="breadcrumb-actions">
+                    <button class="header-action-btn" aria-label="More Actions">
+                        <i data-lucide="more-vertical"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="editor-content">
+                <p>This is where the content of the selected file will be displayed.</p>
+            </div>
                 </div>
             </div>
             <div id="terminal-drag-handle" class="resizer resizer-horizontal">
@@ -255,14 +253,14 @@
                 <div class="bottom-panel-content">
                     <div id="terminal" class="bottom-panel-view terminal">
                         <div id="terminal-output" class="terminal-output">
-                            <pre>
+<pre>
 
 ███╗   ███╗███████╗██████╗ ██╗ █████╗ ██╗   ██╗██╗
 ████╗ ████║██╔════╝██╔══██╗██║██╔══██╗██║   ██║██║
 ██╔████╔██║█████╗  ██║  ██║██║███████║██║   ██║██║
 ██║╚██╔╝██║██╔══╝  ██║  ██║██║██╔══██║██║   ██║██║
 ██║ ╚═╝ ██║███████╗██████╔╝██║██║  ██║╚██████╔╝██║
-╚═╝     ╚═╝╚══════╝╚═════╝ ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝
+╚═╝     ╚═╝╚══════╝╚═════╝ ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝    
 </pre>
                             <p>Welcome to MediaUI. Type 'help' for a list of commands.</p>
                             <div class="terminal-input-line">

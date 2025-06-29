@@ -493,7 +493,8 @@ body.is-resizing-v {
     margin: 0;
     font-size: var(--font-size-md);
     flex-grow: 1;
-    overflow-y: auto;
+    /* The container handles scrolling now */
+    /* overflow-y: auto; */
 }
 
 .file-tree ul {
@@ -1387,4 +1388,35 @@ body.is-resizing .split-pane {
         transform: scale(1);
         opacity: 1;
     }
+}
+
+.file-tree-container {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.file-tree-container::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+}
+
+.file-tree-container::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.file-tree-container::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: var(--scrollbar-thumb-radius);
+}
+
+.file-tree-container:hover::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb-bg);
+}
+
+.file-tree-container:hover::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-bg-hover);
+}
+
+.panel-header-actions .header-action-btn .lucide {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
 }

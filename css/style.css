@@ -41,7 +41,7 @@
     /* UI Look & Feel */
     --border-radius: 4px;
     --transition-duration: 0.0s;
-    --resizer-hitbox-size: 10px;
+    --resizer-hitbox-size: 12px;
     --shadow-drag: 0 5px 15px rgba(0,0,0,0.3);
     --shadow-modal: 0 5px 15px rgba(0,0,0,0.3);
 
@@ -605,28 +605,36 @@ body.is-resizing-v {
 
 .split-panel-btn {
     position: absolute;
-    right: var(--spacing-unit);
     top: 50%;
     transform: translateY(-50%);
-    background: var(--color-bg-header);
-    border: 1px solid var(--color-border);
+    padding: var(--spacing-unit);
+    border-radius: var(--border-radius);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    transition: var(--transition-duration);
+    background: transparent;
+    border: 1px solid transparent;
     color: var(--color-text-tertiary);
     cursor: pointer;
-    padding: 4px 8px;
-    border-radius: var(--border-radius);
-    line-height: 0;
-    transition: all var(--transition-duration) ease-out;
-    z-index: 10;
-}
-
-.split-panel-btn.split-horizontal {
-    right: calc(var(--spacing-unit) + 40px); /* Position to the left of vertical split button */
 }
 
 .split-panel-btn:hover {
-    background-color: var(--color-bg-panel);
     color: var(--color-text-primary);
-    border-color: var(--color-accent);
+    background-color: transparent;
+    border-color: transparent;
+}
+
+/* Vertical button is now on the left */
+.split-panel-btn:not(.split-horizontal) {
+    right: 38px;
+}
+
+/* Horizontal button is now on the right */
+.split-panel-btn.split-horizontal {
+    right: var(--spacing-unit);
 }
 
 .split-panel-btn .lucide {
@@ -661,6 +669,11 @@ body.is-resizing-v {
     transition: flex-basis 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Disable transition during manual resizing for instant feedback */
+body.is-resizing .split-pane {
+    transition: none;
+}
+
 /* Animation classes for new panes */
 .split-pane.animate-in-right {
     animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -691,7 +704,7 @@ body.is-resizing-v {
     transition: var(--resizer-transition);
     flex-shrink: 0;
     position: relative;
-    overflow: hidden;
+    z-index: 1; /* Elevate resizer to ensure its hitbox is on top of sibling panes */
 }
 
 .split-resizer.animate-in {
@@ -701,6 +714,16 @@ body.is-resizing-v {
 .split-resizer:hover,
 .split-resizer:active {
     background-color: var(--resizer-hover-bg);
+}
+
+/* Increase hit zone for easier grabbing */
+.split-resizer::after {
+    content: '';
+    position: absolute;
+    top: calc(var(--resizer-hitbox-size) * -1);
+    bottom: calc(var(--resizer-hitbox-size) * -1);
+    left: calc(var(--resizer-hitbox-size) * -1);
+    right: calc(var(--resizer-hitbox-size) * -1);
 }
 
 .split-resizer.vertical {

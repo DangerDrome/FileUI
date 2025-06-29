@@ -10,14 +10,16 @@ class App {
         this.leftPanel = document.querySelector('.left-panel');
         this.rightPanel = document.querySelector('.right-panel');
         this.rightResizer = document.getElementById('right-drag-handle');
-        this.tabsContainer = document.querySelector('.tabs');
-        this.editorContent = document.querySelector('.editor-content p');
-        this.breadcrumbBar = document.querySelector('.breadcrumb-bar');
+        this.mainPanel = document.querySelector('.main-panel');
+
+        // Initial pane elements - these will be reassigned as panes are created/destroyed
+        this.tabsContainer = document.querySelector('.main-panel .tabs');
+        this.editorContent = document.querySelector('.main-panel .editor-content p');
+        this.breadcrumbBar = document.querySelector('.main-panel .breadcrumb-bar');
 
         // Terminal elements
         this.bottomPanel = document.getElementById('bottom-panel');
         this.terminal = document.getElementById('terminal');
-        this.mainPanel = document.querySelector('.main-panel');
         this.terminalOutput = document.getElementById('terminal-output');
         this.terminalInput = document.getElementById('terminal-input');
         this.bottomTabsContainer = document.getElementById('bottom-tabs');
@@ -1733,37 +1735,31 @@ class App {
     }
 
     #initSplitPanels() {
-        // Initialize split panel buttons
-        this.splitPanelBtns.forEach(btn => {
+        // Find all split buttons in the initial layout (main and bottom)
+        const allSplitBtns = document.querySelectorAll('.split-panel-btn');
+
+        allSplitBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const isMainPanel = e.target.closest('.main-panel');
+                const sourcePane = btn.closest('.split-pane');
+                if (!sourcePane) return;
+
                 const isHorizontal = btn.classList.contains('split-horizontal');
                 const direction = isHorizontal ? 'horizontal' : 'vertical';
                 
-                if (isMainPanel) {
-                    // Find the pane that contains this button
-                    const sourcePane = btn.closest('.split-pane');
-                    this.#splitPanel('main', direction, sourcePane);
-                } else {
-                    // Bottom panel split - implement later if needed
-                    this.#logEvent("Bottom panel split not yet implemented");
-                }
+                this.#splitPanel('main', direction, sourcePane);
             });
         });
 
         // Initialize the first pane
         const firstPane = this.mainSplitContainer.querySelector('.split-pane');
         if (firstPane) {
-            // Move the main tabs to the first pane if they're not already there
-            if (this.tabsContainer.parentElement === this.mainPanel) {
-                firstPane.insertBefore(this.tabsContainer, firstPane.firstChild);
-                firstPane.classList.add('has-tabs');
-            }
+            // Get the tabs for the first pane
+            const firstTabs = firstPane.querySelector('.tabs');
             
             this.activePanes.set('main-pane-1', {
                 element: firstPane,
-                tabs: this.tabsContainer,
-                activeTab: null
+                tabs: firstTabs,
+                activeTab: firstTabs ? firstTabs.querySelector('.tab-item.active') : null
             });
             
             // Initialize drag events for the first pane

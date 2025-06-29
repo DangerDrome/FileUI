@@ -600,6 +600,92 @@ body.is-resizing-v {
     flex-shrink: 0;
     background-color: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
+    padding-right: 90px; /* Increased space for two split buttons */
+}
+
+.split-panel-btn {
+    position: absolute;
+    right: var(--spacing-unit);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--color-bg-header);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+    line-height: 0;
+    transition: all var(--transition-duration) ease-out;
+    z-index: 10;
+}
+
+.split-panel-btn.split-horizontal {
+    right: calc(var(--spacing-unit) + 40px); /* Position to the left of vertical split button */
+}
+
+.split-panel-btn:hover {
+    background-color: var(--color-bg-panel);
+    color: var(--color-text-primary);
+    border-color: var(--color-accent);
+}
+
+.split-panel-btn .lucide {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+}
+
+/* Split Container Styles */
+.split-container {
+    flex-grow: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.split-container.vertical {
+    flex-direction: row;
+}
+
+.split-container.horizontal {
+    flex-direction: column;
+}
+
+.split-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 200px;
+    min-height: 150px; /* Minimum height for horizontal splits */
+    position: relative; /* For drop zone indicators */
+}
+
+.split-pane .tabs {
+    display: none; /* Initially hidden, shown when split */
+}
+
+.split-pane.has-tabs .tabs {
+    display: flex;
+}
+
+.split-resizer {
+    background-color: var(--color-border);
+    transition: var(--resizer-transition);
+    flex-shrink: 0;
+}
+
+.split-resizer:hover,
+.split-resizer:active {
+    background-color: var(--resizer-hover-bg);
+}
+
+.split-resizer.vertical {
+    width: var(--resizer-size);
+    cursor: col-resize;
+}
+
+.split-resizer.horizontal {
+    height: var(--resizer-size);
+    cursor: row-resize;
 }
 
 .tab-item {
@@ -670,11 +756,12 @@ body.is-resizing-v {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: var(--tab-indicator-width);
+    width: 3px; /* Thicker indicator */
     background-color: var(--color-accent);
     pointer-events: none; /* So it doesn't interfere with drag events */
     display: none;
     z-index: var(--z-index-layout);
+    box-shadow: 0 0 5px var(--color-accent); /* Add glow effect */
 }
 
 .editor-content {
@@ -999,4 +1086,66 @@ body.is-resizing-v {
 }
 .terminal-ll-name {
     text-align: left;
+}
+
+/* Tab Drag and Drop */
+.tabs.drag-active {
+    background-color: var(--color-bg-panel);
+    transition: background-color 0.2s ease;
+}
+
+.tabs.drag-active:hover {
+    background-color: var(--color-bg-header);
+    border-bottom-color: var(--color-accent);
+}
+
+.tabs.drag-over {
+    background-color: var(--color-bg-header);
+    border-bottom: 3px solid var(--color-accent);
+    box-shadow: inset 0 -3px 10px rgba(0, 204, 139, 0.3);
+}
+
+/* Drop Zone Indicators */
+.drop-zone-indicator {
+    position: absolute;
+    background-color: var(--color-accent);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: var(--z-index-layout);
+    transition: opacity 0.2s ease;
+    box-shadow: inset 0 0 20px rgba(0, 204, 139, 0.5);
+}
+
+.drop-zone-indicator[data-zone="top"],
+.drop-zone-indicator[data-zone="bottom"] {
+    border: 3px solid var(--color-accent);
+    border-left: none;
+    border-right: none;
+}
+
+.drop-zone-indicator[data-zone="left"],
+.drop-zone-indicator[data-zone="right"] {
+    border: 3px solid var(--color-accent);
+    border-top: none;
+    border-bottom: none;
+}
+
+.drop-zone-indicator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: var(--color-accent);
+    opacity: 0.5;
+    border-radius: 50%;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.3; }
+    100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
 }

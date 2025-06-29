@@ -76,6 +76,7 @@ Here is a basic example of an HTML structure:
 MediaUI comes with a variety of ready-to-use components built with Vanilla JS:
 
 -   **Resizable Panels:** Draggable splitter for flexible side-by-side layouts.
+-   **Split Panels:** Create vertical or horizontal splits within the editor area for multi-pane layouts.
 -   **Tabbed Interface:** A standard tabbing system for managing different views.
 -   **Interactive Terminal:** A simulated terminal that processes basic commands.
 -   **Modal Dialogs:** An accessible modal component for focused user interaction.

@@ -770,7 +770,26 @@ body.is-resizing .split-pane {
     border-right: 1px solid var(--color-border);
     font-size: var(--font-size-md);
     padding-right: var(--tab-padding-right); /* Reduce right padding to accommodate button */
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+    color: var(--color-text-tertiary);
+    opacity: 0.5;
+}
+
+.tab-item:hover {
+    background-color: var(--color-bg-content);
+    color: var(--color-text-primary);
+    opacity: 1;
+}
+
+.tab-item.active {
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-content);
+    opacity: 1;
+}
+
+.tab-item:hover .tab-close-btn,
+.tab-item.active .tab-close-btn {
+    opacity: 1;
 }
 
 .tab-item.tab-docking {
@@ -799,15 +818,16 @@ body.is-resizing .split-pane {
 }
 
 .tab-close-btn {
-    background: none;
-    border: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    padding: var(--tab-close-padding);
-    border-radius: 50%;
-    line-height: 0;
-    transition: all var(--transition-duration) ease-out;
     opacity: 0;
+    margin-left: auto;
+    padding: 2px;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-duration) ease-out;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    line-height: 0;
+    color: var(--color-text-tertiary);
 }
 
 .tab-item:hover .tab-close-btn,
@@ -822,11 +842,6 @@ body.is-resizing .split-pane {
 
 .tab-close-btn:hover {
     background-color: var(--tab-close-hover-bg);
-}
-
-.tab-item.active {
-    background-color: var(--color-tab-inactive-bg);
-    color: var(--color-text-primary);
 }
 
 .drop-indicator {

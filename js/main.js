@@ -2285,15 +2285,21 @@ class App {
      * @private
      */
     #showDropZoneIndicator(paneElement, zone) {
-        // Remove any existing indicators
-        this.#hideDropZoneIndicators();
-        
         if (zone === 'tab-bar' || zone === 'center') {
-            // For tab-bar drops, use existing logic
+            this.#hideDropZoneIndicators();
             return;
         }
-        
-        // Create drop zone indicator
+
+        // Check if the correct indicator is already visible
+        const existingIndicator = paneElement.querySelector(`.drop-zone-indicator[data-zone="${zone}"]`);
+        if (existingIndicator) {
+            return; // Already showing, do nothing to prevent flicker
+        }
+
+        // If we are here, we need to show a new indicator, so hide any old ones first.
+        this.#hideDropZoneIndicators();
+
+        // Create new drop zone indicator
         const indicator = document.createElement('div');
         indicator.className = 'drop-zone-indicator';
         indicator.dataset.zone = zone;

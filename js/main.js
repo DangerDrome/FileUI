@@ -12,6 +12,7 @@ class App {
         this.rightResizer = document.getElementById('right-drag-handle');
         this.tabsContainer = document.querySelector('.tabs');
         this.editorContent = document.querySelector('.editor-content p');
+        this.breadcrumbBar = document.querySelector('.breadcrumb-bar');
 
         // Terminal elements
         this.bottomPanel = document.getElementById('bottom-panel');
@@ -22,6 +23,9 @@ class App {
         this.bottomTabsContainer = document.getElementById('bottom-tabs');
         this.logsPanel = document.getElementById('logs');
         this.clearLogsBtn = document.getElementById('clear-logs-btn');
+
+        // Terminal state
+        this.currentWorkingDirectory = ['MediaUI'];
 
         // Modal elements
         this.modalOverlay = document.getElementById('modal-overlay');
@@ -50,7 +54,6 @@ class App {
     init() {
         console.log("MediaUI Initialized!");
         this.#logEvent("Application Initialized");
-        this.#createIcons();
         this.#initPanelResizer();
         this.#initFileTree();
         this.#initTabs();
@@ -63,6 +66,10 @@ class App {
         this.#initActivityPanel();
         this.#initHeaderActions();
         this.#initExplorerActions();
+        this.#initActiveTab();
+
+        // This should be called last to render all icons added during initialization
+        this.#createIcons();
     }
 
     /**
@@ -196,30 +203,32 @@ class App {
      * @private
      */
     #initHeaderActions() {
-        if (this.toggleLeftPanelBtn) {
-            this.toggleLeftPanelBtn.addEventListener('click', () => {
-                this.leftPanel?.classList.toggle('hidden');
-                this.resizer?.classList.toggle('hidden');
-                this.toggleLeftPanelBtn.classList.toggle('active');
-                this.#logEvent(`Toggled left panel`);
+        const setupToggleButton = (button, panel, resizer) => {
+            if (!button || !panel || !resizer) return;
+            button.addEventListener('click', () => {
+                const isNowActive = button.classList.toggle('active');
+                panel.classList.toggle('collapsed', !isNowActive);
+                resizer.classList.toggle('collapsed', !isNowActive);
+                this.#logEvent(`Toggled ${panel.id || 'panel'}`);
             });
+        };
+        
+        setupToggleButton(this.toggleLeftPanelBtn, this.leftPanel, this.resizer);
+        setupToggleButton(this.toggleRightPanelBtn, this.rightPanel, this.rightResizer);
+        setupToggleButton(this.toggleTerminalBtn, this.bottomPanel, this.terminalResizer);
+    }
+
+    /**
+     * Updates the visible terminal input prompt to reflect the current directory.
+     * @private
+     */
+    #updateInputPrompt() {
+        const promptSpan = this.terminal?.querySelector('.terminal-input-line .terminal-prompt');
+        if (promptSpan) {
+            const cwd = this.currentWorkingDirectory;
+            promptSpan.innerHTML = `<span class="terminal-prompt-path">/${cwd.join('/')}</span> <span class="terminal-prompt-arrow">&gt;</span>`;
         }
-        if (this.toggleRightPanelBtn) {
-            this.toggleRightPanelBtn.addEventListener('click', () => {
-                this.rightPanel?.classList.toggle('hidden');
-                this.rightResizer?.classList.toggle('hidden');
-                this.toggleRightPanelBtn.classList.toggle('active');
-                this.#logEvent(`Toggled right panel`);
-            });
-        }
-        if (this.toggleTerminalBtn) {
-            this.toggleTerminalBtn.addEventListener('click', () => {
-                this.bottomPanel?.classList.toggle('hidden');
-                this.terminalResizer?.classList.toggle('hidden');
-                this.toggleTerminalBtn.classList.toggle('active');
-                this.#logEvent(`Toggled bottom panel`);
-            });
-        }
+        this.#updateCustomCursor();
     }
 
     /**
@@ -235,6 +244,13 @@ class App {
         // Focus the input when the terminal area is clicked
         this.terminal.addEventListener('click', () => this.terminalInput.focus());
 
+        // Create custom thick cursor
+        this.#createCustomCursor();
+
+        // Set initial prompt
+        this.#updateInputPrompt();
+        this.#updateCustomCursor();
+
         this.terminalInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -243,9 +259,87 @@ class App {
                     this.#logToTerminal(command, true);
                     this.#processTerminalCommand(command);
                     this.terminalInput.value = '';
+                    this.#updateInputPrompt();
                 }
+                this.terminalInput.focus();
             }
         });
+
+        // Update cursor position on input
+        this.terminalInput.addEventListener('input', () => this.#updateCustomCursor());
+        this.terminalInput.addEventListener('click', () => this.#updateCustomCursor());
+        this.terminalInput.addEventListener('keyup', () => this.#updateCustomCursor());
+    }
+
+    /**
+     * Creates a custom thick blinking cursor for the terminal input.
+     * @private
+     */
+    #createCustomCursor() {
+        if (!this.terminalInput) return;
+
+        // Hide the default cursor
+        this.terminalInput.style.caretColor = 'transparent';
+
+        // Create custom cursor element
+        this.customCursor = document.createElement('div');
+        this.customCursor.style.cssText = `
+            position: absolute;
+            width: var(--terminal-cursor-width);
+            height: var(--terminal-cursor-height);
+            background-color: var(--terminal-cursor-color);
+            animation: blink var(--terminal-cursor-blink-duration) infinite;
+            pointer-events: none;
+            z-index: 10;
+        `;
+
+        // Add the cursor to the terminal input container
+        const inputContainer = this.terminalInput.parentElement;
+        if (inputContainer) {
+            inputContainer.style.position = 'relative';
+            inputContainer.appendChild(this.customCursor);
+        }
+
+        // Initial cursor position
+        this.#updateCustomCursor();
+    }
+
+    /**
+     * Updates the position of the custom cursor to match the text cursor.
+     * @private
+     */
+    #updateCustomCursor() {
+        if (!this.customCursor || !this.terminalInput) return;
+
+        // Get cursor position
+        const cursorPosition = this.terminalInput.selectionStart;
+        
+        // Create a temporary span to measure text width
+        const tempSpan = document.createElement('span');
+        tempSpan.style.cssText = `
+            position: absolute;
+            visibility: hidden;
+            white-space: pre;
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+        `;
+        tempSpan.textContent = this.terminalInput.value.substring(0, cursorPosition);
+        
+        const inputContainer = this.terminalInput.parentElement;
+        if (inputContainer) {
+            inputContainer.appendChild(tempSpan);
+            const cursorLeft = tempSpan.offsetWidth;
+            inputContainer.removeChild(tempSpan);
+            
+            // Get the input's position relative to its container
+            const inputRect = this.terminalInput.getBoundingClientRect();
+            const containerRect = inputContainer.getBoundingClientRect();
+            const inputLeft = inputRect.left - containerRect.left;
+            
+            // Position the custom cursor relative to the input's left edge
+            this.customCursor.style.left = `${inputLeft + cursorLeft}px`;
+        }
     }
 
     /**
@@ -271,11 +365,12 @@ class App {
     #processTerminalCommand(command) {
         const [cmd, ...args] = command.split(' ');
         let response = '';
+        let inlineList = false;
         this.#logEvent(`Executed command: ${command}`);
 
         switch (cmd.toLowerCase()) {
             case 'help':
-                response = 'Available commands:\n  help    - Show this help message\n  clear   - Clear the terminal screen\n  date    - Display the current date and time\n  echo    - Display a line of text\n  modal   - Open the test modal';
+                response = 'Available commands:\n  help    - Show this help message\n  clear   - Clear the terminal screen\n  date    - Display the current date and time\n  echo    - Display a line of text\n  modal   - Open the test modal\n  ls      - List files and directories (horizontal)\n  ll      - List files and directories (long/vertical)\n  cd      - Change directory\n  pwd     - Print working directory\n  tree    - Show directory tree structure';
                 break;
             case 'clear':
                 this.terminalOutput.innerHTML = '';
@@ -290,98 +385,259 @@ class App {
                 this.#openModal();
                 return; // No response needed
                 break;
+            case 'ls':
+                response = this.#listDirectory(false);
+                inlineList = true;
+                break;
+            case 'll':
+                response = this.#listDirectory(true);
+                break;
+            case 'cd':
+                response = this.#changeDirectory(args);
+                this.#updateInputPrompt();
+                break;
+            case 'pwd':
+                response = this.#printWorkingDirectory();
+                break;
+            case 'tree':
+                response = this.#showDirectoryTree();
+                break;
             default:
                 response = `Command not found: ${cmd}. Type 'help' for a list of commands.`;
                 break;
         }
-        this.#logToTerminal(response);
+        this.#logToTerminal(response, false, inlineList);
     }
 
     /**
      * Logs a message to the terminal output.
      * @param {string} message The message to log.
      * @param {boolean} [isUserInput=false] True if the message is from user input.
+     * @param {boolean} [inlineList=false] True if the message is a list of items to be rendered inline.
      * @private
      */
-    #logToTerminal(message, isUserInput = false) {
+    #logToTerminal(message, isUserInput = false, inlineList = false) {
         const p = document.createElement('p');
-        if (isUserInput) {
+        if (inlineList) {
+            p.classList.add('terminal-inline-list');
+        }
+        // Special handling for ll JSON array
+        let isLLGrid = false;
+        let llData = null;
+        if (!isUserInput && message && message.startsWith('[') && message.endsWith(']')) {
+            try {
+                llData = JSON.parse(message);
+                isLLGrid = Array.isArray(llData);
+            } catch {}
+        }
+        if (isLLGrid) {
+            // Render as grid
+            const grid = document.createElement('div');
+            grid.className = 'terminal-ll-grid';
+            llData.forEach(entry => {
+                // Type column
+                const typeSpan = document.createElement('span');
+                typeSpan.className = 'terminal-ll-type';
+                typeSpan.textContent = entry.type;
+                grid.appendChild(typeSpan);
+                // Date column
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'terminal-ll-date';
+                dateSpan.textContent = entry.date;
+                grid.appendChild(dateSpan);
+                // Name column (icon + color)
+                let fileClass = 'file-type-default';
+                if (entry.iconName === 'folder') fileClass = '';
+                else if (/\.css$/i.test(entry.name)) fileClass = 'file-type-css';
+                else if (/\.(js|jsx|ts|tsx)$/i.test(entry.name)) fileClass = 'file-type-js';
+                else if (/\.(html|htm)$/i.test(entry.name)) fileClass = 'file-type-html';
+                else if (/\.(md|markdown)$/i.test(entry.name)) fileClass = 'file-type-md';
+                else if (/\.json$/i.test(entry.name)) fileClass = 'file-type-json';
+                else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(entry.name)) fileClass = 'file-type-image';
+                else if (/\.(mp4|mov|avi|webm|mkv)$/i.test(entry.name)) fileClass = 'file-type-video';
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'terminal-ll-name' + (fileClass ? ' ' + fileClass : '');
+                const icon = document.createElement('i');
+                icon.setAttribute('data-lucide', entry.iconName);
+                icon.style.marginRight = '8px';
+                icon.style.verticalAlign = 'middle';
+                icon.style.width = '16px';
+                icon.style.height = '16px';
+                nameSpan.appendChild(icon);
+                nameSpan.appendChild(document.createTextNode(entry.name));
+                grid.appendChild(nameSpan);
+            });
+            p.appendChild(grid);
+        } else if (isUserInput) {
             p.classList.add('user-input');
             const prompt = document.createElement('span');
             prompt.className = 'terminal-prompt';
-            prompt.textContent = '>';
+            // Show full path in prompt with accent color and bold arrow
+            const cwd = this.currentWorkingDirectory;
+            prompt.innerHTML = `<span class="terminal-prompt-path">/${cwd.join('/')}</span> <span class="terminal-prompt-arrow">&gt;</span>`;
             p.appendChild(prompt);
-            p.append(document.createTextNode(message));
+            p.append(document.createTextNode(' ' + message));
         } else {
-            p.textContent = message;
+            // If message contains HTML, render as HTML
+            if (message.includes('<span')) {
+                p.innerHTML = message;
+            } else {
+                // Check if the message contains Lucide icon names and replace them with actual icons
+                const lines = message.split('\n');
+                lines.forEach((line, index) => {
+                    if (index > 0 && !inlineList) {
+                        p.appendChild(document.createElement('br'));
+                    }
+                    // Check if line starts with a Lucide icon name
+                    const iconMatch = line.match(/^(folder|file-type|file-code|file-text|file-json|braces|image|video)\s+([^\(]+)(?:\s*\((file|folder)\))?/);
+                    if (iconMatch) {
+                        const iconName = iconMatch[1];
+                        const fileName = iconMatch[2].trim();
+                        const fileType = iconMatch[3];
+                        // Determine file type class
+                        let fileClass = 'file-type-default';
+                        if (iconName === 'folder') fileClass = '';
+                        else if (/\.css$/i.test(fileName)) fileClass = 'file-type-css';
+                        else if (/\.(js|jsx|ts|tsx)$/i.test(fileName)) fileClass = 'file-type-js';
+                        else if (/\.(html|htm)$/i.test(fileName)) fileClass = 'file-type-html';
+                        else if (/\.(md|markdown)$/i.test(fileName)) fileClass = 'file-type-md';
+                        else if (/\.json$/i.test(fileName)) fileClass = 'file-type-json';
+                        else if (/\.(png|jpe?g|gif|svg|webp)$/i.test(fileName)) fileClass = 'file-type-image';
+                        else if (/\.(mp4|mov|avi|webm|mkv)$/i.test(fileName)) fileClass = 'file-type-video';
+                        // Create icon element
+                        const icon = document.createElement('i');
+                        icon.setAttribute('data-lucide', iconName);
+                        icon.style.marginRight = '8px';
+                        icon.style.verticalAlign = 'middle';
+                        icon.style.width = '16px';
+                        icon.style.height = '16px';
+                        // Create text node for filename
+                        const textNode = document.createTextNode(fileName);
+                        const wrapper = document.createElement('span');
+                        if (fileClass) wrapper.className = fileClass;
+                        wrapper.appendChild(icon);
+                        wrapper.appendChild(textNode);
+                        p.appendChild(wrapper);
+                        if (fileType) {
+                            const typeSpan = document.createElement('span');
+                            typeSpan.className = 'terminal-dim';
+                            typeSpan.textContent = ` (${fileType})`;
+                            p.appendChild(typeSpan);
+                        }
+                    } else {
+                        p.appendChild(document.createTextNode(line));
+                    }
+                });
+            }
         }
         this.terminalOutput.appendChild(p);
+        // Always move the input line to the end
+        const inputLine = this.terminalOutput.querySelector('.terminal-input-line');
+        if (inputLine) {
+            this.terminalOutput.appendChild(inputLine);
+        }
+        // Render the icons after adding to DOM
+        if (!isUserInput) {
+            lucide.createIcons();
+        }
         // Auto-scroll to the bottom
         this.terminalOutput.scrollTop = this.terminalOutput.scrollHeight;
     }
 
     #initTerminalResizer() {
-        if (!this.terminalResizer || !this.bottomPanel || !this.mainPanel) return;
+        if (!this.terminalResizer || !this.bottomPanel || !this.mainPanel || !this.toggleTerminalBtn) return;
 
-        const handleMouseMove = (e) => {
-            const containerRect = this.mainPanel.getBoundingClientRect();
-            // Calculate new height from the bottom of the container
-            const newHeight = containerRect.bottom - e.clientY;
-
-            // Define constraints
-            const minHeight = 50; // pixels
-            const maxHeight = containerRect.height * 0.8; // 80% of main panel
-
-            if (newHeight >= minHeight && newHeight <= maxHeight) {
-                this.bottomPanel.style.flexBasis = `${newHeight}px`;
-            }
-        };
-
-        const handleMouseUp = () => {
-            document.body.classList.remove('is-resizing', 'is-resizing-v');
-            document.removeEventListener('mousemove', handleMouseMove);
-            this.#logEvent(`Resized bottom panel to ${this.bottomPanel.style.flexBasis}`);
-        };
-
-        this.terminalResizer.addEventListener('mousedown', (e) => {
+        const handleMouseDown = (e) => {
             e.preventDefault();
             document.body.classList.add('is-resizing', 'is-resizing-v');
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp, { once: true });
-        });
+            
+            const startY = e.clientY;
+            const startHeight = this.bottomPanel.offsetHeight;
 
+            const handleMouseMove = (event) => {
+                const newHeight = startHeight - (event.clientY - startY);
+                const containerRect = this.mainPanel.getBoundingClientRect();
+                const minHeight = 50; // pixels
+                const maxHeight = containerRect.height * 0.8; // 80% of main panel
+                const snapThreshold = 40; // px
+
+                if (this.toggleTerminalBtn.classList.contains('active') && newHeight < snapThreshold) {
+                    this.toggleTerminalBtn.click();
+                    handleMouseUp();
+                    return;
+                }
+
+                // If dragging out from a collapsed state, ensure it's active
+                if (this.bottomPanel.classList.contains('collapsed') && newHeight > minHeight) {
+                    this.toggleTerminalBtn.click();
+                }
+
+                this.bottomPanel.style.flexBasis = `${newHeight}px`;
+            };
+
+            const handleMouseUp = () => {
+                document.body.classList.remove('is-resizing', 'is-resizing-v');
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+                if (!this.bottomPanel.classList.contains('collapsed')) {
+                    this.#logEvent(`Resized bottom panel to ${this.bottomPanel.style.flexBasis}`);
+                }
+            };
+
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        };
+
+        this.terminalResizer.addEventListener('mousedown', handleMouseDown);
         // Set initial size
         this.bottomPanel.style.flexBasis = '200px';
     }
 
     #initRightPanelResizer() {
-        if (!this.rightResizer || !this.rightPanel) return;
+        if (!this.rightResizer || !this.rightPanel || !this.toggleRightPanelBtn) return;
 
-        const handleMouseMove = (e) => {
-            const containerRect = this.rightResizer.parentElement.getBoundingClientRect();
-            // Calculate new width from the right edge of the container
-            const newWidth = containerRect.right - e.clientX;
-
-            const minWidth = 150;
-            const maxWidth = containerRect.width * 0.5;
-
-            if (newWidth >= minWidth && newWidth <= maxWidth) {
-                this.rightPanel.style.flexBasis = `${newWidth}px`;
-            }
-        };
-
-        const handleMouseUp = () => {
-            document.body.classList.remove('is-resizing', 'is-resizing-h');
-            document.removeEventListener('mousemove', handleMouseMove);
-            this.#logEvent(`Resized right panel to ${this.rightPanel.style.flexBasis}`);
-        };
-
-        this.rightResizer.addEventListener('mousedown', (e) => {
+        const handleMouseDown = (e) => {
             e.preventDefault();
             document.body.classList.add('is-resizing', 'is-resizing-h');
+
+            const startX = e.clientX;
+            const startWidth = this.rightPanel.offsetWidth;
+
+            const handleMouseMove = (event) => {
+                const newWidth = startWidth - (event.clientX - startX);
+                const containerRect = this.rightResizer.parentElement.getBoundingClientRect();
+                const minWidth = 150;
+                const maxWidth = containerRect.width * 0.5;
+                const snapThreshold = 75; // px
+
+                if (this.toggleRightPanelBtn.classList.contains('active') && newWidth < snapThreshold) {
+                    this.toggleRightPanelBtn.click();
+                    handleMouseUp();
+                    return;
+                }
+
+                // If dragging out from a collapsed state, ensure it's active
+                if (this.rightPanel.classList.contains('collapsed') && newWidth > minWidth) {
+                    this.toggleRightPanelBtn.click();
+                }
+
+                this.rightPanel.style.flexBasis = `${newWidth}px`;
+            };
+
+            const handleMouseUp = () => {
+                document.body.classList.remove('is-resizing', 'is-resizing-h');
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+                if (!this.rightPanel.classList.contains('collapsed')) {
+                    this.#logEvent(`Resized right panel to ${this.rightPanel.style.flexBasis}`);
+                }
+            };
+
             document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp, { once: true });
-        });
+            document.addEventListener('mouseup', handleMouseUp);
+        };
+        
+        this.rightResizer.addEventListener('mousedown', handleMouseDown);
     }
 
     /**
@@ -390,7 +646,11 @@ class App {
      * @private
      */
     #setActiveTab(tabElement) {
-        if (!tabElement || !this.tabsContainer || !this.editorContent) return;
+        if (!tabElement || !this.tabsContainer || !this.editorContent) {
+            this.#updateBreadcrumbs(null);
+            if (this.editorContent) this.editorContent.textContent = 'No file open.';
+            return;
+        }
 
         // Deactivate current active tab
         this.tabsContainer.querySelector('.tab-item.active')?.classList.remove('active');
@@ -398,12 +658,110 @@ class App {
         // Activate the new one
         tabElement.classList.add('active');
 
-        // Update editor content based on the active tab
-        const fileName = tabElement ? tabElement.dataset.filename : null;
+        // Update editor content and breadcrumbs
+        const fileName = tabElement.dataset.filename;
+        let filePath = tabElement.dataset.path ? JSON.parse(tabElement.dataset.path) : null;
+        
+        if (!filePath && fileName) {
+            const fileTreeElement = this.#findFileElementInTree(fileName);
+            if (fileTreeElement) {
+                filePath = this.#getPathForFileElement(fileTreeElement);
+                tabElement.dataset.path = JSON.stringify(filePath);
+            } else {
+                filePath = [fileName]; // Fallback for files not in the tree
+            }
+        }
+        
+        this.#updateBreadcrumbs(filePath);
+
         if (fileName) {
             this.editorContent.textContent = `Content for ${fileName} would be displayed here.`;
         } else {
             this.editorContent.textContent = 'No file open.';
+        }
+    }
+
+    /**
+     * Finds the file-tree-item element corresponding to a given filename.
+     * @param {string} fileName The name of the file to find.
+     * @returns {HTMLElement|null} The element if found, otherwise null.
+     * @private
+     */
+    #findFileElementInTree(fileName) {
+        const fileTreeItems = this.leftPanel.querySelectorAll('.file-tree-item');
+        return Array.from(fileTreeItems).find(item => {
+            return item.textContent.trim() === fileName;
+        });
+    }
+
+    /**
+     * Gets the full path for a file tree item element by traversing up the DOM.
+     * @param {HTMLElement} itemElement The file-tree-item element that was clicked.
+     * @returns {string[]} An array of strings representing the path.
+     * @private
+     */
+    #getPathForFileElement(itemElement) {
+        const path = [];
+        path.unshift(itemElement.textContent.trim());
+
+        let currentLi = itemElement.closest('li');
+        let parentFolderLi = currentLi.parentElement.closest('li.folder');
+
+        while (parentFolderLi) {
+            const parentName = parentFolderLi.querySelector('.file-tree-item').textContent.trim();
+            path.unshift(parentName);
+            parentFolderLi = parentFolderLi.parentElement.closest('li.folder');
+        }
+        return path;
+    }
+
+    /**
+     * Updates the breadcrumb bar based on a given file path.
+     * @param {string[]|null} path The array of path segments, or null to clear.
+     * @private
+     */
+    #updateBreadcrumbs(path) {
+        if (!this.breadcrumbBar) return;
+        const container = this.breadcrumbBar.querySelector('.breadcrumbs');
+        if (!container) return;
+
+        if (!path || path.length === 0) {
+            this.breadcrumbBar.classList.add('hidden');
+            return;
+        }
+        
+        this.breadcrumbBar.classList.remove('hidden');
+        container.innerHTML = ''; // Clear existing breadcrumbs
+
+        path.forEach((segment, index) => {
+            const isLast = index === path.length - 1;
+
+            if (isLast) {
+                // The file itself
+                const fileIcon = this.#getFileIcon(segment);
+                container.innerHTML += `<i data-lucide="${fileIcon}" class="breadcrumb-icon"></i>`;
+                container.innerHTML += `<span class="breadcrumb-item active">${segment}</span>`;
+            } else {
+                // A parent folder
+                container.innerHTML += `<i data-lucide="folder" class="breadcrumb-icon"></i>`;
+                container.innerHTML += `<span class="breadcrumb-item">${segment}</span>`;
+                container.innerHTML += `<i data-lucide="chevron-right" class="breadcrumb-separator"></i>`;
+            }
+        });
+
+        this.#createIcons(); // Re-render icons
+    }
+
+    /**
+     * Initializes the active tab and its breadcrumbs on startup.
+     * @private
+     */
+    #initActiveTab() {
+        const activeTab = this.tabsContainer.querySelector('.tab-item.active');
+        if (activeTab) {
+            this.#setActiveTab(activeTab);
+        } else {
+            this.#updateBreadcrumbs(null);
         }
     }
 
@@ -435,9 +793,10 @@ class App {
      * Opens a file in a new tab, or focuses the tab if already open.
      * It also creates the close button for the new tab.
      * @param {string} fileName The name of the file to open.
+     * @param {string[]} [filePath] The array of path segments for the file.
      * @private
      */
-    #openFileInTab(fileName) {
+    #openFileInTab(fileName, filePath) {
         if (!this.tabsContainer) return;
 
         // Check if tab already exists
@@ -454,6 +813,9 @@ class App {
             newTab.className = 'tab-item';
             newTab.draggable = true;
             newTab.dataset.filename = fileName;
+            if (filePath) {
+                newTab.dataset.path = JSON.stringify(filePath);
+            }
             const iconName = this.#getFileIcon(fileName);
             newTab.innerHTML = `
                 <i data-lucide="${iconName}" class="tab-icon"></i>
@@ -461,7 +823,6 @@ class App {
                 <button class="tab-close-btn" aria-label="Close tab"><i data-lucide="x"></i></button>
             `;
             this.tabsContainer.appendChild(newTab);
-            this.#createIcons(); // Re-render icons to catch the new one
             this.#logEvent(`Opened tab: ${fileName}`);
             this.#setActiveTab(newTab);
         }
@@ -522,6 +883,12 @@ class App {
     #initTabGroup(container, onActivate, onClose) {
         if (!container) return;
 
+        const dropIndicator = document.createElement('div');
+        dropIndicator.className = 'drop-indicator';
+        container.appendChild(dropIndicator);
+    
+        let dropTarget = null; // To store where the tab should be dropped
+
         container.addEventListener('click', (e) => {
             const closeBtn = e.target.closest('.tab-close-btn');
             if (closeBtn && onClose) {
@@ -531,8 +898,6 @@ class App {
 
             const clickedTab = e.target.closest('.tab-item');
             if (clickedTab && !clickedTab.classList.contains('active')) {
-                container.querySelector('.tab-item.active')?.classList.remove('active');
-                clickedTab.classList.add('active');
                 onActivate(clickedTab);
             }
         });
@@ -540,28 +905,50 @@ class App {
         container.addEventListener('dragstart', e => {
             const target = e.target.closest('.tab-item');
             if (target) {
-                target.classList.add('dragging');
+                // Defer adding the class to allow the browser to create the drag image first.
+                setTimeout(() => target.classList.add('dragging'), 0);
             }
         });
 
         container.addEventListener('dragend', e => {
-            const target = e.target.closest('.tab-item');
-            if (target) {
-                target.classList.remove('dragging');
-                const tabName = target.dataset.filename || target.dataset.view;
+            const draggingTab = container.querySelector('.dragging');
+            if (draggingTab) {
+                // Perform the actual move. If dropTarget is null, it appends to the end.
+                container.insertBefore(draggingTab, dropTarget);
+
+                // Clean up
+                draggingTab.classList.remove('dragging');
+                const tabName = draggingTab.dataset.filename || draggingTab.dataset.view;
                 this.#logEvent(`Reordered tab: ${tabName}`);
             }
+            dropIndicator.style.display = 'none';
+            dropTarget = null;
         });
 
         container.addEventListener('dragover', e => {
             e.preventDefault(); // Allow dropping
-            const draggingTab = container.querySelector('.dragging');
-            if (!draggingTab) return;
-            const afterElement = this.#getDragAfterElement(container, e.clientX);
-            if (afterElement == null) {
-                container.appendChild(draggingTab);
+            
+            dropTarget = this.#getDragAfterElement(container, e.clientX);
+            const lastElement = container.querySelector('.tab-item:not(.dragging):last-of-type');
+            
+            let indicatorLeft = 0;
+            if (dropTarget) {
+                indicatorLeft = dropTarget.offsetLeft;
+            } else if (lastElement) {
+                indicatorLeft = lastElement.offsetLeft + lastElement.offsetWidth;
             } else {
-                container.insertBefore(draggingTab, afterElement);
+                // If there are no other tabs, position at the start
+                indicatorLeft = 0;
+            }
+
+            dropIndicator.style.left = `${indicatorLeft}px`;
+            dropIndicator.style.display = 'block';
+        });
+
+        container.addEventListener('dragleave', e => {
+            // Hide indicator if mouse leaves the container
+            if (!container.contains(e.relatedTarget)) {
+                dropIndicator.style.display = 'none';
             }
         });
     }
@@ -580,6 +967,11 @@ class App {
      */
     #initBottomTabs() {
         const onActivate = (tab) => {
+            // Remove active class from all tabs
+            this.bottomTabsContainer.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            // Add active class to the clicked tab
+            tab.classList.add('active');
+            
             const targetViewName = tab.dataset.view;
             this.bottomPanel.querySelectorAll('.bottom-panel-view').forEach(v => v.classList.add('hidden'));
             this.bottomPanel.querySelector(`#${targetViewName}`)?.classList.remove('hidden');
@@ -605,6 +997,53 @@ class App {
         this.#initTabGroup(this.bottomTabsContainer, onActivate, onClose);
     }
 
+    #initPanelResizer() {
+        if (!this.resizer || !this.leftPanel || !this.toggleLeftPanelBtn) return;
+
+        const handleMouseDown = (e) => {
+            e.preventDefault();
+            document.body.classList.add('is-resizing', 'is-resizing-h');
+
+            const startX = e.clientX;
+            const startWidth = this.leftPanel.offsetWidth;
+
+            const handleMouseMove = (event) => {
+                const newWidth = startWidth + (event.clientX - startX);
+                const containerRect = this.resizer.parentElement.getBoundingClientRect();
+                const minWidth = 150;
+                const maxWidth = containerRect.width * 0.5;
+                const snapThreshold = 75; // px
+
+                if (this.toggleLeftPanelBtn.classList.contains('active') && newWidth < snapThreshold) {
+                    this.toggleLeftPanelBtn.click();
+                    handleMouseUp();
+                    return;
+                }
+                
+                // If dragging out from a collapsed state, ensure it's active
+                if (this.leftPanel.classList.contains('collapsed') && newWidth > minWidth) {
+                    this.toggleLeftPanelBtn.click();
+                }
+                
+                this.leftPanel.style.flexBasis = `${newWidth}px`;
+            };
+
+            const handleMouseUp = () => {
+                document.body.classList.remove('is-resizing', 'is-resizing-h');
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+                if (!this.leftPanel.classList.contains('collapsed')) {
+                    this.#logEvent(`Resized left panel to ${this.leftPanel.style.flexBasis}`);
+                }
+            };
+
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        };
+
+        this.resizer.addEventListener('mousedown', handleMouseDown);
+    }
+
     #initFileTree() {
         const fileTree = this.leftPanel?.querySelector('.file-tree');
         if (!fileTree) return;
@@ -612,6 +1051,13 @@ class App {
         fileTree.addEventListener('click', (e) => {
             const item = e.target.closest('.file-tree-item');
             if (!item) return;
+
+            // Handle selection
+            const currentlySelected = fileTree.querySelector('.file-tree-item.selected');
+            if (currentlySelected) {
+                currentlySelected.classList.remove('selected');
+            }
+            item.classList.add('selected');
 
             const parentLi = item.parentElement;
             if (parentLi?.classList.contains('folder')) {
@@ -626,38 +1072,193 @@ class App {
                 // It's a file, open it in a tab
                 const fileName = item.textContent.trim();
                 if (fileName) {
-                    this.#openFileInTab(fileName);
+                    const filePath = this.#getPathForFileElement(item);
+                    this.#openFileInTab(fileName, filePath);
                 }
             }
         });
     }
 
-    #initPanelResizer() {
-        if (!this.resizer || !this.leftPanel) return;
+    /**
+     * Lists the contents of the current working directory.
+     * @returns {string} Formatted directory listing.
+     * @private
+     */
+    #listDirectory(longFormat = false) {
+        const currentPath = this.#getCurrentPathElement();
+        if (!currentPath) {
+            return 'Error: Current directory not found in file tree.';
+        }
 
-        const handleMouseMove = (e) => {
-            const containerRect = this.resizer.parentElement.getBoundingClientRect();
-            const newWidth = e.clientX - containerRect.left;
-            const minWidth = 150;
-            const maxWidth = containerRect.width * 0.5;
+        const folders = [];
+        const files = [];
+        const nestedList = currentPath.querySelector('.nested-list');
+        const now = new Date();
+        const dummyDate = now.toISOString().slice(0, 16).replace('T', ' ');
+        
+        if (nestedList) {
+            nestedList.querySelectorAll('li').forEach(li => {
+                const itemElement = li.querySelector('.file-tree-item');
+                if (itemElement) {
+                    // Use the last span for the filename (skipping placeholder)
+                    const name = itemElement.querySelector('span:last-of-type')?.textContent.trim();
+                    const isFolder = li.classList.contains('folder');
+                    const iconElement = itemElement.querySelector('.file-icon');
+                    const iconName = iconElement?.getAttribute('data-lucide') || (isFolder ? 'folder' : 'file');
+                    const type = isFolder ? 'folder' : 'file';
+                    const date = dummyDate;
+                    if (isFolder) {
+                        folders.push({iconName, name, type, date});
+                    } else {
+                        files.push({iconName, name, type, date});
+                    }
+                }
+            });
+        }
 
-            if (newWidth >= minWidth && newWidth <= maxWidth) {
-                this.leftPanel.style.flexBasis = `${newWidth}px`;
+        if (folders.length === 0 && files.length === 0) {
+            return 'Directory is empty.';
+        }
+
+        const all = [...folders, ...files];
+        if (longFormat) {
+            // Return as JSON string for special handling in logToTerminal
+            return JSON.stringify(all);
+        } else {
+            // Horizontal, but still one per line for icon rendering
+            return all.map(e => `${e.iconName} ${e.name}`).join('\n');
+        }
+    }
+
+    /**
+     * Changes the current working directory.
+     * @param {string[]} args Command arguments (target directory).
+     * @returns {string} Status message.
+     * @private
+     */
+    #changeDirectory(args) {
+        const target = args[0];
+        
+        if (!target || target === '.') {
+            return ''; // Stay in current directory
+        }
+        
+        if (target === '..') {
+            // Go up one level
+            if (this.currentWorkingDirectory.length > 1) {
+                this.currentWorkingDirectory.pop();
+                return `<span class="terminal-dim">Changed to directory: ${this.currentWorkingDirectory.join('/')}</span>`;
+            } else {
+                return `<span class="terminal-dim">Already at root directory.</span>`;
             }
-        };
-
-        const handleMouseUp = () => {
-            document.body.classList.remove('is-resizing', 'is-resizing-h');
-            document.removeEventListener('mousemove', handleMouseMove);
-            this.#logEvent(`Resized left panel to ${this.leftPanel.style.flexBasis}`);
-        };
-
-        this.resizer.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            document.body.classList.add('is-resizing', 'is-resizing-h');
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp, { once: true });
+        }
+        
+        if (target === '/') {
+            // Go to root
+            this.currentWorkingDirectory = ['MediaUI'];
+            return `<span class="terminal-dim">Changed to root directory: MediaUI</span>`;
+        }
+        
+        // Navigate to specific directory
+        const currentPath = this.#getCurrentPathElement();
+        if (!currentPath) {
+            return 'Error: Current directory not found.';
+        }
+        
+        const nestedList = currentPath.querySelector('.nested-list');
+        if (!nestedList) {
+            return `Directory '${target}' not found.`;
+        }
+        
+        const targetFolder = Array.from(nestedList.querySelectorAll('li.folder')).find(li => {
+            const name = li.querySelector('.file-tree-item span')?.textContent.trim();
+            return name === target;
         });
+        
+        if (targetFolder) {
+            this.currentWorkingDirectory.push(target);
+            return `<span class="terminal-dim">Changed to directory: ${this.currentWorkingDirectory.join('/')}</span>`;
+        } else {
+            return `Directory '${target}' not found.`;
+        }
+    }
+
+    /**
+     * Prints the current working directory path.
+     * @returns {string} Current working directory path.
+     * @private
+     */
+    #printWorkingDirectory() {
+        return this.currentWorkingDirectory.join('/');
+    }
+
+    /**
+     * Shows the directory tree structure from current directory.
+     * @returns {string} Formatted tree structure.
+     * @private
+     */
+    #showDirectoryTree() {
+        const currentPath = this.#getCurrentPathElement();
+        if (!currentPath) {
+            return 'Error: Current directory not found in file tree.';
+        }
+
+        let tree = '';
+        const buildTree = (element, prefix = '', isLast = true) => {
+            const nestedList = element.querySelector('.nested-list');
+            if (!nestedList) return;
+            
+            const items = nestedList.querySelectorAll('li');
+            items.forEach((item, index) => {
+                const isLastItem = index === items.length - 1;
+                const itemElement = item.querySelector('.file-tree-item');
+                const name = itemElement?.querySelector('span')?.textContent.trim();
+                const isFolder = item.classList.contains('folder');
+                
+                // Get the actual icon from the file tree
+                const iconElement = itemElement?.querySelector('.file-icon');
+                const iconName = iconElement?.getAttribute('data-lucide') || (isFolder ? 'folder' : 'file');
+                
+                tree += `${prefix}${isLastItem ? '└── ' : '├── '}${iconName} ${name}\n`;
+                
+                if (isFolder) {
+                    const newPrefix = prefix + (isLastItem ? '    ' : '│   ');
+                    buildTree(item, newPrefix, false);
+                }
+            });
+        };
+        
+        buildTree(currentPath);
+        return tree || 'Directory is empty.';
+    }
+
+    /**
+     * Gets the DOM element corresponding to the current working directory path.
+     * @returns {HTMLElement|null} The current directory element or null if not found.
+     * @private
+     */
+    #getCurrentPathElement() {
+        if (!this.leftPanel) return null;
+        
+        let currentElement = this.leftPanel.querySelector('.file-tree > li');
+        
+        // Navigate through the path
+        for (let i = 1; i < this.currentWorkingDirectory.length; i++) {
+            const targetName = this.currentWorkingDirectory[i];
+            const nestedList = currentElement.querySelector('.nested-list');
+            
+            if (!nestedList) return null;
+            
+            const targetFolder = Array.from(nestedList.querySelectorAll('li.folder')).find(li => {
+                const name = li.querySelector('.file-tree-item span')?.textContent.trim();
+                return name === targetName;
+            });
+            
+            if (!targetFolder) return null;
+            currentElement = targetFolder;
+        }
+        
+        return currentElement;
     }
 }
 

@@ -87,7 +87,6 @@
     /* File Tree */
     --file-tree-padding: var(--spacing-unit);
     --file-tree-nested-padding: calc(var(--spacing-unit) * 2);
-    --file-tree-nested-max-height: 1000px;
     --file-tree-transition-duration: 0.1s;
     --file-tree-vertical-line-left: calc(20px + var(--spacing-unit));
     --file-tree-horizontal-line-top: 17px;
@@ -494,9 +493,10 @@ body.is-resizing-v {
 }
 
 .file-tree .nested-list {
-    max-height: var(--file-tree-nested-max-height); /* A large enough value for smooth transition */
     overflow: hidden;
-    transition: max-height var(--file-tree-transition-duration) ease-out;
+    transition: opacity var(--file-tree-transition-duration) ease-out, transform var(--file-tree-transition-duration) ease-out;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* The vertical line connecting all items in a list */
@@ -573,11 +573,16 @@ body.is-resizing-v {
 
 /* File Tree Interactivity */
 .file-tree .folder > .nested-list {
-    max-height: 0; /* Collapsed by default */
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+    overflow: hidden;
 }
 
 .file-tree .folder.open > .nested-list {
-    max-height: var(--file-tree-nested-max-height); /* Expanded */
+    opacity: 1;
+    transform: translateY(0);
+    max-height: none;
 }
 
 .file-tree .folder > .file-tree-item .twirldown-icon {

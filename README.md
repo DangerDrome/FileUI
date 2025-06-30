@@ -1,11 +1,22 @@
-# MediaUI
+```
+███████╗██╗██╗     ███████╗██╗   ██╗██╗
+██╔════╝██║██║     ██╔════╝██║   ██║██║
+█████╗  ██║██║     █████╗  ██║   ██║██║
+██╔══╝  ██║██║     ██╔══╝  ██║   ██║██║
+██║     ██║███████╗███████╗╚██████╔╝██║
+╚═╝     ╚═╝╚══════╝╚══════╝ ╚═════╝ ╚═╝
+```
+# FileUI
 
-A sleek, modern, and mobile-friendly generic user interface inspired by VSCode. Built with pure Vanilla JavaScript, CSS, and HTML, MediaUI serves as a versatile template for creating a wide range of applications, a robust starter kit for new projects, or a comprehensive style guide.
+A modern, and mobile-friendly generic user interface inspired by VSCode. 
+Built with pure Vanilla JavaScript, CSS, and HTML, 
+FileUI serves as a versatile template for creating a wide range of applications, 
+a robust starter kit for new projects, or a comprehensive style guide.
 
 <!-- It's highly recommended to add a screenshot or GIF of your project in action! -->
-![Screenshot of MediaUI](./path/to/screenshot.png)
+![Screenshot of FileUI](/Screenshot_01.png)
 
-## ✨ Features
+## Features
 
 -   **VSCode-Inspired Design:** A familiar and intuitive layout that users love.
 -   **Pure Vanilla Stack:** No frameworks, no dependencies. Just lightweight and fast HTML, CSS, and JavaScript.
@@ -14,16 +25,16 @@ A sleek, modern, and mobile-friendly generic user interface inspired by VSCode. 
 -   **Easily Customizable:** Use CSS variables to easily theme and style the UI to match your brand.
 -   **Lightweight:** Minimal footprint for fast loading times.
 
-## 🚀 Getting Started
+## Getting Started
 
-To get started with MediaUI, simply clone the repository and open the `index.html` file in your browser.
+To get started with FileUI, simply clone the repository and open the `index.html` file in your browser.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/MediaUI.git
+git clone https://github.com/your-username/FileUI.git
 
 # Navigate to the project directory
-cd MediaUI
+cd FileUI
 
 # Open index.html in your default browser
 # On macOS:
@@ -34,9 +45,9 @@ start index.html
 xdg-open index.html
 ```
 
-## 🛠️ Usage
+## Usage
 
-MediaUI is designed to be straightforward. The main structure is typically composed of a header, a main content area with panels, and a footer.
+FileUI is designed to be straightforward. The main structure is typically composed of a header, a main content area with panels, and a footer.
 
 Here is a basic example of an HTML structure:
 
@@ -46,8 +57,8 @@ Here is a basic example of an HTML structure:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My App with MediaUI</title>
-    <!-- Link to MediaUI's CSS -->
+    <title>My App with FileUI</title>
+    <!-- Link to FileUI's CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -64,16 +75,16 @@ Here is a basic example of an HTML structure:
 
     <footer class="main-footer"><!-- Footer content like status bar --></footer>
 
-    <!-- Link to MediaUI's JavaScript -->
+    <!-- Link to FileUI's JavaScript -->
     <script src="js/main.js"></script>
 </body>
 </html>
 ```
 *Note: The class names and structure above are illustrative. Please refer to the source code for the actual implementation.*
 
-## 🧩 Components
+## Components
 
-MediaUI comes with a variety of ready-to-use components built with Vanilla JS:
+FileUI comes with a variety of ready-to-use components built with Vanilla JS:
 
 -   **Resizable Panels:** Draggable splitter for flexible side-by-side layouts.
 -   **Split Panels:** Create vertical or horizontal splits within the editor area for multi-pane layouts.
@@ -84,18 +95,19 @@ MediaUI comes with a variety of ready-to-use components built with Vanilla JS:
 -   **File Tree:** A collapsible tree view for navigating files and folders.
 -   **UI Controls:** A set of pre-styled buttons and inputs.
 
-## 🎨 Customization & Theming
+## Customization & Theming
 
 Customizing the look and feel is simple thanks to CSS Custom Properties (Variables). You can find and override the default theme variables in the main CSS file (e.g., `css/style.css`).
 
-## 📦 Icons
+## Icons
 
 This project uses Lucide Icons, a beautiful and consistent open-source icon set.
+https://lucide.dev
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to fork the repository, make changes, and open a pull request.
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.

@@ -1,5 +1,5 @@
 /* 
- * MediaUI - Main JavaScript File
+ * FileUI - Main JavaScript File
  */
 
 class App {
@@ -27,7 +27,7 @@ class App {
         this.clearLogsBtn = document.getElementById('clear-logs-btn');
 
         // Terminal state
-        this.currentWorkingDirectory = ['MediaUI'];
+        this.currentWorkingDirectory = ['FileUI'];
 
         // Modal elements
         this.modalOverlay = document.getElementById('modal-overlay');
@@ -73,7 +73,7 @@ class App {
      * Main initialization method. Called after the DOM is fully loaded.
      */
     init() {
-        console.log("MediaUI Initialized!");
+        console.log("FileUI Initialized!");
         this.#logEvent("Application Initialized");
         this.#initPanelResizer();
         this.#initFileTree();
@@ -1584,8 +1584,8 @@ class App {
         
         if (target === '/') {
             // Go to root
-            this.currentWorkingDirectory = ['MediaUI'];
-            return `<span class="terminal-dim">Changed to root directory: MediaUI</span>`;
+            this.currentWorkingDirectory = ['FileUI'];
+            return `<span class="terminal-dim">Changed to root directory: FileUI</span>`;
         }
         
         // Navigate to specific directory

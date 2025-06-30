@@ -1,5 +1,5 @@
 /* 
- * MediaUI - Main Style Sheet
+ * FileUI - Main Style Sheet
  */
 
 /* 🎨 --- THEME VARIABLES --- 🎨 */
@@ -216,6 +216,13 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: calc(var(--spacing-unit) * 2);
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-unit);
+    color: var(--color-text-quaternary);
 }
 
 .main-footer {
@@ -484,6 +491,7 @@ body.is-resizing-v {
     line-height: var(--panel-content-line-height);
     padding: var(--panel-content-padding);
     color: var(--color-text-quaternary);
+    border-radius: var(--border-radius);
 }
 
 /* File Tree */
@@ -552,8 +560,13 @@ body.is-resizing-v {
     border-radius: var(--border-radius);
 }
 
-.file-icon {
+.file-icon-container {
     margin-right: var(--spacing-unit);
+    display: inline-flex;
+    align-items: center;
+}
+
+.file-icon {
     color: var(--color-text-secondary);
     width: var(--icon-size-md);
     height: var(--icon-size-md);
@@ -565,6 +578,7 @@ body.is-resizing-v {
     height: var(--icon-size-md);
     margin-right: calc(var(--spacing-unit) / 2);
     flex-shrink: 0;
+    transition: transform var(--file-tree-transition-duration) ease-out;
 }
 
 .twirldown-placeholder {
@@ -597,8 +611,17 @@ body.is-resizing-v {
     max-height: none;
 }
 
-.file-tree .folder > .file-tree-item .twirldown-icon {
-    transition: transform var(--file-tree-transition-duration) ease-out;
+.file-tree .folder .icon-folder-open {
+    display: none;
+}
+.file-tree .folder .icon-folder-closed {
+    display: block;
+}
+.file-tree .folder.open .icon-folder-open {
+    display: block;
+}
+.file-tree .folder.open .icon-folder-closed {
+    display: none;
 }
 
 .file-tree .folder.open > .file-tree-item .twirldown-icon {

@@ -8,7 +8,7 @@
 ```
 # FileUI
 
-A modern, and mobile-friendly generic user interface inspired by VSCode. 
+### A modern, and mobile-friendly generic user interface inspired by VSCode. 
 Built with pure Vanilla JavaScript, CSS, and HTML, 
 FileUI serves as a versatile template for creating a wide range of applications, 
 a robust starter kit for new projects, or a comprehensive style guide.

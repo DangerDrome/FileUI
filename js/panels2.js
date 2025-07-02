@@ -1,0 +1,721 @@
+(function() {
+    'use strict';
+
+    // ===== CONFIGURATION =====
+    const CONFIG = {
+        RESIZER_THICKNESS: 4,
+        PANEL_MIN_HEIGHT: 40,
+        PANEL_MIN_WIDTH: 150,
+        DEFAULT_SPLIT: 0.5,
+        HISTORY_LIMIT: 50,
+        ANIMATION_DURATION: 150,
+        EASING: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        PANEL_ANIMATION_CLASS: 'panel-grow-in',
+    };
+
+    // ===== UTILITY CLASSES =====
+
+    /**
+     * A simple event emitter for pub/sub communication.
+     */
+    class EventEmitter {
+        constructor() {
+            this.events = new Map();
+        }
+        on(event, listener) {
+            if (!this.events.has(event)) {
+                this.events.set(event, []);
+            }
+            this.events.get(event).push(listener);
+        }
+        emit(event, payload) {
+            if (this.events.has(event)) {
+                this.events.get(event).forEach(listener => listener(payload));
+            }
+        }
+    }
+
+    /**
+     * Manages the state history for undo/redo functionality.
+     */
+    class HistoryManager {
+        constructor(limit) {
+            this.limit = limit;
+            this.history = [];
+            this.pointer = -1;
+            this.emitter = new EventEmitter();
+        }
+        
+        add(state) {
+            if (this.pointer < this.history.length - 1) {
+                this.history.splice(this.pointer + 1);
+            }
+            this.history.push(state);
+            if (this.history.length > this.limit) {
+                this.history.shift();
+            }
+            this.pointer = this.history.length - 1;
+            this.emitChange();
+        }
+
+        undo() {
+            if (this.canUndo()) {
+                this.pointer--;
+                this.emitChange();
+                return this.history[this.pointer];
+            }
+            return null;
+        }
+
+        redo() {
+            if (this.canRedo()) {
+                this.pointer++;
+                this.emitChange();
+                return this.history[this.pointer];
+            }
+            return null;
+        }
+
+        canUndo() { return this.pointer > 0; }
+        canRedo() { return this.pointer < this.history.length - 1; }
+        
+        on(event, listener) { this.emitter.on(event, listener); }
+        emitChange() { this.emitter.emit('change', { canUndo: this.canUndo(), canRedo: this.canRedo() }); }
+        
+        clear() {
+            this.history = [];
+            this.pointer = -1;
+            this.emitChange();
+        }
+    }
+
+    /**
+     * Represents a node in the Binary Space Partitioning (BSP) tree.
+     */
+    class BSPNode {
+        constructor(options = {}) {
+            this.id = options.id || self.crypto.randomUUID();
+            this.parent = options.parent || null;
+            this.children = options.children || [];
+            this.direction = options.direction || null;
+            this.split = options.split || CONFIG.DEFAULT_SPLIT;
+            this.element = options.element || null; 
+        }
+
+        isLeaf() { return this.children.length === 0; }
+
+        getSibling() {
+            if (!this.parent) return null;
+            return this.parent.children.find(child => child !== this);
+        }
+
+        toJSON() {
+            const obj = {
+                id: this.id,
+                direction: this.direction,
+                split: this.split,
+                children: this.children.map(c => c.toJSON())
+            };
+            if (this.isLeaf()) obj.leaf = true;
+            return obj;
+        }
+
+        static fromJSON(json, parent, panelElementsMap) {
+            const node = new BSPNode({ ...json, parent });
+            if (json.leaf) {
+                node.element = panelElementsMap.get(json.id);
+            } else {
+                node.children = json.children.map(childJson => 
+                    BSPNode.fromJSON(childJson, node, panelElementsMap)
+                );
+            }
+            return node;
+        }
+    }
+
+    /**
+     * Manages the entire panel grid system.
+     */
+    class PanelManager {
+        constructor(container) {
+            this.container = container;
+            this.dropIndicator = document.getElementById('drop-indicator');
+            this.panels = new Map();
+            this.resizers = [];
+            this.root = null;
+            this.nextPanelNumber = 1;
+            this.history = new HistoryManager(CONFIG.HISTORY_LIMIT);
+            this.minSizeCache = new Map();
+
+            this.handlePointerDown = this.handlePointerDown.bind(this);
+            this.handlePointerMove = this.handlePointerMove.bind(this);
+            this.handlePointerUp = this.handlePointerUp.bind(this);
+            this.handleDragOver = this.handleDragOver.bind(this);
+        }
+
+        init() {
+            this.setupUI();
+            this.resetLayout();
+            this.setupEventListeners();
+        }
+
+        setupUI() {
+            this.dom = {
+                addPanelBtn: document.getElementById('add-panel-btn'),
+                resetLayoutBtn: document.getElementById('reset-layout-btn'),
+                undoBtn: document.getElementById('undo-btn'),
+                redoBtn: document.getElementById('redo-btn'),
+            };
+
+            // Only bind events if buttons exist
+            if (this.dom.addPanelBtn) this.dom.addPanelBtn.onclick = () => this.addPanel();
+            if (this.dom.resetLayoutBtn) this.dom.resetLayoutBtn.onclick = () => this.resetLayout();
+            if (this.dom.undoBtn) this.dom.undoBtn.onclick = () => this.undo();
+            if (this.dom.redoBtn) this.dom.redoBtn.onclick = () => this.redo();
+            
+            this.history.on('change', ({ canUndo, canRedo }) => {
+                if (this.dom.undoBtn) this.dom.undoBtn.disabled = !canUndo;
+                if (this.dom.redoBtn) this.dom.redoBtn.disabled = !canRedo;
+            });
+        }
+        
+        setupEventListeners() {
+            this.container.addEventListener('pointerdown', this.handlePointerDown);
+            window.addEventListener('resize', () => this.layout());
+            
+            window.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 'z') { e.preventDefault(); this.undo(); }
+                    if (e.key === 'y') { e.preventDefault(); this.redo(); }
+                }
+            });
+        }
+
+        resetLayout() {
+            this.container.innerHTML = '';
+            this.panels.clear();
+            this.resizers = [];
+            this.nextPanelNumber = 1;
+            this.history.clear();
+
+            const panel = this.createPanel();
+            this.root = new BSPNode({ id: panel.id, element: panel.element });
+            this.panels.set(panel.id, { node: this.root, element: panel.element });
+            
+            this.layout();
+            this.saveState("Initial Layout");
+        }
+
+        saveState(action) {
+            const serializedTree = this.root.toJSON();
+            this.history.add({ action, tree: serializedTree });
+        }
+        
+        restoreState(state) {
+            const panelElementsMap = new Map();
+            this.panels.forEach(p => panelElementsMap.set(p.node.id, p.element));
+            
+            this.root = BSPNode.fromJSON(state.tree, null, panelElementsMap);
+            
+            this.panels.clear();
+            const syncPanels = (node) => {
+                if (node.isLeaf()) {
+                    this.panels.set(node.id, { node, element: node.element });
+                } else {
+                    node.children.forEach(syncPanels);
+                }
+            };
+            syncPanels(this.root);
+            
+            this.layout();
+        }
+        
+        undo() {
+            const state = this.history.undo();
+            if (state) this.restoreState(state);
+        }
+
+        redo() {
+            const state = this.history.redo();
+            if (state) this.restoreState(state);
+        }
+
+        layout() {
+            this.minSizeCache.clear();
+            this.resizers.forEach(r => r.remove());
+            this.resizers = [];
+
+            const layoutRecursive = (node, rect) => {
+                node.rect = rect;
+
+                if (node.isLeaf()) {
+                    Object.assign(node.element.style, {
+                        left: `${rect.x}px`, top: `${rect.y}px`,
+                        width: `${rect.width}px`, height: `${rect.height}px`
+                    });
+                    this.updatePanelControls(node);
+                    return;
+                }
+
+                const [child1, child2] = node.children;
+                let rect1, rect2;
+
+                if (node.direction === 'vertical') {
+                    const availableWidth = rect.width - CONFIG.RESIZER_THICKNESS;
+                    const minWidth1 = this.calculateMinimumWidth(child1);
+                    const minWidth2 = this.calculateMinimumWidth(child2);
+                    const totalMinWidth = minWidth1 + minWidth2;
+                    if (totalMinWidth > availableWidth) {
+                        node.split = (totalMinWidth > 0) ? (minWidth1 / totalMinWidth) : 0.5;
+                    }
+
+                    let width1 = Math.max(minWidth1, availableWidth * node.split);
+                    let width2 = availableWidth - width1;
+                    if (width2 < minWidth2) {
+                        width2 = minWidth2;
+                        width1 = availableWidth - width2;
+                    }
+                    
+                    rect1 = { ...rect, width: width1 };
+                    rect2 = { ...rect, x: rect.x + width1 + CONFIG.RESIZER_THICKNESS, width: width2 };
+
+                    const resizerX = rect.x + width1;
+                    const resizer = this.createResizer(node, resizerX, rect.y, CONFIG.RESIZER_THICKNESS, rect.height, 'vertical');
+                    this.resizers.push(resizer);
+                } else {
+                    const availableHeight = rect.height - CONFIG.RESIZER_THICKNESS;
+                    const minHeight1 = this.calculateMinimumHeight(child1);
+                    const minHeight2 = this.calculateMinimumHeight(child2);
+                    const totalMinHeight = minHeight1 + minHeight2;
+                    if (totalMinHeight > availableHeight) {
+                        node.split = (totalMinHeight > 0) ? (minHeight1 / totalMinHeight) : 0.5;
+                    }
+
+                    let height1 = Math.max(minHeight1, availableHeight * node.split);
+                    let height2 = availableHeight - height1;
+                    if (height2 < minHeight2) {
+                        height2 = minHeight2;
+                        height1 = availableHeight - height2;
+                    }
+                    
+                    rect1 = { ...rect, height: height1 };
+                    rect2 = { ...rect, y: rect.y + height1 + CONFIG.RESIZER_THICKNESS, height: height2 };
+                    
+                    const resizerY = rect.y + height1;
+                    const resizer = this.createResizer(node, rect.x, resizerY, rect.width, CONFIG.RESIZER_THICKNESS, 'horizontal');
+                    this.resizers.push(resizer);
+                }
+
+                layoutRecursive(child1, rect1);
+                layoutRecursive(child2, rect2);
+            };
+            
+            const containerRect = this.container.getBoundingClientRect();
+            layoutRecursive(this.root, { x: 0, y: 0, width: containerRect.width, height: containerRect.height });
+        }
+
+        createPanelElement(panelNumber) {
+            const element = document.createElement('div');
+            element.className = `panel ${CONFIG.PANEL_ANIMATION_CLASS}`;
+            element.innerHTML = `
+                <div class="panel-header">
+                    <span class="panel-title">Panel ${panelNumber}</span>
+                    <div class="panel-actions">
+                        <button class="panel-action-btn" data-action="split-v" title="Split Vertically"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg></button>
+                        <button class="panel-action-btn" data-action="split-h" title="Split Horizontally"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg></button>
+                        <button class="panel-action-btn" data-action="close" title="Close Panel"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                    </div>
+                </div>
+                <div class="panel-content">Content for panel ${panelNumber}</div>`;
+            
+            element.addEventListener('animationend', () => element.classList.remove(CONFIG.PANEL_ANIMATION_CLASS), { once: true });
+            this.container.appendChild(element);
+            return element;
+        }
+
+        createPanel() {
+            const panelNumber = this.nextPanelNumber++;
+            const element = this.createPanelElement(panelNumber);
+            const id = `panel-${panelNumber}-${Date.now()}`;
+            element.dataset.panelId = id;
+            return { id, element };
+        }
+        
+        addPanel() {
+            let targetNode = null;
+            const findLeaf = (node) => {
+                if (targetNode) return;
+                if (node.isLeaf()) targetNode = node;
+                else node.children.forEach(findLeaf);
+            };
+            findLeaf(this.root);
+
+            if (targetNode) {
+                const canSplitV = targetNode.rect.width >= CONFIG.PANEL_MIN_WIDTH * 2 + CONFIG.RESIZER_THICKNESS;
+                const canSplitH = targetNode.rect.height >= CONFIG.PANEL_MIN_HEIGHT * 2 + CONFIG.RESIZER_THICKNESS;
+                if (canSplitV) this.splitPanel(targetNode.id, 'vertical');
+                else if (canSplitH) this.splitPanel(targetNode.id, 'horizontal');
+            }
+        }
+        
+        splitPanel(targetId, direction) {
+            const target = this.panels.get(targetId);
+            if (!target) return;
+            const { node: targetNode } = target;
+
+            const newPanel = this.createPanel();
+            const newNode = new BSPNode({ id: newPanel.id, element: newPanel.element });
+            this.panels.set(newPanel.id, { node: newNode, element: newPanel.element });
+            
+            const newParent = new BSPNode({
+                parent: targetNode.parent,
+                direction,
+                children: [targetNode, newNode]
+            });
+
+            targetNode.parent = newParent;
+            newNode.parent = newParent;
+
+            if (this.root === targetNode) {
+                this.root = newParent;
+            } else {
+                const oldParent = newParent.parent;
+                const targetIndex = oldParent.children.indexOf(targetNode);
+                oldParent.children.splice(targetIndex, 1, newParent);
+            }
+            
+            this.layout();
+            this.saveState(`Split ${direction}`);
+        }
+        
+        closePanel(targetId) {
+            const target = this.panels.get(targetId);
+            if (!target || this.panels.size <= 1) return;
+            const { node: targetNode } = target;
+
+            const parent = targetNode.parent;
+            const sibling = targetNode.getSibling();
+            const grandparent = parent.parent;
+
+            if (grandparent) {
+                const parentIndex = grandparent.children.indexOf(parent);
+                grandparent.children.splice(parentIndex, 1, sibling);
+                sibling.parent = grandparent;
+            } else {
+                this.root = sibling;
+                sibling.parent = null;
+            }
+
+            targetNode.element.remove();
+            this.panels.delete(targetId);
+            this.layout();
+            this.saveState("Close Panel");
+        }
+
+        calculateMinimumHeight(node) {
+            if (this.minSizeCache.has(node.id + '-h')) return this.minSizeCache.get(node.id + '-h');
+            if (node.isLeaf()) return CONFIG.PANEL_MIN_HEIGHT;
+            
+            const [child1, child2] = node.children;
+            const h1 = this.calculateMinimumHeight(child1);
+            const h2 = this.calculateMinimumHeight(child2);
+            
+            const result = node.direction === 'horizontal' 
+                ? h1 + h2 + CONFIG.RESIZER_THICKNESS 
+                : Math.max(h1, h2);
+            
+            this.minSizeCache.set(node.id + '-h', result);
+            return result;
+        }
+
+        calculateMinimumWidth(node) {
+            if (this.minSizeCache.has(node.id + '-w')) return this.minSizeCache.get(node.id + '-w');
+            if (node.isLeaf()) return CONFIG.PANEL_MIN_WIDTH;
+            
+            const [child1, child2] = node.children;
+            const w1 = this.calculateMinimumWidth(child1);
+            const w2 = this.calculateMinimumWidth(child2);
+            
+            const result = node.direction === 'vertical' 
+                ? w1 + w2 + CONFIG.RESIZER_THICKNESS 
+                : Math.max(w1, w2);
+
+            this.minSizeCache.set(node.id + '-w', result);
+            return result;
+        }
+        
+        handlePointerDown(e) {
+            const resizer = e.target.closest('.panel-resizer');
+            const header = e.target.closest('.panel-header');
+            const actionBtn = e.target.closest('.panel-action-btn');
+
+            if (actionBtn) { this.handleActionClick(actionBtn); return; }
+            if (resizer) this.activeDrag = { type: 'resize', resizer, target: this.findNodeByResizer(resizer) };
+            else if (header) this.activeDrag = { type: 'move', header, target: this.findNodeByElement(header.parentElement) };
+            else return;
+            
+            e.preventDefault();
+            this.activeDrag.startX = e.clientX;
+            this.activeDrag.startY = e.clientY;
+            
+            this.container.classList.add('no-transition');
+            document.body.style.cursor = this.activeDrag.type === 'resize' ? getComputedStyle(resizer).cursor : 'grabbing';
+
+            window.addEventListener('pointermove', this.handlePointerMove);
+            window.addEventListener('pointerup', this.handlePointerUp, { once: true });
+        }
+        
+        handlePointerMove(e) {
+            if (!this.activeDrag) return;
+
+            if (this.activeDrag.type === 'resize') this.handleResize(e);
+            else if (this.activeDrag.type === 'move') {
+                if (!this.activeDrag.isDragging) {
+                    const dx = e.clientX - this.activeDrag.startX;
+                    const dy = e.clientY - this.activeDrag.startY;
+                    if (Math.hypot(dx, dy) > 5) this.initDrag(e);
+                } else {
+                    this.handleDrag(e);
+                }
+            }
+        }
+        
+        handlePointerUp(e) {
+            this.container.classList.remove('no-transition');
+            document.body.style.cursor = '';
+            
+            if (this.activeDrag?.isDragging) this.handleDrop(e);
+            else if (this.activeDrag?.type === 'resize') this.saveState("Resize");
+
+            this.activeDrag = null;
+            window.removeEventListener('pointermove', this.handlePointerMove);
+        }
+
+        handleActionClick(button) {
+            const action = button.dataset.action;
+            const panelId = button.closest('.panel')?.dataset.panelId;
+            if (!panelId) return;
+
+            switch(action) {
+                case 'split-v': this.splitPanel(panelId, 'vertical'); break;
+                case 'split-h': this.splitPanel(panelId, 'horizontal'); break;
+                case 'close': this.closePanel(panelId); break;
+            }
+        }
+        
+        handleResize(e) {
+            const { target: node } = this.activeDrag;
+            if (!node || node.isLeaf()) return;
+            
+            const parentRect = node.rect;
+            if (node.direction === 'vertical') {
+                node.split = (e.clientX - parentRect.x) / (parentRect.width - CONFIG.RESIZER_THICKNESS);
+            } else {
+                node.split = (e.clientY - parentRect.y) / (parentRect.height - CONFIG.RESIZER_THICKNESS);
+            }
+            this.layout();
+        }
+
+        initDrag(e) {
+            this.activeDrag.isDragging = true;
+            const { target } = this.activeDrag;
+            const element = target.element;
+            const rect = element.getBoundingClientRect();
+
+            this.activeDrag.ghost = element.cloneNode(true);
+            this.activeDrag.ghost.classList.add('drag-ghost');
+            
+            // Set ghost dimensions and position to match the original panel exactly
+            Object.assign(this.activeDrag.ghost.style, {
+                width: `${rect.width}px`,
+                height: `${rect.height}px`,
+                position: 'fixed',
+                left: `${rect.left}px`,
+                top: `${rect.top}px`,
+                zIndex: '9999',
+                pointerEvents: 'none'
+            });
+            
+            document.body.appendChild(this.activeDrag.ghost);
+            
+            // Calculate offset from the mouse position to the panel's top-left corner
+            this.activeDrag.offsetX = e.clientX - rect.left;
+            this.activeDrag.offsetY = e.clientY - rect.top;
+
+            element.style.opacity = '0.3';
+            this.container.addEventListener('pointermove', this.handleDragOver);
+        }
+
+        handleDrag(e) {
+            const { ghost, offsetX, offsetY } = this.activeDrag;
+            ghost.style.left = `${e.clientX - offsetX}px`;
+            ghost.style.top = `${e.clientY - offsetY}px`;
+        }
+        
+        handleDragOver(e) {
+            if (!this.activeDrag?.isDragging) return;
+            
+            // Find the panel under the mouse cursor, accounting for container position
+            const containerRect = this.container.getBoundingClientRect();
+            const relativeX = e.clientX - containerRect.left;
+            const relativeY = e.clientY - containerRect.top;
+            
+            let targetPanel = null;
+            let dropZone = null;
+            
+            // Find which panel we're over by checking panel positions
+            for (const [panelId, panelData] of this.panels) {
+                if (panelData.element === this.activeDrag.target.element) continue;
+                
+                const rect = panelData.node.rect;
+                if (relativeX >= rect.x && relativeX <= rect.x + rect.width &&
+                    relativeY >= rect.y && relativeY <= rect.y + rect.height) {
+                    targetPanel = panelData.element;
+                    
+                    // Calculate drop zone based on position within the panel
+                    const x = relativeX - rect.x;
+                    const y = relativeY - rect.y;
+                    const threshold = 0.25;
+
+                    if (y < rect.height * threshold) dropZone = 'top';
+                    else if (y > rect.height * (1 - threshold)) dropZone = 'bottom';
+                    else if (x < rect.width * threshold) dropZone = 'left';
+                    else if (x > rect.width * (1 - threshold)) dropZone = 'right';
+                    break;
+                }
+            }
+
+            if (this.activeDrag.currentTargetPanel !== targetPanel || this.activeDrag.currentDropZone !== dropZone) {
+                this.activeDrag.currentTargetPanel = targetPanel;
+                this.activeDrag.currentDropZone = dropZone;
+                this.updateDropIndicator(targetPanel, dropZone);
+            }
+        }
+        
+        updateDropIndicator(targetPanel, zone) {
+            if (!targetPanel || !zone) {
+                this.dropIndicator.style.display = 'none';
+                return;
+            }
+            const rect = targetPanel.getBoundingClientRect();
+            const containerRect = this.container.getBoundingClientRect();
+            let indicatorRect;
+
+            switch (zone) {
+                case 'top': indicatorRect = { top: rect.top, left: rect.left, width: rect.width, height: rect.height / 2 }; break;
+                case 'bottom': indicatorRect = { top: rect.top + rect.height / 2, left: rect.left, width: rect.width, height: rect.height / 2 }; break;
+                case 'left': indicatorRect = { top: rect.top, left: rect.left, width: rect.width / 2, height: rect.height }; break;
+                case 'right': indicatorRect = { top: rect.top, left: rect.left + rect.width / 2, width: rect.width / 2, height: rect.height }; break;
+            }
+            
+            Object.assign(this.dropIndicator.style, {
+                display: 'block',
+                left: `${indicatorRect.left - containerRect.left}px`,
+                top: `${indicatorRect.top - containerRect.top}px`,
+                width: `${indicatorRect.width}px`,
+                height: `${indicatorRect.height}px`,
+            });
+        }
+        
+        handleDrop() {
+            const { ghost, target, currentTargetPanel, currentDropZone } = this.activeDrag;
+            
+            ghost.remove();
+            target.element.style.opacity = '1';
+            this.dropIndicator.style.display = 'none';
+            this.container.removeEventListener('pointermove', this.handleDragOver);
+
+            if (currentTargetPanel && currentDropZone) {
+                this.movePanel(target.id, currentTargetPanel.dataset.panelId, currentDropZone);
+            }
+        }
+        
+        movePanel(draggedId, targetId, zone) {
+            if (draggedId === targetId) return;
+
+            const draggedNode = this.panels.get(draggedId).node;
+            const targetNode = this.panels.get(targetId).node;
+            
+            const draggedParent = draggedNode.parent;
+            if (draggedParent) {
+                const sibling = draggedNode.getSibling();
+                const grandparent = draggedParent.parent;
+                if (grandparent) {
+                    const parentIndex = grandparent.children.indexOf(draggedParent);
+                    grandparent.children.splice(parentIndex, 1, sibling);
+                    sibling.parent = grandparent;
+                } else {
+                    this.root = sibling;
+                    sibling.parent = null;
+                }
+            } else { return; }
+
+            const targetParent = targetNode.parent;
+            const direction = (zone === 'left' || zone === 'right') ? 'vertical' : 'horizontal';
+            const children = (zone === 'left' || zone === 'top') ? [draggedNode, targetNode] : [targetNode, draggedNode];
+            const newSplitNode = new BSPNode({ parent: targetParent, direction, children });
+
+            draggedNode.parent = newSplitNode;
+            targetNode.parent = newSplitNode;
+
+            if (targetParent) {
+                const targetIndex = targetParent.children.indexOf(targetNode);
+                targetParent.children.splice(targetIndex, 1, newSplitNode);
+            } else {
+                this.root = newSplitNode;
+            }
+
+            this.layout();
+            this.saveState("Move Panel");
+        }
+        
+        findNodeByElement(element) {
+            const panelId = element.dataset.panelId;
+            return this.panels.get(panelId)?.node;
+        }
+
+        findNodeByResizer(resizerEl) {
+            for(const panel of this.panels.values()){
+                const parent = panel.node.parent;
+                if(parent && parent.resizer === resizerEl) return parent;
+            }
+            return null;
+        }
+        
+        createResizer(node, x, y, width, height, direction) {
+            const resizer = document.createElement('div');
+            resizer.className = `panel-resizer ${direction}`;
+            Object.assign(resizer.style, {
+                left: `${x}px`, top: `${y}px`,
+                width: `${width}px`, height: `${height}px`
+            });
+            this.container.appendChild(resizer);
+            node.resizer = resizer;
+            return resizer;
+        }
+        
+        updatePanelControls(node) {
+            if (!node.isLeaf()) return;
+            const { element, rect } = node;
+
+            const canSplitV = rect.width >= CONFIG.PANEL_MIN_WIDTH * 2 + CONFIG.RESIZER_THICKNESS;
+            const canSplitH = rect.height >= CONFIG.PANEL_MIN_HEIGHT * 2 + CONFIG.RESIZER_THICKNESS;
+
+            element.querySelector('[data-action="split-v"]').disabled = !canSplitV;
+            element.querySelector('[data-action="split-h"]').disabled = !canSplitH;
+            element.querySelector('[data-action="close"]').disabled = (this.panels.size <= 1);
+        }
+    }
+
+    // ===== INITIALIZATION =====
+    document.addEventListener('DOMContentLoaded', () => {
+        const panelContainer = document.getElementById('panel-container');
+        if (panelContainer) {
+            window.panelManager = new PanelManager(panelContainer);
+            window.panelManager.init();
+        } else {
+            console.error('Panel container not found.');
+        }
+    });
+
+})();

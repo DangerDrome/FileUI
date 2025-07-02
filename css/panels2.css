@@ -1,0 +1,231 @@
+/* ===== PANEL V2 STYLES ===== */
+
+/* --- 1. Root & Theming --- */
+:root {
+    /* Dark Theme (Default) */
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --background-color: #1a1a1a;
+    --text-color: #ecf0f1;
+    --header-bg: #252526;
+    --footer-bg: #252526;
+    --panel-bg: #2c2c2e;
+    --panel-header-bg: #3a3a3c;
+    --panel-border: #424245;
+    --panel-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    --panel-resizer: #0a84ff;
+    --panel-resizer-hover: #389bff;
+    --button-bg: #4a4a4d;
+    --button-hover-bg: #5a5a5e;
+    --button-disabled-bg: #3a3a3c;
+    --button-disabled-text: #7a7a7e;
+    --accent-color: #0a84ff;
+    --drop-indicator-bg: rgba(10, 132, 255, 0.3);
+    --drop-indicator-border: #0a84ff;
+    --body-font-size: 14px;
+    --header-height: 50px;
+    --footer-height: 30px;
+}
+
+/* --- 2. Base Layout --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: var(--body-font-size);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- 3. Header & Footer --- */
+.main-header, .main-footer {
+    flex-shrink: 0;
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    user-select: none;
+}
+
+.main-header {
+    height: var(--header-height);
+    gap: 24px;
+}
+.main-footer {
+    height: var(--footer-height);
+    border-bottom: none;
+    border-top: 1px solid var(--panel-border);
+    font-size: 12px;
+    color: var(--button-disabled-text);
+}
+
+.header-brand { flex-grow: 1; }
+.header-brand h1 { font-size: 18px; font-weight: 600; }
+
+.header-actions, .header-history {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+}
+.action-btn:hover { background-color: var(--button-hover-bg); }
+.action-btn:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; }
+.action-btn:disabled {
+    background-color: var(--button-disabled-bg);
+    color: var(--button-disabled-text);
+    cursor: not-allowed;
+}
+.action-btn svg { stroke: var(--text-color); }
+.action-btn:disabled svg { stroke: var(--button-disabled-text); }
+
+
+/* --- 4. Panel Container & Panels --- */
+.panel-container {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.panel {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--panel-bg);
+    border-radius: 8px;
+    box-shadow: var(--panel-shadow);
+    border: 1px solid var(--panel-border);
+    overflow: hidden;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.panel.no-transition { transition: none; }
+.panel-container.no-transition .panel { transition: none; }
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    padding: 0 4px 0 12px;
+    height: 28px;
+    background-color: var(--panel-header-bg);
+    border-bottom: 1px solid var(--panel-border);
+    font-weight: 500;
+    font-size: 13px;
+    flex-shrink: 0;
+    cursor: grab;
+    user-select: none;
+}
+.panel-header:active { cursor: grabbing; }
+
+.panel-title {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.panel-title-icon {
+    margin-right: 6px;
+    vertical-align: -2px;
+}
+
+.panel-actions {
+    display: flex;
+    align-items: center;
+}
+.panel-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: var(--button-disabled-text);
+    cursor: pointer;
+}
+.panel-action-btn:hover { background-color: var(--button-hover-bg); color: var(--text-color); }
+.panel-action-btn:disabled { background: none !important; cursor: not-allowed; }
+.panel-action-btn:disabled svg { stroke: var(--button-disabled-text) !important; }
+.panel-action-btn svg { width: 14px; height: 14px; stroke: currentColor; }
+
+.panel-content {
+    padding: 12px;
+    flex-grow: 1;
+    overflow: auto;
+}
+
+
+/* --- 5. Resizers --- */
+.panel-resizer {
+    position: absolute;
+    background-color: var(--panel-resizer);
+    z-index: 10;
+    transition: background-color 150ms ease;
+}
+.panel-resizer.vertical { cursor: col-resize; }
+.panel-resizer.horizontal { cursor: row-resize; }
+.panel-resizer:hover { background-color: var(--panel-resizer-hover); }
+
+/* --- 6. Drag & Drop Elements --- */
+.drag-ghost {
+    opacity: 0.9;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    transition: none; /* Disable transitions during drag for performance */
+}
+.drag-ghost .panel-header {
+    cursor: grabbing;
+}
+
+#drop-indicator {
+    position: absolute;
+    z-index: 9998;
+    background-color: var(--drop-indicator-bg);
+    border: 1px dashed var(--drop-indicator-border);
+    border-radius: 8px;
+    pointer-events: none;
+    display: none;
+}
+
+/* --- 7. Animations --- */
+.panel-grow-in { animation: panelGrowIn 250ms cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes panelGrowIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.panel-slide-in { animation: panelSlideIn 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes panelSlideIn {
+    from { transform: translateX(-30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.panel-fade-in { animation: panelFadeIn 300ms ease-out; }
+@keyframes panelFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

@@ -1,69 +1,208 @@
 /* 
-  Defines custom properties (variables) for the panel components.
-  This makes theming and maintenance easier.
+  ============================================================================
+  PANEL GRID SYSTEM - COMPLETE CSS VARIABLES & DOCUMENTATION
+  ============================================================================
+  
+  A comprehensive panel management system with drag/drop, resizing, and
+  flexible layout capabilities. All styling uses CSS custom properties
+  for easy theming and maintenance.
 */
+
 :root {
-    /* Base Colors from main.css */
+    /* ========== BASE SYSTEM COLORS ========== */
+    /* Primary accent color for interactive elements */
     --color-accent: #00cc8b;
-    --color-bg: #1e1e1e;
-    --color-bg-panel: #252526;
-    --color-bg-header: #333333;
-    --color-text-primary: #e0e0e0;
-    --color-text-secondary: #b8b8b8;
-    --color-border: #3c3c3c;
-    --color-selection-bg: rgba(0, 204, 139, 0.2);
+    
+    /* Background colors for different UI layers */
+    --color-bg: #1e1e1e;                    /* Main application background */
+    --color-bg-panel: #252526;              /* Individual panel background */
+    --color-bg-header: #333333;             /* Panel header background */
+    
+    /* Text colors for different content types */
+    --color-text-primary: #e0e0e0;          /* Main readable text */
+    --color-text-secondary: #b8b8b8;        /* Secondary/muted text */
+    
+    /* Border and separator colors */
+    --color-border: #3c3c3c;                /* Standard border color */
+    --color-selection-bg: rgba(0, 204, 139, 0.2); /* Selection highlight */
 
-    /* Base Sizing from main.css */
-    --font-size-base: 14px;
-    --border-radius-sm: 4px;
+    /* ========== TYPOGRAPHY SYSTEM ========== */
+    /* Base font sizing and families */
+    --font-size-base: 14px;                 /* Standard UI text size */
+    --font-size-panel: 12px;                /* Panel header text size */
+    --font-size-content: 11px;              /* Panel content text size */
+    --font-size-indicator: 10px;            /* Small indicator text */
+    --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    /* Font weights for different contexts */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    
+    /* Line height for optimal readability */
+    --line-height-tight: 1;                 /* Compact elements like buttons */
+    --line-height-normal: 1.4;              /* Standard text content */
 
-    /* Panel-specific variables */
-    --panel-grid-bg: #161617;
-    --panel-item-bg: #252526;
+    /* ========== LAYOUT & SPACING SYSTEM ========== */
+    /* Border radius values for consistent rounded corners */
+    --border-radius-sm: 4px;                /* Small radius for buttons/inputs */
+    --border-radius-md: 6px;                /* Medium radius for panels */
+    
+    /* Spacing scale for consistent padding/margins */
+    --spacing-xs: 2px;                      /* Extra small spacing */
+    --spacing-sm: 4px;                      /* Small spacing */
+    --spacing-md: 6px;                      /* Medium spacing */
+    --spacing-lg: 8px;                      /* Large spacing */
+    --spacing-xl: 10px;                     /* Extra large spacing */
+    --spacing-xxl: 12px;                    /* Double extra large */
+
+    /* ========== PANEL GRID SPECIFIC VARIABLES ========== */
+    /* Main panel grid styling */
+    --panel-grid-bg: #161617;              /* Grid container background */
+    
+    /* Individual panel styling */
+    --panel-item-bg: var(--color-bg-panel);
     --panel-item-border-color: var(--color-border);
-    --panel-header-bg: #333333;
-    --panel-header-padding: 6px 10px;
-    --panel-font-size: 12px;
+    --panel-item-border-width: 1px;
+    --panel-item-border: var(--panel-item-border-width) solid var(--panel-item-border-color);
+    
+    /* Panel header styling */
+    --panel-header-bg: var(--color-bg-header);
+    --panel-header-padding-v: var(--spacing-md);    /* Vertical padding */
+    --panel-header-padding-h: var(--spacing-xl);    /* Horizontal padding */
+    --panel-header-padding: var(--panel-header-padding-v) var(--panel-header-padding-h);
+    --panel-header-font-size: var(--font-size-panel);
+    --panel-header-min-height: 24px;       /* Minimum functional header height */
+    --panel-header-border-bottom: var(--panel-item-border-width) solid var(--panel-item-border-color);
+    
+    /* Panel header icon and text styling */
     --panel-icon-color: var(--color-text-secondary);
+    --panel-icon-gap: var(--spacing-lg);   /* Gap between icon and text */
+    
+    /* Panel action button styling */
     --panel-action-btn-color: var(--color-text-secondary);
     --panel-action-btn-hover-bg: #4f4f4f;
     --panel-action-btn-hover-color: var(--color-text-primary);
-    --panel-content-padding: 8px;
-    --panel-resizer-size: 5px;
+    --panel-action-btn-padding: var(--spacing-xs);
+    --panel-action-btn-gap: var(--spacing-sm); /* Gap between action buttons */
+    --panel-action-btn-radius: var(--border-radius-sm);
+    
+    /* Panel content area styling */
+    --panel-content-padding: var(--spacing-lg);
+    --panel-content-font-size: var(--font-size-content);
+    --panel-content-min-height: 0;         /* Allows content to collapse completely */
+
+    /* ========== PANEL RESIZER SYSTEM ========== */
+    /* Resizer dimensions and behavior */
+    --panel-resizer-size: 5px;             /* Thickness of resizer handles */
     --panel-resizer-hover-bg: var(--color-accent);
+    --panel-resizer-transition: background-color 0.2s ease;
+    --panel-resizer-z-index: 10;           /* Layer above panels but below modals */
+    
+    /* Resizer cursor styles */
+    --panel-resizer-cursor-vertical: ew-resize;    /* Left-right resize cursor */
+    --panel-resizer-cursor-horizontal: ns-resize;  /* Up-down resize cursor */
+
+    /* ========== PANEL MINIMUM DIMENSIONS ========== */
+    /* Minimum sizes to maintain functionality */
+    --panel-min-height: 40px;              /* Just enough for header visibility */
+    --panel-min-width: 200px;               /* Ensures panels remain functional */
+    
+    /* ========== DRAG & DROP SYSTEM ========== */
+    /* Drop indicator styling */
     --panel-drop-indicator-bg: var(--color-selection-bg);
-    --panel-drop-indicator-border: 1px solid var(--color-accent);
+    --panel-drop-indicator-border: var(--panel-item-border-width) solid var(--color-accent);
+    --panel-drop-indicator-z-index: 20;    /* Above resizers */
+    --panel-drop-indicator-transition: all 0.1s linear;
+    
+    /* Drag ghost styling */
+    --panel-drag-ghost-border: var(--panel-item-border-width) solid var(--color-accent);
+    --panel-drag-ghost-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    --panel-drag-ghost-z-index: 9999;      /* Highest layer for dragging */
+
+    /* ========== ANIMATION SYSTEM ========== */
+    /* Panel transitions and animations */
+    --panel-transition-all: all 0.2s ease-in-out;
+    --panel-transition-bg: background-color 0.2s ease;
+    
+    /* Animation timing functions */
+    --animation-easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Animation durations */
+    --animation-duration-fast: 0.2s;       /* Quick interactions */
+    --animation-duration-medium: 0.25s;    /* Standard animations */
+    --animation-duration-slow: 0.3s;       /* Slower, more visible animations */
+
+    /* ========== VISUAL FEEDBACK SYSTEM ========== */
+    /* Collapse indicator styling */
+    --panel-collapse-indicator-content: "⋯";
+    --panel-collapse-indicator-color: var(--color-text-secondary);
+    --panel-collapse-indicator-size: var(--font-size-indicator);
+    --panel-collapse-indicator-opacity: 0.5;
+
+    /* ========== LAYOUT SYSTEM ========== */
+    /* Main application layout */
+    --app-height: 100vh;                   /* Full viewport height */
+    --app-padding-vertical: var(--panel-resizer-size);
+    --app-padding-horizontal: 2px;
+    --app-header-footer-padding: var(--spacing-lg) var(--spacing-xxl);
 }
 
+/* 
+  ============================================================================
+  MAIN APPLICATION LAYOUT
+  ============================================================================
+*/
+
+/* 
+  Body element - Main application container
+  Sets up the overall layout structure and prevents overflow
+*/
 body {
     background-color: var(--panel-grid-bg);
     color: var(--color-text-primary);
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: var(--app-height);
     overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    padding: var(--panel-resizer-size);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-normal);
+    padding: var(--app-padding-vertical) var(--app-padding-horizontal);
     margin: 0;
     box-sizing: border-box;
 }
 
-/* Add basic layout styles for header, main, and footer */
-.main-header, .main-footer {
+/* 
+  Application header and footer
+  Fixed height elements that don't resize with content
+*/
+.main-header, 
+.main-footer {
     flex-shrink: 0;
-    padding: 8px 12px;
-    background-color: #333333;
+    padding: var(--app-header-footer-padding);
+    background-color: var(--color-bg-header);
 }
 
+/* 
+  Main content area
+  Flexible container that fills available space
+*/
 .main-content {
     flex-grow: 1;
     position: relative;
     overflow: hidden;
 }
 
-/*
-  The main container for the entire grid of panels.
-  It fills the available space in its parent.
+/* 
+  ============================================================================
+  PANEL GRID CONTAINER
+  ============================================================================
+*/
+
+/* 
+  Main container for the entire grid of panels
+  Fills the available space and provides the coordinate system for absolute positioning
 */
 .panel-grid-container {
     width: 100%;
@@ -72,104 +211,129 @@ body {
     background-color: var(--panel-grid-bg);
 }
 
-/*
-  A class for the visual clone of the panel being dragged.
-  It adds a stroke (border) and a shadow.
+/* 
+  ============================================================================
+  INDIVIDUAL PANEL STYLING
+  ============================================================================
 */
-.drag-ghost {
-    border: 1px solid var(--color-accent);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
 
-/*
-  Styles for a single panel within the grid.
-  Panels are positioned absolutely by the JavaScript logic.
+/* 
+  Base panel styling
+  Panels are positioned absolutely by JavaScript and use flexbox for internal layout
 */
 .panel-grid-item {
     position: absolute;
-    border: 1px solid var(--panel-item-border-color);
+    border: var(--panel-item-border);
     background-color: var(--panel-item-bg);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     box-sizing: border-box;
-    transition: all 0.2s ease-in-out;
+    transition: var(--panel-transition-all);
+    min-height: var(--panel-min-height);
+    min-width: var(--panel-min-width);
+    border-radius: var(--border-radius-sm);
 }
 
-/*
-  A utility class to temporarily disable transitions during 
-  drag or resize operations for better performance.
+/* 
+  Performance optimization class
+  Temporarily disables transitions during drag or resize operations
 */
 .panel-grid-item.no-transition {
     transition: none;
 }
 
-/*
-  The header bar for each panel.
-  Uses flexbox to space out the title and action buttons.
+/* 
+  ============================================================================
+  PANEL HEADER SYSTEM
+  ============================================================================
+*/
+
+/* 
+  Panel header bar
+  Contains title, icon, and action buttons
+  Always maintains its height and cannot be collapsed
 */
 .panel-grid-item-header {
     background-color: var(--panel-header-bg);
     padding: var(--panel-header-padding);
-    font-size: var(--panel-font-size);
-    border-bottom: 1px solid var(--panel-item-border-color);
+    font-size: var(--panel-header-font-size);
+    border-bottom: var(--panel-header-border-bottom);
     cursor: move;
     user-select: none;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevents header from shrinking */
     display: flex;
     align-items: center;
     justify-content: space-between;
+    min-height: var(--panel-header-min-height);
+    font-weight: var(--font-weight-medium);
 }
 
-/*
-  A container for the title and its associated icon in the header.
-  Ensures they are grouped together.
+/* 
+  Panel title container
+  Groups the icon and title text together
 */
 .panel-header-title {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--panel-icon-gap);
     color: var(--panel-icon-color);
+    font-weight: var(--font-weight-normal);
 }
 
-/*
-  A container for the action buttons (split, close) in the header.
-  Groups the buttons together on the right side.
+/* 
+  Panel action buttons container
+  Groups the split and close buttons on the right side
 */
 .panel-header-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--panel-action-btn-gap);
 }
 
-/*
-  Base styles for all buttons within the panel header actions.
-  This specificity ensures these styles override global button styles.
+/* 
+  Individual action buttons
+  Styled for minimal visual impact while maintaining functionality
 */
 .panel-header-actions button {
     background: transparent;
     border: none;
-    padding: 2px;
+    padding: var(--panel-action-btn-padding);
     cursor: pointer;
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--panel-action-btn-radius);
     color: var(--panel-action-btn-color);
-    display: inline-flex; /* Use inline-flex for proper alignment */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    line-height: 1; /* Prevents button height from being too large */
+    line-height: var(--line-height-tight);
+    transition: var(--panel-transition-bg);
 }
 
-/*
-  Hover state for all buttons in the panel header.
+/* 
+  Action button hover state
+  Provides visual feedback on interaction
 */
 .panel-header-actions button:hover {
     background-color: var(--panel-action-btn-hover-bg);
     color: var(--panel-action-btn-hover-color);
 }
 
-/*
-  The main content area of a panel.
-  Centered content by default.
+.panel-header-actions button.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* 
+  ============================================================================
+  PANEL CONTENT AREA
+  ============================================================================
+*/
+
+/* 
+  Main content area of each panel
+  Can collapse to zero height while keeping header visible
+  Provides scrolling when content is clipped
 */
 .panel-grid-item-content {
     padding: var(--panel-content-padding);
@@ -178,52 +342,182 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: var(--panel-content-min-height);
+    font-size: var(--panel-content-font-size);
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/*
-  The draggable resizer element between panels.
+/* 
+  Visual indicator for collapsed content
+  Shows ellipsis when content area is very small or empty
+*/
+.panel-grid-item-content:empty::before,
+.panel-grid-item[style*="height: 28px"] .panel-grid-item-content::before {
+    content: var(--panel-collapse-indicator-content);
+    color: var(--panel-collapse-indicator-color);
+    font-size: var(--panel-collapse-indicator-size);
+    opacity: var(--panel-collapse-indicator-opacity);
+}
+
+/* 
+  ============================================================================
+  PANEL ANIMATION SYSTEM
+  ============================================================================
+*/
+
+/* 
+  Growth animation for new panels
+  Scales in from 80% with fade effect
+*/
+.panel-grow-in {
+    animation: panelGrowIn var(--animation-duration-fast) var(--animation-easing-smooth) forwards;
+}
+
+/* 
+  Slide animation for new panels
+  Slides in from the left with fade effect
+*/
+.panel-slide-in {
+    animation: panelSlideIn var(--animation-duration-slow) var(--animation-easing-smooth) forwards;
+}
+
+/* 
+  Fade animation for new panels
+  Simple opacity transition
+*/
+.panel-fade-in {
+    animation: panelFadeIn var(--animation-duration-medium) var(--animation-easing-smooth) forwards;
+}
+
+/* 
+  ============================================================================
+  KEYFRAME DEFINITIONS
+  ============================================================================
+*/
+
+/* 
+  Growth animation keyframes
+  Creates a subtle scale and fade effect
+*/
+@keyframes panelGrowIn {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 
+  Slide animation keyframes
+  Creates a slide-in effect from the left
+*/
+@keyframes panelSlideIn {
+    0% {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* 
+  Fade animation keyframes
+  Simple opacity transition
+*/
+@keyframes panelFadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* 
+  ============================================================================
+  PANEL RESIZER SYSTEM
+  ============================================================================
+*/
+
+/* 
+  Base resizer element
+  Invisible by default, becomes visible on hover
+  Positioned absolutely between panels
 */
 .panel-resizer {
     position: absolute;
     background-color: transparent;
-    transition: background-color 0.2s;
-    z-index: 10;
+    transition: var(--panel-resizer-transition);
+    z-index: var(--panel-resizer-z-index);
 }
 
-/*
-  Hover state for the resizer to make it visible.
+/* 
+  Resizer hover state
+  Makes the resizer visible when user hovers over it
 */
 .panel-resizer:hover {
     background-color: var(--panel-resizer-hover-bg);
 }
 
-/*
-  Styles for a vertical resizer.
+/* 
+  Vertical resizer (between left/right panels)
+  Handles horizontal resizing with east-west cursor
 */
 .panel-resizer.vertical {
-    cursor: ew-resize;
+    cursor: var(--panel-resizer-cursor-vertical);
     width: var(--panel-resizer-size);
     margin-left: calc(-1 * var(--panel-resizer-size) / 2);
 }
 
-/*
-  Styles for a horizontal resizer.
+/* 
+  Horizontal resizer (between top/bottom panels)
+  Handles vertical resizing with north-south cursor
 */
 .panel-resizer.horizontal {
-    cursor: ns-resize;
+    cursor: var(--panel-resizer-cursor-horizontal);
     height: var(--panel-resizer-size);
     margin-top: calc(-1 * var(--panel-resizer-size) / 2);
 }
 
-/*
-  The visual indicator showing where a panel will be dropped.
+/* 
+  ============================================================================
+  DRAG & DROP SYSTEM
+  ============================================================================
+*/
+
+/* 
+  Drag ghost element
+  Visual clone of the panel being dragged
+*/
+.drag-ghost {
+    border: var(--panel-drag-ghost-border);
+    box-shadow: var(--panel-drag-ghost-shadow);
+    z-index: var(--panel-drag-ghost-z-index);
+}
+
+/* 
+  Drop indicator
+  Shows where a panel will be placed during drag operations
 */
 #drop-indicator {
     position: absolute;
     background-color: var(--panel-drop-indicator-bg);
     border: var(--panel-drop-indicator-border);
-    z-index: 20;
+    z-index: var(--panel-drop-indicator-z-index);
     pointer-events: none;
     display: none;
-    transition: all 0.1s linear;
-} 
+    transition: var(--panel-drop-indicator-transition);
+    border-radius: var(--border-radius-sm);
+}
+
+/* 
+  ============================================================================
+  END OF PANEL GRID SYSTEM STYLES
+  ============================================================================
+*/ 

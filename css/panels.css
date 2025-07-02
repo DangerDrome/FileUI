@@ -22,8 +22,8 @@
     --panel-item-bg: #252526;
     --panel-item-border-color: var(--color-border);
     --panel-header-bg: #333333;
-    --panel-header-padding: 8px 12px;
-    --panel-font-size: var(--font-size-base);
+    --panel-header-padding: 6px 10px;
+    --panel-font-size: 12px;
     --panel-icon-color: var(--color-text-secondary);
     --panel-action-btn-color: var(--color-text-secondary);
     --panel-action-btn-hover-bg: #4f4f4f;
@@ -36,13 +36,16 @@
 }
 
 body {
-    background-color: var(--color-bg);
+    background-color: var(--panel-grid-bg);
     color: var(--color-text-primary);
     display: flex;
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: var(--panel-resizer-size);
+    margin: 0;
+    box-sizing: border-box;
 }
 
 /* Add basic layout styles for header, main, and footer */
@@ -70,12 +73,21 @@ body {
 }
 
 /*
+  A class for the visual clone of the panel being dragged.
+  It adds a stroke (border) and a shadow.
+*/
+.drag-ghost {
+    border: 1px solid var(--color-accent);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/*
   Styles for a single panel within the grid.
   Panels are positioned absolutely by the JavaScript logic.
 */
 .panel-grid-item {
     position: absolute;
-    border: var(--panel-item-border-color);
+    border: 1px solid var(--panel-item-border-color);
     background-color: var(--panel-item-bg);
     display: flex;
     flex-direction: column;

@@ -29,6 +29,12 @@
         nextPanelId: 4,
         dropHandled: false,
 
+        // Properties for live resize preview
+        previewAnimation: null,
+        lastPreviewTarget: null,
+        lastPreviewZone: null,
+        lastPreviewTargetOriginalRect: null,
+
         init() {
             this.container = document.getElementById('panel-grid-container');
             this.dropIndicator = document.getElementById('drop-indicator');
@@ -275,6 +281,7 @@
                     this.draggedNode = null;
                 }
                 this.removeDragGhost();
+                this.clearDropPreview(); // Restore any previewed panel
                 // Remove no-transition class if drop was cancelled
                 this.container.querySelectorAll('.panel-grid-item').forEach(p => p.classList.remove('no-transition'));
             }
@@ -288,10 +295,11 @@
                 this.dragGhostElement.remove();
             }
             this.dragGhostElement = sourceElement.cloneNode(true);
+            this.dragGhostElement.classList.add('drag-ghost');
             this.dragGhostElement.style.position = 'absolute';
             this.dragGhostElement.style.pointerEvents = 'none';
             this.dragGhostElement.style.zIndex = '9999';
-            this.dragGhostElement.style.opacity = '0.7';
+            this.dragGhostElement.style.opacity = '1';
             
             const rect = sourceElement.getBoundingClientRect();
             this.dragGhostElement.style.width = `${rect.width}px`;
@@ -319,173 +327,308 @@
 
         handleDragOver(e) {
             e.preventDefault();
-            const targetElement = document.elementFromPoint(e.clientX, e.clientY).closest('.panel-grid-item');
             
-            if (!targetElement || !this.draggedNode || targetElement === this.draggedNode.element) {
-                this.dropIndicator.style.display = 'none';
-                return;
+            let targetElement = null;
+
+            // First, check if we are still within the bounds of the panel we are currently previewing.
+            // This prevents flickering when the panel shrinks and the mouse is temporarily not over it.
+            if (this.lastPreviewTarget && this.lastPreviewTargetOriginalRect) {
+                const containerRect = this.container.getBoundingClientRect();
+                const originalRect = {
+                    left: parseFloat(this.lastPreviewTargetOriginalRect.left) + containerRect.left,
+                    top: parseFloat(this.lastPreviewTargetOriginalRect.top) + containerRect.top,
+                    width: parseFloat(this.lastPreviewTargetOriginalRect.width),
+                    height: parseFloat(this.lastPreviewTargetOriginalRect.height),
+                };
+                originalRect.right = originalRect.left + originalRect.width;
+                originalRect.bottom = originalRect.top + originalRect.height;
+                
+                if (e.clientX >= originalRect.left && e.clientX <= originalRect.right &&
+                    e.clientY >= originalRect.top && e.clientY <= originalRect.bottom) {
+                    targetElement = this.lastPreviewTarget;
+                }
             }
             
-            const rect = targetElement.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            // If we're not over the last previewed panel, find a new one.
+            if (!targetElement) {
+                const allPanels = this.container.querySelectorAll('.panel-grid-item');
+                for (const panel of allPanels) {
+                    // Don't check against the last previewed panel again, or the dragged panel.
+                    if (panel === this.lastPreviewTarget || (this.draggedNode && panel === this.draggedNode.element)) {
+                        continue;
+                    }
+                    const rect = panel.getBoundingClientRect();
+                    if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                        e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                        targetElement = panel;
+                        break;
+                    }
+                }
+            }
 
-            const dropZoneSize = 0.25;
             let zone = '';
+            if (targetElement) {
+                // To calculate the zone, we must use the original rect if we are previewing,
+                // because the visual rect is shrunk.
+                const rect = (targetElement === this.lastPreviewTarget && this.lastPreviewTargetOriginalRect)
+                    ? { 
+                        left: parseFloat(this.lastPreviewTargetOriginalRect.left) + this.container.getBoundingClientRect().left,
+                        top: parseFloat(this.lastPreviewTargetOriginalRect.top) + this.container.getBoundingClientRect().top,
+                        width: parseFloat(this.lastPreviewTargetOriginalRect.width),
+                        height: parseFloat(this.lastPreviewTargetOriginalRect.height)
+                      }
+                    : targetElement.getBoundingClientRect();
+                
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const dropZoneSize = 0.25;
 
-            if (y < rect.height * dropZoneSize) zone = 'top';
-            else if (y > rect.height * (1 - dropZoneSize)) zone = 'bottom';
-            else if (x < rect.width * dropZoneSize) zone = 'left';
-            else if (x > rect.width * (1 - dropZoneSize)) zone = 'right';
-            
-            if (zone) {
-                this.showDropIndicator(targetElement, zone);
-                this.dropIndicator.dataset.zone = zone;
-                this.dropIndicator.dataset.targetId = targetElement.dataset.panelId;
-            } else {
-                this.dropIndicator.style.display = 'none';
+                if (y < rect.height * dropZoneSize) zone = 'top';
+                else if (y > rect.height * (1 - dropZoneSize)) zone = 'bottom';
+                else if (x < rect.width * dropZoneSize) zone = 'left';
+                else if (x > rect.width * (1 - dropZoneSize)) zone = 'right';
+            }
+
+            // If the target and zone are the same as the last frame, do nothing.
+            if (targetElement === this.lastPreviewTarget && zone === this.lastPreviewZone) {
+                return;
+            }
+
+            // If the state has changed, clear the old preview first.
+            this.clearDropPreview();
+
+            // If we have a new valid target and zone, create a new preview.
+            if (targetElement && zone) {
+                this.createDropPreview(targetElement, zone);
             }
         },
         
-        showDropIndicator(targetElement, zone) {
-            const ind = this.dropIndicator;
+        createDropPreview(targetElement, zone) {
+            if (this.previewAnimation) {
+                this.previewAnimation.cancel();
+            }
+
+            this.lastPreviewTarget = targetElement;
+            this.lastPreviewZone = zone;
+        
             const rect = targetElement.getBoundingClientRect();
             const containerRect = this.container.getBoundingClientRect();
-            
-            const left = rect.left - containerRect.left;
-            const top = rect.top - containerRect.top;
 
-            ind.style.display = 'block';
+            const original = {
+                left: rect.left - containerRect.left,
+                top: rect.top - containerRect.top,
+                width: rect.width,
+                height: rect.height,
+            };
+            
+            // Store the original rect to be used for restoration
+            this.lastPreviewTargetOriginalRect = original;
+        
+            const targetNewRect = { ...original };
+            const indicatorRect = { ...original };
+        
             switch (zone) {
                 case 'top':
-                    ind.style.left = `${left}px`;
-                    ind.style.top = `${top}px`;
-                    ind.style.width = `${rect.width}px`;
-                    ind.style.height = `${rect.height / 2}px`;
+                    targetNewRect.height /= 2;
+                    targetNewRect.top += targetNewRect.height;
+                    indicatorRect.height /= 2;
                     break;
                 case 'bottom':
-                    ind.style.left = `${left}px`;
-                    ind.style.top = `${top + rect.height / 2}px`;
-                    ind.style.width = `${rect.width}px`;
-                    ind.style.height = `${rect.height / 2}px`;
+                    targetNewRect.height /= 2;
+                    indicatorRect.top += indicatorRect.height / 2;
+                    indicatorRect.height /= 2;
                     break;
                 case 'left':
-                    ind.style.left = `${left}px`;
-                    ind.style.top = `${top}px`;
-                    ind.style.width = `${rect.width / 2}px`;
-                    ind.style.height = `${rect.height}px`;
+                    targetNewRect.width /= 2;
+                    targetNewRect.left += targetNewRect.width;
+                    indicatorRect.width /= 2;
                     break;
                 case 'right':
-                    ind.style.left = `${left + rect.width / 2}px`;
-                    ind.style.top = `${top}px`;
-                    ind.style.width = `${rect.width / 2}px`;
-                    ind.style.height = `${rect.height}px`;
+                    targetNewRect.width /= 2;
+                    indicatorRect.left += indicatorRect.width / 2;
+                    indicatorRect.width /= 2;
                     break;
             }
+            
+            this.previewAnimation = targetElement.animate([
+                {
+                    left: `${original.left}px`, top: `${original.top}px`,
+                    width: `${original.width}px`, height: `${original.height}px`
+                },
+                {
+                    left: `${targetNewRect.left}px`, top: `${targetNewRect.top}px`,
+                    width: `${targetNewRect.width}px`, height: `${targetNewRect.height}px`
+                }
+            ], {
+                duration: 150,
+                easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                fill: 'forwards'
+            });
+            
+            const ind = this.dropIndicator;
+            ind.style.display = 'block';
+            Object.assign(ind.style, {
+                left: `${indicatorRect.left}px`,
+                top: `${indicatorRect.top}px`,
+                width: `${indicatorRect.width}px`,
+                height: `${indicatorRect.height}px`,
+            });
+        },
+        
+        clearDropPreview() {
+            if (this.previewAnimation) {
+                this.previewAnimation.cancel();
+                this.previewAnimation = null;
+            }
+
+            if (this.lastPreviewTarget && this.lastPreviewTargetOriginalRect) {
+                const target = this.lastPreviewTarget;
+                const original = this.lastPreviewTargetOriginalRect;
+                
+                const currentRect = target.getBoundingClientRect();
+                const containerRect = this.container.getBoundingClientRect();
+
+                this.previewAnimation = target.animate([
+                    {
+                        left: `${currentRect.left - containerRect.left}px`,
+                        top: `${currentRect.top - containerRect.top}px`,
+                        width: `${currentRect.width}px`,
+                        height: `${currentRect.height}px`,
+                    },
+                    {
+                        left: `${original.left}px`,
+                        top: `${original.top}px`,
+                        width: `${original.width}px`,
+                        height: `${original.height}px`,
+                    }
+                ], {
+                    duration: 150,
+                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                    fill: 'forwards'
+                });
+
+                this.previewAnimation.onfinish = () => {
+                    target.style.left = '';
+                    target.style.top = '';
+                    target.style.width = '';
+                    target.style.height = '';
+                    this.previewAnimation = null;
+                };
+            }
+
+            this.dropIndicator.style.display = 'none';
+            this.lastPreviewTarget = null;
+            this.lastPreviewZone = null;
+            this.lastPreviewTargetOriginalRect = null;
+        },
+
+        showDropIndicator(targetElement, zone) {
+            // This function is now effectively replaced by the logic in handleDragOver
+            // but we'll keep it to avoid breaking anything that might call it, just in case.
         },
 
         handleDrop(e) {
             e.preventDefault();
-            this.dropHandled = true; // Signal that a valid drop is being handled.
-
-            const targetId = this.dropIndicator.dataset.targetId;
-            this.dropIndicator.style.display = 'none';
-
-            if (!targetId || !this.draggedNode) {
-                if (this.draggedNode) this.draggedNode.element.style.visibility = 'visible';
-                this.removeDragGhost();
-                return;
+            this.dropHandled = true;
+        
+            if (this.previewAnimation) {
+                this.previewAnimation.cancel();
+                this.previewAnimation = null;
             }
 
-            const targetElement = this.container.querySelector(`[data-panel-id='${targetId}']`);
-            const targetNode = this.findNodeByElement(targetElement);
-            const zone = this.dropIndicator.dataset.zone;
-
-            if (!targetNode || targetNode === this.draggedNode) {
-                if (this.draggedNode) this.draggedNode.element.style.visibility = 'visible';
-                this.removeDragGhost();
-                return;
-            }
-
-            // 1. Remove dragged node from the tree
-            const oldParent = this.draggedNode.parent;
-            if (oldParent) {
-                 const sibling = oldParent.children.find(c => c !== this.draggedNode);
-                 const grandParent = oldParent.parent;
-                 if (grandParent) {
-                    const oldParentIndex = grandParent.children.indexOf(oldParent);
-                    grandParent.children.splice(oldParentIndex, 1, sibling);
-                    sibling.parent = grandParent;
-                 } else {
-                    this.root = sibling;
-                    sibling.parent = null;
-                 }
-            } else { 
-                 if (this.root.isLeaf()) return;
-            }
-
-            // 2. Split target node and insert dragged node
-            const targetParent = targetNode.parent;
-            const newSplitNode = new BSPNode({ parent: targetParent });
-            
-            if (zone === 'left' || zone === 'right') {
-                newSplitNode.direction = 'vertical';
-                newSplitNode.children = zone === 'left' ? [this.draggedNode, targetNode] : [targetNode, this.draggedNode];
-            } else {
-                newSplitNode.direction = 'horizontal';
-                newSplitNode.children = zone === 'top' ? [this.draggedNode, targetNode] : [targetNode, this.draggedNode];
-            }
-
-            this.draggedNode.parent = newSplitNode;
-            targetNode.parent = newSplitNode;
-            
-            if (targetParent) {
-                const targetIndex = targetParent.children.indexOf(targetNode);
-                targetParent.children.splice(targetIndex, 1, newSplitNode);
-            } else {
-                this.root = newSplitNode;
-            }
-            
-            // Recalculate layout, which moves the real (but hidden) panel to its final spot
-            this.layout();
-
-            const ghost = this.dragGhostElement;
-            if (!ghost) return;
-
-            // Get the final position of the now-placed (but hidden) panel
-            const finalRect = this.draggedNode.element.getBoundingClientRect();
-
-            // Animate the ghost from its current position to the panel's final position
-            const animation = ghost.animate([
-                {
-                    top: ghost.style.top,
-                    left: ghost.style.left,
-                    width: ghost.style.width,
-                    height: ghost.style.height,
-                },
-                {
-                    top: `${finalRect.top}px`,
-                    left: `${finalRect.left}px`,
-                    width: `${finalRect.width}px`,
-                    height: `${finalRect.height}px`,
+            const performDropLogic = () => {
+                const targetId = this.lastPreviewTarget ? this.lastPreviewTarget.dataset.panelId : null;
+                const zone = this.lastPreviewZone;
+        
+                this.lastPreviewTarget = null;
+                this.lastPreviewZone = null;
+        
+                if (!targetId || !zone || !this.draggedNode) {
+                    if (this.draggedNode) this.draggedNode.element.style.visibility = 'visible';
+                    this.removeDragGhost();
+                    return;
                 }
-            ], {
-                duration: 200,
-                easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-            });
-
-            animation.onfinish = () => {
-                // After animation, show the real panel and remove the ghost
-                if (this.draggedNode) {
-                    this.draggedNode.element.style.visibility = 'visible';
-                    // The transition for the final state change should be enabled.
-                    this.draggedNode.element.classList.remove('no-transition');
-                    this.draggedNode = null;
+        
+                const targetElement = this.container.querySelector(`[data-panel-id='${targetId}']`);
+                const targetNode = this.findNodeByElement(targetElement);
+        
+                if (!targetNode || targetNode === this.draggedNode) {
+                    if (this.draggedNode) this.draggedNode.element.style.visibility = 'visible';
+                    this.removeDragGhost();
+                    return;
                 }
-                this.removeDragGhost();
-                // Re-enable transitions for all other panels as well
-                this.container.querySelectorAll('.panel-grid-item').forEach(p => p.classList.remove('no-transition'));
+        
+                const oldParent = this.draggedNode.parent;
+                if (oldParent) {
+                     const sibling = oldParent.children.find(c => c !== this.draggedNode);
+                     const grandParent = oldParent.parent;
+                     if (grandParent) {
+                        const oldParentIndex = grandParent.children.indexOf(oldParent);
+                        grandParent.children.splice(oldParentIndex, 1, sibling);
+                        sibling.parent = grandParent;
+                     } else {
+                        this.root = sibling;
+                        sibling.parent = null;
+                     }
+                } else { 
+                     if (this.root.isLeaf()) return;
+                }
+        
+                const targetParent = targetNode.parent;
+                const newSplitNode = new BSPNode({ parent: targetParent });
+                
+                if (zone === 'left' || zone === 'right') {
+                    newSplitNode.direction = 'vertical';
+                    newSplitNode.children = zone === 'left' ? [this.draggedNode, targetNode] : [targetNode, this.draggedNode];
+                } else {
+                    newSplitNode.direction = 'horizontal';
+                    newSplitNode.children = zone === 'top' ? [this.draggedNode, targetNode] : [targetNode, this.draggedNode];
+                }
+        
+                this.draggedNode.parent = newSplitNode;
+                targetNode.parent = newSplitNode;
+                
+                if (targetParent) {
+                    const targetIndex = targetParent.children.indexOf(targetNode);
+                    targetParent.children.splice(targetIndex, 1, newSplitNode);
+                } else {
+                    this.root = newSplitNode;
+                }
+                
+                this.layout();
+        
+                const ghost = this.dragGhostElement;
+                if (!ghost) return;
+        
+                const finalRect = this.draggedNode.element.getBoundingClientRect();
+        
+                const animation = ghost.animate([
+                    {
+                        top: ghost.style.top, left: ghost.style.left,
+                        width: ghost.style.width, height: ghost.style.height,
+                    },
+                    {
+                        top: `${finalRect.top}px`, left: `${finalRect.left}px`,
+                        width: `${finalRect.width}px`, height: `${finalRect.height}px`,
+                    }
+                ], {
+                    duration: 200,
+                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                });
+        
+                animation.onfinish = () => {
+                    if (this.draggedNode) {
+                        this.draggedNode.element.style.visibility = 'visible';
+                        this.draggedNode.element.classList.remove('no-transition');
+                        this.draggedNode = null;
+                    }
+                    this.removeDragGhost();
+                    this.container.querySelectorAll('.panel-grid-item').forEach(p => p.classList.remove('no-transition'));
+                };
             };
+        
+            // We no longer need to wait for an animation to reverse.
+            performDropLogic();
         },
 
         handleClosePanel(button) {
@@ -559,18 +702,18 @@
             element.innerHTML = `
                 <div class="panel-grid-item-header">
                     <div class="panel-header-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
                         Panel ${panelId}
                     </div>
                     <div class="panel-header-actions">
                         <button class="panel-action-btn" data-split-direction="vertical" title="Split Vertically">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-columns"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="12" x2="12" y1="3" y2="21"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-columns"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="12" x2="12" y1="3" y2="21"/></svg>
                         </button>
                         <button class="panel-action-btn" data-split-direction="horizontal" title="Split Horizontally">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rows"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="12" y2="12"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rows"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="12" y2="12"/></svg>
                         </button>
                         <button class="panel-close-btn" title="Close Panel">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                         </button>
                     </div>
                 </div>

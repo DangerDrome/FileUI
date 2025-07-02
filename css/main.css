@@ -289,12 +289,12 @@ body.is-resizing-h {
     cursor: var(--body-resizing-cursor-h);
 }
 body.is-resizing-v {
-    cursor: var(--body-resizing-cursor-v);
+    cursor: ns-resize;
 }
 
 .resizer {
-    position: relative;
-    background-color: var(--color-border);
+    background-color: transparent;
+    position: absolute;
     transition: var(--resizer-transition);
 }
 .resizer:hover,
@@ -1442,4 +1442,11 @@ body.is-resizing .split-pane {
 .panel-header-actions .header-action-btn .lucide {
     width: var(--icon-size-md);
     height: var(--icon-size-md);
+}
+
+.panel-body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
 }

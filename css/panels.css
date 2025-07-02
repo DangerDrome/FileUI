@@ -1,0 +1,217 @@
+/* 
+  Defines custom properties (variables) for the panel components.
+  This makes theming and maintenance easier.
+*/
+:root {
+    /* Base Colors from main.css */
+    --color-accent: #00cc8b;
+    --color-bg: #1e1e1e;
+    --color-bg-panel: #252526;
+    --color-bg-header: #333333;
+    --color-text-primary: #e0e0e0;
+    --color-text-secondary: #b8b8b8;
+    --color-border: #3c3c3c;
+    --color-selection-bg: rgba(0, 204, 139, 0.2);
+
+    /* Base Sizing from main.css */
+    --font-size-base: 14px;
+    --border-radius-sm: 4px;
+
+    /* Panel-specific variables */
+    --panel-grid-bg: #161617;
+    --panel-item-bg: #252526;
+    --panel-item-border-color: var(--color-border);
+    --panel-header-bg: #333333;
+    --panel-header-padding: 8px 12px;
+    --panel-font-size: var(--font-size-base);
+    --panel-icon-color: var(--color-text-secondary);
+    --panel-action-btn-color: var(--color-text-secondary);
+    --panel-action-btn-hover-bg: #4f4f4f;
+    --panel-action-btn-hover-color: var(--color-text-primary);
+    --panel-content-padding: 8px;
+    --panel-resizer-size: 5px;
+    --panel-resizer-hover-bg: var(--color-accent);
+    --panel-drop-indicator-bg: var(--color-selection-bg);
+    --panel-drop-indicator-border: 1px solid var(--color-accent);
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Add basic layout styles for header, main, and footer */
+.main-header, .main-footer {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    background-color: #333333;
+}
+
+.main-content {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+/*
+  The main container for the entire grid of panels.
+  It fills the available space in its parent.
+*/
+.panel-grid-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: var(--panel-grid-bg);
+}
+
+/*
+  Styles for a single panel within the grid.
+  Panels are positioned absolutely by the JavaScript logic.
+*/
+.panel-grid-item {
+    position: absolute;
+    border: var(--panel-item-border-color);
+    background-color: var(--panel-item-bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: all 0.2s ease-in-out;
+}
+
+/*
+  A utility class to temporarily disable transitions during 
+  drag or resize operations for better performance.
+*/
+.panel-grid-item.no-transition {
+    transition: none;
+}
+
+/*
+  The header bar for each panel.
+  Uses flexbox to space out the title and action buttons.
+*/
+.panel-grid-item-header {
+    background-color: var(--panel-header-bg);
+    padding: var(--panel-header-padding);
+    font-size: var(--panel-font-size);
+    border-bottom: 1px solid var(--panel-item-border-color);
+    cursor: move;
+    user-select: none;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/*
+  A container for the title and its associated icon in the header.
+  Ensures they are grouped together.
+*/
+.panel-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--panel-icon-color);
+}
+
+/*
+  A container for the action buttons (split, close) in the header.
+  Groups the buttons together on the right side.
+*/
+.panel-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/*
+  Base styles for all buttons within the panel header actions.
+  This specificity ensures these styles override global button styles.
+*/
+.panel-header-actions button {
+    background: transparent;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    border-radius: var(--border-radius-sm);
+    color: var(--panel-action-btn-color);
+    display: inline-flex; /* Use inline-flex for proper alignment */
+    align-items: center;
+    justify-content: center;
+    line-height: 1; /* Prevents button height from being too large */
+}
+
+/*
+  Hover state for all buttons in the panel header.
+*/
+.panel-header-actions button:hover {
+    background-color: var(--panel-action-btn-hover-bg);
+    color: var(--panel-action-btn-hover-color);
+}
+
+/*
+  The main content area of a panel.
+  Centered content by default.
+*/
+.panel-grid-item-content {
+    padding: var(--panel-content-padding);
+    flex-grow: 1;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*
+  The draggable resizer element between panels.
+*/
+.panel-resizer {
+    position: absolute;
+    background-color: transparent;
+    transition: background-color 0.2s;
+    z-index: 10;
+}
+
+/*
+  Hover state for the resizer to make it visible.
+*/
+.panel-resizer:hover {
+    background-color: var(--panel-resizer-hover-bg);
+}
+
+/*
+  Styles for a vertical resizer.
+*/
+.panel-resizer.vertical {
+    cursor: ew-resize;
+    width: var(--panel-resizer-size);
+    margin-left: calc(-1 * var(--panel-resizer-size) / 2);
+}
+
+/*
+  Styles for a horizontal resizer.
+*/
+.panel-resizer.horizontal {
+    cursor: ns-resize;
+    height: var(--panel-resizer-size);
+    margin-top: calc(-1 * var(--panel-resizer-size) / 2);
+}
+
+/*
+  The visual indicator showing where a panel will be dropped.
+*/
+#drop-indicator {
+    position: absolute;
+    background-color: var(--panel-drop-indicator-bg);
+    border: var(--panel-drop-indicator-border);
+    z-index: 20;
+    pointer-events: none;
+    display: none;
+    transition: all 0.1s linear;
+} 

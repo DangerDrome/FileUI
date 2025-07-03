@@ -109,6 +109,20 @@
             return this.parent.children.find(child => child !== this);
         }
 
+        clone(parent = null) {
+            const newChildren = [];
+            const newInstance = new BSPNode({
+                id: this.id,
+                parent,
+                direction: this.direction,
+                split: this.split,
+                children: newChildren,
+                element: this.element // Keep reference to original element
+            });
+            newChildren.push(...this.children.map(c => c.clone(newInstance)));
+            return newInstance;
+        }
+
         toJSON() {
             const obj = {
                 id: this.id,
@@ -139,10 +153,12 @@
     class PanelManager {
         constructor(container) {
             this.container = container;
-            this.dropIndicator = document.getElementById('drop-indicator');
             this.panels = new Map();
             this.resizers = [];
             this.root = null;
+            this.previewRoot = null;
+            this.isPreviewMode = false;
+            this.lastDragOverTarget = { panelId: null, zone: null };
             this.nextPanelNumber = 1;
             this.history = new HistoryManager(CONFIG.HISTORY_LIMIT);
             this.minSizeCache = new Map();
@@ -151,6 +167,7 @@
             this.handlePointerMove = this.handlePointerMove.bind(this);
             this.handlePointerUp = this.handlePointerUp.bind(this);
             this.handleDragOver = this.handleDragOver.bind(this);
+            this.updatePreviewLayout = this.updatePreviewLayout.bind(this);
         }
 
         init() {
@@ -240,10 +257,16 @@
             if (state) this.restoreState(state);
         }
 
-        layout() {
+        layout(isPreview = false) {
+            const tree = isPreview ? this.previewRoot : this.root;
+            if (!tree) return;
+
             this.minSizeCache.clear();
-            this.resizers.forEach(r => r.remove());
-            this.resizers = [];
+            
+            if (!isPreview) {
+                this.resizers.forEach(r => r.remove());
+                this.resizers = [];
+            }
 
             const layoutRecursive = (node, rect) => {
                 node.rect = rect;
@@ -253,7 +276,9 @@
                         left: `${rect.x}px`, top: `${rect.y}px`,
                         width: `${rect.width}px`, height: `${rect.height}px`
                     });
-                    this.updatePanelControls(node);
+                    if (!isPreview) {
+                       this.updatePanelControls(node);
+                    }
                     return;
                 }
 
@@ -279,9 +304,11 @@
                     rect1 = { ...rect, width: width1 };
                     rect2 = { ...rect, x: rect.x + width1 + CONFIG.RESIZER_THICKNESS, width: width2 };
 
-                    const resizerX = rect.x + width1;
-                    const resizer = this.createResizer(node, resizerX, rect.y, CONFIG.RESIZER_THICKNESS, rect.height, 'vertical');
-                    this.resizers.push(resizer);
+                    if (!isPreview) {
+                        const resizerX = rect.x + width1;
+                        const resizer = this.createResizer(node, resizerX, rect.y, CONFIG.RESIZER_THICKNESS, rect.height, 'vertical');
+                        this.resizers.push(resizer);
+                    }
                 } else {
                     const availableHeight = rect.height - CONFIG.RESIZER_THICKNESS;
                     const minHeight1 = this.calculateMinimumHeight(child1);
@@ -301,9 +328,11 @@
                     rect1 = { ...rect, height: height1 };
                     rect2 = { ...rect, y: rect.y + height1 + CONFIG.RESIZER_THICKNESS, height: height2 };
                     
-                    const resizerY = rect.y + height1;
-                    const resizer = this.createResizer(node, rect.x, resizerY, rect.width, CONFIG.RESIZER_THICKNESS, 'horizontal');
-                    this.resizers.push(resizer);
+                    if (!isPreview) {
+                        const resizerY = rect.y + height1;
+                        const resizer = this.createResizer(node, rect.x, resizerY, rect.width, CONFIG.RESIZER_THICKNESS, 'horizontal');
+                        this.resizers.push(resizer);
+                    }
                 }
 
                 layoutRecursive(child1, rect1);
@@ -311,7 +340,7 @@
             };
             
             const containerRect = this.container.getBoundingClientRect();
-            layoutRecursive(this.root, { x: 0, y: 0, width: containerRect.width, height: containerRect.height });
+            layoutRecursive(tree, { x: 0, y: 0, width: containerRect.width, height: containerRect.height });
         }
 
         createPanelElement(panelNumber) {
@@ -480,13 +509,17 @@
             }
         }
         
-        handlePointerUp(e) {
+        handlePointerUp() {
+            if (this.activeDrag?.isDragging) {
+                this.handleDrop();
+            } else if (this.activeDrag?.type === 'resize') {
+                this.saveState("Resize");
+            }
+            
+            this.exitPreviewMode();
+
             this.container.classList.remove('no-transition');
             document.body.style.cursor = '';
-            
-            if (this.activeDrag?.isDragging) this.handleDrop(e);
-            else if (this.activeDrag?.type === 'resize') this.saveState("Resize");
-
             this.activeDrag = null;
             window.removeEventListener('pointermove', this.handlePointerMove);
         }
@@ -522,10 +555,11 @@
             const element = target.element;
             const rect = element.getBoundingClientRect();
 
+            this.enterPreviewMode(element);
+
             this.activeDrag.ghost = element.cloneNode(true);
             this.activeDrag.ghost.classList.add('drag-ghost');
             
-            // Set ghost dimensions and position to match the original panel exactly
             Object.assign(this.activeDrag.ghost.style, {
                 width: `${rect.width}px`,
                 height: `${rect.height}px`,
@@ -538,11 +572,9 @@
             
             document.body.appendChild(this.activeDrag.ghost);
             
-            // Calculate offset from the mouse position to the panel's top-left corner
             this.activeDrag.offsetX = e.clientX - rect.left;
             this.activeDrag.offsetY = e.clientY - rect.top;
 
-            element.style.opacity = '0.3';
             this.container.addEventListener('pointermove', this.handleDragOver);
         }
 
@@ -555,7 +587,6 @@
         handleDragOver(e) {
             if (!this.activeDrag?.isDragging) return;
             
-            // Find the panel under the mouse cursor, accounting for container position
             const containerRect = this.container.getBoundingClientRect();
             const relativeX = e.clientX - containerRect.left;
             const relativeY = e.clientY - containerRect.top;
@@ -563,79 +594,72 @@
             let targetPanel = null;
             let dropZone = null;
             
-            // Find which panel we're over by checking panel positions
-            for (const [panelId, panelData] of this.panels) {
-                if (panelData.element === this.activeDrag.target.element) continue;
-                
-                const rect = panelData.node.rect;
-                if (relativeX >= rect.x && relativeX <= rect.x + rect.width &&
-                    relativeY >= rect.y && relativeY <= rect.y + rect.height) {
-                    targetPanel = panelData.element;
-                    
-                    // Calculate drop zone based on position within the panel
-                    const x = relativeX - rect.x;
-                    const y = relativeY - rect.y;
-                    const threshold = 0.25;
+            const findTarget = (node) => {
+                if (!node || targetPanel) return;
+                if (node.isLeaf()) {
+                    if (node.element === this.activeDrag.target.element) return;
+                    const rect = node.rect;
+                    if (relativeX >= rect.x && relativeX <= rect.x + rect.width &&
+                        relativeY >= rect.y && relativeY <= rect.y + rect.height) {
+                            
+                        targetPanel = node.element;
+                        const x = relativeX - rect.x;
+                        const y = relativeY - rect.y;
+                        const threshold = 0.25;
 
-                    if (y < rect.height * threshold) dropZone = 'top';
-                    else if (y > rect.height * (1 - threshold)) dropZone = 'bottom';
-                    else if (x < rect.width * threshold) dropZone = 'left';
-                    else if (x > rect.width * (1 - threshold)) dropZone = 'right';
-                    break;
+                        if (y < rect.height * threshold) dropZone = 'top';
+                        else if (y > rect.height * (1 - threshold)) dropZone = 'bottom';
+                        else if (x < rect.width * threshold) dropZone = 'left';
+                        else if (x > rect.width * (1 - threshold)) dropZone = 'right';
+                        else dropZone = null; 
+                    }
+                } else {
+                    node.children.forEach(findTarget);
                 }
-            }
+            };
+            findTarget(this.root);
 
-            if (this.activeDrag.currentTargetPanel !== targetPanel || this.activeDrag.currentDropZone !== dropZone) {
+            if (this.lastDragOverTarget.panelId !== (targetPanel?.dataset.panelId || null) || this.lastDragOverTarget.zone !== dropZone) {
+                this.lastDragOverTarget = { panelId: targetPanel?.dataset.panelId, zone: dropZone };
                 this.activeDrag.currentTargetPanel = targetPanel;
                 this.activeDrag.currentDropZone = dropZone;
-                this.updateDropIndicator(targetPanel, dropZone);
+                requestAnimationFrame(this.updatePreviewLayout);
             }
         }
         
-        updateDropIndicator(targetPanel, zone) {
-            if (!targetPanel || !zone) {
-                this.dropIndicator.style.display = 'none';
-                return;
-            }
-            const rect = targetPanel.getBoundingClientRect();
-            const containerRect = this.container.getBoundingClientRect();
-            let indicatorRect;
-
-            switch (zone) {
-                case 'top': indicatorRect = { top: rect.top, left: rect.left, width: rect.width, height: rect.height / 2 }; break;
-                case 'bottom': indicatorRect = { top: rect.top + rect.height / 2, left: rect.left, width: rect.width, height: rect.height / 2 }; break;
-                case 'left': indicatorRect = { top: rect.top, left: rect.left, width: rect.width / 2, height: rect.height }; break;
-                case 'right': indicatorRect = { top: rect.top, left: rect.left + rect.width / 2, width: rect.width / 2, height: rect.height }; break;
-            }
+        updatePreviewLayout() {
+            if (!this.isPreviewMode) return;
             
-            Object.assign(this.dropIndicator.style, {
-                display: 'block',
-                left: `${indicatorRect.left - containerRect.left}px`,
-                top: `${indicatorRect.top - containerRect.top}px`,
-                width: `${indicatorRect.width}px`,
-                height: `${indicatorRect.height}px`,
-            });
-        }
-        
-        handleDrop() {
-            const { ghost, target, currentTargetPanel, currentDropZone } = this.activeDrag;
-            
-            ghost.remove();
-            target.element.style.opacity = '1';
-            this.dropIndicator.style.display = 'none';
-            this.container.removeEventListener('pointermove', this.handleDragOver);
+            this.previewRoot = this.root.clone();
 
+            const { target, currentTargetPanel, currentDropZone } = this.activeDrag;
             if (currentTargetPanel && currentDropZone) {
-                this.movePanel(target.id, currentTargetPanel.dataset.panelId, currentDropZone);
+                this.previewRoot = this._performMove(this.previewRoot, target.id, currentTargetPanel.dataset.panelId, currentDropZone);
             }
-        }
-        
-        movePanel(draggedId, targetId, zone) {
-            if (draggedId === targetId) return;
-
-            const draggedNode = this.panels.get(draggedId).node;
-            const targetNode = this.panels.get(targetId).node;
             
+            this.layout(true);
+        }
+
+        _findNodeInTree(tree, panelId) {
+            if (tree.isLeaf()) {
+                return tree.id === panelId ? tree : null;
+            }
+            for (const child of tree.children) {
+                const found = this._findNodeInTree(child, panelId);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        _performMove(tree, draggedId, targetId, zone) {
+            if (draggedId === targetId) return tree;
+
+            const draggedNode = this._findNodeInTree(tree, draggedId);
+            const targetNode = this._findNodeInTree(tree, targetId);
+            
+            if (!draggedNode || !targetNode) return tree;
+
+            // Detach dragged node
             const draggedParent = draggedNode.parent;
             if (draggedParent) {
                 const sibling = draggedNode.getSibling();
@@ -645,11 +669,12 @@
                     grandparent.children.splice(parentIndex, 1, sibling);
                     sibling.parent = grandparent;
                 } else {
-                    this.root = sibling;
+                    tree = sibling;
                     sibling.parent = null;
                 }
-            } else { return; }
+            } else { return tree; } // Should not happen if tree is valid
 
+            // Attach dragged node to target
             const targetParent = targetNode.parent;
             const direction = (zone === 'left' || zone === 'right') ? 'vertical' : 'horizontal';
             const children = (zone === 'left' || zone === 'top') ? [draggedNode, targetNode] : [targetNode, draggedNode];
@@ -662,11 +687,45 @@
                 const targetIndex = targetParent.children.indexOf(targetNode);
                 targetParent.children.splice(targetIndex, 1, newSplitNode);
             } else {
-                this.root = newSplitNode;
+                tree = newSplitNode;
+            }
+            return tree;
+        }
+
+        enterPreviewMode(draggedElement) {
+            this.isPreviewMode = true;
+            this.previewRoot = this.root.clone();
+            draggedElement.classList.add('is-dragging-source');
+            this.container.classList.add('preview-mode');
+            this.layout(true);
+        }
+
+        exitPreviewMode() {
+            if (!this.isPreviewMode) return;
+
+            if (this.activeDrag?.ghost) this.activeDrag.ghost.remove();
+
+            const draggedElement = this.activeDrag?.target.element;
+            if (draggedElement) draggedElement.classList.remove('is-dragging-source');
+            
+            this.container.classList.remove('preview-mode');
+            this.isPreviewMode = false;
+            this.previewRoot = null;
+            this.lastDragOverTarget = { panelId: null, zone: null };
+            
+            this.container.removeEventListener('pointermove', this.handleDragOver);
+        }
+        
+        handleDrop() {
+            const { currentTargetPanel, currentDropZone } = this.activeDrag;
+            
+            if (currentTargetPanel && currentDropZone) {
+                this.root = this.previewRoot;
+                this.saveState("Move Panel");
             }
 
+            this.exitPreviewMode();
             this.layout();
-            this.saveState("Move Panel");
         }
         
         findNodeByElement(element) {

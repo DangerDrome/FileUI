@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileUI - Panels v3</title>
+    <link rel="stylesheet" href="css/panels3.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-brand">
+            <h1>Panel System v3</h1>
+        </div>
+        <div class="header-actions">
+            <button id="add-panel-btn" class="action-btn">Add Panel</button>
+            <button id="reset-layout-btn" class="action-btn">Reset Layout</button>
+        </div>
+        <div class="header-history">
+            <button id="undo-btn" class="action-btn" title="Undo (Ctrl+Z)">Undo</button>
+            <button id="redo-btn" class="action-btn" title="Redo (Ctrl+Y)">Redo</button>
+        </div>
+    </header>
+
+    <main id="panel-container" class="panel-container">
+        <!-- Panels will be dynamically inserted here -->
+    </main>
+    
+    <footer class="main-footer">
+        <p>Live Preview Demo. Drag headers to see grid compensation. <strong>Ctrl+Z/Y</strong> for history.</p>
+    </footer>
+
+    <script src="js/panels3.js"></script>
+</body>
+</html>

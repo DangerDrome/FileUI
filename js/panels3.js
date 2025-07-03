@@ -224,53 +224,60 @@
             this.nextPanelNumber = 1;
             this.history.clear();
 
-            // 2. Create the four panels that will form the initial layout
+            // 2. Create the five panels
+            const headerPanel = this.createPanel();
             const leftPanel = this.createPanel();
             const mainPanel = this.createPanel();
             const rightPanel = this.createPanel();
             const footerPanel = this.createPanel();
 
             // 3. Create the BSP nodes for each panel
+            const headerNode = new BSPNode({ id: headerPanel.id, element: headerPanel.element, isPinned: true });
             const leftNode = new BSPNode({ id: leftPanel.id, element: leftPanel.element, isPinned: true });
             const mainNode = new BSPNode({ id: mainPanel.id, element: mainPanel.element });
             const rightNode = new BSPNode({ id: rightPanel.id, element: rightPanel.element, isPinned: true });
             const footerNode = new BSPNode({ id: footerPanel.id, element: footerPanel.element, isPinned: true });
 
-            // 4. Build the tree structure from the bottom up
-            // Container for Main and Right
+            // 4. Build the tree structure from the bottom up for the content area
             const rightContainer = new BSPNode({
                 direction: 'vertical',
-                split: 0.8, // Main content gets 80%
-                children: [mainNode, rightNode]
+                split: 0.8, children: [mainNode, rightNode]
             });
             mainNode.parent = rightContainer;
             rightNode.parent = rightContainer;
 
-            // Container for Left and the rightContainer
             const topContainer = new BSPNode({
                 direction: 'vertical',
-                split: 0.2, // Left panel gets 20%
-                children: [leftNode, rightContainer]
+                split: 0.2, children: [leftNode, rightContainer]
             });
             leftNode.parent = topContainer;
             rightContainer.parent = topContainer;
             
-            // Root container for Top and Footer
+            const mainBodyContainer = new BSPNode({
+                direction: 'horizontal',
+                split: 0.85, children: [topContainer, footerNode]
+            });
+            topContainer.parent = mainBodyContainer;
+            footerNode.parent = mainBodyContainer;
+
+            // 5. Create the root with the header
             this.root = new BSPNode({
                 direction: 'horizontal',
-                split: 0.8, // Top container gets 80% height
-                children: [topContainer, footerNode]
+                split: 0.1, // Header gets 10%
+                children: [headerNode, mainBodyContainer]
             });
-            topContainer.parent = this.root;
-            footerNode.parent = this.root;
+            headerNode.parent = this.root;
+            mainBodyContainer.parent = this.root;
 
-            // 5. Populate the global panels map
+
+            // 6. Populate the global panels map
+            this.panels.set(headerPanel.id, { node: headerNode, element: headerPanel.element });
             this.panels.set(leftPanel.id, { node: leftNode, element: leftPanel.element });
             this.panels.set(mainPanel.id, { node: mainNode, element: mainPanel.element });
             this.panels.set(rightPanel.id, { node: rightNode, element: rightPanel.element });
             this.panels.set(footerPanel.id, { node: footerNode, element: footerPanel.element });
             
-            // 6. Render and save
+            // 7. Render and save
             this.layout();
             this.saveState("Initial Pinned Layout");
         }

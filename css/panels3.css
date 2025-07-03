@@ -3,7 +3,12 @@
 /* --- 1. Root & Theming --- */
 :root {
     /* Dark Theme (Default) */
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --color-background: #1a1a1a;
+    --color-background-pinned: #262626;
+    --color-text: #e0e0e0;
+    --color-text-muted: #8a8a8a;
+    --color-border: #333;
     --background-color: #1a1a1a;
     --text-color: #ecf0f1;
     --header-bg: #252526;
@@ -172,52 +177,55 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
 .panel-header {
     display: flex;
     align-items: center;
-    padding: 0 4px 0 12px;
-    height: 28px;
-    background-color: var(--panel-header-bg);
-    border-bottom: 1px solid var(--panel-border);
-    font-weight: 500;
-    font-size: 13px;
-    flex-shrink: 0;
+    padding: 4px 8px;
+    background-color: var(--color-header-background);
     cursor: grab;
-    user-select: none;
+    height: 30px;
+    gap: 8px;
 }
-.panel-header:active { cursor: grabbing; }
 
 .panel-title {
     flex-grow: 1;
     white-space: nowrap;
-    overflow: auto;
+    overflow: hidden;
     text-overflow: ellipsis;
-}
-.panel-title-icon {
-    margin-right: 6px;
-    vertical-align: -2px;
+    line-height: 1; /* Aligns text better */
+    color: var(--color-text-muted);
 }
 
 .panel-actions {
     display: flex;
     align-items: center;
+    gap: 4px;
 }
+
 .panel-action-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    background: none;
     border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    padding: 3px;
     border-radius: 4px;
-    color: var(--button-disabled-text);
     cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
 }
-.panel-action-btn:hover { background-color: var(--button-hover-bg); color: var(--text-color); }
-.panel-action-btn:disabled { background: none !important; cursor: not-allowed; }
-.panel-action-btn:disabled svg { stroke: var(--button-disabled-text) !important; }
-.panel-action-btn svg { width: 14px; height: 14px; stroke: currentColor; }
+.panel-action-btn:hover:not(:disabled) {
+    background-color: var(--color-background-hover);
+    color: var(--color-text);
+}
+.panel-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.panel-action-btn[data-action="collapse"] {
+    transition: transform 0.2s ease-in-out;
+}
 
 .panel-content {
-    padding: 12px;
+    padding: 10px;
+    height: 100%;
     flex-grow: 1;
     overflow: auto;
 }
@@ -234,7 +242,7 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
 .panel-resizer.horizontal { cursor: row-resize; }
 
 .panel-resizer:hover {
-    background-color: rgba(var(--accent-color-rgb), 0.8);
+    background-color: var(--color-accent-translucent);
 }
 
 /* Create a larger, invisible hitzone around the resizer element */
@@ -298,4 +306,61 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
 @keyframes panelFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+.panel.is-pinned {
+    background-color: var(--color-background-pinned);
+}
+
+.panel.is-pinned .panel-header {
+    background-color: var(--color-accent-dark);
+}
+
+/* Default state: show the normal pin icon with a muted color */
+.panel:not(.is-pinned) .icon-pin-off { display: none; }
+.panel:not(.is-pinned) .icon-pin { stroke: var(--color-text-muted); }
+
+/* Pinned state: show the 'off' icon with a bright color */
+.panel.is-pinned .icon-pin { display: none; }
+.panel.is-pinned .icon-pin-off {
+    display: inline-block; /* Ensure it's visible */
+    color: var(--color-accent);
+}
+
+.panel-resizer.is-disabled {
+    pointer-events: none;
+    background-color: transparent !important;
+}
+
+/* --- COLLAPSED STATE --- */
+.panel.is-collapsed .panel-content {
+    display: none;
+}
+.panel.is-collapsed .panel-header {
+    flex-direction: column;
+    width: 30px; /* Must match CONFIG.COLLAPSED_SIZE */
+    height: 100%;
+    justify-content: flex-start;
+    padding: 8px 4px;
+}
+.panel.is-collapsed .panel-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: left;
+    margin: 10px 0;
+}
+.panel.is-collapsed .panel-actions {
+    flex-direction: column;
+}
+.panel.is-collapsed .panel-action-btn[data-action="collapse"] {
+    transform: rotate(180deg);
+}
+.panel.is-collapsed [data-action="pin"] {
+    order: 1;
+}
+.panel.is-collapsed .panel-actions {
+    order: 2;
+}
+.panel.is-collapsed .panel-title {
+    order: 3;
 }

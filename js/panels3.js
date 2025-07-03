@@ -6,6 +6,8 @@
         RESIZER_THICKNESS: 10,
         PANEL_MIN_HEIGHT: 40,
         PANEL_MIN_WIDTH: 150,
+        COLLAPSED_SIZE: 30, // Corresponds to header height/width
+        DRAG_COLLAPSE_THRESHOLD: 20,
         DEFAULT_SPLIT: 0.5,
         HISTORY_LIMIT: 50,
         ANIMATION_DURATION: 150,
@@ -100,6 +102,8 @@
             this.direction = options.direction || null;
             this.split = options.split || CONFIG.DEFAULT_SPLIT;
             this.element = options.element || null; 
+            this.isPinned = options.isPinned || false;
+            this.isCollapsed = options.isCollapsed || false;
         }
 
         isLeaf() { return this.children.length === 0; }
@@ -116,6 +120,8 @@
                 parent,
                 direction: this.direction,
                 split: this.split,
+                isPinned: this.isPinned,
+                isCollapsed: this.isCollapsed,
                 children: newChildren,
                 element: this.element // Keep reference to original element
             });
@@ -128,6 +134,8 @@
                 id: this.id,
                 direction: this.direction,
                 split: this.split,
+                isPinned: this.isPinned,
+                isCollapsed: this.isCollapsed,
                 children: this.children.map(c => c.toJSON())
             };
             if (this.isLeaf()) obj.leaf = true;
@@ -209,18 +217,62 @@
         }
 
         resetLayout() {
+            // 1. Cleanup
             this.container.innerHTML = '';
             this.panels.clear();
             this.resizers = [];
             this.nextPanelNumber = 1;
             this.history.clear();
 
-            const panel = this.createPanel();
-            this.root = new BSPNode({ id: panel.id, element: panel.element });
-            this.panels.set(panel.id, { node: this.root, element: panel.element });
+            // 2. Create the four panels that will form the initial layout
+            const leftPanel = this.createPanel();
+            const mainPanel = this.createPanel();
+            const rightPanel = this.createPanel();
+            const footerPanel = this.createPanel();
+
+            // 3. Create the BSP nodes for each panel
+            const leftNode = new BSPNode({ id: leftPanel.id, element: leftPanel.element, isPinned: true });
+            const mainNode = new BSPNode({ id: mainPanel.id, element: mainPanel.element });
+            const rightNode = new BSPNode({ id: rightPanel.id, element: rightPanel.element, isPinned: true });
+            const footerNode = new BSPNode({ id: footerPanel.id, element: footerPanel.element, isPinned: true });
+
+            // 4. Build the tree structure from the bottom up
+            // Container for Main and Right
+            const rightContainer = new BSPNode({
+                direction: 'vertical',
+                split: 0.8, // Main content gets 80%
+                children: [mainNode, rightNode]
+            });
+            mainNode.parent = rightContainer;
+            rightNode.parent = rightContainer;
+
+            // Container for Left and the rightContainer
+            const topContainer = new BSPNode({
+                direction: 'vertical',
+                split: 0.2, // Left panel gets 20%
+                children: [leftNode, rightContainer]
+            });
+            leftNode.parent = topContainer;
+            rightContainer.parent = topContainer;
             
+            // Root container for Top and Footer
+            this.root = new BSPNode({
+                direction: 'horizontal',
+                split: 0.8, // Top container gets 80% height
+                children: [topContainer, footerNode]
+            });
+            topContainer.parent = this.root;
+            footerNode.parent = this.root;
+
+            // 5. Populate the global panels map
+            this.panels.set(leftPanel.id, { node: leftNode, element: leftPanel.element });
+            this.panels.set(mainPanel.id, { node: mainNode, element: mainPanel.element });
+            this.panels.set(rightPanel.id, { node: rightNode, element: rightPanel.element });
+            this.panels.set(footerPanel.id, { node: footerNode, element: footerPanel.element });
+            
+            // 6. Render and save
             this.layout();
-            this.saveState("Initial Layout");
+            this.saveState("Initial Pinned Layout");
         }
 
         saveState(action) {
@@ -293,19 +345,32 @@
 
                 if (node.direction === 'vertical') {
                     const availableWidth = rect.width - CONFIG.RESIZER_THICKNESS;
-                    const minWidth1 = this.calculateMinimumWidth(child1);
-                    const minWidth2 = this.calculateMinimumWidth(child2);
-                    const totalMinWidth = minWidth1 + minWidth2;
-                    if (totalMinWidth > availableWidth) {
-                        node.split = (totalMinWidth > 0) ? (minWidth1 / totalMinWidth) : 0.5;
-                    }
+                    let width1, width2;
+                    const child1Collapsed = child1.isLeaf() && child1.isCollapsed;
+                    const child2Collapsed = child2.isLeaf() && child2.isCollapsed;
 
-                    let width1 = Math.max(minWidth1, availableWidth * node.split);
-                    let width2 = availableWidth - width1;
-                    if (width2 < minWidth2) {
-                        width2 = minWidth2;
+                    if (child1Collapsed) {
+                        width1 = CONFIG.COLLAPSED_SIZE;
+                        width2 = availableWidth - width1;
+                    } else if (child2Collapsed) {
+                        width2 = CONFIG.COLLAPSED_SIZE;
                         width1 = availableWidth - width2;
+                    } else {
+                        const minWidth1 = this.calculateMinimumWidth(child1);
+                        const minWidth2 = this.calculateMinimumWidth(child2);
+                        const totalMinWidth = minWidth1 + minWidth2;
+                        if (totalMinWidth > availableWidth) {
+                            node.split = (totalMinWidth > 0) ? (minWidth1 / totalMinWidth) : 0.5;
+                        }
+
+                        width1 = Math.max(minWidth1, availableWidth * node.split);
+                        width2 = availableWidth - width1;
+                        if (width2 < minWidth2) {
+                            width2 = minWidth2;
+                            width1 = availableWidth - width2;
+                        }
                     }
+                    if (availableWidth > 0) node.split = width1 / availableWidth;
                     
                     rect1 = { ...rect, width: width1 };
                     rect2 = { ...rect, x: rect.x + width1 + CONFIG.RESIZER_THICKNESS, width: width2 };
@@ -317,19 +382,32 @@
                     }
                 } else {
                     const availableHeight = rect.height - CONFIG.RESIZER_THICKNESS;
-                    const minHeight1 = this.calculateMinimumHeight(child1);
-                    const minHeight2 = this.calculateMinimumHeight(child2);
-                    const totalMinHeight = minHeight1 + minHeight2;
-                    if (totalMinHeight > availableHeight) {
-                        node.split = (totalMinHeight > 0) ? (minHeight1 / totalMinHeight) : 0.5;
-                    }
+                    let height1, height2;
+                    const child1Collapsed = child1.isLeaf() && child1.isCollapsed;
+                    const child2Collapsed = child2.isLeaf() && child2.isCollapsed;
 
-                    let height1 = Math.max(minHeight1, availableHeight * node.split);
-                    let height2 = availableHeight - height1;
-                    if (height2 < minHeight2) {
-                        height2 = minHeight2;
+                    if (child1Collapsed) {
+                        height1 = CONFIG.COLLAPSED_SIZE;
+                        height2 = availableHeight - height1;
+                    } else if (child2Collapsed) {
+                        height2 = CONFIG.COLLAPSED_SIZE;
                         height1 = availableHeight - height2;
+                    } else {
+                        const minHeight1 = this.calculateMinimumHeight(child1);
+                        const minHeight2 = this.calculateMinimumHeight(child2);
+                        const totalMinHeight = minHeight1 + minHeight2;
+                        if (totalMinHeight > availableHeight) {
+                            node.split = (totalMinHeight > 0) ? (minHeight1 / totalMinHeight) : 0.5;
+                        }
+
+                        height1 = Math.max(minHeight1, availableHeight * node.split);
+                        height2 = availableHeight - height1;
+                        if (height2 < minHeight2) {
+                            height2 = minHeight2;
+                            height1 = availableHeight - height2;
+                        }
                     }
+                    if (availableHeight > 0) node.split = height1 / availableHeight;
                     
                     rect1 = { ...rect, height: height1 };
                     rect2 = { ...rect, y: rect.y + height1 + CONFIG.RESIZER_THICKNESS, height: height2 };
@@ -357,8 +435,13 @@
             element.className = `panel ${CONFIG.PANEL_ANIMATION_CLASS}`;
             element.innerHTML = `
                 <div class="panel-header">
+                    <button class="panel-action-btn" data-action="pin" title="Pin Panel">
+                        <svg class="icon-pin" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/></svg>
+                        <svg class="icon-pin-off" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="8"/></svg>
+                    </button>
                     <span class="panel-title">Panel ${panelNumber}</span>
                     <div class="panel-actions">
+                        <button class="panel-action-btn" data-action="collapse" title="Collapse Panel"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
                         <button class="panel-action-btn" data-action="split-v" title="Split Vertically"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg></button>
                         <button class="panel-action-btn" data-action="split-h" title="Split Horizontally"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg></button>
                         <button class="panel-action-btn" data-action="close" title="Close Panel"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
@@ -380,25 +463,25 @@
         }
         
         addPanel() {
-            let largestLeaf = null;
+            let largestUnpinnedLeaf = null;
             let maxArea = -1;
 
             const findLargestLeaf = (node) => {
-                if (node.isLeaf()) {
+                if (node.isLeaf() && !node.isPinned) {
                     const area = node.rect.width * node.rect.height;
                     if (area > maxArea) {
                         maxArea = area;
-                        largestLeaf = node;
+                        largestUnpinnedLeaf = node;
                     }
-                } else {
+                } else if (!node.isLeaf()) {
                     node.children.forEach(findLargestLeaf);
                 }
             };
 
             findLargestLeaf(this.root);
 
-            if (largestLeaf) {
-                const targetNode = largestLeaf;
+            if (largestUnpinnedLeaf) {
+                const targetNode = largestUnpinnedLeaf;
                 const canSplitV = targetNode.rect.width >= CONFIG.PANEL_MIN_WIDTH * 2 + CONFIG.RESIZER_THICKNESS;
                 const canSplitH = targetNode.rect.height >= CONFIG.PANEL_MIN_HEIGHT * 2 + CONFIG.RESIZER_THICKNESS;
 
@@ -525,13 +608,16 @@
 
             if (actionBtn) { this.handleActionClick(actionBtn); return; }
             
-            if (resizer) {
+            if (resizer && !resizer.classList.contains('is-disabled')) {
                 const nodeId = resizer.dataset.nodeId;
                 const targetNode = this._findNodeById(this.root, nodeId);
                 if (!targetNode) return;
                 this.activeDrag = { type: 'resize', resizer, target: targetNode };
             } else if (header) {
-                this.activeDrag = { type: 'move', header, target: this.findNodeByElement(header.parentElement) };
+                const targetNode = this.findNodeByElement(header.parentElement);
+                if (targetNode && !targetNode.isPinned) {
+                    this.activeDrag = { type: 'move', header, target: targetNode };
+                }
             } else {
                 return;
             }
@@ -588,6 +674,8 @@
             if (!panelId) return;
 
             switch(action) {
+                case 'pin': this.togglePin(panelId); break;
+                case 'collapse': this.toggleCollapse(panelId); break;
                 case 'split-v': this.splitPanel(panelId, 'vertical'); break;
                 case 'split-h': this.splitPanel(panelId, 'horizontal'); break;
                 case 'close': this.closePanel(panelId); break;
@@ -600,8 +688,25 @@
             
             const parentRect = node.rect;
             if (node.direction === 'vertical') {
-                node.split = (e.clientX - parentRect.x) / (parentRect.width - CONFIG.RESIZER_THICKNESS);
-            } else {
+                const newSplit = (e.clientX - parentRect.x) / (parentRect.width - CONFIG.RESIZER_THICKNESS);
+                const [child1, child2] = node.children;
+                const availableWidth = parentRect.width - CONFIG.RESIZER_THICKNESS;
+                const width1 = newSplit * availableWidth;
+                const width2 = availableWidth - width1;
+                
+                // Drag-to-collapse logic
+                if (child1.isLeaf() && child1.isPinned) {
+                    if (!child1.isCollapsed && width1 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
+                    else if (child1.isCollapsed && width1 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
+                }
+                if (child2.isLeaf() && child2.isPinned) {
+                    if (!child2.isCollapsed && width2 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                    else if (child2.isCollapsed && width2 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                }
+                
+                node.split = newSplit;
+
+            } else { // Horizontal resize
                 node.split = (e.clientY - parentRect.y) / (parentRect.height - CONFIG.RESIZER_THICKNESS);
             }
             this.layout();
@@ -627,7 +732,7 @@
             const findTarget = (node) => {
                 if (!node || targetPanel) return;
                 if (node.isLeaf()) {
-                    if (node.element === this.activeDrag.target.element) return;
+                    if (node.isPinned || node.element === this.activeDrag.target.element) return;
                     const rect = node.rect;
                     if (relativeX >= rect.x && relativeX <= rect.x + rect.width &&
                         relativeY >= rect.y && relativeY <= rect.y + rect.height) {
@@ -695,6 +800,13 @@
                 if (found) return found;
             }
             return null;
+        }
+
+        _isSubtreeFullyPinned(node) {
+            if (node.isLeaf()) {
+                return node.isPinned;
+            }
+            return node.children.every(child => this._isSubtreeFullyPinned(child));
         }
 
         _findLeafNodeById(tree, panelId) {
@@ -802,6 +914,17 @@
             const resizer = document.createElement('div');
             resizer.className = `panel-resizer ${direction}`;
             resizer.dataset.nodeId = node.id;
+
+            const [child1, child2] = node.children;
+            const child1Pinned = this._isSubtreeFullyPinned(child1);
+            const child2Pinned = this._isSubtreeFullyPinned(child2);
+            const child1Collapsed = child1.isLeaf() && child1.isCollapsed;
+            const child2Collapsed = child2.isLeaf() && child2.isCollapsed;
+
+            if ((child1Pinned && child2Pinned) || child1Collapsed || child2Collapsed) {
+                resizer.classList.add('is-disabled');
+            }
+
             Object.assign(resizer.style, {
                 left: `${x}px`, top: `${y}px`,
                 width: `${width}px`, height: `${height}px`
@@ -817,9 +940,56 @@
             const canSplitV = rect.width >= CONFIG.PANEL_MIN_WIDTH * 2 + CONFIG.RESIZER_THICKNESS;
             const canSplitH = rect.height >= CONFIG.PANEL_MIN_HEIGHT * 2 + CONFIG.RESIZER_THICKNESS;
 
-            element.querySelector('[data-action="split-v"]').disabled = !canSplitV;
-            element.querySelector('[data-action="split-h"]').disabled = !canSplitH;
-            element.querySelector('[data-action="close"]').disabled = (this.panels.size <= 1);
+            element.classList.toggle('is-pinned', node.isPinned);
+            element.classList.toggle('is-collapsed', node.isCollapsed);
+
+            const collapseBtn = element.querySelector('[data-action="collapse"]');
+            if (collapseBtn) {
+                const isCollapsible = node.isPinned && node.parent?.direction === 'vertical';
+                collapseBtn.style.display = isCollapsible ? 'flex' : 'none';
+            }
+
+            const splitVBtn = element.querySelector('[data-action="split-v"]');
+            if(splitVBtn) {
+                splitVBtn.style.display = node.isPinned ? 'none' : 'flex';
+                splitVBtn.disabled = !canSplitV || node.isCollapsed;
+            }
+
+            const splitHBtn = element.querySelector('[data-action="split-h"]');
+            if(splitHBtn) {
+                splitHBtn.style.display = node.isPinned ? 'none' : 'flex';
+                splitHBtn.disabled = !canSplitH || node.isCollapsed;
+            }
+            
+            const closeBtn = element.querySelector('[data-action="close"]');
+            if(closeBtn) {
+                closeBtn.style.display = node.isPinned ? 'none' : 'flex';
+                closeBtn.disabled = (this.panels.size <= 1);
+            }
+        }
+
+        togglePin(panelId) {
+            const panel = this.panels.get(panelId);
+            if (!panel) return;
+            const { node } = panel;
+            
+            node.isPinned = !node.isPinned;
+            // A panel cannot be both collapsed and unpinned
+            if (!node.isPinned && node.isCollapsed) {
+                node.isCollapsed = false;
+            }
+            this.layout(); // Recalculate layout to update resizer states
+            this.saveState(`Pin panel ${node.isPinned ? 'on' : 'off'}`);
+        }
+
+        toggleCollapse(panelId) {
+            const panel = this.panels.get(panelId);
+            if (!panel || !panel.node.isPinned || panel.node.parent?.direction !== 'vertical') return;
+            const { node } = panel;
+            
+            node.isCollapsed = !node.isCollapsed;
+            this.layout();
+            this.saveState(`Collapse panel ${node.isCollapsed ? 'on' : 'off'}`);
         }
     }
 

@@ -3,7 +3,7 @@
 
     // ===== CONFIGURATION =====
     const CONFIG = {
-        RESIZER_THICKNESS: 10,
+        RESIZER_THICKNESS: 5,
         PANEL_MIN_HEIGHT: 40,
         PANEL_MIN_WIDTH: 150,
         COLLAPSED_SIZE: 30, // Corresponds to header height/width
@@ -104,6 +104,7 @@
             this.element = options.element || null; 
             this.isPinned = options.isPinned || false;
             this.isCollapsed = options.isCollapsed || false;
+            this.isMainContent = options.isMainContent || false;
         }
 
         isLeaf() { return this.children.length === 0; }
@@ -122,6 +123,7 @@
                 split: this.split,
                 isPinned: this.isPinned,
                 isCollapsed: this.isCollapsed,
+                isMainContent: this.isMainContent,
                 children: newChildren,
                 element: this.element // Keep reference to original element
             });
@@ -136,6 +138,7 @@
                 split: this.split,
                 isPinned: this.isPinned,
                 isCollapsed: this.isCollapsed,
+                isMainContent: this.isMainContent,
                 children: this.children.map(c => c.toJSON())
             };
             if (this.isLeaf()) obj.leaf = true;
@@ -170,6 +173,9 @@
             this.nextPanelNumber = 1;
             this.history = new HistoryManager(CONFIG.HISTORY_LIMIT);
             this.minSizeCache = new Map();
+            this.markdownConverter = new showdown.Converter();
+            this.markdownContent = new Map();
+            this.alignmentGuides = [];
 
             this.handlePointerDown = this.handlePointerDown.bind(this);
             this.handlePointerMove = this.handlePointerMove.bind(this);
@@ -226,6 +232,7 @@
 
             // 2. Create the five panels
             const headerPanel = this.createPanel();
+            headerPanel.element.classList.add('header-panel');
             const leftPanel = this.createPanel();
             const mainPanel = this.createPanel();
             const rightPanel = this.createPanel();
@@ -234,7 +241,7 @@
             // 3. Create the BSP nodes for each panel
             const headerNode = new BSPNode({ id: headerPanel.id, element: headerPanel.element, isPinned: true });
             const leftNode = new BSPNode({ id: leftPanel.id, element: leftPanel.element, isPinned: true });
-            const mainNode = new BSPNode({ id: mainPanel.id, element: mainPanel.element });
+            const mainNode = new BSPNode({ id: mainPanel.id, element: mainPanel.element, isMainContent: true });
             const rightNode = new BSPNode({ id: rightPanel.id, element: rightPanel.element, isPinned: true });
             const footerNode = new BSPNode({ id: footerPanel.id, element: footerPanel.element, isPinned: true });
 
@@ -270,33 +277,74 @@
             mainBodyContainer.parent = this.root;
 
 
-            // 6. Populate the global panels map
+            // 6. Populate the global panels map with the structural panels
             this.panels.set(headerPanel.id, { node: headerNode, element: headerPanel.element });
             this.panels.set(leftPanel.id, { node: leftNode, element: leftPanel.element });
             this.panels.set(mainPanel.id, { node: mainNode, element: mainPanel.element });
             this.panels.set(rightPanel.id, { node: rightNode, element: rightPanel.element });
             this.panels.set(footerPanel.id, { node: footerNode, element: footerPanel.element });
             
-            // 7. Render and save
+            // 7. Run layout to get dimensions, then generate the fractal pattern
+            this.layout();
+            this.createRandomPattern(mainNode, 5); // Generate 5 random splits
+
+            // 8. Set content for all panels based on their state
+            const randomWords = ["Dynamic", "Fluid", "Modular", "Intuitive", "Responsive", "Creative", "Organized", "Productive", "Efficient", "Seamless", "Integrated"];
+
+            this.panels.forEach((panel, id) => {
+                if (panel.element.classList.contains('header-panel')) {
+                    return; // Skip header panel
+                }
+
+                if (panel.node.isPinned) {
+                    const defaultMarkdown = `### ${panel.element.querySelector('.panel-title').textContent}\n\nContent Area.`;
+                    this.setPanelMarkdown(id, defaultMarkdown);
+                } else {
+                    const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
+                    const specialMarkdown = `# ${randomWord}\n\nDraggable content area.`;
+                    this.setPanelMarkdown(id, specialMarkdown);
+                }
+            });
+            
+            const markdownToolbar = `
+                <div class="markdown-toolbar">
+                    <button class="btn" data-action="add-panel">Add Panel</button>
+                    <button class="btn" data-action="reset-layout">Reset Layout</button>
+                    <button class="btn" data-action="undo" id="header-undo-btn" disabled>Undo</button>
+                    <button class="btn" data-action="redo" id="header-redo-btn" disabled>Redo</button>
+                </div>
+            `;
+            this.setPanelHtml(headerNode.id, markdownToolbar);
+
+            // 10. Final layout pass and save
             this.layout();
             this.saveState("Initial Pinned Layout");
         }
 
         saveState(action) {
             const serializedTree = this.root.toJSON();
-            this.history.add({ action, tree: serializedTree });
+            const markdownData = Object.fromEntries(this.markdownContent);
+            this.history.add({ action, tree: serializedTree, markdown: markdownData });
         }
         
         restoreState(state) {
+            // TODO: This does not handle undoing panel creation/deletion correctly,
+            // as the panel DOM elements may not exist in the current state.
+            // It works for state changes on existing panels, like content edits.
             const panelElementsMap = new Map();
             this.panels.forEach(p => panelElementsMap.set(p.node.id, p.element));
             
+            this.markdownContent = new Map(Object.entries(state.markdown || {}));
             this.root = BSPNode.fromJSON(state.tree, null, panelElementsMap);
             
             this.panels.clear();
             const syncPanels = (node) => {
                 if (node.isLeaf()) {
                     this.panels.set(node.id, { node, element: node.element });
+                    if (!node.element.classList.contains('header-panel')) {
+                        const markdown = this.markdownContent.get(node.id) || '';
+                        this.setPanelMarkdown(node.id, markdown);
+                    }
                 } else {
                     node.children.forEach(syncPanels);
                 }
@@ -304,6 +352,19 @@
             syncPanels(this.root);
             
             this.layout();
+            
+            const headerPanel = Array.from(this.panels.values()).find(p => p.element.classList.contains('header-panel'));
+            if (headerPanel) {
+                const markdownToolbar = `
+                    <div class="markdown-toolbar">
+                        <button class="btn" data-action="add-panel">Add Panel</button>
+                        <button class="btn" data-action="reset-layout">Reset Layout</button>
+                        <button class="btn" data-action="undo" id="header-undo-btn" disabled>Undo</button>
+                        <button class="btn" data-action="redo" id="header-redo-btn" disabled>Redo</button>
+                    </div>
+                `;
+                this.setPanelHtml(headerPanel.node.id, markdownToolbar);
+            }
         }
         
         undo() {
@@ -454,7 +515,7 @@
                         <button class="panel-action-btn" data-action="close" title="Close Panel"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
                     </div>
                 </div>
-                <div class="panel-content">Content for panel ${panelNumber}</div>`;
+                <div class="panel-content"></div>`;
             
             element.addEventListener('animationend', () => element.classList.remove(CONFIG.PANEL_ANIMATION_CLASS), { once: true });
             this.container.appendChild(element);
@@ -512,19 +573,19 @@
             }
         }
         
-        splitPanel(targetId, direction) {
+        splitPanel(targetId, direction, suppressLayout = false) {
             const target = this.panels.get(targetId);
-            if (!target) return;
+            if (!target) return null;
             const { node: targetNode } = target;
 
-            if (!targetNode.rect) return; // Should not happen in normal flow
-
-            if (direction === 'vertical') {
-                const canSplitV = targetNode.rect.width >= CONFIG.PANEL_MIN_WIDTH * 2 + CONFIG.RESIZER_THICKNESS;
-                if (!canSplitV) return;
-            } else { // horizontal
-                const canSplitH = targetNode.rect.height >= CONFIG.PANEL_MIN_HEIGHT * 2 + CONFIG.RESIZER_THICKNESS;
-                if (!canSplitH) return;
+            if (targetNode.rect) { // Only check if rect is available
+                if (direction === 'vertical') {
+                    const canSplitV = targetNode.rect.width >= CONFIG.PANEL_MIN_WIDTH * 2 + CONFIG.RESIZER_THICKNESS;
+                    if (!canSplitV) return null;
+                } else { // horizontal
+                    const canSplitH = targetNode.rect.height >= CONFIG.PANEL_MIN_HEIGHT * 2 + CONFIG.RESIZER_THICKNESS;
+                    if (!canSplitH) return null;
+                }
             }
 
             const newPanel = this.createPanel();
@@ -534,7 +595,8 @@
             const newParent = new BSPNode({
                 parent: targetNode.parent,
                 direction,
-                children: [targetNode, newNode]
+                children: [targetNode, newNode],
+                split: 0.3 + Math.random() * 0.4
             });
 
             targetNode.parent = newParent;
@@ -544,14 +606,66 @@
                 this.root = newParent;
             } else {
                 const oldParent = newParent.parent;
+                if (!oldParent) return null; // Should not happen in a valid tree
                 const targetIndex = oldParent.children.indexOf(targetNode);
                 oldParent.children.splice(targetIndex, 1, newParent);
             }
             
-            this.layout();
-            this.saveState(`Split ${direction}`);
+            if (!suppressLayout) {
+                this.layout();
+                this.saveState(`Split ${direction}`);
+            }
+            return { oldNode: targetNode, newNode: newNode };
         }
         
+        createRandomPattern(startNode, numSplits) {
+            let leaves = [startNode];
+
+            for (let i = 0; i < numSplits && leaves.length > 0; i++) {
+                const leafIndex = Math.floor(Math.random() * leaves.length);
+                const leafToSplit = leaves[leafIndex];
+                leaves.splice(leafIndex, 1);
+
+                const canSplitV = leafToSplit.rect.width >= CONFIG.PANEL_MIN_WIDTH * 2 + CONFIG.RESIZER_THICKNESS;
+                const canSplitH = leafToSplit.rect.height >= CONFIG.PANEL_MIN_HEIGHT * 2 + CONFIG.RESIZER_THICKNESS;
+
+                const possibleDirections = [];
+                if (canSplitV) possibleDirections.push('vertical');
+                if (canSplitH) possibleDirections.push('horizontal');
+
+                if (possibleDirections.length === 0) continue;
+
+                const direction = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
+                
+                const result = this.splitPanel(leafToSplit.id, direction, true);
+                if (result) {
+                    const { oldNode, newNode } = result;
+                    
+                    const parentRect = leafToSplit.rect;
+                    const newParentNode = oldNode.parent;
+                    let rect1, rect2;
+
+                    if (direction === 'vertical') {
+                        const availableWidth = parentRect.width - CONFIG.RESIZER_THICKNESS;
+                        const width1 = availableWidth * newParentNode.split;
+                        const width2 = availableWidth - width1;
+                        rect1 = { ...parentRect, width: width1 };
+                        rect2 = { ...parentRect, x: parentRect.x + width1 + CONFIG.RESIZER_THICKNESS, width: width2 };
+                    } else {
+                        const availableHeight = parentRect.height - CONFIG.RESIZER_THICKNESS;
+                        const height1 = availableHeight * newParentNode.split;
+                        const height2 = availableHeight - height1;
+                        rect1 = { ...parentRect, height: height1 };
+                        rect2 = { ...parentRect, y: parentRect.y + height1 + CONFIG.RESIZER_THICKNESS, height: height2 };
+                    }
+                    oldNode.rect = rect1;
+                    newNode.rect = rect2;
+
+                    leaves.push(oldNode, newNode);
+                }
+            }
+        }
+
         closePanel(targetId) {
             const target = this.panels.get(targetId);
             if (!target || this.panels.size <= 1) return;
@@ -613,7 +727,10 @@
             const header = e.target.closest('.panel-header');
             const actionBtn = e.target.closest('.panel-action-btn');
 
-            if (actionBtn) { this.handleActionClick(actionBtn); return; }
+            if (actionBtn) {
+                this.handleActionClick(actionBtn);
+                return;
+            }
             
             if (resizer && !resizer.classList.contains('is-disabled')) {
                 const nodeId = resizer.dataset.nodeId;
@@ -625,10 +742,16 @@
                 if (targetNode && !targetNode.isPinned) {
                     this.activeDrag = { type: 'move', header, target: targetNode };
                 }
-            } else {
-                return;
+            } else if (e.target.closest('.panel-content')) {
+                const contentActionBtn = e.target.closest('button.btn');
+                if (contentActionBtn) {
+                    this.handleContentButtonClick(contentActionBtn);
+                }
+                return; // Clicks on content should not proceed
             }
             
+            if (!this.activeDrag) return;
+
             e.preventDefault();
             this.activeDrag.startX = e.clientX;
             this.activeDrag.startY = e.clientY;
@@ -689,6 +812,53 @@
             }
         }
         
+        handleContentButtonClick(button) {
+            const action = button.dataset.action;
+            const panelId = button.closest('.panel')?.dataset.panelId;
+
+            const findMainPanel = () => {
+                for (const panel of this.panels.values()) {
+                    if (panel.node.isMainContent) return panel;
+                }
+                return null;
+            };
+            
+            switch (action) {
+                // Global App Actions
+                case 'add-panel': this.addPanel(); break;
+                case 'reset-layout': this.resetLayout(); break;
+                case 'undo': this.undo(); break;
+                case 'redo': this.redo(); break;
+
+                // Markdown Content Actions
+                case 'add-h1':
+                case 'add-bold':
+                case 'add-italic':
+                    const mainPanel = findMainPanel();
+                    if (!mainPanel) {
+                        alert("No main content panel found!");
+                        return;
+                    }
+                    const currentMarkdown = this.markdownContent.get(mainPanel.node.id) || '';
+                    let newMarkdown = currentMarkdown;
+                    
+                    if (action === 'add-h1') newMarkdown += '\n\n# New Header';
+                    else if (action === 'add-bold') newMarkdown += '\n\n**Bold Text**';
+                    else if (action === 'add-italic') newMarkdown += '\n\n*Italic Text*';
+
+                    if (newMarkdown !== currentMarkdown) {
+                        this.setPanelMarkdown(mainPanel.node.id, newMarkdown);
+                        this.saveState("Edit Content");
+                    }
+                    break;
+
+                // Test Action
+                case 'test-alert':
+                    alert(`Button clicked in panel: ${panelId}`);
+                    break;
+            }
+        }
+        
         handleResize(e) {
             const { target: node } = this.activeDrag;
             if (!node || node.isLeaf()) return;
@@ -724,6 +894,13 @@
             const draggedElement = this.activeDrag.target.element;
             this.enterPreviewMode(draggedElement);
             this.container.addEventListener('pointermove', this.handleDragOver);
+
+            ['horizontal', 'horizontal', 'vertical', 'vertical'].forEach(direction => {
+                const guide = document.createElement('div');
+                guide.className = `alignment-guide ${direction}`;
+                this.container.appendChild(guide);
+                this.alignmentGuides.push(guide);
+            });
         }
         
         handleDragOver(e) {
@@ -879,6 +1056,9 @@
         exitPreviewMode() {
             if (!this.isPreviewMode) return;
             
+            this.alignmentGuides.forEach(guide => guide.remove());
+            this.alignmentGuides = [];
+            
             const draggedElement = this.activeDrag?.target.element;
             if (draggedElement) {
                 draggedElement.classList.remove('is-dragging');
@@ -890,6 +1070,7 @@
             this.lastDragOverTarget = { panelId: null, zone: null };
             
             this.container.removeEventListener('pointermove', this.handleDragOver);
+            this.saveState("Move Panel");
         }
         
         handleDrop() {
@@ -987,6 +1168,16 @@
             }
             this.layout(); // Recalculate layout to update resizer states
             this.saveState(`Pin panel ${node.isPinned ? 'on' : 'off'}`);
+
+            this.history.on('change', ({ canUndo, canRedo }) => {
+                if (this.dom.undoBtn) this.dom.undoBtn.disabled = !canUndo;
+                if (this.dom.redoBtn) this.dom.redoBtn.disabled = !canRedo;
+                
+                const headerUndoBtn = document.getElementById('header-undo-btn');
+                const headerRedoBtn = document.getElementById('header-redo-btn');
+                if (headerUndoBtn) headerUndoBtn.disabled = !canUndo;
+                if (headerRedoBtn) headerRedoBtn.disabled = !canRedo;
+            });
         }
 
         toggleCollapse(panelId) {
@@ -997,6 +1188,33 @@
             node.isCollapsed = !node.isCollapsed;
             this.layout();
             this.saveState(`Collapse panel ${node.isCollapsed ? 'on' : 'off'}`);
+        }
+
+        setPanelMarkdown(panelId, markdown) {
+            const panel = this.panels.get(panelId);
+            if (!panel) return;
+
+            this.markdownContent.set(panelId, markdown);
+            this.setPanelHtml(panelId, this.markdownConverter.makeHtml(markdown));
+        }
+
+        setPanelHtml(panelId, html) {
+            const panel = this.panels.get(panelId);
+            if (!panel) return;
+            const contentArea = panel.element.querySelector('.panel-content');
+            if (contentArea) {
+                contentArea.innerHTML = html;
+            }
+        }
+
+        updateAlignmentGuides(rect) {
+            if (this.alignmentGuides.length < 4) return;
+            const [topGuide, bottomGuide, leftGuide, rightGuide] = this.alignmentGuides;
+
+            topGuide.style.transform = `translateY(${rect.y}px)`;
+            bottomGuide.style.transform = `translateY(${rect.y + rect.height}px)`;
+            leftGuide.style.transform = `translateX(${rect.x}px)`;
+            rightGuide.style.transform = `translateX(${rect.x + rect.width}px)`;
         }
     }
 

@@ -19,6 +19,7 @@
     --button-disabled-bg: #3a3a3c;
     --button-disabled-text: #7a7a7e;
     --accent-color: #0a84ff;
+    --accent-color-rgb: 10, 132, 255;
     --body-font-size: 14px;
     --header-height: 50px;
     --footer-height: 30px;
@@ -195,18 +196,19 @@ body {
     transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), left 200ms cubic-bezier(0.4, 0, 0.2, 1), top 200ms cubic-bezier(0.4, 0, 0.2, 1), width 200ms cubic-bezier(0.4, 0, 0.2, 1), height 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.panel-container.preview-mode .panel.is-dragging-source {
-    opacity: 0;
+.panel.is-dragging {
+    z-index: 10000;
 }
 
-.drag-ghost {
-    opacity: 0.9;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-    transition: none; /* Disable transitions during drag for performance */
-    cursor: grabbing;
-}
-.drag-ghost .panel-header {
-    cursor: grabbing;
+.panel.is-dragging::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(var(--accent-color-rgb), 0.2);
+    pointer-events: none;
 }
 
 /* --- 7. Animations --- */

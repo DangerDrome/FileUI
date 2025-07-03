@@ -497,14 +497,13 @@
         handlePointerMove(e) {
             if (!this.activeDrag) return;
 
-            if (this.activeDrag.type === 'resize') this.handleResize(e);
-            else if (this.activeDrag.type === 'move') {
-                if (!this.activeDrag.isDragging) {
-                    const dx = e.clientX - this.activeDrag.startX;
-                    const dy = e.clientY - this.activeDrag.startY;
-                    if (Math.hypot(dx, dy) > 5) this.initDrag(e);
-                } else {
-                    this.handleDrag(e);
+            if (this.activeDrag.type === 'resize') {
+                this.handleResize(e);
+            } else if (this.activeDrag.type === 'move' && !this.activeDrag.isDragging) {
+                const dx = e.clientX - this.activeDrag.startX;
+                const dy = e.clientY - this.activeDrag.startY;
+                if (Math.hypot(dx, dy) > 5) {
+                    this.initDrag();
                 }
             }
         }
@@ -522,6 +521,7 @@
             document.body.style.cursor = '';
             this.activeDrag = null;
             window.removeEventListener('pointermove', this.handlePointerMove);
+            this.layout();
         }
 
         handleActionClick(button) {
@@ -549,39 +549,11 @@
             this.layout();
         }
 
-        initDrag(e) {
+        initDrag() {
             this.activeDrag.isDragging = true;
-            const { target } = this.activeDrag;
-            const element = target.element;
-            const rect = element.getBoundingClientRect();
-
-            this.enterPreviewMode(element);
-
-            this.activeDrag.ghost = element.cloneNode(true);
-            this.activeDrag.ghost.classList.add('drag-ghost');
-            
-            Object.assign(this.activeDrag.ghost.style, {
-                width: `${rect.width}px`,
-                height: `${rect.height}px`,
-                position: 'fixed',
-                left: `${rect.left}px`,
-                top: `${rect.top}px`,
-                zIndex: '9999',
-                pointerEvents: 'none'
-            });
-            
-            document.body.appendChild(this.activeDrag.ghost);
-            
-            this.activeDrag.offsetX = e.clientX - rect.left;
-            this.activeDrag.offsetY = e.clientY - rect.top;
-
+            const draggedElement = this.activeDrag.target.element;
+            this.enterPreviewMode(draggedElement);
             this.container.addEventListener('pointermove', this.handleDragOver);
-        }
-
-        handleDrag(e) {
-            const { ghost, offsetX, offsetY } = this.activeDrag;
-            ghost.style.left = `${e.clientX - offsetX}px`;
-            ghost.style.top = `${e.clientY - offsetY}px`;
         }
         
         handleDragOver(e) {
@@ -605,13 +577,25 @@
                         targetPanel = node.element;
                         const x = relativeX - rect.x;
                         const y = relativeY - rect.y;
-                        const threshold = 0.25;
+                        const w = rect.width;
+                        const h = rect.height;
 
-                        if (y < rect.height * threshold) dropZone = 'top';
-                        else if (y > rect.height * (1 - threshold)) dropZone = 'bottom';
-                        else if (x < rect.width * threshold) dropZone = 'left';
-                        else if (x > rect.width * (1 - threshold)) dropZone = 'right';
-                        else dropZone = null; 
+                        const distTop = y;
+                        const distBottom = h - y;
+                        const distLeft = x;
+                        const distRight = w - x;
+
+                        const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+
+                        if (minDist === distTop) {
+                            dropZone = 'top';
+                        } else if (minDist === distBottom) {
+                            dropZone = 'bottom';
+                        } else if (minDist === distLeft) {
+                            dropZone = 'left';
+                        } else {
+                            dropZone = 'right';
+                        }
                     }
                 } else {
                     node.children.forEach(findTarget);
@@ -625,6 +609,8 @@
                 this.activeDrag.currentDropZone = dropZone;
                 requestAnimationFrame(this.updatePreviewLayout);
             }
+
+            this.layout(true);
         }
         
         updatePreviewLayout() {
@@ -695,19 +681,19 @@
         enterPreviewMode(draggedElement) {
             this.isPreviewMode = true;
             this.previewRoot = this.root.clone();
-            draggedElement.classList.add('is-dragging-source');
+            draggedElement.classList.add('is-dragging');
             this.container.classList.add('preview-mode');
             this.layout(true);
         }
 
         exitPreviewMode() {
             if (!this.isPreviewMode) return;
-
-            if (this.activeDrag?.ghost) this.activeDrag.ghost.remove();
-
-            const draggedElement = this.activeDrag?.target.element;
-            if (draggedElement) draggedElement.classList.remove('is-dragging-source');
             
+            const draggedElement = this.activeDrag?.target.element;
+            if (draggedElement) {
+                draggedElement.classList.remove('is-dragging');
+            }
+
             this.container.classList.remove('preview-mode');
             this.isPreviewMode = false;
             this.previewRoot = null;

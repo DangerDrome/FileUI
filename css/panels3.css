@@ -109,7 +109,7 @@ body {
     flex-grow: 1;
     position: relative;
     overflow: hidden;
-    background-color: var(--accent-color);
+    padding: 10px;
 }
 
 .panel {
@@ -183,13 +183,40 @@ body {
 /* --- 5. Resizers --- */
 .panel-resizer {
     position: absolute;
-    background-color: var(--panel-resizer);
+    background-color: transparent;
     z-index: 10;
     transition: background-color 150ms ease;
 }
 .panel-resizer.vertical { cursor: col-resize; }
 .panel-resizer.horizontal { cursor: row-resize; }
-.panel-resizer:hover { background-color: var(--panel-resizer-hover); }
+
+.panel-resizer:hover {
+    background-color: var(--panel-resizer-hover);
+}
+
+/* Create a larger, invisible hitzone around the resizer element */
+.panel-resizer::before {
+    content: '';
+    position: absolute;
+}
+.panel-resizer.vertical::before {
+    top: 0;
+    bottom: 0;
+    left: -4px;
+    right: -4px;
+}
+.panel-resizer.horizontal::before {
+    top: -4px;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+}
+
+.panel-container.preview-mode .panel-resizer {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease-out;
+}
 
 /* --- 6. Drag & Drop Elements --- */
 .panel-container.preview-mode .panel {

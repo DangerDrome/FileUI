@@ -261,6 +261,12 @@
             const tree = isPreview ? this.previewRoot : this.root;
             if (!tree) return;
 
+            const computedStyle = getComputedStyle(this.container);
+            const paddingLeft = parseFloat(computedStyle.paddingLeft);
+            const paddingTop = parseFloat(computedStyle.paddingTop);
+            const paddingRight = parseFloat(computedStyle.paddingRight);
+            const paddingBottom = parseFloat(computedStyle.paddingBottom);
+
             this.minSizeCache.clear();
             
             if (!isPreview) {
@@ -340,7 +346,10 @@
             };
             
             const containerRect = this.container.getBoundingClientRect();
-            layoutRecursive(tree, { x: 0, y: 0, width: containerRect.width, height: containerRect.height });
+            const layoutWidth = containerRect.width - paddingLeft - paddingRight;
+            const layoutHeight = containerRect.height - paddingTop - paddingBottom;
+            
+            layoutRecursive(tree, { x: paddingLeft, y: paddingTop, width: layoutWidth, height: layoutHeight });
         }
 
         createPanelElement(panelNumber) {
@@ -479,9 +488,17 @@
             const actionBtn = e.target.closest('.panel-action-btn');
 
             if (actionBtn) { this.handleActionClick(actionBtn); return; }
-            if (resizer) this.activeDrag = { type: 'resize', resizer, target: this.findNodeByResizer(resizer) };
-            else if (header) this.activeDrag = { type: 'move', header, target: this.findNodeByElement(header.parentElement) };
-            else return;
+            
+            if (resizer) {
+                const nodeId = resizer.dataset.nodeId;
+                const targetNode = this._findNodeById(this.root, nodeId);
+                if (!targetNode) return;
+                this.activeDrag = { type: 'resize', resizer, target: targetNode };
+            } else if (header) {
+                this.activeDrag = { type: 'move', header, target: this.findNodeByElement(header.parentElement) };
+            } else {
+                return;
+            }
             
             e.preventDefault();
             this.activeDrag.startX = e.clientX;
@@ -626,12 +643,23 @@
             this.layout(true);
         }
 
-        _findNodeInTree(tree, panelId) {
+        _findNodeById(node, nodeId) {
+            if (node.id === nodeId) return node;
+            if (node.isLeaf()) return null;
+
+            for (const child of node.children) {
+                const found = this._findNodeById(child, nodeId);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        _findLeafNodeById(tree, panelId) {
             if (tree.isLeaf()) {
                 return tree.id === panelId ? tree : null;
             }
             for (const child of tree.children) {
-                const found = this._findNodeInTree(child, panelId);
+                const found = this._findLeafNodeById(child, panelId);
                 if (found) return found;
             }
             return null;
@@ -640,8 +668,8 @@
         _performMove(tree, draggedId, targetId, zone) {
             if (draggedId === targetId) return tree;
 
-            const draggedNode = this._findNodeInTree(tree, draggedId);
-            const targetNode = this._findNodeInTree(tree, targetId);
+            const draggedNode = this._findLeafNodeById(tree, draggedId);
+            const targetNode = this._findLeafNodeById(tree, targetId);
             
             if (!draggedNode || !targetNode) return tree;
 
@@ -707,11 +735,19 @@
             
             if (currentTargetPanel && currentDropZone) {
                 this.root = this.previewRoot;
+
+                this.panels.clear();
+                const sync = (node) => {
+                    if (node.isLeaf()) {
+                        this.panels.set(node.id, { node, element: node.element });
+                    } else {
+                        node.children.forEach(sync);
+                    }
+                };
+                sync(this.root);
+                
                 this.saveState("Move Panel");
             }
-
-            this.exitPreviewMode();
-            this.layout();
         }
         
         findNodeByElement(element) {
@@ -719,23 +755,15 @@
             return this.panels.get(panelId)?.node;
         }
 
-        findNodeByResizer(resizerEl) {
-            for(const panel of this.panels.values()){
-                const parent = panel.node.parent;
-                if(parent && parent.resizer === resizerEl) return parent;
-            }
-            return null;
-        }
-        
         createResizer(node, x, y, width, height, direction) {
             const resizer = document.createElement('div');
             resizer.className = `panel-resizer ${direction}`;
+            resizer.dataset.nodeId = node.id;
             Object.assign(resizer.style, {
                 left: `${x}px`, top: `${y}px`,
                 width: `${width}px`, height: `${height}px`
             });
             this.container.appendChild(resizer);
-            node.resizer = resizer;
             return resizer;
         }
         

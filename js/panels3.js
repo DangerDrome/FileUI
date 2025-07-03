@@ -12,6 +12,7 @@
             "isPinned": false,
             "isCollapsed": false,
             "isMainContent": false,
+            "isToolbar": false,
             "children": [
                 {
                     "id": "panel-2-1751524681458",
@@ -20,6 +21,7 @@
                     "isPinned": true,
                     "isCollapsed": true,
                     "isMainContent": false,
+                    "isToolbar": true,
                     "children": [],
                     "leaf": true
                 },
@@ -30,6 +32,7 @@
                     "isPinned": false,
                     "isCollapsed": false,
                     "isMainContent": false,
+                    "isToolbar": false,
                     "children": [
                         {
                             "id": "7ee4d068-e236-477e-8ffe-39f1c7f01461",
@@ -38,6 +41,7 @@
                             "isPinned": false,
                             "isCollapsed": false,
                             "isMainContent": false,
+                            "isToolbar": false,
                             "children": [
                                 {
                                     "id": "d90ec94e-7e9f-4069-b1c3-ad3ab8afe391",
@@ -46,6 +50,7 @@
                                     "isPinned": false,
                                     "isCollapsed": false,
                                     "isMainContent": false,
+                                    "isToolbar": false,
                                     "children": [
                                         {
                                             "id": "panel-1-1751524681458",
@@ -54,6 +59,7 @@
                                             "isPinned": true,
                                             "isCollapsed": true,
                                             "isMainContent": false,
+                                            "isToolbar": true,
                                             "children": [],
                                             "leaf": true
                                         },
@@ -64,6 +70,7 @@
                                             "isPinned": false,
                                             "isCollapsed": false,
                                             "isMainContent": false,
+                                            "isToolbar": false,
                                             "children": [
                                                 {
                                                     "id": "fc3915bc-6529-475d-9c4b-278e97199a3a",
@@ -72,6 +79,7 @@
                                                     "isPinned": false,
                                                     "isCollapsed": false,
                                                     "isMainContent": false,
+                                                    "isToolbar": false,
                                                     "children": [
                                                         {
                                                             "id": "panel-3-1751524681459",
@@ -80,6 +88,7 @@
                                                             "isPinned": true,
                                                             "isCollapsed": false,
                                                             "isMainContent": false,
+                                                            "isToolbar": false,
                                                             "children": [],
                                                             "leaf": true
                                                         },
@@ -90,6 +99,7 @@
                                                             "isPinned": false,
                                                             "isCollapsed": false,
                                                             "isMainContent": false,
+                                                            "isToolbar": false,
                                                             "children": [
                                                                 {
                                                                     "id": "panel-10-1751524681464",
@@ -98,6 +108,7 @@
                                                                     "isPinned": false,
                                                                     "isCollapsed": false,
                                                                     "isMainContent": false,
+                                                                    "isToolbar": false,
                                                                     "children": [],
                                                                     "leaf": true
                                                                 },
@@ -108,6 +119,7 @@
                                                                     "isPinned": false,
                                                                     "isCollapsed": false,
                                                                     "isMainContent": false,
+                                                                    "isToolbar": false,
                                                                     "children": [],
                                                                     "leaf": true
                                                                 }
@@ -122,6 +134,7 @@
                                                     "isPinned": false,
                                                     "isCollapsed": false,
                                                     "isMainContent": false,
+                                                    "isToolbar": false,
                                                     "children": [
                                                         {
                                                             "id": "panel-4-1751524681459",
@@ -130,6 +143,7 @@
                                                             "isPinned": false,
                                                             "isCollapsed": false,
                                                             "isMainContent": true,
+                                                            "isToolbar": false,
                                                             "children": [],
                                                             "leaf": true
                                                         },
@@ -140,6 +154,7 @@
                                                             "isPinned": false,
                                                             "isCollapsed": false,
                                                             "isMainContent": false,
+                                                            "isToolbar": false,
                                                             "children": [
                                                                 {
                                                                     "id": "panel-9-1751524681463",
@@ -148,6 +163,7 @@
                                                                     "isPinned": false,
                                                                     "isCollapsed": false,
                                                                     "isMainContent": false,
+                                                                    "isToolbar": false,
                                                                     "children": [],
                                                                     "leaf": true
                                                                 },
@@ -158,6 +174,7 @@
                                                                     "isPinned": false,
                                                                     "isCollapsed": false,
                                                                     "isMainContent": false,
+                                                                    "isToolbar": false,
                                                                     "children": [
                                                                         {
                                                                             "id": "panel-8-1751524681463",
@@ -166,6 +183,7 @@
                                                                             "isPinned": false,
                                                                             "isCollapsed": false,
                                                                             "isMainContent": false,
+                                                                            "isToolbar": false,
                                                                             "children": [],
                                                                             "leaf": true
                                                                         },
@@ -176,6 +194,7 @@
                                                                             "isPinned": false,
                                                                             "isCollapsed": false,
                                                                             "isMainContent": false,
+                                                                            "isToolbar": false,
                                                                             "children": [],
                                                                             "leaf": true
                                                                         }
@@ -196,6 +215,7 @@
                                     "isPinned": true,
                                     "isCollapsed": false,
                                     "isMainContent": false,
+                                    "isToolbar": false,
                                     "children": [],
                                     "leaf": true
                                 }
@@ -208,6 +228,7 @@
                             "isPinned": true,
                             "isCollapsed": false,
                             "isMainContent": false,
+                            "isToolbar": false,
                             "children": [],
                             "leaf": true
                         }
@@ -216,10 +237,10 @@
             ]
         },
         "markdown": {
-            "panel-3-1751524681459": "### Panel 3\n\nContent Area.",
+            "panel-3-1751524681459": "",
             "panel-4-1751524681459": "# Responsive\n\nDraggable content area.",
-            "panel-5-1751524681459": "### Panel 5\n\nContent Area.",
-            "panel-6-1751524681459": "### Panel 6\n\nContent Area.",
+            "panel-5-1751524681459": "",
+            "panel-6-1751524681459": "",
             "panel-7-1751524681463": "# Efficient\n\nDraggable content area.",
             "panel-8-1751524681463": "# Efficient\n\nDraggable content area.",
             "panel-9-1751524681463": "# Modular\n\nDraggable content area.",
@@ -333,6 +354,7 @@
             this.isPinned = options.isPinned || false;
             this.isCollapsed = options.isCollapsed || false;
             this.isMainContent = options.isMainContent || false;
+            this.isToolbar = options.isToolbar || false;
         }
 
         isLeaf() { return this.children.length === 0; }
@@ -352,6 +374,7 @@
                 isPinned: this.isPinned,
                 isCollapsed: this.isCollapsed,
                 isMainContent: this.isMainContent,
+                isToolbar: this.isToolbar,
                 children: newChildren,
                 element: this.element // Keep reference to original element
             });
@@ -367,6 +390,7 @@
                 isPinned: this.isPinned,
                 isCollapsed: this.isCollapsed,
                 isMainContent: this.isMainContent,
+                isToolbar: this.isToolbar,
                 children: this.children.map(c => c.toJSON())
             };
             if (this.isLeaf()) obj.leaf = true;
@@ -404,6 +428,7 @@
             this.markdownConverter = new showdown.Converter();
             this.markdownContent = new Map();
             this.alignmentGuides = [];
+            this.globalClickHandler = null;
 
             this.handlePointerDown = this.handlePointerDown.bind(this);
             this.handlePointerMove = this.handlePointerMove.bind(this);
@@ -435,10 +460,31 @@
             // Add double-click event listener for markdown editing
             this.container.addEventListener('dblclick', this.handleDoubleClick.bind(this));
             
+            // Menu drag functionality
+            this.menuDragState = {
+                isDragging: false,
+                startMenuItem: null
+            };
+            
+            // Bind menu drag handlers to preserve 'this' context
+            this.handleMenuDrag = this.handleMenuDrag.bind(this);
+            this.handleMenuDragEnd = this.handleMenuDragEnd.bind(this);
+            
             if (this.dom.addPanelBtn) this.dom.addPanelBtn.addEventListener('click', () => this.addPanel());
             if (this.dom.resetLayoutBtn) this.dom.resetLayoutBtn.addEventListener('click', () => this.resetLayout());
             if (this.dom.undoBtn) this.dom.undoBtn.addEventListener('click', () => this.undo());
             if (this.dom.redoBtn) this.dom.redoBtn.addEventListener('click', () => this.redo());
+            
+            // Set up history change listener for undo/redo button states
+            this.history.on('change', ({ canUndo, canRedo }) => {
+                if (this.dom.undoBtn) this.dom.undoBtn.disabled = !canUndo;
+                if (this.dom.redoBtn) this.dom.redoBtn.disabled = !canRedo;
+                
+                const headerUndoBtn = document.getElementById('header-undo-btn');
+                const headerRedoBtn = document.getElementById('header-redo-btn');
+                if (headerUndoBtn) headerUndoBtn.disabled = !canUndo;
+                if (headerRedoBtn) headerRedoBtn.disabled = !canRedo;
+            });
             
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
@@ -455,147 +501,8 @@
         }
 
         resetLayout() {
-            // 1. Cleanup
-            this.container.innerHTML = '';
-            this.panels.clear();
-            this.resizers = [];
-            this.nextPanelNumber = 1;
-            this.history.clear();
-
-            // 2. Create the six panels (added action bar)
-            const headerPanel = this.createPanel();
-            headerPanel.element.classList.add('header-panel');
-            const actionBarPanel = this.createPanel();
-            actionBarPanel.element.classList.add('action-bar-panel');
-            const leftPanel = this.createPanel();
-            const mainPanel = this.createPanel();
-            const rightPanel = this.createPanel();
-            const footerPanel = this.createPanel();
-
-            // 3. Create the BSP nodes for each panel
-            const headerNode = new BSPNode({ id: headerPanel.id, element: headerPanel.element, isPinned: true });
-            const actionBarNode = new BSPNode({ id: actionBarPanel.id, element: actionBarPanel.element, isPinned: true });
-            const leftNode = new BSPNode({ id: leftPanel.id, element: leftPanel.element, isPinned: true });
-            const mainNode = new BSPNode({ id: mainPanel.id, element: mainPanel.element, isMainContent: true });
-            const rightNode = new BSPNode({ id: rightPanel.id, element: rightPanel.element, isPinned: true });
-            const footerNode = new BSPNode({ id: footerPanel.id, element: footerPanel.element, isPinned: true });
-
-            // 4. Build the tree structure from the bottom up for the content area
-            const rightContainer = new BSPNode({
-                direction: 'horizontal', // mainNode is on the left of rightNode
-                split: 0.8, children: [mainNode, rightNode]
-            });
-            mainNode.parent = rightContainer;
-            rightNode.parent = rightContainer;
-
-            // This container will hold the header panel (now on the left) and the left panel, side-by-side
-            const headerAndLeftContainer = new BSPNode({
-                direction: 'horizontal',
-                split: 0.25,
-                children: [headerNode, leftNode]
-            });
-            headerNode.parent = headerAndLeftContainer;
-            leftNode.parent = headerAndLeftContainer;
-
-            const topContentContainer = new BSPNode({
-                direction: 'horizontal',
-                split: 0.2,
-                children: [headerAndLeftContainer, rightContainer]
-            });
-            headerAndLeftContainer.parent = topContentContainer;
-            rightContainer.parent = topContentContainer;
-            
-            const mainBodyContainer = new BSPNode({
-                direction: 'vertical', // The main content area is above the footer
-                split: 0.9, children: [topContentContainer, footerNode]
-            });
-            topContentContainer.parent = mainBodyContainer;
-            footerNode.parent = mainBodyContainer;
-
-            // 5. Create the root, with the action bar (now on top) above the main body
-            this.root = new BSPNode({
-                direction: 'vertical',
-                split: 0.08, // The action bar gets 8% of the total height
-                children: [actionBarNode, mainBodyContainer]
-            });
-            actionBarNode.parent = this.root;
-            mainBodyContainer.parent = this.root;
-
-            // 6. Populate the global panels map with the structural panels
-            this.panels.set(headerPanel.id, { node: headerNode, element: headerPanel.element });
-            this.panels.set(actionBarPanel.id, { node: actionBarNode, element: actionBarPanel.element });
-            this.panels.set(leftPanel.id, { node: leftNode, element: leftPanel.element });
-            this.panels.set(mainPanel.id, { node: mainNode, element: mainPanel.element });
-            this.panels.set(rightPanel.id, { node: rightNode, element: rightPanel.element });
-            this.panels.set(footerPanel.id, { node: footerNode, element: footerPanel.element });
-            
-            // 7. Run layout to get dimensions, then generate the fractal pattern
-            this.layout();
-            this.createRandomPattern(mainNode, 5); // Generate 5 random splits
-
-            // 8. Set content for all panels based on their state
-            const randomWords = ["Dynamic", "Fluid", "Modular", "Intuitive", "Responsive", "Creative", "Organized", "Productive", "Efficient", "Seamless", "Integrated"];
-
-            this.panels.forEach((panel, id) => {
-                if (panel.element.classList.contains('header-panel') || panel.element.classList.contains('action-bar-panel')) {
-                    return; // Skip header and action bar panels
-                }
-
-                if (panel.node.isPinned) {
-                    const defaultMarkdown = `### ${panel.element.querySelector('.panel-title').textContent}\n\nContent Area.`;
-                    this.setPanelMarkdown(id, defaultMarkdown);
-                } else {
-                    const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
-                    const specialMarkdown = `# ${randomWord}\n\nDraggable content area.`;
-                    this.setPanelMarkdown(id, specialMarkdown);
-                }
-            });
-            
-            const markdownToolbar = `
-                <div class="markdown-toolbar">
-                    <button class="btn" data-action="add-panel" title="Add Panel">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                    </button>
-                    <button class="btn" data-action="reset-layout" title="Reset Layout">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-                    </button>
-                    <button class="btn" data-action="undo" id="header-undo-btn" title="Undo (Ctrl+Z)" disabled>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
-                    </button>
-                    <button class="btn" data-action="redo" id="header-redo-btn" title="Redo (Ctrl+Y)" disabled>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
-                    </button>
-                    <div class="toolbar-separator"></div>
-                    <button class="btn" data-action="save-layout" title="Save Layout as JSON">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-                    </button>
-                    <button class="btn" data-action="load-layout" title="Load Layout from JSON">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M10 15l2 2 4-4"/></svg>
-                    </button>
-                </div>
-            `;
-            this.setPanelHtml(headerNode.id, markdownToolbar);
-
-            const actionBarContent = `
-                <div class="action-bar-content">
-                    <div class="action-list">
-                        <button class="action-item" data-action="new-document" title="New Document">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
-                        </button>
-                        <button class="action-item" data-action="open-file" title="Open File">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
-                        </button>
-                        <button class="action-item" data-action="save" title="Save">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-                        </button>
-                    </div>
-                </div>
-            `;
-            this.setPanelHtml(actionBarNode.id, actionBarContent);
-
-            // 10. Final layout pass and save
-            this.layout();
-            this.saveState("Initial Pinned Layout");
+            // Load the predefined DEFAULT_LAYOUT
+            this.loadLayout(DEFAULT_LAYOUT);
         }
 
         saveState(action) {
@@ -618,7 +525,7 @@
             const syncPanels = (node) => {
                 if (node.isLeaf()) {
                     this.panels.set(node.id, { node, element: node.element });
-                    if (!node.element.classList.contains('header-panel')) {
+                    if (!node.isToolbar) {
                         const markdown = this.markdownContent.get(node.id) || '';
                         this.setPanelMarkdown(node.id, markdown);
                     }
@@ -632,30 +539,40 @@
             
             const headerPanel = Array.from(this.panels.values()).find(p => p.element.classList.contains('header-panel'));
             if (headerPanel) {
-                const markdownToolbar = `
-                    <div class="markdown-toolbar">
-                        <button class="btn" data-action="add-panel" title="Add Panel">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                        </button>
-                        <button class="btn" data-action="reset-layout" title="Reset Layout">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-                        </button>
-                        <button class="btn" data-action="undo" id="header-undo-btn" title="Undo (Ctrl+Z)" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
-                        </button>
-                        <button class="btn" data-action="redo" id="header-redo-btn" title="Redo (Ctrl+Y)" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
-                        </button>
-                        <div class="toolbar-separator"></div>
-                        <button class="btn" data-action="save-layout" title="Save Layout as JSON">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-                        </button>
-                        <button class="btn" data-action="load-layout" title="Load Layout from JSON">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M10 15l2 2 4-4"/></svg>
-                        </button>
-                    </div>
-                `;
-                this.setPanelHtml(headerPanel.node.id, markdownToolbar);
+                // Set up the file menu in the header for restore state
+                const headerElement = headerPanel.element.querySelector('.panel-header');
+                if (headerElement) {
+                    headerElement.innerHTML = `
+                        <div class="file-menu">
+                            <span class="menu-item" data-menu="file">File</span>
+                            <span class="menu-item" data-menu="edit">Edit</span>
+                            <span class="menu-item" data-menu="view">View</span>
+                            <span class="menu-item" data-menu="terminal">Terminal</span>
+                            <span class="menu-item" data-menu="help">Help</span>
+                        </div>
+                        <div class="header-toolbar">
+                            <button class="btn" data-action="add-panel" title="Add Panel">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            </button>
+                            <button class="btn" data-action="reset-layout" title="Reset Layout">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                            </button>
+                            <button class="btn" data-action="undo" id="header-undo-btn" title="Undo (Ctrl+Z)" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                            </button>
+                            <button class="btn" data-action="redo" id="header-redo-btn" title="Redo (Ctrl+Y)" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                            </button>
+                            <div class="toolbar-separator"></div>
+                            <button class="btn" data-action="save-layout" title="Save Layout as JSON">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                            </button>
+                            <button class="btn" data-action="load-layout" title="Load Layout from JSON">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M10 15l2 2 4-4"/></svg>
+                            </button>
+                        </div>
+                    `;
+                }
             }
 
             const actionBarPanel = Array.from(this.panels.values()).find(p => p.element.classList.contains('action-bar-panel'));
@@ -728,11 +645,13 @@
                     let width1, width2;
                     const child1Collapsed = child1.isLeaf() && child1.isCollapsed;
                     const child2Collapsed = child2.isLeaf() && child2.isCollapsed;
+                    const child1Toolbar = child1.isLeaf() && child1.isToolbar;
+                    const child2Toolbar = child2.isLeaf() && child2.isToolbar;
 
-                    if (child1Collapsed) {
+                    if (child1Collapsed || child1Toolbar) {
                         width1 = CONFIG.COLLAPSED_SIZE;
                         width2 = availableWidth - width1;
-                    } else if (child2Collapsed) {
+                    } else if (child2Collapsed || child2Toolbar) {
                         width2 = CONFIG.COLLAPSED_SIZE;
                         width1 = availableWidth - width2;
                     } else {
@@ -765,11 +684,13 @@
                     let height1, height2;
                     const child1Collapsed = child1.isLeaf() && child1.isCollapsed;
                     const child2Collapsed = child2.isLeaf() && child2.isCollapsed;
+                    const child1Toolbar = child1.isLeaf() && child1.isToolbar;
+                    const child2Toolbar = child2.isLeaf() && child2.isToolbar;
 
-                    if (child1Collapsed) {
+                    if (child1Collapsed || child1Toolbar) {
                         height1 = CONFIG.COLLAPSED_SIZE;
                         height2 = availableHeight - height1;
-                    } else if (child2Collapsed) {
+                    } else if (child2Collapsed || child2Toolbar) {
                         height2 = CONFIG.COLLAPSED_SIZE;
                         height1 = availableHeight - height2;
                     } else {
@@ -810,16 +731,20 @@
             layoutRecursive(tree, { x: paddingLeft, y: paddingTop, width: layoutWidth, height: layoutHeight });
         }
 
-        createPanelElement(panelNumber) {
+        createPanelElement(panelNumber, customName = null) {
             const element = document.createElement('div');
             element.className = `panel ${CONFIG.PANEL_ANIMATION_CLASS}`;
+            
+            // Use custom name if provided, otherwise default to "Panel X"
+            const panelTitle = customName || `Panel ${panelNumber}`;
+            
             element.innerHTML = `
                 <div class="panel-header">
                     <button class="panel-action-btn" data-action="pin" title="Pin Panel">
                         <svg class="icon-pin" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/></svg>
                         <svg class="icon-pin-off" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="8"/></svg>
                     </button>
-                    <span class="panel-title">Panel ${panelNumber}</span>
+                    <span class="panel-title">${panelTitle}</span>
                     <div class="panel-actions">
                         <button class="panel-action-btn" data-action="collapse" title="Collapse Panel"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
                         <button class="panel-action-btn" data-action="split-v" title="Split Vertically"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg></button>
@@ -834,9 +759,21 @@
             return element;
         }
 
+        // Helper function to get custom panel names
+        getCustomPanelName(panelNumber) {
+            const customNames = {
+                1: '', // Header panel will have empty title since we'll use menu in header
+                3: 'Explorer', 
+                5: 'Footer',
+                6: 'Properties'
+            };
+            return customNames[panelNumber] || null;
+        }
+
         createPanel() {
             const panelNumber = this.nextPanelNumber++;
-            const element = this.createPanelElement(panelNumber);
+            const customName = this.getCustomPanelName(panelNumber);
+            const element = this.createPanelElement(panelNumber, customName);
             const id = `panel-${panelNumber}-${Date.now()}`;
             element.dataset.panelId = id;
             return { id, element };
@@ -1004,7 +941,13 @@
 
         calculateMinimumHeight(node) {
             if (this.minSizeCache.has(node.id + '-h')) return this.minSizeCache.get(node.id + '-h');
-            if (node.isLeaf()) return CONFIG.PANEL_MIN_HEIGHT;
+            if (node.isLeaf()) {
+                // Toolbar panels should never exceed header height
+                if (node.isToolbar) {
+                    return CONFIG.COLLAPSED_SIZE;
+                }
+                return CONFIG.PANEL_MIN_HEIGHT;
+            }
             
             const [child1, child2] = node.children;
             const h1 = this.calculateMinimumHeight(child1);
@@ -1020,7 +963,13 @@
 
         calculateMinimumWidth(node) {
             if (this.minSizeCache.has(node.id + '-w')) return this.minSizeCache.get(node.id + '-w');
-            if (node.isLeaf()) return CONFIG.PANEL_MIN_WIDTH;
+            if (node.isLeaf()) {
+                // Toolbar panels should never exceed header width
+                if (node.isToolbar) {
+                    return CONFIG.COLLAPSED_SIZE;
+                }
+                return CONFIG.PANEL_MIN_WIDTH;
+            }
             
             const [child1, child2] = node.children;
             const w1 = this.calculateMinimumWidth(child1);
@@ -1043,6 +992,20 @@
                 this.handleActionClick(actionBtn);
                 return;
             }
+
+            // Check for toolbar buttons (.btn) in both content and header areas
+            const toolbarBtn = e.target.closest('button.btn');
+            if (toolbarBtn) {
+                this.handleContentButtonClick(toolbarBtn);
+                return;
+            }
+            
+            // Check for file menu items
+            const menuItem = e.target.closest('.menu-item');
+            if (menuItem) {
+                this.handleMenuPointerDown(menuItem, e);
+                return;
+            }
             
             if (resizer && !resizer.classList.contains('is-disabled')) {
                 const nodeId = resizer.dataset.nodeId;
@@ -1055,11 +1018,7 @@
                     this.activeDrag = { type: 'move', header, target: targetNode };
                 }
             } else if (e.target.closest('.panel-content')) {
-                const contentActionBtn = e.target.closest('button.btn');
-                if (contentActionBtn) {
-                    this.handleContentButtonClick(contentActionBtn);
-                }
-                return; // Clicks on content should not proceed
+                return; // Clicks on content should not proceed to drag logic
             }
             
             if (!this.activeDrag) return;
@@ -1073,6 +1032,424 @@
 
             window.addEventListener('pointermove', this.handlePointerMove);
             window.addEventListener('pointerup', this.handlePointerUp, { once: true });
+        }
+        
+        handleMenuPointerDown(menuItem, e) {
+            // Start menu drag tracking
+            this.menuDragState.isDragging = true;
+            this.menuDragState.startMenuItem = menuItem;
+            
+            // Add CSS class to prevent sticky hover states
+            document.body.classList.add('menu-dragging');
+            
+            // Set up menu drag event listeners
+            document.addEventListener('pointermove', this.handleMenuDrag);
+            document.addEventListener('pointerup', this.handleMenuDragEnd, { once: true });
+            
+            // Handle the initial click
+            this.handleMenuClick(menuItem);
+        }
+        
+        handleMenuDrag(e) {
+            if (!this.menuDragState.isDragging) return;
+            
+            const currentMenuItem = e.target.closest('.menu-item');
+            
+            // If we've moved to a different menu item or away from menu items entirely
+            if (currentMenuItem !== this.menuDragState.startMenuItem) {
+                // Clear visual state from previous menu item
+                if (this.menuDragState.startMenuItem) {
+                    this.menuDragState.startMenuItem.classList.remove('menu-open');
+                }
+                
+                // If we're over a new menu item, switch to it
+                if (currentMenuItem) {
+                    this.handleMenuClick(currentMenuItem);
+                    this.menuDragState.startMenuItem = currentMenuItem;
+                } else {
+                    // Mouse is not over any menu item, close all dropdowns
+                    this.closeAllDropdowns();
+                    this.menuDragState.startMenuItem = null;
+                }
+            }
+        }
+        
+        handleMenuDragEnd(e) {
+            // Remove CSS class that prevents sticky hover states
+            document.body.classList.remove('menu-dragging');
+            
+            // Clean up any remaining visual states
+            const allMenuItems = document.querySelectorAll('.menu-item');
+            allMenuItems.forEach(item => {
+                // Remove any lingering hover or active states that might be stuck
+                item.blur();
+            });
+            
+            this.menuDragState.isDragging = false;
+            this.menuDragState.startMenuItem = null;
+            document.removeEventListener('pointermove', this.handleMenuDrag);
+        }
+
+        handleMenuClick(menuItem) {
+            const menuType = menuItem.dataset.menu;
+            
+            // Check if ANY dropdown is currently open
+            const anyDropdownOpen = document.querySelector('.dropdown-menu.show');
+            const thisMenuOpen = menuItem.classList.contains('menu-open');
+            
+            // If we're in drag mode, always switch to the new menu
+            if (this.menuDragState.isDragging) {
+                this.closeAllDropdowns();
+                this.showDropdownMenu(menuItem, menuType);
+                return;
+            }
+            
+            // Normal click behavior
+            // Always close all dropdowns first
+            this.closeAllDropdowns();
+            
+            // If this specific menu wasn't open, open it
+            // (If any other menu was open, we still want to open this one)
+            if (!thisMenuOpen) {
+                this.showDropdownMenu(menuItem, menuType);
+            }
+        }
+        
+        closeAllDropdowns() {
+            // Remove the global click handler if it exists
+            if (this.globalClickHandler) {
+                document.removeEventListener('click', this.globalClickHandler);
+                this.globalClickHandler = null;
+            }
+            
+            // Ensure menu-dragging class is removed
+            document.body.classList.remove('menu-dragging');
+            
+            const existingDropdowns = document.querySelectorAll('.dropdown-menu');
+            const openMenuItems = document.querySelectorAll('.menu-item.menu-open');
+            
+            existingDropdowns.forEach(dropdown => {
+                dropdown.classList.remove('show');
+                dropdown.remove();
+            });
+            
+            openMenuItems.forEach(menuItem => {
+                menuItem.classList.remove('menu-open');
+                delete menuItem.dataset.dropdownId;
+            });
+        }
+        
+        showDropdownMenu(menuItem, menuType) {
+            const dropdown = document.createElement('div');
+            dropdown.className = 'dropdown-menu';
+            
+            const menuContent = this.getMenuContent(menuType);
+            dropdown.innerHTML = menuContent;
+            
+            // Append to body instead of menu item to avoid stacking context issues
+            document.body.appendChild(dropdown);
+            
+            // Calculate position relative to viewport
+            const menuRect = menuItem.getBoundingClientRect();
+            dropdown.style.position = 'fixed';
+            dropdown.style.top = `${menuRect.bottom}px`;
+            dropdown.style.left = `${menuRect.left}px`;
+            
+            // Mark menu item as open
+            menuItem.classList.add('menu-open');
+            
+            // Show dropdown with animation
+            requestAnimationFrame(() => {
+                dropdown.classList.add('show');
+            });
+            
+            // Add click handlers for dropdown items
+            this.setupDropdownHandlers(dropdown);
+            
+            // Store reference for cleanup
+            const dropdownId = Date.now().toString();
+            menuItem.dataset.dropdownId = dropdownId;
+            dropdown.dataset.dropdownId = dropdownId;
+            
+            // Set up global click handler to close dropdown when clicking outside
+            this.globalClickHandler = (e) => {
+                // Don't close if we're in menu drag mode
+                if (this.menuDragState.isDragging) {
+                    return;
+                }
+                // Don't close if clicking on a menu item or inside the dropdown
+                if (e.target.closest('.menu-item') || e.target.closest('.dropdown-menu')) {
+                    return;
+                }
+                this.closeAllDropdowns();
+            };
+            
+            // Add the global click handler with a small delay to avoid immediate triggering
+            setTimeout(() => {
+                document.addEventListener('click', this.globalClickHandler);
+            }, 50);
+        }
+        
+                 getMenuContent(menuType) {
+             switch(menuType) {
+                 case 'file':
+                     return `
+                         <button class="dropdown-item" data-action="new-file">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                             New File
+                             <span class="shortcut">Ctrl+N</span>
+                         </button>
+                         <button class="dropdown-item" data-action="open-file">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                             Open File
+                             <span class="shortcut">Ctrl+O</span>
+                         </button>
+                         <div class="dropdown-separator"></div>
+                         <button class="dropdown-item" data-action="save-file">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                             Save
+                             <span class="shortcut">Ctrl+S</span>
+                         </button>
+                         <button class="dropdown-item" data-action="save-as">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                             Save As...
+                             <span class="shortcut">Ctrl+Shift+S</span>
+                         </button>
+                         <div class="dropdown-separator"></div>
+                         <button class="dropdown-item" data-action="save-layout">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                             Save Layout
+                         </button>
+                         <button class="dropdown-item" data-action="load-layout">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M8 8h8v8H8z"/></svg>
+                             Load Layout
+                         </button>
+                     `;
+                     
+                 case 'edit':
+                     return `
+                         <button class="dropdown-item" data-action="undo">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                             Undo
+                             <span class="shortcut">Ctrl+Z</span>
+                         </button>
+                         <button class="dropdown-item" data-action="redo">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                             Redo
+                             <span class="shortcut">Ctrl+Y</span>
+                         </button>
+                         <div class="dropdown-separator"></div>
+                         <button class="dropdown-item" data-action="cut">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12L12 12"/><path d="M20 4L8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8L20 20"/></svg>
+                             Cut
+                             <span class="shortcut">Ctrl+X</span>
+                         </button>
+                         <button class="dropdown-item" data-action="copy">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                             Copy
+                             <span class="shortcut">Ctrl+C</span>
+                         </button>
+                         <button class="dropdown-item" data-action="paste">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                             Paste
+                             <span class="shortcut">Ctrl+V</span>
+                         </button>
+                     `;
+                     
+                 case 'view':
+                     return `
+                         <button class="dropdown-item" data-action="add-panel">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                             Add Panel
+                         </button>
+                         <button class="dropdown-item" data-action="reset-layout">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                             Reset Layout
+                         </button>
+                         <div class="dropdown-separator"></div>
+                         <button class="dropdown-item" data-action="toggle-explorer">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2z"/></svg>
+                             Toggle Explorer
+                         </button>
+                         <button class="dropdown-item" data-action="toggle-properties">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                             Toggle Properties
+                         </button>
+                     `;
+                     
+                 case 'terminal':
+                     return `
+                         <button class="dropdown-item" data-action="new-terminal">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+                             New Terminal
+                             <span class="shortcut">Ctrl+\`</span>
+                         </button>
+                         <button class="dropdown-item" data-action="toggle-terminal">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="7" x2="7" y1="9" y2="15"/><line x1="17" x2="17" y1="9" y2="15"/></svg>
+                             Toggle Terminal
+                         </button>
+                         <div class="dropdown-separator"></div>
+                         <button class="dropdown-item" data-action="clear-terminal">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                             Clear Terminal
+                         </button>
+                     `;
+                     
+                 case 'help':
+                     return `
+                         <button class="dropdown-item" data-action="shortcuts">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.001"/><path d="M10 8h.001"/><path d="M14 8h.001"/><path d="M18 8h.001"/><path d="M8 12h.001"/><path d="M12 12h.001"/><path d="M16 12h.001"/><path d="M7 16h10"/></svg>
+                             Keyboard Shortcuts
+                             <span class="shortcut">Ctrl+/</span>
+                         </button>
+                         <button class="dropdown-item" data-action="documentation">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                             Documentation
+                         </button>
+                         <div class="dropdown-separator"></div>
+                         <button class="dropdown-item" data-action="about">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                             About FileUI
+                         </button>
+                     `;
+                     
+                 default:
+                     return '<button class="dropdown-item">No items available</button>';
+             }
+         }
+        
+        setupDropdownHandlers(dropdown) {
+            const items = dropdown.querySelectorAll('.dropdown-item[data-action]');
+            items.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const action = item.dataset.action;
+                    this.handleDropdownAction(action);
+                    this.closeAllDropdowns();
+                });
+            });
+        }
+        
+        handleDropdownAction(action) {
+            // Handle dropdown menu actions
+            switch(action) {
+                // File menu actions
+                case 'new-file':
+                    console.log('New file');
+                    // TODO: Implement new file functionality
+                    break;
+                case 'open-file':
+                    console.log('Open file');
+                    // TODO: Implement open file functionality
+                    break;
+                case 'save-file':
+                    console.log('Save file');
+                    // TODO: Implement save file functionality
+                    break;
+                case 'save-as':
+                    console.log('Save as');
+                    // TODO: Implement save as functionality
+                    break;
+                case 'save-layout':
+                    this.saveLayoutToFile();
+                    break;
+                case 'load-layout':
+                    this.loadLayoutFromFile();
+                    break;
+                    
+                // Edit menu actions
+                case 'undo':
+                    this.undo();
+                    break;
+                case 'redo':
+                    this.redo();
+                    break;
+                case 'cut':
+                    console.log('Cut');
+                    // TODO: Implement cut functionality
+                    break;
+                case 'copy':
+                    console.log('Copy');
+                    // TODO: Implement copy functionality
+                    break;
+                case 'paste':
+                    console.log('Paste');
+                    // TODO: Implement paste functionality
+                    break;
+                    
+                // View menu actions
+                case 'add-panel':
+                    this.addPanel();
+                    break;
+                case 'reset-layout':
+                    this.resetLayout();
+                    break;
+                case 'toggle-explorer':
+                    console.log('Toggle explorer');
+                    // TODO: Implement toggle explorer functionality
+                    break;
+                case 'toggle-properties':
+                    console.log('Toggle properties');
+                    // TODO: Implement toggle properties functionality
+                    break;
+                    
+                // Terminal menu actions
+                case 'new-terminal':
+                    console.log('New terminal');
+                    // TODO: Implement new terminal functionality
+                    break;
+                case 'toggle-terminal':
+                    console.log('Toggle terminal');
+                    // TODO: Implement toggle terminal functionality
+                    break;
+                case 'clear-terminal':
+                    console.log('Clear terminal');
+                    // TODO: Implement clear terminal functionality
+                    break;
+                    
+                // Help menu actions
+                case 'shortcuts':
+                    console.log('Show shortcuts');
+                    // TODO: Implement shortcuts modal
+                    break;
+                case 'documentation':
+                    console.log('Show documentation');
+                    // TODO: Implement documentation
+                    break;
+                case 'about':
+                    console.log('Show about');
+                    // TODO: Implement about modal
+                    break;
+                    
+                default:
+                    console.log(`Unknown action: ${action}`);
+            }
+        }
+        
+        showFileMenu(menuItem) {
+            // Method kept for backward compatibility but now handled by showDropdownMenu
+            this.showDropdownMenu(menuItem, 'file');
+        }
+        
+        showEditMenu(menuItem) {
+            // Method kept for backward compatibility but now handled by showDropdownMenu
+            this.showDropdownMenu(menuItem, 'edit');
+        }
+        
+        showViewMenu(menuItem) {
+            // Method kept for backward compatibility but now handled by showDropdownMenu
+            this.showDropdownMenu(menuItem, 'view');
+        }
+        
+        showTerminalMenu(menuItem) {
+            // Method kept for backward compatibility but now handled by showDropdownMenu
+            this.showDropdownMenu(menuItem, 'terminal');
+        }
+        
+        showHelpMenu(menuItem) {
+            // Method kept for backward compatibility but now handled by showDropdownMenu
+            this.showDropdownMenu(menuItem, 'help');
         }
         
         handlePointerMove(e) {
@@ -1182,39 +1559,59 @@
                 const newSplit = (e.clientX - parentRect.x) / (parentRect.width - CONFIG.RESIZER_THICKNESS);
                 const [child1, child2] = node.children;
                 const availableWidth = parentRect.width - CONFIG.RESIZER_THICKNESS;
-                const width1 = newSplit * availableWidth;
-                const width2 = availableWidth - width1;
+                let width1 = newSplit * availableWidth;
+                let width2 = availableWidth - width1;
                 
-                // Drag-to-collapse logic
-                if (child1.isLeaf() && child1.isPinned) {
-                    if (!child1.isCollapsed && width1 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
-                    else if (child1.isCollapsed && width1 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
-                }
-                if (child2.isLeaf() && child2.isPinned) {
-                    if (!child2.isCollapsed && width2 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
-                    else if (child2.isCollapsed && width2 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                // Constrain toolbar panels to collapsed size
+                if (child1.isLeaf() && child1.isToolbar) {
+                    width1 = CONFIG.COLLAPSED_SIZE;
+                    width2 = availableWidth - width1;
+                } else if (child2.isLeaf() && child2.isToolbar) {
+                    width2 = CONFIG.COLLAPSED_SIZE;
+                    width1 = availableWidth - width2;
+                } else {
+                    // Drag-to-collapse logic for non-toolbar panels
+                    if (child1.isLeaf() && child1.isPinned) {
+                        if (!child1.isCollapsed && width1 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
+                        else if (child1.isCollapsed && width1 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
+                    }
+                    if (child2.isLeaf() && child2.isPinned) {
+                        if (!child2.isCollapsed && width2 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                        else if (child2.isCollapsed && width2 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                    }
                 }
                 
-                node.split = newSplit;
+                // Update split based on actual widths
+                node.split = width1 / availableWidth;
 
             } else { // Horizontal resize
                 const newSplit = (e.clientY - parentRect.y) / (parentRect.height - CONFIG.RESIZER_THICKNESS);
                 const [child1, child2] = node.children;
                 const availableHeight = parentRect.height - CONFIG.RESIZER_THICKNESS;
-                const height1 = newSplit * availableHeight;
-                const height2 = availableHeight - height1;
+                let height1 = newSplit * availableHeight;
+                let height2 = availableHeight - height1;
 
-                // Drag-to-collapse logic for horizontal splits
-                if (child1.isLeaf() && child1.isPinned) {
-                    if (!child1.isCollapsed && height1 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
-                    else if (child1.isCollapsed && height1 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
-                }
-                if (child2.isLeaf() && child2.isPinned) {
-                    if (!child2.isCollapsed && height2 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
-                    else if (child2.isCollapsed && height2 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                // Constrain toolbar panels to collapsed size
+                if (child1.isLeaf() && child1.isToolbar) {
+                    height1 = CONFIG.COLLAPSED_SIZE;
+                    height2 = availableHeight - height1;
+                } else if (child2.isLeaf() && child2.isToolbar) {
+                    height2 = CONFIG.COLLAPSED_SIZE;
+                    height1 = availableHeight - height2;
+                } else {
+                    // Drag-to-collapse logic for non-toolbar panels
+                    if (child1.isLeaf() && child1.isPinned) {
+                        if (!child1.isCollapsed && height1 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
+                        else if (child1.isCollapsed && height1 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
+                    }
+                    if (child2.isLeaf() && child2.isPinned) {
+                        if (!child2.isCollapsed && height2 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                        else if (child2.isCollapsed && height2 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                    }
                 }
 
-                node.split = newSplit;
+                // Update split based on actual heights
+                node.split = height1 / availableHeight;
             }
             this.layout();
         }
@@ -1438,8 +1835,10 @@
             const child2Pinned = this._isSubtreeFullyPinned(child2);
             const child1Collapsed = child1.isLeaf() && child1.isCollapsed;
             const child2Collapsed = child2.isLeaf() && child2.isCollapsed;
+            const child1Toolbar = child1.isLeaf() && child1.isToolbar;
+            const child2Toolbar = child2.isLeaf() && child2.isToolbar;
 
-            if ((child1Pinned && child2Pinned) || child1Collapsed || child2Collapsed) {
+            if ((child1Pinned && child2Pinned) || child1Collapsed || child2Collapsed || child1Toolbar || child2Toolbar) {
                 resizer.classList.add('is-disabled');
             }
 
@@ -1460,6 +1859,7 @@
 
             element.classList.toggle('is-pinned', node.isPinned);
             element.classList.toggle('is-collapsed', node.isCollapsed);
+            element.classList.toggle('is-toolbar', node.isToolbar);
 
             // Add classes for collapse direction
             if (node.isCollapsed) {
@@ -1474,28 +1874,37 @@
                 element.classList.remove('is-collapsed-horizontally', 'is-collapsed-vertically');
             }
 
+            // Handle pin button visibility - should be hidden for toolbar panels
+            const pinBtn = element.querySelector('[data-action="pin"]');
+            if (pinBtn) {
+                if (node.isToolbar) {
+                    pinBtn.style.display = 'none';
+                } else {
+                    pinBtn.style.display = 'inline-flex';
+                }
+            }
+
             const collapseBtn = element.querySelector('[data-action="collapse"]');
             if (collapseBtn) {
-                const isAlwaysCollapsed = element.classList.contains('header-panel');
-                const isCollapsible = node.isPinned && !isAlwaysCollapsed;
+                const isCollapsible = node.isPinned && !node.isToolbar;
                 collapseBtn.style.display = isCollapsible ? 'flex' : 'none';
             }
 
             const splitVBtn = element.querySelector('[data-action="split-v"]');
             if(splitVBtn) {
-                splitVBtn.style.display = node.isPinned ? 'none' : 'flex';
+                splitVBtn.style.display = (node.isPinned || node.isToolbar) ? 'none' : 'flex';
                 splitVBtn.disabled = !canSplitV || node.isCollapsed;
             }
 
             const splitHBtn = element.querySelector('[data-action="split-h"]');
             if(splitHBtn) {
-                splitHBtn.style.display = node.isPinned ? 'none' : 'flex';
+                splitHBtn.style.display = (node.isPinned || node.isToolbar) ? 'none' : 'flex';
                 splitHBtn.disabled = !canSplitH || node.isCollapsed;
             }
             
             const closeBtn = element.querySelector('[data-action="close"]');
             if(closeBtn) {
-                closeBtn.style.display = node.isPinned ? 'none' : 'flex';
+                closeBtn.style.display = (node.isPinned || node.isToolbar) ? 'none' : 'flex';
                 closeBtn.disabled = (this.panels.size <= 1);
             }
         }
@@ -1512,41 +1921,26 @@
             }
             this.layout(); // Recalculate layout to update resizer states
             this.saveState(`Pin panel ${node.isPinned ? 'on' : 'off'}`);
-
-            this.history.on('change', ({ canUndo, canRedo }) => {
-                if (this.dom.undoBtn) this.dom.undoBtn.disabled = !canUndo;
-                if (this.dom.redoBtn) this.dom.redoBtn.disabled = !canRedo;
-                
-                const headerUndoBtn = document.getElementById('header-undo-btn');
-                const headerRedoBtn = document.getElementById('header-redo-btn');
-                if (headerUndoBtn) headerUndoBtn.disabled = !canUndo;
-                if (headerRedoBtn) headerRedoBtn.disabled = !canRedo;
-            });
         }
 
         toggleCollapse(panelId) {
             const panel = this.panels.get(panelId);
             if (!panel || !panel.node.isPinned) return;
             const { node, element } = panel;
-
-            // Prevent header panel from being toggled, but allow action bar
-            if (element.classList.contains('header-panel')) {
-                return;
-            }
             
             node.isCollapsed = !node.isCollapsed;
 
-            // Move action buttons for action-bar-panel on collapse/expand
-            if (element.classList.contains('action-bar-panel')) {
+            // Move action buttons for toolbar panels on collapse/expand
+            if (node.isToolbar) {
                 const header = element.querySelector('.panel-header');
                 const content = element.querySelector('.panel-content');
-                const actionList = element.querySelector('.action-list');
+                const toolbarContent = element.querySelector('.markdown-toolbar, .action-list');
 
-                if (actionList && header && content) {
+                if (toolbarContent && header && content) {
                     if (node.isCollapsed) {
-                        header.appendChild(actionList);
+                        header.appendChild(toolbarContent);
                     } else {
-                        content.appendChild(actionList);
+                        content.appendChild(toolbarContent);
                     }
                 }
             }
@@ -1558,6 +1952,9 @@
         setPanelMarkdown(panelId, markdown) {
             const panel = this.panels.get(panelId);
             if (!panel) return;
+
+            // Don't allow markdown content on toolbar panels
+            if (panel.node.isToolbar) return;
 
             this.markdownContent.set(panelId, markdown);
             this.setPanelHtml(panelId, this.markdownConverter.makeHtml(markdown));
@@ -1598,8 +1995,9 @@
             const panelId = panel.dataset.panelId;
             if (!panelId) return;
             
-            // Skip header panel
-            if (panel.classList.contains('header-panel')) return;
+            // Skip toolbar panels (header and action bar)
+            const panelNode = this.panels.get(panelId)?.node;
+            if (panelNode?.isToolbar) return;
             
             this.startMarkdownEdit(panelId, panelContent);
         }
@@ -1785,7 +2183,12 @@
             const panelElementsMap = new Map();
             const createPanelElements = (node) => {
                 if (node.leaf) {
-                    const element = this.createPanelElement(0); // Panel number will be set from title
+                    // Extract panel number from ID (e.g., "panel-3-1751524681459" -> 3)
+                    const panelNumberMatch = node.id.match(/^panel-(\d+)-/);
+                    const panelNumber = panelNumberMatch ? parseInt(panelNumberMatch[1]) : 0;
+                    
+                    const customName = this.getCustomPanelName(panelNumber);
+                    const element = this.createPanelElement(panelNumber, customName);
                     element.dataset.panelId = node.id;
                     
                     // Set special classes if needed
@@ -1807,18 +2210,9 @@
             const syncPanels = (node) => {
                 if (node.isLeaf()) {
                     this.panels.set(node.id, { node, element: node.element });
-                    
-                    // Extract panel number from existing title if available
-                    const markdown = this.markdownContent.get(node.id) || '';
-                    if (markdown && node.element) {
-                        // Look for panel title in markdown or use a default
-                        const titleMatch = markdown.match(/^###?\s*Panel\s*(\d+)/m);
-                        if (titleMatch) {
-                            const titleElement = node.element.querySelector('.panel-title');
-                            if (titleElement) {
-                                titleElement.textContent = `Panel ${titleMatch[1]}`;
-                            }
-                        }
+                    if (!node.isToolbar) {
+                        const markdown = this.markdownContent.get(node.id) || '';
+                        this.setPanelMarkdown(node.id, markdown);
                     }
                 } else {
                     node.children.forEach(syncPanels);
@@ -1826,110 +2220,92 @@
             };
             syncPanels(this.root);
             
-            // Identify special panels based on position in tree
-            // The structure should match what resetLayout creates
-            let headerPanel = null;
-            let actionBarPanel = null;
-            
-            // Navigate tree to find header and action bar panels
-            if (this.root.children && this.root.children.length >= 2) {
-                // Action bar should be first child of root
-                const firstChild = this.root.children[0];
-                if (firstChild.isLeaf()) {
-                    actionBarPanel = this.panels.get(firstChild.id);
-                    if (actionBarPanel) {
-                        actionBarPanel.element.classList.add('action-bar-panel');
-                    }
-                }
-                
-                // Header panel should be in the structure
-                const secondChild = this.root.children[1];
-                if (secondChild.children && secondChild.children.length > 0) {
-                    const topContent = secondChild.children[0];
-                    if (topContent.children && topContent.children.length > 0) {
-                        const headerAndLeft = topContent.children[0];
-                        if (headerAndLeft.children && headerAndLeft.children.length >= 1) {
-                            const possibleHeader = headerAndLeft.children[0];
-                            if (possibleHeader.isLeaf()) {
-                                headerPanel = this.panels.get(possibleHeader.id);
-                                if (headerPanel) {
-                                    headerPanel.element.classList.add('header-panel');
-                                }
+            // Identify and set up toolbar panels
+            this.panels.forEach((panel, id) => {
+                if (panel.node.isToolbar) {
+                    if (panel.element.classList.contains('action-bar-panel') || 
+                        (this.root.children && this.root.children[0] && this.root.children[0].id === id)) {
+                        // This is the action bar panel
+                        panel.element.classList.add('action-bar-panel');
+                        const actionBarContent = `
+                            <div class="action-bar-content">
+                                <div class="action-list">
+                                    <button class="action-item" data-action="new-document" title="New Document">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                                    </button>
+                                    <button class="action-item" data-action="open-file" title="Open File">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                                    </button>
+                                    <button class="action-item" data-action="save" title="Save">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        this.setPanelHtml(id, actionBarContent);
+
+                        // If collapsed, move action buttons to header
+                        if (panel.node.isCollapsed) {
+                            const actionList = panel.element.querySelector('.action-list');
+                            const header = panel.element.querySelector('.panel-header');
+                            if (actionList && header) {
+                                header.appendChild(actionList);
                             }
                         }
-                    }
-                }
-            }
-            
-            // Set up header panel content
-            if (headerPanel) {
-                const markdownToolbar = `
-                    <div class="markdown-toolbar">
-                        <button class="btn" data-action="add-panel" title="Add Panel">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                        </button>
-                        <button class="btn" data-action="reset-layout" title="Reset Layout">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-                        </button>
-                        <button class="btn" data-action="undo" id="header-undo-btn" title="Undo (Ctrl+Z)" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
-                        </button>
-                        <button class="btn" data-action="redo" id="header-redo-btn" title="Redo (Ctrl+Y)" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
-                        </button>
-                        <div class="toolbar-separator"></div>
-                        <button class="btn" data-action="save-layout" title="Save Layout as JSON">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-                        </button>
-                        <button class="btn" data-action="load-layout" title="Load Layout from JSON">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M10 15l2 2 4-4"/></svg>
-                        </button>
-                    </div>
-                `;
-                this.setPanelHtml(headerPanel.node.id, markdownToolbar);
+                    } else {
+                        // This is the header panel
+                        panel.element.classList.add('header-panel');
+                        
+                        // Set up the file menu in the header
+                        const headerElement = panel.element.querySelector('.panel-header');
+                        if (headerElement) {
+                            headerElement.innerHTML = `
+                                <div class="file-menu">
+                                    <span class="menu-item" data-menu="file">File</span>
+                                    <span class="menu-item" data-menu="edit">Edit</span>
+                                    <span class="menu-item" data-menu="view">View</span>
+                                    <span class="menu-item" data-menu="terminal">Terminal</span>
+                                    <span class="menu-item" data-menu="help">Help</span>
+                                </div>
+                                <div class="header-toolbar">
+                                    <button class="btn" data-action="add-panel" title="Add Panel">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                                    </button>
+                                    <button class="btn" data-action="reset-layout" title="Reset Layout">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                                    </button>
+                                    <button class="btn" data-action="undo" id="header-undo-btn" title="Undo (Ctrl+Z)" disabled>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                                    </button>
+                                    <button class="btn" data-action="redo" id="header-redo-btn" title="Redo (Ctrl+Y)" disabled>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                                    </button>
+                                    <div class="toolbar-separator"></div>
+                                    <button class="btn" data-action="save-layout" title="Save Layout as JSON">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                                    </button>
+                                    <button class="btn" data-action="load-layout" title="Load Layout from JSON">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M10 15l2 2 4-4"/></svg>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                        
+                        const markdownToolbar = `
+                            <div class="markdown-toolbar" style="display: none;">
+                                <!-- Content moved to header -->
+                            </div>
+                        `;
+                        this.setPanelHtml(id, markdownToolbar);
 
-                // If header panel is collapsed on load, move toolbar to header
-                if (headerPanel.node.isCollapsed) {
-                    const toolbar = headerPanel.element.querySelector('.markdown-toolbar');
-                    const header = headerPanel.element.querySelector('.panel-header');
-                    if (toolbar && header) {
-                        header.appendChild(toolbar);
+                        // Collapsed state is already handled since toolbar is in header
                     }
                 }
-            }
+            });
             
-            // Set up action bar panel content
-            if (actionBarPanel) {
-                const actionBarContent = `
-                    <div class="action-bar-content">
-                        <div class="action-list">
-                            <button class="action-item" data-action="new-document" title="New Document">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
-                            </button>
-                            <button class="action-item" data-action="open-file" title="Open File">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
-                            </button>
-                            <button class="action-item" data-action="save" title="Save">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                this.setPanelHtml(actionBarPanel.node.id, actionBarContent);
-
-                // If action bar panel is collapsed on load, move action buttons to header
-                if (actionBarPanel.node.isCollapsed) {
-                    const actionList = actionBarPanel.element.querySelector('.action-list');
-                    const header = actionBarPanel.element.querySelector('.panel-header');
-                    if (actionList && header) {
-                        header.appendChild(actionList);
-                    }
-                }
-            }
-            
-            // Restore markdown content for all panels
+            // Restore markdown content for non-toolbar panels
             this.panels.forEach((panel, id) => {
-                if (!panel.element.classList.contains('header-panel') && !panel.element.classList.contains('action-bar-panel')) {
+                if (!panel.node.isToolbar) {
                     const markdown = this.markdownContent.get(id) || '';
                     if (markdown) {
                         this.setPanelMarkdown(id, markdown);

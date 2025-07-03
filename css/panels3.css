@@ -48,6 +48,49 @@ body {
     overflow: hidden;
 }
 
+body.is-dragging {
+    cursor: grabbing;
+    user-select: none;
+}
+
+/* SCROLLBAR STYLES */
+.panel-content {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.panel-content::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.panel-content::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    background-color: transparent; /* Hide by default */
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Show scrollbar thumb on panel hover */
+.panel:hover .panel-content::-webkit-scrollbar-thumb {
+    background-color: var(--color-accent-translucent);
+}
+
+/* Make thumb darker on its own hover for better UX */
+.panel .panel-content::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-accent);
+}
+
+/* Hide scrollbars during drag operations */
+body.is-dragging .panel-content::-webkit-scrollbar-thumb {
+    background-color: transparent !important;
+}
+
 /* --- 3. Header & Footer --- */
 .main-header, .main-footer {
     flex-shrink: 0;
@@ -191,7 +234,7 @@ body {
 .panel-resizer.horizontal { cursor: row-resize; }
 
 .panel-resizer:hover {
-    background-color: var(--panel-resizer-hover);
+    background-color: rgba(var(--accent-color-rgb), 0.8);
 }
 
 /* Create a larger, invisible hitzone around the resizer element */

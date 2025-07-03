@@ -3,7 +3,7 @@
 
     // ===== CONFIGURATION =====
     const CONFIG = {
-        RESIZER_THICKNESS: 4,
+        RESIZER_THICKNESS: 10,
         PANEL_MIN_HEIGHT: 40,
         PANEL_MIN_WIDTH: 150,
         DEFAULT_SPLIT: 0.5,
@@ -380,19 +380,45 @@
         }
         
         addPanel() {
-            let targetNode = null;
-            const findLeaf = (node) => {
-                if (targetNode) return;
-                if (node.isLeaf()) targetNode = node;
-                else node.children.forEach(findLeaf);
-            };
-            findLeaf(this.root);
+            let largestLeaf = null;
+            let maxArea = -1;
 
-            if (targetNode) {
+            const findLargestLeaf = (node) => {
+                if (node.isLeaf()) {
+                    const area = node.rect.width * node.rect.height;
+                    if (area > maxArea) {
+                        maxArea = area;
+                        largestLeaf = node;
+                    }
+                } else {
+                    node.children.forEach(findLargestLeaf);
+                }
+            };
+
+            findLargestLeaf(this.root);
+
+            if (largestLeaf) {
+                const targetNode = largestLeaf;
                 const canSplitV = targetNode.rect.width >= CONFIG.PANEL_MIN_WIDTH * 2 + CONFIG.RESIZER_THICKNESS;
                 const canSplitH = targetNode.rect.height >= CONFIG.PANEL_MIN_HEIGHT * 2 + CONFIG.RESIZER_THICKNESS;
-                if (canSplitV) this.splitPanel(targetNode.id, 'vertical');
-                else if (canSplitH) this.splitPanel(targetNode.id, 'horizontal');
+
+                const isWider = targetNode.rect.width > targetNode.rect.height;
+
+                if (isWider) {
+                    // Prefer vertical split for wider panels
+                    if (canSplitV) {
+                        this.splitPanel(targetNode.id, 'vertical');
+                    } else if (canSplitH) {
+                        this.splitPanel(targetNode.id, 'horizontal');
+                    }
+                } else {
+                    // Prefer horizontal split for taller or square panels
+                    if (canSplitH) {
+                        this.splitPanel(targetNode.id, 'horizontal');
+                    } else if (canSplitV) {
+                        this.splitPanel(targetNode.id, 'vertical');
+                    }
+                }
             }
         }
         
@@ -532,13 +558,18 @@
                 this.saveState("Resize");
             }
             
+            const wasDragging = this.activeDrag?.isDragging;
+
             this.exitPreviewMode();
 
             this.container.classList.remove('no-transition');
             document.body.style.cursor = '';
             this.activeDrag = null;
             window.removeEventListener('pointermove', this.handlePointerMove);
-            this.layout();
+
+            if (wasDragging) {
+                this.layout();
+            }
         }
 
         handleActionClick(button) {
@@ -620,8 +651,10 @@
             };
             findTarget(this.root);
 
-            if (this.lastDragOverTarget.panelId !== (targetPanel?.dataset.panelId || null) || this.lastDragOverTarget.zone !== dropZone) {
-                this.lastDragOverTarget = { panelId: targetPanel?.dataset.panelId, zone: dropZone };
+            const hasChangedTarget = this.lastDragOverTarget.panelId !== (targetPanel?.dataset.panelId || null) || this.lastDragOverTarget.zone !== dropZone;
+
+            if (targetPanel && dropZone && hasChangedTarget) {
+                this.lastDragOverTarget = { panelId: targetPanel.dataset.panelId, zone: dropZone };
                 this.activeDrag.currentTargetPanel = targetPanel;
                 this.activeDrag.currentDropZone = dropZone;
                 requestAnimationFrame(this.updatePreviewLayout);

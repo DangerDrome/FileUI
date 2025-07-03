@@ -28,9 +28,50 @@
     --button-disabled-text: #7a7a7e;
     --accent-color: #0a84ff;
     --accent-color-rgb: 10, 132, 255;
+    --accent-color-dark: #0066cc;
+    --accent-color-translucent: rgba(10, 132, 255, 0.2);
+    --color-accent: #0a84ff;
+    --color-accent-dark: #0066cc;
+    --color-accent-translucent: rgba(10, 132, 255, 0.2);
+    --color-header-background: #3a3a3c;
+    --color-background-hover: #4a4a4d;
     --body-font-size: 14px;
     --header-height: 50px;
     --footer-height: 30px;
+
+    /* Dark theme colors */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #141414;
+    --bg-tertiary: #1a1a1a;
+    --panel-bg: #0f0f0f;
+    --panel-bg-unpinned: #1a1a1a; /* Lighter background for unpinned panels */
+    --text-secondary: #a0a0a0;
+    --text-muted: #666;
+    --border-color: #2a2a2a;
+    --border-hover: #3a3a3a;
+    --resizer-color: #3a3a3a;
+    --resizer-hover: #4a4a4a;
+    --accent-hover: #357abd;
+    --danger-color: #ff4a4a;
+    --danger-hover: #cc3a3a;
+    --success-color: #4aff4a;
+    --drag-preview: rgba(74, 158, 255, 0.15);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    
+    /* Button colors */
+    --button-bg: rgba(255, 255, 255, 0.05);
+    --button-hover-bg: rgba(255, 255, 255, 0.1);
+    
+    /* Color scheme compatibility */
+    --color-background: var(--bg-primary);
+    --color-surface: var(--bg-secondary);
+    --color-surface-alt: var(--bg-tertiary);
+    --color-text: var(--text-color);
+    --color-text-muted: var(--text-muted);
+    --color-border: var(--border-color);
+    --color-accent: var(--accent-color);
+    --color-accent-dark: var(--accent-hover);
+    --color-danger: var(--danger-color);
 }
 
 /* --- 2. Base Layout --- */
@@ -63,7 +104,8 @@ body.is-dragging {
 
 /* SCROLLBAR STYLES */
 .panel-content {
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -73,7 +115,7 @@ body.is-dragging {
 
 .panel-content::-webkit-scrollbar {
     width: 10px;
-    height: 10px;
+    height: 0; /* Disable horizontal scrollbar */
 }
 
 .panel-content::-webkit-scrollbar-thumb {
@@ -86,12 +128,12 @@ body.is-dragging {
 
 /* Show scrollbar thumb on panel hover */
 .panel:hover .panel-content::-webkit-scrollbar-thumb {
-    background-color: var(--color-accent-translucent);
+    background-color: var(--color-border);
 }
 
 /* Make thumb darker on its own hover for better UX */
 .panel .panel-content::-webkit-scrollbar-thumb:hover {
-    background-color: var(--color-accent);
+    background-color: var(--color-text-muted);
 }
 
 /* Hide scrollbars during drag operations */
@@ -171,7 +213,7 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
     position: absolute;
     display: flex;
     flex-direction: column;
-    background-color: var(--panel-bg);
+    background-color: var(--panel-bg-unpinned); /* Use lighter color by default */
     border-radius: 8px;
     box-shadow: var(--panel-shadow);
     border: 1px solid var(--panel-bg);
@@ -185,7 +227,7 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
     display: flex;
     align-items: center;
     padding: 4px 8px;
-    background-color: var(--color-header-background);
+    background-color: transparent; /* Make header transparent to show panel background */
     cursor: grab;
     height: 30px;
     gap: 8px;
@@ -251,6 +293,7 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
     height: 100%;
     flex-grow: 1;
     overflow: auto;
+    position: relative;
 }
 
 
@@ -265,7 +308,7 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
 .panel-resizer.horizontal { cursor: row-resize; }
 
 .panel-resizer:hover {
-    background-color: var(--color-accent-translucent);
+    background-color: transparent;
 }
 
 /* Create a larger, invisible hitzone around the resizer element */
@@ -336,7 +379,7 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
 }
 
 .panel.is-pinned .panel-header {
-    background-color: var(--color-accent-dark);
+    background-color: var(--color-background-pinned);
 }
 
 /* Default state: show the normal pin icon with a muted color */
@@ -359,6 +402,9 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
 .panel.is-collapsed .panel-content {
     display: none;
 }
+
+
+
 .panel.is-collapsed .panel-header {
     flex-direction: column;
     width: 30px; /* Must match CONFIG.COLLAPSED_SIZE */
@@ -386,6 +432,108 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
 }
 .panel.is-collapsed .panel-title {
     order: 3;
+}
+
+/* -- Vertical Collapse -- */
+.panel.is-collapsed-vertically .panel-header {
+    flex-direction: column;
+    width: 30px;
+    height: 100%;
+    justify-content: flex-start;
+    padding: 8px 4px;
+}
+.panel.is-collapsed-vertically .panel-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: left;
+    margin: 10px 0;
+}
+.panel.is-collapsed-vertically .panel-actions {
+    flex-direction: column;
+}
+.panel.is-collapsed-vertically .panel-action-btn[data-action="collapse"] {
+    transform: rotate(180deg);
+}
+.panel.is-collapsed-vertically [data-action="pin"] {
+    order: 1;
+}
+.panel.is-collapsed-vertically .panel-actions {
+    order: 2;
+}
+.panel.is-collapsed-vertically .panel-title {
+    order: 3;
+}
+
+/* -- Horizontal Collapse -- */
+.panel.is-collapsed-horizontally {
+    flex-direction: row;
+    align-items: center;
+    height: 30px !important; /* Override layout height */
+}
+.panel.is-collapsed-horizontally .panel-header {
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    padding: 4px 8px;
+    align-items: center;
+}
+.panel.is-collapsed-horizontally .panel-title {
+    writing-mode: horizontal-tb;
+    transform: none;
+    margin: 0;
+}
+.panel.is-collapsed-horizontally .panel-actions {
+    flex-direction: row;
+}
+
+/* Special handling for header buttons when moved to header */
+.panel.is-collapsed .panel-header .markdown-toolbar {
+    padding: 0;
+    gap: 6px;
+}
+.panel.is-collapsed .panel-header .markdown-toolbar .btn {
+    padding: 3px;
+    background: transparent;
+}
+.panel.is-collapsed .panel-header .markdown-toolbar .btn:hover:not(:disabled) {
+    background: var(--button-hover-bg);
+}
+.panel.is-collapsed-horizontally .panel-header .markdown-toolbar {
+    flex-direction: row;
+}
+.panel.is-collapsed-vertically .panel-header .markdown-toolbar {
+    flex-direction: column;
+}
+.panel.is-collapsed-vertically .panel-header .toolbar-separator {
+    height: 1px;
+    width: 16px;
+    margin: 2px 0;
+}
+
+/* Special handling for action buttons when moved to header */
+.panel.is-collapsed .panel-header .action-list {
+    display: flex;
+    padding: 0;
+    gap: 4px;
+    margin: 0;
+}
+.panel.is-collapsed-horizontally .panel-header .action-list {
+    flex-direction: row;
+}
+.panel.is-collapsed-vertically .panel-header .action-list {
+    flex-direction: column;
+}
+.panel.is-collapsed .panel-header .action-item {
+    padding: 2px;
+    background: transparent;
+    border-radius: 3px;
+}
+.panel.is-collapsed .panel-header .action-item:hover {
+    background: var(--button-hover-bg);
+}
+.panel.is-collapsed .panel-header .action-item svg {
+    width: 12px;
+    height: 12px;
 }
 
 /* --- Content Styling --- */
@@ -430,42 +578,103 @@ body.is-dragging .panel-content::-webkit-scrollbar-thumb {
 
 .markdown-toolbar {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
     gap: 8px;
+    padding: 8px;
     height: 100%;
 }
 
 .markdown-toolbar .btn {
-    background-color: var(--color-accent);
-    color: var(--color-background);
-    border: none;
-    padding: 4px 8px;
+    padding: 6px 10px;
+    background: var(--button-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     cursor: pointer;
-    font-weight: 500;
     font-size: 12px;
-    transition: background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+    white-space: nowrap;
 }
 
 .markdown-toolbar .btn:hover:not(:disabled) {
-    background-color: var(--color-accent-dark);
+    background: var(--button-hover-bg);
+    color: var(--text-color);
+    transform: translateY(-1px);
 }
 
 .markdown-toolbar .btn:disabled {
-    background-color: var(--color-border);
-    color: var(--color-text-muted);
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-/* Force the enabled buttons in the toolbar to have the correct style */
-.markdown-toolbar .btn:not(:disabled) {
-    background-color: var(--color-accent);
-    color: var(--color-background);
+.markdown-toolbar .btn svg {
+    width: 14px;
+    height: 14px;
 }
 
+/* Toolbar separator */
+.toolbar-separator {
+    width: 1px;
+    height: 20px;
+    background: var(--border-color);
+    margin: 0 4px;
+}
+
+/* Styles for the new vertical toolbar on the left (header-panel) */
 .header-panel .panel-content {
-    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 10px;
+    height: 100%;
+}
+.header-panel .markdown-toolbar {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.action-bar-panel .panel-content {
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.action-list {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    width: 100%;
+    align-items: center;
+}
+
+.action-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: auto;
+}
+
+.action-item:hover {
+    background-color: var(--color-background-hover);
+    color: var(--color-text);
+}
+
+.action-item svg {
+    stroke: currentColor;
+    width: 16px;
+    height: 16px;
 }
 
 .alignment-guide {
@@ -494,3 +703,70 @@ body.is-dragging {
     cursor: grabbing;
     user-select: none;
 }
+
+/* --- MARKDOWN EDITOR --- */
+.markdown-editor {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    background-color: var(--panel-bg);
+    color: var(--text-color);
+    border: none;
+    border-radius: 0;
+    padding: 12px;
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.markdown-editor:focus {
+    border: none;
+    box-shadow: none;
+}
+
+/* Markdown editor scrollbar styles */
+.markdown-editor::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.markdown-editor::-webkit-scrollbar {
+    width: 10px;
+    height: 0;
+}
+
+.markdown-editor::-webkit-scrollbar-thumb {
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    background-color: transparent;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.markdown-editor:hover::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+}
+
+.markdown-editor::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-muted);
+}
+
+
+
+/* Hide title and pin button for the action bar */
+.action-bar-panel .panel-title,
+.action-bar-panel .panel-action-btn[data-action="pin"] {
+    display: none;
+}
+
+.action-bar-panel .panel-content {
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+
+
+

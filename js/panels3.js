@@ -1,6 +1,234 @@
 (function() {
     'use strict';
 
+    // ===== DEFAULT LAYOUT DATA =====
+    const DEFAULT_LAYOUT = {
+        "version": "1.0",
+        "timestamp": "2025-07-03T06:39:44.916Z",
+        "tree": {
+            "id": "5ad14758-daac-4b2c-8592-fece794bdb50",
+            "direction": "vertical",
+            "split": 0.011787819253438114,
+            "isPinned": false,
+            "isCollapsed": false,
+            "isMainContent": false,
+            "children": [
+                {
+                    "id": "panel-2-1751524681458",
+                    "direction": null,
+                    "split": 0.5,
+                    "isPinned": true,
+                    "isCollapsed": true,
+                    "isMainContent": false,
+                    "children": [],
+                    "leaf": true
+                },
+                {
+                    "id": "bd242593-1244-400d-be52-eb677bdc5a4d",
+                    "direction": "vertical",
+                    "split": 0.8791500988234562,
+                    "isPinned": false,
+                    "isCollapsed": false,
+                    "isMainContent": false,
+                    "children": [
+                        {
+                            "id": "7ee4d068-e236-477e-8ffe-39f1c7f01461",
+                            "direction": "horizontal",
+                            "split": 0.967802523190329,
+                            "isPinned": false,
+                            "isCollapsed": false,
+                            "isMainContent": false,
+                            "children": [
+                                {
+                                    "id": "d90ec94e-7e9f-4069-b1c3-ad3ab8afe391",
+                                    "direction": "horizontal",
+                                    "split": 0.07962138663646175,
+                                    "isPinned": false,
+                                    "isCollapsed": false,
+                                    "isMainContent": false,
+                                    "children": [
+                                        {
+                                            "id": "panel-1-1751524681458",
+                                            "direction": null,
+                                            "split": 0.5,
+                                            "isPinned": true,
+                                            "isCollapsed": true,
+                                            "isMainContent": false,
+                                            "children": [],
+                                            "leaf": true
+                                        },
+                                        {
+                                            "id": "cc44a063-87be-4a2f-b5e1-fda11ab4c7bd",
+                                            "direction": "vertical",
+                                            "split": 0.5,
+                                            "isPinned": false,
+                                            "isCollapsed": false,
+                                            "isMainContent": false,
+                                            "children": [
+                                                {
+                                                    "id": "fc3915bc-6529-475d-9c4b-278e97199a3a",
+                                                    "direction": "vertical",
+                                                    "split": 0.2956653882609988,
+                                                    "isPinned": false,
+                                                    "isCollapsed": false,
+                                                    "isMainContent": false,
+                                                    "children": [
+                                                        {
+                                                            "id": "panel-3-1751524681459",
+                                                            "direction": null,
+                                                            "split": 0.5,
+                                                            "isPinned": true,
+                                                            "isCollapsed": false,
+                                                            "isMainContent": false,
+                                                            "children": [],
+                                                            "leaf": true
+                                                        },
+                                                        {
+                                                            "id": "df615640-943f-49d6-adf9-f3acc7f8dcd4",
+                                                            "direction": "vertical",
+                                                            "split": 0.5,
+                                                            "isPinned": false,
+                                                            "isCollapsed": false,
+                                                            "isMainContent": false,
+                                                            "children": [
+                                                                {
+                                                                    "id": "panel-10-1751524681464",
+                                                                    "direction": null,
+                                                                    "split": 0.5,
+                                                                    "isPinned": false,
+                                                                    "isCollapsed": false,
+                                                                    "isMainContent": false,
+                                                                    "children": [],
+                                                                    "leaf": true
+                                                                },
+                                                                {
+                                                                    "id": "panel-7-1751524681463",
+                                                                    "direction": null,
+                                                                    "split": 0.5,
+                                                                    "isPinned": false,
+                                                                    "isCollapsed": false,
+                                                                    "isMainContent": false,
+                                                                    "children": [],
+                                                                    "leaf": true
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "id": "b49e17af-e8fd-4d2b-9b51-419e2bc72de2",
+                                                    "direction": "horizontal",
+                                                    "split": 0.5,
+                                                    "isPinned": false,
+                                                    "isCollapsed": false,
+                                                    "isMainContent": false,
+                                                    "children": [
+                                                        {
+                                                            "id": "panel-4-1751524681459",
+                                                            "direction": null,
+                                                            "split": 0.5,
+                                                            "isPinned": false,
+                                                            "isCollapsed": false,
+                                                            "isMainContent": true,
+                                                            "children": [],
+                                                            "leaf": true
+                                                        },
+                                                        {
+                                                            "id": "d2f995a6-d967-473e-b2b5-8c255fb7610a",
+                                                            "direction": "vertical",
+                                                            "split": 0.5,
+                                                            "isPinned": false,
+                                                            "isCollapsed": false,
+                                                            "isMainContent": false,
+                                                            "children": [
+                                                                {
+                                                                    "id": "panel-9-1751524681463",
+                                                                    "direction": null,
+                                                                    "split": 0.5,
+                                                                    "isPinned": false,
+                                                                    "isCollapsed": false,
+                                                                    "isMainContent": false,
+                                                                    "children": [],
+                                                                    "leaf": true
+                                                                },
+                                                                {
+                                                                    "id": "1955b473-21f1-45a1-a669-f56193aa419c",
+                                                                    "direction": "horizontal",
+                                                                    "split": 0.5,
+                                                                    "isPinned": false,
+                                                                    "isCollapsed": false,
+                                                                    "isMainContent": false,
+                                                                    "children": [
+                                                                        {
+                                                                            "id": "panel-8-1751524681463",
+                                                                            "direction": null,
+                                                                            "split": 0.5,
+                                                                            "isPinned": false,
+                                                                            "isCollapsed": false,
+                                                                            "isMainContent": false,
+                                                                            "children": [],
+                                                                            "leaf": true
+                                                                        },
+                                                                        {
+                                                                            "id": "panel-11-1751524681464",
+                                                                            "direction": null,
+                                                                            "split": 0.5,
+                                                                            "isPinned": false,
+                                                                            "isCollapsed": false,
+                                                                            "isMainContent": false,
+                                                                            "children": [],
+                                                                            "leaf": true
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id": "panel-5-1751524681459",
+                                    "direction": null,
+                                    "split": 0.5,
+                                    "isPinned": true,
+                                    "isCollapsed": false,
+                                    "isMainContent": false,
+                                    "children": [],
+                                    "leaf": true
+                                }
+                            ]
+                        },
+                        {
+                            "id": "panel-6-1751524681459",
+                            "direction": null,
+                            "split": 0.5,
+                            "isPinned": true,
+                            "isCollapsed": false,
+                            "isMainContent": false,
+                            "children": [],
+                            "leaf": true
+                        }
+                    ]
+                }
+            ]
+        },
+        "markdown": {
+            "panel-3-1751524681459": "### Panel 3\n\nContent Area.",
+            "panel-4-1751524681459": "# Responsive\n\nDraggable content area.",
+            "panel-5-1751524681459": "### Panel 5\n\nContent Area.",
+            "panel-6-1751524681459": "### Panel 6\n\nContent Area.",
+            "panel-7-1751524681463": "# Efficient\n\nDraggable content area.",
+            "panel-8-1751524681463": "# Efficient\n\nDraggable content area.",
+            "panel-9-1751524681463": "# Modular\n\nDraggable content area.",
+            "panel-10-1751524681464": "# Organized\n\nDraggable content area.",
+            "panel-11-1751524681464": "# Fluid\n\nDraggable content area."
+        },
+        "panelCount": 12
+    };
+
     // ===== CONFIGURATION =====
     const CONFIG = {
         RESIZER_THICKNESS: 5,
@@ -186,38 +414,42 @@
 
         init() {
             this.setupUI();
-            this.resetLayout();
+            // Load default layout instead of resetLayout
+            this.loadLayout(DEFAULT_LAYOUT);
             this.setupEventListeners();
         }
 
         setupUI() {
             this.dom = {
-                addPanelBtn: document.getElementById('add-panel-btn'),
-                resetLayoutBtn: document.getElementById('reset-layout-btn'),
-                undoBtn: document.getElementById('undo-btn'),
-                redoBtn: document.getElementById('redo-btn'),
+                addPanelBtn: null,
+                resetLayoutBtn: null,
+                undoBtn: null,
+                redoBtn: null,
             };
-
-            // Only bind events if buttons exist
-            if (this.dom.addPanelBtn) this.dom.addPanelBtn.onclick = () => this.addPanel();
-            if (this.dom.resetLayoutBtn) this.dom.resetLayoutBtn.onclick = () => this.resetLayout();
-            if (this.dom.undoBtn) this.dom.undoBtn.onclick = () => this.undo();
-            if (this.dom.redoBtn) this.dom.redoBtn.onclick = () => this.redo();
-            
-            this.history.on('change', ({ canUndo, canRedo }) => {
-                if (this.dom.undoBtn) this.dom.undoBtn.disabled = !canUndo;
-                if (this.dom.redoBtn) this.dom.redoBtn.disabled = !canRedo;
-            });
         }
         
         setupEventListeners() {
             this.container.addEventListener('pointerdown', this.handlePointerDown);
             window.addEventListener('resize', () => this.layout());
             
-            window.addEventListener('keydown', (e) => {
+            // Add double-click event listener for markdown editing
+            this.container.addEventListener('dblclick', this.handleDoubleClick.bind(this));
+            
+            if (this.dom.addPanelBtn) this.dom.addPanelBtn.addEventListener('click', () => this.addPanel());
+            if (this.dom.resetLayoutBtn) this.dom.resetLayoutBtn.addEventListener('click', () => this.resetLayout());
+            if (this.dom.undoBtn) this.dom.undoBtn.addEventListener('click', () => this.undo());
+            if (this.dom.redoBtn) this.dom.redoBtn.addEventListener('click', () => this.redo());
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
                 if (e.ctrlKey || e.metaKey) {
-                    if (e.key === 'z') { e.preventDefault(); this.undo(); }
-                    if (e.key === 'y') { e.preventDefault(); this.redo(); }
+                    if (e.key === 'z' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.undo();
+                    } else if ((e.key === 'y') || (e.key === 'z' && e.shiftKey)) {
+                        e.preventDefault();
+                        this.redo();
+                    }
                 }
             });
         }
@@ -230,9 +462,11 @@
             this.nextPanelNumber = 1;
             this.history.clear();
 
-            // 2. Create the five panels
+            // 2. Create the six panels (added action bar)
             const headerPanel = this.createPanel();
             headerPanel.element.classList.add('header-panel');
+            const actionBarPanel = this.createPanel();
+            actionBarPanel.element.classList.add('action-bar-panel');
             const leftPanel = this.createPanel();
             const mainPanel = this.createPanel();
             const rightPanel = this.createPanel();
@@ -240,6 +474,7 @@
 
             // 3. Create the BSP nodes for each panel
             const headerNode = new BSPNode({ id: headerPanel.id, element: headerPanel.element, isPinned: true });
+            const actionBarNode = new BSPNode({ id: actionBarPanel.id, element: actionBarPanel.element, isPinned: true });
             const leftNode = new BSPNode({ id: leftPanel.id, element: leftPanel.element, isPinned: true });
             const mainNode = new BSPNode({ id: mainPanel.id, element: mainPanel.element, isMainContent: true });
             const rightNode = new BSPNode({ id: rightPanel.id, element: rightPanel.element, isPinned: true });
@@ -247,38 +482,48 @@
 
             // 4. Build the tree structure from the bottom up for the content area
             const rightContainer = new BSPNode({
-                direction: 'vertical',
+                direction: 'horizontal', // mainNode is on the left of rightNode
                 split: 0.8, children: [mainNode, rightNode]
             });
             mainNode.parent = rightContainer;
             rightNode.parent = rightContainer;
 
-            const topContainer = new BSPNode({
-                direction: 'vertical',
-                split: 0.2, children: [leftNode, rightContainer]
+            // This container will hold the header panel (now on the left) and the left panel, side-by-side
+            const headerAndLeftContainer = new BSPNode({
+                direction: 'horizontal',
+                split: 0.25,
+                children: [headerNode, leftNode]
             });
-            leftNode.parent = topContainer;
-            rightContainer.parent = topContainer;
+            headerNode.parent = headerAndLeftContainer;
+            leftNode.parent = headerAndLeftContainer;
+
+            const topContentContainer = new BSPNode({
+                direction: 'horizontal',
+                split: 0.2,
+                children: [headerAndLeftContainer, rightContainer]
+            });
+            headerAndLeftContainer.parent = topContentContainer;
+            rightContainer.parent = topContentContainer;
             
             const mainBodyContainer = new BSPNode({
-                direction: 'horizontal',
-                split: 0.85, children: [topContainer, footerNode]
+                direction: 'vertical', // The main content area is above the footer
+                split: 0.9, children: [topContentContainer, footerNode]
             });
-            topContainer.parent = mainBodyContainer;
+            topContentContainer.parent = mainBodyContainer;
             footerNode.parent = mainBodyContainer;
 
-            // 5. Create the root with the header
+            // 5. Create the root, with the action bar (now on top) above the main body
             this.root = new BSPNode({
-                direction: 'horizontal',
-                split: 0.1, // Header gets 10%
-                children: [headerNode, mainBodyContainer]
+                direction: 'vertical',
+                split: 0.08, // The action bar gets 8% of the total height
+                children: [actionBarNode, mainBodyContainer]
             });
-            headerNode.parent = this.root;
+            actionBarNode.parent = this.root;
             mainBodyContainer.parent = this.root;
-
 
             // 6. Populate the global panels map with the structural panels
             this.panels.set(headerPanel.id, { node: headerNode, element: headerPanel.element });
+            this.panels.set(actionBarPanel.id, { node: actionBarNode, element: actionBarPanel.element });
             this.panels.set(leftPanel.id, { node: leftNode, element: leftPanel.element });
             this.panels.set(mainPanel.id, { node: mainNode, element: mainPanel.element });
             this.panels.set(rightPanel.id, { node: rightNode, element: rightPanel.element });
@@ -292,8 +537,8 @@
             const randomWords = ["Dynamic", "Fluid", "Modular", "Intuitive", "Responsive", "Creative", "Organized", "Productive", "Efficient", "Seamless", "Integrated"];
 
             this.panels.forEach((panel, id) => {
-                if (panel.element.classList.contains('header-panel')) {
-                    return; // Skip header panel
+                if (panel.element.classList.contains('header-panel') || panel.element.classList.contains('action-bar-panel')) {
+                    return; // Skip header and action bar panels
                 }
 
                 if (panel.node.isPinned) {
@@ -308,13 +553,45 @@
             
             const markdownToolbar = `
                 <div class="markdown-toolbar">
-                    <button class="btn" data-action="add-panel">Add Panel</button>
-                    <button class="btn" data-action="reset-layout">Reset Layout</button>
-                    <button class="btn" data-action="undo" id="header-undo-btn" disabled>Undo</button>
-                    <button class="btn" data-action="redo" id="header-redo-btn" disabled>Redo</button>
+                    <button class="btn" data-action="add-panel" title="Add Panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    </button>
+                    <button class="btn" data-action="reset-layout" title="Reset Layout">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                    </button>
+                    <button class="btn" data-action="undo" id="header-undo-btn" title="Undo (Ctrl+Z)" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                    </button>
+                    <button class="btn" data-action="redo" id="header-redo-btn" title="Redo (Ctrl+Y)" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                    </button>
+                    <div class="toolbar-separator"></div>
+                    <button class="btn" data-action="save-layout" title="Save Layout as JSON">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                    </button>
+                    <button class="btn" data-action="load-layout" title="Load Layout from JSON">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M10 15l2 2 4-4"/></svg>
+                    </button>
                 </div>
             `;
             this.setPanelHtml(headerNode.id, markdownToolbar);
+
+            const actionBarContent = `
+                <div class="action-bar-content">
+                    <div class="action-list">
+                        <button class="action-item" data-action="new-document" title="New Document">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                        </button>
+                        <button class="action-item" data-action="open-file" title="Open File">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                        </button>
+                        <button class="action-item" data-action="save" title="Save">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            this.setPanelHtml(actionBarNode.id, actionBarContent);
 
             // 10. Final layout pass and save
             this.layout();
@@ -357,13 +634,48 @@
             if (headerPanel) {
                 const markdownToolbar = `
                     <div class="markdown-toolbar">
-                        <button class="btn" data-action="add-panel">Add Panel</button>
-                        <button class="btn" data-action="reset-layout">Reset Layout</button>
-                        <button class="btn" data-action="undo" id="header-undo-btn" disabled>Undo</button>
-                        <button class="btn" data-action="redo" id="header-redo-btn" disabled>Redo</button>
+                        <button class="btn" data-action="add-panel" title="Add Panel">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        </button>
+                        <button class="btn" data-action="reset-layout" title="Reset Layout">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                        </button>
+                        <button class="btn" data-action="undo" id="header-undo-btn" title="Undo (Ctrl+Z)" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                        </button>
+                        <button class="btn" data-action="redo" id="header-redo-btn" title="Redo (Ctrl+Y)" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                        </button>
+                        <div class="toolbar-separator"></div>
+                        <button class="btn" data-action="save-layout" title="Save Layout as JSON">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                        </button>
+                        <button class="btn" data-action="load-layout" title="Load Layout from JSON">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M10 15l2 2 4-4"/></svg>
+                        </button>
                     </div>
                 `;
                 this.setPanelHtml(headerPanel.node.id, markdownToolbar);
+            }
+
+            const actionBarPanel = Array.from(this.panels.values()).find(p => p.element.classList.contains('action-bar-panel'));
+            if (actionBarPanel) {
+                const actionBarContent = `
+                    <div class="action-bar-content">
+                        <div class="action-list">
+                            <button class="action-item" data-action="new-document" title="New Document">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                            </button>
+                            <button class="action-item" data-action="open-file" title="Open File">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                            </button>
+                            <button class="action-item" data-action="save" title="Save">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                this.setPanelHtml(actionBarPanel.node.id, actionBarContent);
             }
         }
         
@@ -829,6 +1141,8 @@
                 case 'reset-layout': this.resetLayout(); break;
                 case 'undo': this.undo(); break;
                 case 'redo': this.redo(); break;
+                case 'save-layout': this.saveLayoutToFile(); break;
+                case 'load-layout': this.loadLayoutFromFile(); break;
 
                 // Markdown Content Actions
                 case 'add-h1':
@@ -884,7 +1198,23 @@
                 node.split = newSplit;
 
             } else { // Horizontal resize
-                node.split = (e.clientY - parentRect.y) / (parentRect.height - CONFIG.RESIZER_THICKNESS);
+                const newSplit = (e.clientY - parentRect.y) / (parentRect.height - CONFIG.RESIZER_THICKNESS);
+                const [child1, child2] = node.children;
+                const availableHeight = parentRect.height - CONFIG.RESIZER_THICKNESS;
+                const height1 = newSplit * availableHeight;
+                const height2 = availableHeight - height1;
+
+                // Drag-to-collapse logic for horizontal splits
+                if (child1.isLeaf() && child1.isPinned) {
+                    if (!child1.isCollapsed && height1 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
+                    else if (child1.isCollapsed && height1 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child1.id);
+                }
+                if (child2.isLeaf() && child2.isPinned) {
+                    if (!child2.isCollapsed && height2 < CONFIG.COLLAPSED_SIZE - CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                    else if (child2.isCollapsed && height2 > CONFIG.COLLAPSED_SIZE + CONFIG.DRAG_COLLAPSE_THRESHOLD) this.toggleCollapse(child2.id);
+                }
+
+                node.split = newSplit;
             }
             this.layout();
         }
@@ -1131,9 +1461,23 @@
             element.classList.toggle('is-pinned', node.isPinned);
             element.classList.toggle('is-collapsed', node.isCollapsed);
 
+            // Add classes for collapse direction
+            if (node.isCollapsed) {
+                if (node.parent?.direction === 'horizontal') {
+                    element.classList.add('is-collapsed-horizontally');
+                    element.classList.remove('is-collapsed-vertically');
+                } else { // 'vertical'
+                    element.classList.add('is-collapsed-vertically');
+                    element.classList.remove('is-collapsed-horizontally');
+                }
+            } else {
+                element.classList.remove('is-collapsed-horizontally', 'is-collapsed-vertically');
+            }
+
             const collapseBtn = element.querySelector('[data-action="collapse"]');
             if (collapseBtn) {
-                const isCollapsible = node.isPinned && node.parent?.direction === 'vertical';
+                const isAlwaysCollapsed = element.classList.contains('header-panel');
+                const isCollapsible = node.isPinned && !isAlwaysCollapsed;
                 collapseBtn.style.display = isCollapsible ? 'flex' : 'none';
             }
 
@@ -1182,10 +1526,31 @@
 
         toggleCollapse(panelId) {
             const panel = this.panels.get(panelId);
-            if (!panel || !panel.node.isPinned || panel.node.parent?.direction !== 'vertical') return;
-            const { node } = panel;
+            if (!panel || !panel.node.isPinned) return;
+            const { node, element } = panel;
+
+            // Prevent header panel from being toggled, but allow action bar
+            if (element.classList.contains('header-panel')) {
+                return;
+            }
             
             node.isCollapsed = !node.isCollapsed;
+
+            // Move action buttons for action-bar-panel on collapse/expand
+            if (element.classList.contains('action-bar-panel')) {
+                const header = element.querySelector('.panel-header');
+                const content = element.querySelector('.panel-content');
+                const actionList = element.querySelector('.action-list');
+
+                if (actionList && header && content) {
+                    if (node.isCollapsed) {
+                        header.appendChild(actionList);
+                    } else {
+                        content.appendChild(actionList);
+                    }
+                }
+            }
+            
             this.layout();
             this.saveState(`Collapse panel ${node.isCollapsed ? 'on' : 'off'}`);
         }
@@ -1215,6 +1580,366 @@
             bottomGuide.style.transform = `translateY(${rect.y + rect.height}px)`;
             leftGuide.style.transform = `translateX(${rect.x}px)`;
             rightGuide.style.transform = `translateX(${rect.x + rect.width}px)`;
+        }
+
+        handleDoubleClick(e) {
+            // Check if double-click is on panel content (not header, resizer, or buttons)
+            const panelContent = e.target.closest('.panel-content');
+            if (!panelContent) return;
+            
+            // Don't edit if clicking on buttons or interactive elements
+            if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) {
+                return;
+            }
+            
+            const panel = panelContent.closest('.panel');
+            if (!panel) return;
+            
+            const panelId = panel.dataset.panelId;
+            if (!panelId) return;
+            
+            // Skip header panel
+            if (panel.classList.contains('header-panel')) return;
+            
+            this.startMarkdownEdit(panelId, panelContent);
+        }
+
+        startMarkdownEdit(panelId, contentElement) {
+            const currentMarkdown = this.markdownContent.get(panelId) || '';
+            const panel = contentElement.closest('.panel');
+            
+            // Create textarea for editing
+            const textarea = document.createElement('textarea');
+            textarea.className = 'markdown-editor';
+            textarea.value = currentMarkdown;
+            textarea.placeholder = 'Enter markdown content...';
+            
+            // Style the textarea
+            Object.assign(textarea.style, {
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                outline: 'none',
+                resize: 'none',
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                lineHeight: '1.5',
+                padding: '10px',
+                backgroundColor: 'var(--panel-bg)',
+                color: 'var(--text-color)',
+                boxSizing: 'border-box'
+            });
+            
+            // Replace content with editor
+            contentElement.innerHTML = '';
+            contentElement.appendChild(textarea);
+            
+            // Focus and select all text
+            textarea.focus();
+            textarea.select();
+            
+            // Handle save
+            const handleSave = () => {
+                const newMarkdown = textarea.value;
+                this.setPanelMarkdown(panelId, newMarkdown);
+                this.saveState(`Edit panel ${panelId}`);
+                this.exitMarkdownEdit(contentElement);
+            };
+            
+            // Handle cancel
+            const handleCancel = () => {
+                this.exitMarkdownEdit(contentElement);
+                // Restore original content
+                const originalMarkdown = this.markdownContent.get(panelId) || '';
+                this.setPanelHtml(panelId, this.markdownConverter.makeHtml(originalMarkdown));
+            };
+            
+            // Auto-save on blur (clicking away)
+            const handleBlur = () => {
+                setTimeout(() => {
+                    // Only save if we're still in edit mode (not cancelled)
+                    if (this.currentEdit && this.currentEdit.textarea === textarea) {
+                        handleSave();
+                    }
+                }, 100); // Small delay to allow for button clicks
+            };
+            
+            // Keyboard shortcuts
+            const handleKeyDown = (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 's') {
+                        e.preventDefault();
+                        handleSave();
+                    }
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    handleCancel();
+                }
+            };
+            
+            textarea.addEventListener('keydown', handleKeyDown);
+            textarea.addEventListener('blur', handleBlur);
+            
+            // Store cleanup function
+            this.currentEdit = {
+                textarea,
+                handleKeyDown,
+                handleBlur,
+                handleSave,
+                handleCancel,
+                contentElement
+            };
+        }
+
+        exitMarkdownEdit(contentElement) {
+            if (!this.currentEdit) return;
+            
+            const { textarea, handleKeyDown, handleBlur } = this.currentEdit;
+            
+            // Remove event listeners
+            textarea.removeEventListener('keydown', handleKeyDown);
+            textarea.removeEventListener('blur', handleBlur);
+            
+            // Clean up
+            this.currentEdit = null;
+        }
+
+        saveLayoutToFile() {
+            // Create layout data including tree structure and markdown content
+            const layoutData = {
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                tree: this.root.toJSON(),
+                markdown: Object.fromEntries(this.markdownContent),
+                panelCount: this.nextPanelNumber
+            };
+
+            // Convert to JSON string with pretty formatting
+            const jsonString = JSON.stringify(layoutData, null, 2);
+            
+            // Create blob and download link
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create temporary download link
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `panel-layout-${new Date().toISOString().slice(0, 10)}.json`;
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+        }
+
+        loadLayoutFromFile() {
+            // Create file input element
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+            
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const layoutData = JSON.parse(e.target.result);
+                        this.loadLayout(layoutData);
+                    } catch (error) {
+                        alert('Failed to load layout: Invalid JSON file');
+                        console.error('Layout load error:', error);
+                    }
+                };
+                reader.readAsText(file);
+            });
+            
+            // Trigger file picker
+            fileInput.click();
+        }
+
+        loadLayout(layoutData) {
+            // Validate layout data
+            if (!layoutData.tree || !layoutData.version) {
+                alert('Invalid layout file format');
+                return;
+            }
+
+            // Clear current layout
+            this.container.innerHTML = '';
+            this.panels.clear();
+            this.resizers = [];
+            this.history.clear();
+            
+            // Restore panel count
+            this.nextPanelNumber = layoutData.panelCount || 1;
+            
+            // Restore markdown content
+            this.markdownContent = new Map(Object.entries(layoutData.markdown || {}));
+            
+            // Create all panel elements first
+            const panelElementsMap = new Map();
+            const createPanelElements = (node) => {
+                if (node.leaf) {
+                    const element = this.createPanelElement(0); // Panel number will be set from title
+                    element.dataset.panelId = node.id;
+                    
+                    // Set special classes if needed
+                    if (node.isMainContent) {
+                        // No special class needed for main content in this implementation
+                    }
+                    
+                    panelElementsMap.set(node.id, element);
+                } else if (node.children) {
+                    node.children.forEach(createPanelElements);
+                }
+            };
+            createPanelElements(layoutData.tree);
+            
+            // Rebuild BSP tree with element references
+            this.root = BSPNode.fromJSON(layoutData.tree, null, panelElementsMap);
+            
+            // Sync panels map
+            const syncPanels = (node) => {
+                if (node.isLeaf()) {
+                    this.panels.set(node.id, { node, element: node.element });
+                    
+                    // Extract panel number from existing title if available
+                    const markdown = this.markdownContent.get(node.id) || '';
+                    if (markdown && node.element) {
+                        // Look for panel title in markdown or use a default
+                        const titleMatch = markdown.match(/^###?\s*Panel\s*(\d+)/m);
+                        if (titleMatch) {
+                            const titleElement = node.element.querySelector('.panel-title');
+                            if (titleElement) {
+                                titleElement.textContent = `Panel ${titleMatch[1]}`;
+                            }
+                        }
+                    }
+                } else {
+                    node.children.forEach(syncPanels);
+                }
+            };
+            syncPanels(this.root);
+            
+            // Identify special panels based on position in tree
+            // The structure should match what resetLayout creates
+            let headerPanel = null;
+            let actionBarPanel = null;
+            
+            // Navigate tree to find header and action bar panels
+            if (this.root.children && this.root.children.length >= 2) {
+                // Action bar should be first child of root
+                const firstChild = this.root.children[0];
+                if (firstChild.isLeaf()) {
+                    actionBarPanel = this.panels.get(firstChild.id);
+                    if (actionBarPanel) {
+                        actionBarPanel.element.classList.add('action-bar-panel');
+                    }
+                }
+                
+                // Header panel should be in the structure
+                const secondChild = this.root.children[1];
+                if (secondChild.children && secondChild.children.length > 0) {
+                    const topContent = secondChild.children[0];
+                    if (topContent.children && topContent.children.length > 0) {
+                        const headerAndLeft = topContent.children[0];
+                        if (headerAndLeft.children && headerAndLeft.children.length >= 1) {
+                            const possibleHeader = headerAndLeft.children[0];
+                            if (possibleHeader.isLeaf()) {
+                                headerPanel = this.panels.get(possibleHeader.id);
+                                if (headerPanel) {
+                                    headerPanel.element.classList.add('header-panel');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Set up header panel content
+            if (headerPanel) {
+                const markdownToolbar = `
+                    <div class="markdown-toolbar">
+                        <button class="btn" data-action="add-panel" title="Add Panel">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        </button>
+                        <button class="btn" data-action="reset-layout" title="Reset Layout">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                        </button>
+                        <button class="btn" data-action="undo" id="header-undo-btn" title="Undo (Ctrl+Z)" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                        </button>
+                        <button class="btn" data-action="redo" id="header-redo-btn" title="Redo (Ctrl+Y)" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                        </button>
+                        <div class="toolbar-separator"></div>
+                        <button class="btn" data-action="save-layout" title="Save Layout as JSON">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                        </button>
+                        <button class="btn" data-action="load-layout" title="Load Layout from JSON">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M10 15l2 2 4-4"/></svg>
+                        </button>
+                    </div>
+                `;
+                this.setPanelHtml(headerPanel.node.id, markdownToolbar);
+
+                // If header panel is collapsed on load, move toolbar to header
+                if (headerPanel.node.isCollapsed) {
+                    const toolbar = headerPanel.element.querySelector('.markdown-toolbar');
+                    const header = headerPanel.element.querySelector('.panel-header');
+                    if (toolbar && header) {
+                        header.appendChild(toolbar);
+                    }
+                }
+            }
+            
+            // Set up action bar panel content
+            if (actionBarPanel) {
+                const actionBarContent = `
+                    <div class="action-bar-content">
+                        <div class="action-list">
+                            <button class="action-item" data-action="new-document" title="New Document">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+                            </button>
+                            <button class="action-item" data-action="open-file" title="Open File">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                            </button>
+                            <button class="action-item" data-action="save" title="Save">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                this.setPanelHtml(actionBarPanel.node.id, actionBarContent);
+
+                // If action bar panel is collapsed on load, move action buttons to header
+                if (actionBarPanel.node.isCollapsed) {
+                    const actionList = actionBarPanel.element.querySelector('.action-list');
+                    const header = actionBarPanel.element.querySelector('.panel-header');
+                    if (actionList && header) {
+                        header.appendChild(actionList);
+                    }
+                }
+            }
+            
+            // Restore markdown content for all panels
+            this.panels.forEach((panel, id) => {
+                if (!panel.element.classList.contains('header-panel') && !panel.element.classList.contains('action-bar-panel')) {
+                    const markdown = this.markdownContent.get(id) || '';
+                    if (markdown) {
+                        this.setPanelMarkdown(id, markdown);
+                    }
+                }
+            });
+            
+            // Final layout
+            this.layout();
+            this.saveState("Load Layout");
         }
     }
 

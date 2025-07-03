@@ -427,6 +427,16 @@
             if (!target) return;
             const { node: targetNode } = target;
 
+            if (!targetNode.rect) return; // Should not happen in normal flow
+
+            if (direction === 'vertical') {
+                const canSplitV = targetNode.rect.width >= CONFIG.PANEL_MIN_WIDTH * 2 + CONFIG.RESIZER_THICKNESS;
+                if (!canSplitV) return;
+            } else { // horizontal
+                const canSplitH = targetNode.rect.height >= CONFIG.PANEL_MIN_HEIGHT * 2 + CONFIG.RESIZER_THICKNESS;
+                if (!canSplitH) return;
+            }
+
             const newPanel = this.createPanel();
             const newNode = new BSPNode({ id: newPanel.id, element: newPanel.element });
             this.panels.set(newPanel.id, { node: newNode, element: newPanel.element });

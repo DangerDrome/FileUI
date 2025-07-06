@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Integrated Panel System</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+        
+        .info h2 {
+            margin: 0 0 10px 0;
+            color: #0a84ff;
+        }
+        
+        .link {
+            color: #0a84ff;
+            text-decoration: none;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        code {
+            background: #222;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h2>FileUI v004 - Integrated Version</h2>
+        <p>The server is running! You can now access the integrated version at:</p>
+        <p><a href="http://localhost:8000/panels4-integrated.html" class="link" target="_blank">http://localhost:8000/panels4-integrated.html</a></p>
+        
+        <h3>Features:</h3>
+        <ul>
+            <li>✅ v003's superior BSP panel system</li>
+            <li>✅ v004's VS Code-like UI chrome</li>
+            <li>✅ Drag & drop panel rearrangement</li>
+            <li>✅ Panel pinning and collapsing</li>
+            <li>✅ Undo/redo with <code>Ctrl+Z</code> / <code>Ctrl+Shift+Z</code></li>
+            <li>✅ Save layouts with <code>Ctrl+S</code></li>
+            <li>✅ Markdown editing (double-click panel content)</li>
+            <li>✅ Activity bar and status bar</li>
+        </ul>
+        
+        <h3>Keyboard Shortcuts:</h3>
+        <ul>
+            <li><code>Ctrl+Z</code> - Undo</li>
+            <li><code>Ctrl+Shift+Z</code> - Redo</li>
+            <li><code>Ctrl+S</code> - Save layout</li>
+        </ul>
+        
+        <h3>Panel Actions:</h3>
+        <ul>
+            <li>Click split buttons in panel headers to split panels</li>
+            <li>Drag panel headers to rearrange</li>
+            <li>Click pin button to prevent panel from being moved</li>
+            <li>Click collapse button to minimize panel</li>
+            <li>Double-click panel content to edit markdown</li>
+        </ul>
+    </div>
+    
+    <script>
+        // Check if server is accessible
+        fetch('http://localhost:8000/panels4-integrated.html', { method: 'HEAD' })
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ Server is accessible!');
+                } else {
+                    console.error('❌ Server returned:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Cannot reach server:', error);
+                document.querySelector('.info').innerHTML += '<p style="color: #ff6b6b;">⚠️ Cannot reach server. Make sure it\'s running on port 8000.</p>';
+            });
+    </script>
+</body>
+</html>

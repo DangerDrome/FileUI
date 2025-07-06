@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Lucide Icons</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { 
+            background: #1a1a1a; 
+            color: white; 
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .icon-test {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        i {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lucide Icon Test</h1>
+    
+    <div class="icon-test">
+        <i data-lucide="file-heart"></i>
+        <div>file-heart</div>
+    </div>
+    
+    <div class="icon-test">
+        <i data-lucide="search"></i>
+        <div>search</div>
+    </div>
+    
+    <div class="icon-test">
+        <i data-lucide="columns"></i>
+        <div>columns</div>
+    </div>
+    
+    <div class="icon-test">
+        <i data-lucide="panel-left"></i>
+        <div>panel-left</div>
+    </div>
+    
+    <div class="icon-test">
+        <i data-lucide="files"></i>
+        <div>files</div>
+    </div>
+    
+    <div class="icon-test">
+        <i data-lucide="git-branch"></i>
+        <div>git-branch</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Lucide available:', typeof lucide !== 'undefined');
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+                console.log('Icons created');
+            }
+        });
+    </script>
+</body>
+</html>

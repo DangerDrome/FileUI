@@ -1,0 +1,20 @@
+{
+  "name": "fileui",
+  "version": "4.0.0",
+  "description": "A modern file management UI with panel system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "file-manager",
+    "panels",
+    "ui",
+    "bsp"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

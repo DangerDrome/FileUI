@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileUI - Panels v4</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23cccccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v2'/><path d='M14 2v4a2 2 0 0 0 2 2h4'/><path d='M10.29 10.7a2.43 2.43 0 0 0-2.66-.52c-.29.12-.56.3-.78.53l-.35.34-.35-.34a2.43 2.43 0 0 0-2.65-.53c-.3.12-.56.3-.79.53-.95.94-1 2.53.2 3.74L6.5 18l3.6-3.55c1.2-1.21 1.14-2.8.19-3.74Z'/></svg>">
+    <link rel="stylesheet" href="css/panels4-clean.css">
+    <!-- Third-party libraries -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+</head>
+<body>
+    <!-- Header Bar -->
+    <header class="main-header" id="main-header">
+        <div class="header-left">
+            <div class="header-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v2"/>
+                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                    <path d="M10.29 10.7a2.43 2.43 0 0 0-2.66-.52c-.29.12-.56.3-.78.53l-.35.34-.35-.34a2.43 2.43 0 0 0-2.65-.53c-.3.12-.56.3-.79.53-.95.94-1 2.53.2 3.74L6.5 18l3.6-3.55c1.2-1.21 1.14-2.8.19-3.74Z"/>
+                </svg>
+                <h1>FileUI v4</h1>
+            </div>
+            <nav class="menubar" id="menubar">
+                <button class="menu-button" data-menu="file">File</button>
+                <button class="menu-button" data-menu="edit">Edit</button>
+                <button class="menu-button" data-menu="view">View</button>
+                <button class="menu-button" data-menu="terminal">Terminal</button>
+                <button class="menu-button" data-menu="help">Help</button>
+            </nav>
+        </div>
+        <div class="header-center">
+            <div class="header-search-container">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="header-search-input" placeholder="Search files...">
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-action-btn" id="split-editor-btn" aria-label="Split Editor">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="12" y1="3" x2="12" y2="21"></line>
+                </svg>
+            </button>
+            <button class="header-action-btn" id="toggle-sidebar-btn" aria-label="Toggle Sidebar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                </svg>
+            </button>
+            <button class="header-action-btn" id="toggle-panel-btn" aria-label="Toggle Panel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="15" x2="21" y2="15"></line>
+                </svg>
+            </button>
+            <button class="header-action-btn" id="layout-btn" aria-label="Layout">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </button>
+            <button class="header-action-btn" id="more-actions-btn" aria-label="More Actions">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <circle cx="12" cy="5" r="1"></circle>
+                    <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace" id="workspace">
+        <!-- Activity Bar -->
+        <aside class="activity-bar" id="activity-bar">
+            <div class="activity-bar-top">
+                <button class="activity-btn active" data-view="explorer" aria-label="Explorer">
+                    <i data-lucide="files"></i>
+                </button>
+                <button class="activity-btn" data-view="search" aria-label="Search">
+                    <i data-lucide="search"></i>
+                </button>
+                <button class="activity-btn" data-view="git" aria-label="Source Control">
+                    <i data-lucide="git-branch"></i>
+                </button>
+                <button class="activity-btn" data-view="debug" aria-label="Debug">
+                    <i data-lucide="bug"></i>
+                </button>
+                <button class="activity-btn" data-view="extensions" aria-label="Extensions">
+                    <i data-lucide="puzzle"></i>
+                </button>
+            </div>
+            <div class="activity-bar-bottom">
+                <button class="activity-btn" data-view="account" aria-label="Account">
+                    <i data-lucide="user"></i>
+                </button>
+                <button class="activity-btn" data-view="settings" aria-label="Settings">
+                    <i data-lucide="settings-2"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Sidebar (Explorer, Search, etc.) -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Explorer View -->
+            <div class="sidebar-view active" data-view="explorer">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">EXPLORER</h3>
+                    <div class="sidebar-actions">
+                        <button class="icon-btn" aria-label="New File">
+                            <i data-lucide="file-plus"></i>
+                        </button>
+                        <button class="icon-btn" aria-label="New Folder">
+                            <i data-lucide="folder-plus"></i>
+                        </button>
+                        <button class="icon-btn" aria-label="Refresh">
+                            <i data-lucide="refresh-cw"></i>
+                        </button>
+                        <button class="icon-btn" aria-label="Collapse All">
+                            <i data-lucide="fold-vertical"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="file-tree" id="file-tree">
+                    <!-- File tree will be populated here -->
+                </div>
+            </div>
+
+            <!-- Search View -->
+            <div class="sidebar-view" data-view="search">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">SEARCH</h3>
+                </div>
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search">
+                    <div class="search-options">
+                        <label><input type="checkbox"> Match Case</label>
+                        <label><input type="checkbox"> Whole Word</label>
+                        <label><input type="checkbox"> Regex</label>
+                    </div>
+                </div>
+                <div class="search-results" id="search-results">
+                    <!-- Search results will appear here -->
+                </div>
+            </div>
+
+            <!-- Git View -->
+            <div class="sidebar-view" data-view="git">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">SOURCE CONTROL</h3>
+                </div>
+                <div class="git-content">
+                    <p>Git integration coming soon...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Resizer -->
+        <div class="resizer vertical" id="sidebar-resizer"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="main-content">
+            <!-- Editor Container (BSP Panels) -->
+            <div class="editor-container" id="editor-container">
+                <!-- BSP panels will be dynamically created here -->
+                <div class="drop-indicator" id="drop-indicator"></div>
+            </div>
+
+            <!-- Terminal Resizer -->
+            <div class="resizer horizontal" id="terminal-resizer"></div>
+
+            <!-- Terminal Container (BSP Panels) -->
+            <div class="terminal-container" id="terminal-container">
+                <div class="terminal-tabs">
+                    <div class="tabs-list">
+                        <button class="tab active" data-terminal-id="1">
+                            <i data-lucide="terminal"></i>
+                            <span>Terminal</span>
+                            <button class="tab-close"><i data-lucide="x"></i></button>
+                        </button>
+                        <button class="tab" data-terminal-id="2">
+                            <i data-lucide="file-text"></i>
+                            <span>Output</span>
+                            <button class="tab-close"><i data-lucide="x"></i></button>
+                        </button>
+                    </div>
+                    <div class="terminal-actions">
+                        <button class="icon-btn" aria-label="New Terminal">
+                            <i data-lucide="plus"></i>
+                        </button>
+                        <button class="icon-btn" aria-label="Split Terminal">
+                            <i data-lucide="columns"></i>
+                        </button>
+                        <button class="icon-btn" aria-label="Clear Terminal">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div class="terminal-panels" id="terminal-panels">
+                        <!-- Terminal BSP panels will be here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Inspector Panel (Right Sidebar) -->
+        <aside class="inspector" id="inspector">
+            <div class="inspector-header">
+                <h3 class="inspector-title">PROPERTIES</h3>
+            </div>
+            <div class="inspector-content">
+                <p>Properties and details will appear here</p>
+            </div>
+        </aside>
+
+        <!-- Inspector Resizer -->
+        <div class="resizer vertical" id="inspector-resizer"></div>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="status-bar" id="status-bar">
+        <div class="status-left">
+            <span class="status-item">
+                <i data-lucide="git-branch"></i>
+                <span>main</span>
+            </span>
+            <span class="status-item">
+                <i data-lucide="check-circle"></i>
+                <span>0 problems</span>
+            </span>
+        </div>
+        <div class="status-center">
+            <span class="status-item">Ln 1, Col 1</span>
+            <span class="status-item">Spaces: 4</span>
+            <span class="status-item">UTF-8</span>
+        </div>
+        <div class="status-right">
+            <span class="status-item">JavaScript</span>
+            <span class="status-item">
+                <i data-lucide="bell"></i>
+            </span>
+        </div>
+    </footer>
+
+    <!-- Dropdown Menus -->
+    <div class="dropdown-menus" id="dropdown-menus">
+        <!-- File Menu -->
+        <div class="dropdown-menu" data-menu="file">
+            <div class="menu-item" data-action="new-file">
+                <span>New File</span>
+                <span class="shortcut">Ctrl+N</span>
+            </div>
+            <div class="menu-item" data-action="open-file">
+                <span>Open File...</span>
+                <span class="shortcut">Ctrl+O</span>
+            </div>
+            <div class="menu-item" data-action="save">
+                <span>Save</span>
+                <span class="shortcut">Ctrl+S</span>
+            </div>
+            <div class="menu-item" data-action="save-as">
+                <span>Save As...</span>
+                <span class="shortcut">Ctrl+Shift+S</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" data-action="close-editor">
+                <span>Close Editor</span>
+                <span class="shortcut">Ctrl+W</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" data-action="exit">
+                <span>Exit</span>
+            </div>
+        </div>
+
+        <!-- Edit Menu -->
+        <div class="dropdown-menu" data-menu="edit">
+            <div class="menu-item" data-action="undo">
+                <span>Undo</span>
+                <span class="shortcut">Ctrl+Z</span>
+            </div>
+            <div class="menu-item" data-action="redo">
+                <span>Redo</span>
+                <span class="shortcut">Ctrl+Y</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" data-action="cut">
+                <span>Cut</span>
+                <span class="shortcut">Ctrl+X</span>
+            </div>
+            <div class="menu-item" data-action="copy">
+                <span>Copy</span>
+                <span class="shortcut">Ctrl+C</span>
+            </div>
+            <div class="menu-item" data-action="paste">
+                <span>Paste</span>
+                <span class="shortcut">Ctrl+V</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" data-action="find">
+                <span>Find</span>
+                <span class="shortcut">Ctrl+F</span>
+            </div>
+            <div class="menu-item" data-action="replace">
+                <span>Replace</span>
+                <span class="shortcut">Ctrl+H</span>
+            </div>
+        </div>
+
+        <!-- View Menu -->
+        <div class="dropdown-menu" data-menu="view">
+            <div class="menu-item" data-action="toggle-sidebar">
+                <span>Toggle Sidebar</span>
+                <span class="shortcut">Ctrl+B</span>
+            </div>
+            <div class="menu-item" data-action="toggle-terminal">
+                <span>Toggle Terminal</span>
+                <span class="shortcut">Ctrl+`</span>
+            </div>
+            <div class="menu-item" data-action="toggle-inspector">
+                <span>Toggle Inspector</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" data-action="zoom-in">
+                <span>Zoom In</span>
+                <span class="shortcut">Ctrl++</span>
+            </div>
+            <div class="menu-item" data-action="zoom-out">
+                <span>Zoom Out</span>
+                <span class="shortcut">Ctrl+-</span>
+            </div>
+            <div class="menu-item" data-action="reset-zoom">
+                <span>Reset Zoom</span>
+                <span class="shortcut">Ctrl+0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/panels4.js"></script>
+</body>
+</html>

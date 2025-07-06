@@ -261,9 +261,9 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: var(--space-4);
 }
 
-h1 { font-size: var(--text-4xl); }
-h2 { font-size: var(--text-3xl); }
-h3 { font-size: var(--text-2xl); }
+h1 { font-size: calc(var(--text-4xl) * 2); }
+h2 { font-size: calc(var(--text-3xl) * 2); }
+h3 { font-size: calc(var(--text-2xl) * 2); }
 h4 { font-size: var(--text-xl); }
 h5 { font-size: var(--text-lg); }
 h6 { font-size: var(--text-base); }
@@ -345,7 +345,7 @@ pre {
 .nav-tree {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-3);
 }
 
 .nav-section {
@@ -386,7 +386,61 @@ pre {
     width: 20px;
     height: 20px;
     stroke-width: 1.5;
+    vertical-align: middle;
+    display: inline-block;
+    flex-shrink: 0;
 }
+
+/* Light mode icon styling for nav-icon */
+body:not(.dark) .nav-icon {
+    filter: brightness(0) saturate(100%);
+    opacity: 0.7;
+}
+
+/* Add right margin when icon is followed by text or other elements */
+.nav-icon:not(:last-child) {
+    margin-right: var(--space-4);
+}
+
+/* For icons in flex containers (like buttons), rely on gap instead */
+.btn .nav-icon,
+.flex .nav-icon {
+    margin-right: 0;
+}
+
+/* Specific margin for icons in nav items */
+.nav-item .nav-icon {
+    margin-right: var(--space-4);
+}
+
+/* Lucide SVG icons */
+svg.lucide {
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* Light mode icon styling */
+body:not(.dark) svg.lucide {
+    filter: brightness(0) saturate(100%);
+    opacity: 0.7;
+}
+
+/* Add margin to SVG icons when followed by content */
+svg.lucide:not(:last-child) {
+    margin-right: var(--space-4);
+}
+
+/* No margin in flex containers that use gap */
+.btn svg.lucide,
+.flex svg.lucide {
+    margin-right: 0;
+}
+
+/* Larger margin for nav items */
+.nav-item svg.lucide {
+    margin-right: var(--space-4);
+}
+
 
 /* Controls Panel */
 .controls-panel {
@@ -440,7 +494,7 @@ pre {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
@@ -536,7 +590,6 @@ pre {
 }
 
 .section-title {
-    font-size: var(--text-3xl);
     font-weight: var(--font-bold);
     margin-bottom: var(--space-4);
 }
@@ -601,7 +654,7 @@ pre {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
     padding: var(--space-4);
     border: none;
     border-radius: var(--radius-md);
@@ -681,9 +734,6 @@ pre {
         grid-template-columns: 1fr;
     }
     
-    .section-title {
-        font-size: var(--text-2xl);
-    }
     
     .icon-grid {
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
@@ -726,6 +776,7 @@ pre {
 .items-center { align-items: center; }
 .justify-center { justify-content: center; }
 .gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
 .gap-4 { gap: var(--space-4); }
 .gap-6 { gap: var(--space-6); }
 .w-full { width: 100%; }

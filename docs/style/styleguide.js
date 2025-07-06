@@ -9,6 +9,12 @@
     // Initialize when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
         initializeStyleGuide();
+        
+        // Start with light mode by default
+        if (document.body.classList.contains('dark')) {
+            document.body.classList.remove('dark');
+        }
+        updateThemeColors('light');
     });
 
     function initializeStyleGuide() {
@@ -173,13 +179,31 @@
     window.toggleTheme = function() {
         const body = document.body;
         const isDark = body.classList.contains('dark');
+        const themeToggle = document.getElementById('theme-toggle');
+        const icon = themeToggle ? themeToggle.querySelector('i') : null;
         
         if (isDark) {
             body.classList.remove('dark');
             updateThemeColors('light');
+            if (icon) {
+                icon.setAttribute('data-lucide', 'moon');
+                lucide.createIcons();
+            }
+            if (themeToggle) {
+                themeToggle.innerHTML = '<i data-lucide="moon" class="nav-icon"></i> Toggle Dark Mode';
+                lucide.createIcons();
+            }
         } else {
             body.classList.add('dark');
             updateThemeColors('dark');
+            if (icon) {
+                icon.setAttribute('data-lucide', 'sun');
+                lucide.createIcons();
+            }
+            if (themeToggle) {
+                themeToggle.innerHTML = '<i data-lucide="sun" class="nav-icon"></i> Toggle Light Mode';
+                lucide.createIcons();
+            }
         }
     };
 
@@ -187,27 +211,37 @@
         const body = document.body;
         
         if (theme === 'dark') {
-            body.style.setProperty('--bg-primary', '#0a0a0a');
-            body.style.setProperty('--bg-secondary', '#171717');
-            body.style.setProperty('--bg-tertiary', '#262626');
-            body.style.setProperty('--text-primary', '#fafafa');
-            body.style.setProperty('--text-secondary', '#a3a3a3');
-            body.style.setProperty('--text-tertiary', '#737373');
-            body.style.setProperty('--border-color', '#262626');
-            body.style.setProperty('--border-strong', '#404040');
-            body.style.setProperty('--accent', '#4ade80');
-            body.style.setProperty('--accent-hover', '#22c55e');
+            body.style.setProperty('--bg-primary', '#1a1a1a');
+            body.style.setProperty('--bg-secondary', '#242424');
+            body.style.setProperty('--bg-tertiary', '#2e2e2e');
+            body.style.setProperty('--text-primary', '#f0f0f0');
+            body.style.setProperty('--text-secondary', '#b8b8b8');
+            body.style.setProperty('--text-tertiary', '#888888');
+            body.style.setProperty('--border-color', '#3a3a3a');
+            body.style.setProperty('--border-strong', '#4a4a4a');
+            body.style.setProperty('--accent', '#94b896');
+            body.style.setProperty('--accent-hover', '#7fa582');
+            body.style.setProperty('--blue-500', '#7ab8d4');
+            body.style.setProperty('--green-500', '#94b896');
+            body.style.setProperty('--red-500', '#d49499');
+            body.style.setProperty('--amber-500', '#c9a574');
+            body.style.setProperty('--purple-500', '#b794bd');
         } else {
-            body.style.setProperty('--bg-primary', '#ffffff');
-            body.style.setProperty('--bg-secondary', '#f8fafc');
-            body.style.setProperty('--bg-tertiary', '#f1f5f9');
-            body.style.setProperty('--text-primary', '#0f172a');
-            body.style.setProperty('--text-secondary', '#475569');
-            body.style.setProperty('--text-tertiary', '#64748b');
-            body.style.setProperty('--border-color', '#e2e8f0');
-            body.style.setProperty('--border-strong', '#cbd5e1');
-            body.style.setProperty('--accent', '#22c55e');
-            body.style.setProperty('--accent-hover', '#16a34a');
+            body.style.setProperty('--bg-primary', '#a8a8a0');
+            body.style.setProperty('--bg-secondary', '#b4b4ac');
+            body.style.setProperty('--bg-tertiary', '#c0c0b8');
+            body.style.setProperty('--text-primary', '#424242');
+            body.style.setProperty('--text-secondary', '#616161');
+            body.style.setProperty('--text-tertiary', '#757575');
+            body.style.setProperty('--border-color', '#eeeeee');
+            body.style.setProperty('--border-strong', '#e0e0e0');
+            body.style.setProperty('--accent', '#b5d3b6');
+            body.style.setProperty('--accent-hover', '#9fc5a1');
+            body.style.setProperty('--blue-500', '#8cb5cc');
+            body.style.setProperty('--green-500', '#9ec0a0');
+            body.style.setProperty('--red-500', '#d5a6aa');
+            body.style.setProperty('--amber-500', '#d5ad80');
+            body.style.setProperty('--purple-500', '#b896be');
         }
     }
 

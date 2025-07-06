@@ -29,6 +29,7 @@
  
     /* Spacing */
     --spacing-unit: 8px;
+    --global-padding: calc(var(--spacing-unit) * 2); /* 16px */
 
     /* Scrollbar */
     --scrollbar-size: 8px;
@@ -175,6 +176,7 @@ body {
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
+    padding: var(--global-padding);
 }
 
 /* --- SCROLLBAR STYLES --- */
@@ -245,6 +247,11 @@ body {
     flex-grow: 1;
     display: flex;
     overflow: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--activity-panel-width);
+    width: calc(100% - var(--activity-panel-width));
 }
 
 .panel {

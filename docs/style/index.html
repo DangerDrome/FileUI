@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileUI Style Guide</title>
+    <link rel="stylesheet" href="styleguide.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="styleguide.js" defer></script>
+</head>
+<body>
+    <!-- Navigation Panel -->
+    <div class="nav-panel" id="navPanel">
+        <div class="nav-panel-header">
+            <h3>FileUI Style Guide</h3>
+        </div>
+        
+        <div class="nav-panel-content">
+            <div class="nav-tree">
+                <div class="nav-section">
+                    <div class="nav-item nav-parent">
+                        <i data-lucide="book-open" class="nav-icon"></i>
+                        <span>Overview</span>
+                    </div>
+                    <div class="nav-children">
+                        <a href="#introduction" class="nav-item nav-child">
+                            <i data-lucide="info" class="nav-icon"></i>
+                            <span>Introduction</span>
+                        </a>
+                        <a href="#design-principles" class="nav-item nav-child">
+                            <i data-lucide="target" class="nav-icon"></i>
+                            <span>Design Principles</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-item nav-parent">
+                        <i data-lucide="type" class="nav-icon"></i>
+                        <span>Typography</span>
+                    </div>
+                    <div class="nav-children">
+                        <a href="#typography" class="nav-item nav-child">
+                            <i data-lucide="font" class="nav-icon"></i>
+                            <span>Font System</span>
+                        </a>
+                        <a href="#headings" class="nav-item nav-child">
+                            <i data-lucide="heading" class="nav-icon"></i>
+                            <span>Headings</span>
+                        </a>
+                        <a href="#text-styles" class="nav-item nav-child">
+                            <i data-lucide="text" class="nav-icon"></i>
+                            <span>Text Styles</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-item nav-parent">
+                        <i data-lucide="palette" class="nav-icon"></i>
+                        <span>Colors</span>
+                    </div>
+                    <div class="nav-children">
+                        <a href="#color-system" class="nav-item nav-child">
+                            <i data-lucide="droplet" class="nav-icon"></i>
+                            <span>Color System</span>
+                        </a>
+                        <a href="#semantic-colors" class="nav-item nav-child">
+                            <i data-lucide="tag" class="nav-icon"></i>
+                            <span>Semantic Colors</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-item nav-parent">
+                        <i data-lucide="mouse-pointer" class="nav-icon"></i>
+                        <span>Components</span>
+                    </div>
+                    <div class="nav-children">
+                        <a href="#buttons" class="nav-item nav-child">
+                            <i data-lucide="square" class="nav-icon"></i>
+                            <span>Buttons</span>
+                        </a>
+                        <a href="#cards" class="nav-item nav-child">
+                            <i data-lucide="credit-card" class="nav-icon"></i>
+                            <span>Cards</span>
+                        </a>
+                        <a href="#forms" class="nav-item nav-child">
+                            <i data-lucide="edit" class="nav-icon"></i>
+                            <span>Forms</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-item nav-parent">
+                        <i data-lucide="star" class="nav-icon"></i>
+                        <span>Icons</span>
+                    </div>
+                    <div class="nav-children">
+                        <a href="#icon-library" class="nav-item nav-child">
+                            <i data-lucide="library" class="nav-icon"></i>
+                            <span>Icon Library</span>
+                        </a>
+                        <a href="#icon-usage" class="nav-item nav-child">
+                            <i data-lucide="image" class="nav-icon"></i>
+                            <span>Usage Guidelines</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-item nav-parent">
+                        <i data-lucide="layout" class="nav-icon"></i>
+                        <span>Layout</span>
+                    </div>
+                    <div class="nav-children">
+                        <a href="#spacing" class="nav-item nav-child">
+                            <i data-lucide="space" class="nav-icon"></i>
+                            <span>Spacing System</span>
+                        </a>
+                        <a href="#grid" class="nav-item nav-child">
+                            <i data-lucide="grid-3x3" class="nav-icon"></i>
+                            <span>Grid System</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls Panel -->
+    <div class="controls-panel" id="controlsPanel">
+        <div class="controls-panel-header">
+            <h3>Style Controls</h3>
+        </div>
+        
+        <div class="controls-panel-content">
+            <div class="control-section">
+                <h4>Theme</h4>
+                <div class="flex flex-col gap-2">
+                    <button class="btn btn-sm" id="theme-toggle">
+                        <i data-lucide="sun" class="nav-icon"></i>
+                        Toggle Dark Mode
+                    </button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h4>Typography</h4>
+                <div class="flex flex-col gap-2">
+                    <button class="btn btn-sm" data-font="system">
+                        <i data-lucide="type" class="nav-icon"></i>
+                        System Font
+                    </button>
+                    <button class="btn btn-sm" data-font="mono">
+                        <i data-lucide="terminal" class="nav-icon"></i>
+                        Monospace
+                    </button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h4>Layout</h4>
+                <div class="flex flex-col gap-2">
+                    <button class="btn btn-sm" onclick="toggleLayout('compact')">
+                        <i data-lucide="minimize" class="nav-icon"></i>
+                        Compact
+                    </button>
+                    <button class="btn btn-sm" onclick="toggleLayout('comfortable')">
+                        <i data-lucide="maximize" class="nav-icon"></i>
+                        Comfortable
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Introduction Section -->
+        <section id="introduction" class="section">
+            <div class="section-header">
+                <h1 class="section-title">FileUI Design System</h1>
+                <p class="section-description">
+                    A modern, clean design system for file management interfaces. Built with simplicity, 
+                    accessibility, and developer experience in mind. No gradients, clean typography, 
+                    and consistent iconography using Lucide icons.
+                </p>
+            </div>
+        </section>
+
+        <!-- Design Principles Section -->
+        <section id="design-principles" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Design Principles</h2>
+                <p class="section-description">
+                    Core principles that guide our design decisions and component creation.
+                </p>
+            </div>
+            
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i data-lucide="zap" style="width: 24px; height: 24px; color: var(--accent);"></i>
+                            <h3 class="card-title">Simple & Fast</h3>
+                        </div>
+                        <p class="card-description">
+                            Clean, minimal interfaces that load quickly and perform efficiently.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i data-lucide="users" style="width: 24px; height: 24px; color: var(--accent);"></i>
+                            <h3 class="card-title">Accessible</h3>
+                        </div>
+                        <p class="card-description">
+                            Designed for everyone, with proper contrast, keyboard navigation, and screen reader support.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i data-lucide="smartphone" style="width: 24px; height: 24px; color: var(--accent);"></i>
+                            <h3 class="card-title">Responsive</h3>
+                        </div>
+                        <p class="card-description">
+                            Works beautifully across all devices and screen sizes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Typography Section -->
+        <section id="typography" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Typography</h2>
+                <p class="section-description">
+                    Our typography system uses system fonts for optimal performance and native feel.
+                </p>
+            </div>
+            
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Font Stack</h3>
+                        <p class="card-description">System font stack for optimal performance</p>
+                    </div>
+                    <div class="typography-sample">
+                        <p style="font-family: var(--font-system); font-size: var(--text-lg); margin-bottom: var(--space-2);">
+                            System Font Stack
+                        </p>
+                        <code class="text-xs">-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif</code>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Monospace</h3>
+                        <p class="card-description">For code and technical content</p>
+                    </div>
+                    <div class="typography-sample">
+                        <p style="font-family: var(--font-mono); font-size: var(--text-lg); margin-bottom: var(--space-2);">
+                            Monospace Font
+                        </p>
+                        <code class="text-xs">'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace</code>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Headings Section -->
+        <section id="headings" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Headings</h2>
+                <p class="section-description">
+                    Consistent heading hierarchy for clear information structure.
+                </p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Heading Scale</h3>
+                </div>
+                <div class="typography-sample">
+                    <h1>Heading 1 - Main Page Title</h1>
+                    <h2>Heading 2 - Section Title</h2>
+                    <h3>Heading 3 - Subsection Title</h3>
+                    <h4>Heading 4 - Component Title</h4>
+                    <h5>Heading 5 - Small Section</h5>
+                    <h6>Heading 6 - Caption</h6>
+                </div>
+            </div>
+        </section>
+
+        <!-- Text Styles Section -->
+        <section id="text-styles" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Text Styles</h2>
+                <p class="section-description">
+                    Different text treatments for various content types.
+                </p>
+            </div>
+            
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Text Hierarchy</h3>
+                    </div>
+                    <div class="typography-sample">
+                        <p class="text-primary">Primary text for main content</p>
+                        <p class="text-secondary">Secondary text for descriptions</p>
+                        <p class="text-tertiary">Tertiary text for captions</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Text Sizes</h3>
+                    </div>
+                    <div class="typography-sample">
+                        <p class="text-xs">Extra small text</p>
+                        <p class="text-sm">Small text</p>
+                        <p class="text-base">Base text</p>
+                        <p class="text-lg">Large text</p>
+                        <p class="text-xl">Extra large text</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Text Weights</h3>
+                    </div>
+                    <div class="typography-sample">
+                        <p style="font-weight: 300;">Light weight</p>
+                        <p style="font-weight: 400;">Normal weight</p>
+                        <p style="font-weight: 500;">Medium weight</p>
+                        <p style="font-weight: 600;">Semibold weight</p>
+                        <p style="font-weight: 700;">Bold weight</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Color System Section -->
+        <section id="color-system" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Color System</h2>
+                <p class="section-description">
+                    A thoughtful color palette designed for clarity and accessibility.
+                </p>
+            </div>
+            
+            <div class="card mb-8">
+                <div class="card-header">
+                    <h3 class="card-title">Gray Scale</h3>
+                    <p class="card-description">Base neutral colors for backgrounds and text</p>
+                </div>
+                <div class="grid grid-4">
+                    <div class="color-swatch">
+                        <div class="color-preview" style="background-color: var(--gray-50);"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 50</div>
+                            <div class="color-value">#f9fafb</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch">
+                        <div class="color-preview" style="background-color: var(--gray-200);"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 200</div>
+                            <div class="color-value">#e5e7eb</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch">
+                        <div class="color-preview" style="background-color: var(--gray-500);"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 500</div>
+                            <div class="color-value">#6b7280</div>
+                        </div>
+                    </div>
+                    <div class="color-swatch">
+                        <div class="color-preview" style="background-color: var(--gray-900);"></div>
+                        <div class="color-info">
+                            <div class="color-name">Gray 900</div>
+                            <div class="color-value">#111827</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Semantic Colors Section -->
+        <section id="semantic-colors" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Semantic Colors</h2>
+                <p class="section-description">
+                    Colors with specific meanings for consistent UI communication.
+                </p>
+            </div>
+            
+            <div class="grid grid-4">
+                <div class="color-swatch">
+                    <div class="color-preview" style="background-color: var(--blue-500);"></div>
+                    <div class="color-info">
+                        <div class="color-name">Primary</div>
+                        <div class="color-value">#3b82f6</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background-color: var(--green-500);"></div>
+                    <div class="color-info">
+                        <div class="color-name">Success</div>
+                        <div class="color-value">#10b981</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background-color: var(--red-500);"></div>
+                    <div class="color-info">
+                        <div class="color-name">Error</div>
+                        <div class="color-value">#ef4444</div>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-preview" style="background-color: var(--amber-500);"></div>
+                    <div class="color-info">
+                        <div class="color-name">Warning</div>
+                        <div class="color-value">#f59e0b</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buttons Section -->
+        <section id="buttons" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Buttons</h2>
+                <p class="section-description">
+                    Button components for various actions and states.
+                </p>
+            </div>
+            
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Button Variants</h3>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <button class="btn btn-primary">
+                            <i data-lucide="plus" class="nav-icon"></i>
+                            Primary Button
+                        </button>
+                        <button class="btn">
+                            <i data-lucide="edit" class="nav-icon"></i>
+                            Secondary Button
+                        </button>
+                        <button class="btn" style="border: none; background: none; color: var(--accent);">
+                            <i data-lucide="download" class="nav-icon"></i>
+                            Text Button
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Button Sizes</h3>
+                    </div>
+                    <div class="flex flex-col gap-4 items-start">
+                        <button class="btn btn-sm btn-primary">
+                            <i data-lucide="star" class="nav-icon"></i>
+                            Small
+                        </button>
+                        <button class="btn btn-primary">
+                            <i data-lucide="star" class="nav-icon"></i>
+                            Medium
+                        </button>
+                        <button class="btn btn-lg btn-primary">
+                            <i data-lucide="star" class="nav-icon"></i>
+                            Large
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Icon Buttons</h3>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="btn" style="padding: var(--space-3);">
+                            <i data-lucide="heart" class="nav-icon"></i>
+                        </button>
+                        <button class="btn" style="padding: var(--space-3);">
+                            <i data-lucide="share" class="nav-icon"></i>
+                        </button>
+                        <button class="btn" style="padding: var(--space-3);">
+                            <i data-lucide="bookmark" class="nav-icon"></i>
+                        </button>
+                        <button class="btn" style="padding: var(--space-3);">
+                            <i data-lucide="more-horizontal" class="nav-icon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cards Section -->
+        <section id="cards" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Cards</h2>
+                <p class="section-description">
+                    Card components for organizing and displaying content.
+                </p>
+            </div>
+            
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i data-lucide="file-text" style="width: 24px; height: 24px; color: var(--accent);"></i>
+                            <h3 class="card-title">Document Card</h3>
+                        </div>
+                        <p class="card-description">
+                            A card for displaying document information with icon and metadata.
+                        </p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button class="btn btn-sm btn-primary">Open</button>
+                        <button class="btn btn-sm">Share</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i data-lucide="folder" style="width: 24px; height: 24px; color: var(--amber-500);"></i>
+                            <h3 class="card-title">Folder Card</h3>
+                        </div>
+                        <p class="card-description">
+                            A card for displaying folder information with file count and size.
+                        </p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button class="btn btn-sm btn-primary">Open</button>
+                        <button class="btn btn-sm">Properties</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i data-lucide="image" style="width: 24px; height: 24px; color: var(--purple-500);"></i>
+                            <h3 class="card-title">Media Card</h3>
+                        </div>
+                        <p class="card-description">
+                            A card for displaying media files with preview and metadata.
+                        </p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button class="btn btn-sm btn-primary">Preview</button>
+                        <button class="btn btn-sm">Edit</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Icon Library Section -->
+        <section id="icon-library" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Icon Library</h2>
+                <p class="section-description">
+                    Comprehensive icon set using Lucide icons for consistent visual language.
+                </p>
+            </div>
+            
+            <div class="card mb-8">
+                <div class="card-header">
+                    <h3 class="card-title">Common Icons</h3>
+                    <p class="card-description">Frequently used icons across the interface</p>
+                </div>
+                <div class="icon-grid">
+                    <div class="icon-item">
+                        <i data-lucide="home"></i>
+                        <span class="icon-name">home</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="folder"></i>
+                        <span class="icon-name">folder</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="file"></i>
+                        <span class="icon-name">file</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="search"></i>
+                        <span class="icon-name">search</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="settings"></i>
+                        <span class="icon-name">settings</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="user"></i>
+                        <span class="icon-name">user</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="download"></i>
+                        <span class="icon-name">download</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="upload"></i>
+                        <span class="icon-name">upload</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="edit"></i>
+                        <span class="icon-name">edit</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="trash"></i>
+                        <span class="icon-name">trash</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="copy"></i>
+                        <span class="icon-name">copy</span>
+                    </div>
+                    <div class="icon-item">
+                        <i data-lucide="share"></i>
+                        <span class="icon-name">share</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Icon Usage Section -->
+        <section id="icon-usage" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Icon Usage Guidelines</h2>
+                <p class="section-description">
+                    Best practices for using icons consistently throughout the interface.
+                </p>
+            </div>
+            
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Icon Sizes</h3>
+                        <p class="card-description">Standard icon sizes for different contexts</p>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <div class="flex flex-col items-center gap-2">
+                            <i data-lucide="star" style="width: 16px; height: 16px;"></i>
+                            <span class="text-xs">16px</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <i data-lucide="star" style="width: 20px; height: 20px;"></i>
+                            <span class="text-xs">20px</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <i data-lucide="star" style="width: 24px; height: 24px;"></i>
+                            <span class="text-xs">24px</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <i data-lucide="star" style="width: 32px; height: 32px;"></i>
+                            <span class="text-xs">32px</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Icon with Text</h3>
+                        <p class="card-description">Proper alignment and spacing with text</p>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="check-circle" style="width: 16px; height: 16px; color: var(--green-500);"></i>
+                            <span class="text-sm">Task completed</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="alert-circle" style="width: 16px; height: 16px; color: var(--amber-500);"></i>
+                            <span class="text-sm">Warning message</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="x-circle" style="width: 16px; height: 16px; color: var(--red-500);"></i>
+                            <span class="text-sm">Error occurred</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Spacing System Section -->
+        <section id="spacing" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Spacing System</h2>
+                <p class="section-description">
+                    Consistent spacing scale for margins, padding, and layout elements.
+                </p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Spacing Scale</h3>
+                    <p class="card-description">Base spacing units for consistent layouts</p>
+                </div>
+                <div class="grid grid-4">
+                    <div class="flex items-center gap-3">
+                        <div style="width: 4px; height: 4px; background: var(--accent);"></div>
+                        <span class="text-sm font-mono">1 (4px)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div style="width: 8px; height: 8px; background: var(--accent);"></div>
+                        <span class="text-sm font-mono">2 (8px)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div style="width: 16px; height: 16px; background: var(--accent);"></div>
+                        <span class="text-sm font-mono">4 (16px)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div style="width: 24px; height: 24px; background: var(--accent);"></div>
+                        <span class="text-sm font-mono">6 (24px)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div style="width: 32px; height: 32px; background: var(--accent);"></div>
+                        <span class="text-sm font-mono">8 (32px)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div style="width: 40px; height: 40px; background: var(--accent);"></div>
+                        <span class="text-sm font-mono">10 (40px)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div style="width: 48px; height: 48px; background: var(--accent);"></div>
+                        <span class="text-sm font-mono">12 (48px)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div style="width: 64px; height: 64px; background: var(--accent);"></div>
+                        <span class="text-sm font-mono">16 (64px)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grid System Section -->
+        <section id="grid" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Grid System</h2>
+                <p class="section-description">
+                    Flexible grid system for organizing content and creating layouts.
+                </p>
+            </div>
+            
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Grid Examples</h3>
+                        <p class="card-description">Common grid configurations</p>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <div class="text-sm font-semibold">2 Columns</div>
+                        <div class="grid grid-2 gap-2">
+                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 1</div>
+                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 2</div>
+                        </div>
+                        
+                        <div class="text-sm font-semibold">3 Columns</div>
+                        <div class="grid grid-3 gap-2">
+                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 1</div>
+                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 2</div>
+                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 3</div>
+                        </div>
+                        
+                        <div class="text-sm font-semibold">4 Columns</div>
+                        <div class="grid grid-4 gap-2">
+                            <div class="bg-tertiary p-4 rounded text-center text-sm">1</div>
+                            <div class="bg-tertiary p-4 rounded text-center text-sm">2</div>
+                            <div class="bg-tertiary p-4 rounded text-center text-sm">3</div>
+                            <div class="bg-tertiary p-4 rounded text-center text-sm">4</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Responsive Grid</h3>
+                        <p class="card-description">Grid adapts to different screen sizes</p>
+                    </div>
+                    <div class="typography-sample">
+                        <p class="text-sm mb-4">Grid breakpoints:</p>
+                        <ul class="text-sm text-secondary" style="list-style: disc; margin-left: 20px;">
+                            <li>Desktop: 3-4 columns</li>
+                            <li>Tablet: 2 columns</li>
+                            <li>Mobile: 1 column</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Simple theme toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+        }
+        
+        // Layout toggles
+        function toggleLayout(layout) {
+            document.body.className = document.body.className.replace(/layout-\w+/g, '');
+            document.body.classList.add(`layout-${layout}`);
+        }
+    </script>
+</body>
+</html>

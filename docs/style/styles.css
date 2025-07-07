@@ -3,6 +3,12 @@
  * Minimal, efficient styles for UI components
  */
 
+/* Shoelace Component Theme Override */
+:root {
+    --sl-tooltip-background-color: #1a1a1a;
+    --sl-tooltip-color: #ffffff;
+}
+
 /* CSS Custom Properties */
 :root {
     /* Typography */
@@ -3028,6 +3034,35 @@ ul ul, ol ol, ul ol, ol ul {
     margin: var(--space-1) 0;
 }
 
+/* Shoelace Tooltip Styles */
+sl-tooltip::part(base) {
+    --sl-tooltip-background-color: #1a1a1a;
+    --sl-tooltip-color: #ffffff;
+    background: var(--sl-tooltip-background-color) !important;
+    color: var(--sl-tooltip-color) !important;
+    border: none !important;
+    font-size: var(--text-sm);
+    font-family: var(--font-system);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+}
+
+sl-tooltip::part(base__arrow) {
+    color: var(--sl-tooltip-background-color) !important;
+}
+
+/* Force proper tooltip positioning */
+sl-tooltip[placement="top"]::part(base) {
+    margin-bottom: var(--sl-tooltip-arrow-size);
+}
+
+/* Ensure tooltips work in light mode too */
+body:not(.dark) sl-tooltip::part(base) {
+    --sl-tooltip-background-color: #2a2a2a;
+    --sl-tooltip-color: #ffffff;
+}
+
 /* Dark mode adjustments for markdown elements */
 body.dark .callout-info {
     background: rgba(212, 197, 249, 0.05);
@@ -3043,5 +3078,242 @@ body.dark .callout-success {
 
 body.dark .callout-error {
     background: rgba(255, 179, 186, 0.05);
+}
+
+/* Utility Classes - Replace inline styles */
+.icon-sm {
+    width: 24px;
+    height: 24px;
+}
+
+.icon-grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.grid-auto-fill-120 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-4);
+}
+
+.bg-tertiary-card {
+    background: var(--bg-tertiary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.semantic-color-chip {
+    background: var(--primary);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--grey-800);
+}
+
+.semantic-color-chip.success {
+    background: var(--success);
+}
+
+.semantic-color-chip.warning {
+    background: var(--warning);
+}
+
+.semantic-color-chip.error {
+    background: var(--error);
+}
+
+.semantic-color-chip.info {
+    background: var(--info);
+}
+
+.bg-color-chip {
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+}
+
+.bg-color-chip.quinary {
+    background: var(--bg-quinary);
+}
+
+.bg-color-chip.quaternary {
+    background: var(--bg-quaternary);
+}
+
+.bg-color-chip.primary {
+    background: var(--bg-primary);
+}
+
+.bg-color-chip.secondary {
+    background: var(--bg-secondary);
+}
+
+.bg-color-chip.tertiary {
+    background: var(--bg-tertiary);
+}
+
+/* Progress Bar Widths */
+.progress-bar-width-25 { width: 25%; }
+.progress-bar-width-30 { width: 30%; }
+.progress-bar-width-40 { width: 40%; }
+.progress-bar-width-50 { width: 50%; }
+.progress-bar-width-60 { width: 60%; }
+.progress-bar-width-65 { width: 65%; }
+.progress-bar-width-75 { width: 75%; }
+.progress-bar-width-85 { width: 85%; }
+.progress-bar-width-90 { width: 90%; }
+
+/* Layout Utilities */
+.padding-8 {
+    padding: var(--space-8);
+}
+
+.margin-bottom-24 {
+    margin-bottom: var(--space-24);
+}
+
+.margin-top-4 {
+    margin-top: var(--space-4);
+}
+
+.margin-top-6 {
+    margin-top: var(--space-6);
+}
+
+.flex-column-gap-2 {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.gap-4 {
+    gap: var(--space-4);
+}
+
+.gap-6 {
+    gap: var(--space-6);
+}
+
+.scrollable-box {
+    overflow-y: scroll;
+    background: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-4);
+}
+
+.scrollable-box-150 {
+    height: 150px;
+}
+
+.scrollable-box-200 {
+    height: 200px;
+}
+
+.horizontal-scroll {
+    overflow-x: scroll;
+    white-space: nowrap;
+    background: var(--bg-secondary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+}
+
+.grid-span-2 {
+    grid-column: span 2;
+}
+
+.grid-3-cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+    justify-items: center;
+    margin-bottom: var(--space-4);
+}
+
+.inline-display {
+    display: inline;
+}
+
+.width-150 {
+    width: 150%;
+    display: inline-block;
+}
+
+.clickable-50 {
+    height: 50px;
+    cursor: pointer;
+}
+
+/* Additional utility classes for remaining inline styles */
+.cursor-context-menu {
+    cursor: context-menu;
+}
+
+.flex-wrap-gap-2 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.flex-column-gap-3 {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.margin-0-0-2-0 {
+    margin: 0 0 var(--space-2) 0;
+}
+
+.margin-0-0-3-0 {
+    margin: 0 0 var(--space-3) 0;
+}
+
+/* Semantic colored spinners */
+.loading-spinner-primary {
+    border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+    border-top-color: var(--primary);
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+}
+
+.loading-spinner-success {
+    border-color: color-mix(in srgb, var(--success) 30%, transparent);
+    border-top-color: var(--success);
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+}
+
+.loading-spinner-warning {
+    border-color: color-mix(in srgb, var(--warning) 30%, transparent);
+    border-top-color: var(--warning);
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+}
+
+.loading-spinner-error {
+    border-color: color-mix(in srgb, var(--error) 30%, transparent);
+    border-top-color: var(--error);
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
+}
+
+.loading-spinner-info {
+    border-color: color-mix(in srgb, var(--info) 30%, transparent);
+    border-top-color: var(--info);
+    width: 24px;
+    height: 24px;
+    border-width: 3px;
 }
 

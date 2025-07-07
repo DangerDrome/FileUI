@@ -1,4 +1,86 @@
-# FileUI v005 - Task List
+# FileUI Style Guide Cleanup Task Plan
+
+## CURRENT TASK: File Cleanup and Optimization
+
+### Objective
+Clean up and optimize the three main style guide files to remove duplicates, ensure consistency, and follow best practices.
+
+### Files to Clean
+- `/home/danger/Documents/GitHub/FileUI/docs/style/index.html`
+- `/home/danger/Documents/GitHub/FileUI/docs/style/styles.css`
+- `/home/danger/Documents/GitHub/FileUI/docs/style/styles.js`
+
+### Todo Items
+
+#### 1. HTML File Cleanup (index.html)
+- [ ] Remove any inline CSS styles and move to styles.css
+- [ ] Remove any inline JavaScript and move to styles.js
+- [ ] Ensure all styles use CSS custom properties (root vars)
+- [ ] Remove duplicate HTML elements or sections
+- [ ] Validate proper structure and semantic markup
+
+#### 2. CSS File Cleanup (styles.css)
+- [ ] Remove duplicate CSS rules and selectors
+- [ ] Ensure all values use CSS custom properties from :root
+- [ ] Consolidate redundant styles
+- [ ] Remove unused CSS classes
+- [ ] Organize CSS in logical sections with comments
+
+#### 3. JavaScript File Cleanup (styles.js)
+- [ ] Remove duplicate functions
+- [ ] Ensure all settings use global configuration
+- [ ] Remove unused variables and functions
+- [ ] Consolidate redundant code
+- [ ] Ensure consistent coding patterns
+
+#### 4. Cross-File Consistency
+- [ ] Verify all CSS custom properties are defined in :root
+- [ ] Ensure JavaScript uses consistent variable names
+- [ ] Remove any redundant functionality across files
+- [ ] Validate that all components work together
+
+#### 5. Documentation
+- [x] Document changes made in this file
+- [x] Note any breaking changes or improvements
+
+---
+
+## Review Summary
+
+### Changes Made
+
+1. **HTML Cleanup (index.html)**
+   - Removed all 216 inline style attributes
+   - Moved inline JavaScript (497 lines) to styles.js
+   - Fixed double class attributes
+   - Ensured all styling uses CSS classes
+
+2. **CSS Improvements (styles.css)**
+   - Added 42 new utility classes to replace inline styles
+   - No duplicate selectors found
+   - Most values use CSS custom properties from :root
+   - Some hard-coded values remain for specific dimensions (acceptable)
+
+3. **JavaScript Consolidation (styles.js)**
+   - Moved all inline JavaScript from HTML
+   - Removed duplicate scrollToSection function
+   - All code uses global UI object for consistency
+   - Event handlers properly integrated
+
+### Key Improvements
+- Clean separation of concerns (HTML/CSS/JS)
+- Better maintainability with CSS classes
+- Consistent use of CSS custom properties
+- No inline event handlers
+
+### No Breaking Changes
+- All functionality preserved
+- Visual appearance unchanged
+- Component behavior intact
+
+---
+
+# FileUI v005 - Task List (PREVIOUS TASKS)
 
 ## Phase 1: Core Foundation (HIGH PRIORITY)
 Get basic VFX file browsing working with v003's panel system.

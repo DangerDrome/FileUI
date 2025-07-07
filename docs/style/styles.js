@@ -1155,3 +1155,497 @@
         UI.init();
     });
 })();
+
+// ============================================
+// Functions moved from inline HTML script
+// ============================================
+
+// Scroll to section and expand the card
+function scrollToSection(sectionId) {
+    console.log('Scrolling to section:', sectionId);
+    
+    // Find the section
+    const sections = document.querySelectorAll('.section');
+    let targetSection = null;
+    let targetCard = null;
+    
+    // Try to find by matching card title
+    sections.forEach(section => {
+        const card = section.querySelector('.card');
+        if (card) {
+            const title = card.querySelector('.card-title');
+            if (title) {
+                const titleText = title.textContent.toLowerCase();
+                const searchText = sectionId.toLowerCase();
+                
+                // Check various matches
+                if (titleText.includes(searchText) || 
+                    titleText.replace(/[^a-z0-9]/g, '').includes(searchText.replace(/[^a-z0-9]/g, '')) ||
+                    (searchText === 'toast' && titleText.includes('notification')) ||
+                    (searchText === 'badges' && titleText.includes('badges'))) {
+                    targetSection = section;
+                    targetCard = card;
+                }
+            }
+        }
+    });
+    
+    // If found, expand and scroll
+    if (targetSection && targetCard) {
+        // First scroll to the section
+        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Then expand the card with a slight delay for visual effect
+        setTimeout(() => {
+            targetCard.classList.remove('collapsed');
+        }, 100);
+        
+        // Also expand the corresponding nav section if it's collapsed
+        const navPanel = document.getElementById('nav-panel');
+        if (navPanel && !navPanel.classList.contains('collapsed')) {
+            // Expand the nav section that contains this item
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                if (item.dataset.navItem === sectionId) {
+                    const navSection = item.closest('.nav-section');
+                    if (navSection && navSection.classList.contains('collapsed')) {
+                        navSection.classList.remove('collapsed');
+                    }
+                }
+            });
+        }
+    } else {
+        console.log('Section not found:', sectionId);
+    }
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', () => {
+    // Create navigation panel
+    const navSections = [
+        {
+            title: 'Design',
+            items: [
+                { id: 'colors', text: 'Colors', icon: 'palette', onclick: () => scrollToSection('colors') },
+                { id: 'icons', text: 'Icons', icon: 'package', onclick: () => scrollToSection('icons') },
+                { id: 'typography', text: 'Typography', icon: 'type', onclick: () => scrollToSection('typography') }
+            ]
+        },
+        {
+            title: 'Layout',
+            items: [
+                { id: 'grid', text: 'Grid System', icon: 'grid', onclick: () => scrollToSection('grid') },
+                { id: 'cards', text: 'Cards', icon: 'square', onclick: () => scrollToSection('cards') }
+            ]
+        },
+        {
+            title: 'Components',
+            items: [
+                { id: 'buttons', text: 'Buttons', icon: 'mouse-pointer', onclick: () => scrollToSection('buttons') },
+                { id: 'toasts', text: 'Toast Notifications', icon: 'bell', onclick: () => scrollToSection('toast') },
+                { id: 'modals', text: 'Modals', icon: 'layers', onclick: () => scrollToSection('modals') },
+                { id: 'menus', text: 'Menus', icon: 'menu', onclick: () => scrollToSection('menus') },
+                { id: 'panels', text: 'Panels', icon: 'layout', onclick: () => scrollToSection('panels') },
+                { id: 'tags', text: 'Tags', icon: 'tag', onclick: () => scrollToSection('tags') },
+                { id: 'forms', text: 'Forms', icon: 'edit', onclick: () => scrollToSection('forms') },
+                { id: 'badges', text: 'Badges, Spinners & Progress', icon: 'star', onclick: () => scrollToSection('badges') }
+            ]
+        },
+        {
+            title: 'Advanced',
+            items: [
+                { id: 'scrollbars', text: 'Scrollbars', icon: 'scroll', onclick: () => scrollToSection('scrollbars') }
+            ]
+        }
+    ];
+    
+    // Create and add navigation panel
+    const navPanel = UI.navPanel(navSections, {
+        title: 'Components',
+        icon: 'layers',
+        startCollapsed: true
+    });
+    document.body.insertBefore(navPanel, document.body.firstChild);
+    
+    // Create and add control panel
+    const controlPanel = UI.controlPanel();
+    document.body.appendChild(controlPanel);
+    
+    // Removed toggle buttons from footers - panels now toggle by clicking headers only
+    
+    // Add click handlers to panel headers to toggle collapse/expand
+    const navHeader = navPanel.querySelector('.nav-panel-header');
+    if (navHeader) {
+        navHeader.addEventListener('click', () => {
+            navPanel.classList.toggle('collapsed');
+        });
+    }
+    
+    const controlHeader = controlPanel.querySelector('.control-panel-header');
+    if (controlHeader) {
+        controlHeader.addEventListener('click', () => {
+            controlPanel.classList.toggle('collapsed');
+        });
+    }
+    
+    // Make all section cards collapsible and start expanded
+    document.querySelectorAll('.section .card').forEach(card => {
+        // Start expanded (no collapsed class added)
+        
+        const header = card.querySelector('.card-header');
+        if (header) {
+            header.addEventListener('click', () => {
+                card.classList.toggle('collapsed');
+            });
+        }
+    });
+    
+    // Create dynamic components
+    const btnContainer = document.getElementById('dynamic-buttons');
+    btnContainer.appendChild(UI.button('Save', { variant: 'primary', icon: 'save' }));
+    btnContainer.appendChild(UI.button('Delete', { icon: 'trash-2', onclick: () => UI.toast('Deleted!', 'error') }));
+    btnContainer.appendChild(UI.button('Settings', { icon: 'settings', size: 'sm' }));
+    
+    const cardContainer = document.getElementById('card-demo');
+    cardContainer.appendChild(UI.card('Simple Card', 'This is a simple card with just title and content.'));
+    
+    cardContainer.appendChild(UI.card('Card with Icon', 'This card has an icon in the header.', {
+        icon: 'star'
+    }));
+    
+    cardContainer.appendChild(UI.card('Card with Actions', 'This card has action buttons in the header.', {
+        actions: [
+            { icon: 'edit', onclick: () => UI.toast('Edit clicked!', 'info') },
+            { icon: 'trash-2', variant: 'error', onclick: () => UI.toast('Delete clicked!', 'error') }
+        ]
+    }));
+    
+    cardContainer.appendChild(UI.card('Full Featured Card', 'This card has an icon, actions, and a footer.', {
+        icon: 'settings',
+        description: 'Complete example with all options',
+        actions: [
+            { text: 'Save', icon: 'save', variant: 'primary', onclick: () => UI.toast('Saved!', 'success') },
+            { icon: 'more-horizontal', onclick: () => UI.toast('More options', 'info') }
+        ],
+        footer: '<div class="demo-row"><span class="tag tag-success">Active</span><span class="tag tag-info">Featured</span></div>'
+    }));
+    
+    cardContainer.appendChild(UI.card('Card with Description', 'Card content goes here...', {
+        description: 'This card has a description'
+    }));
+    
+    cardContainer.appendChild(UI.card('Card with Footer', 'Main content area', {
+        footer: '<button class="btn btn-sm">Action</button>'
+    }));
+    
+    const spinnerContainer = document.getElementById('dynamic-spinner');
+    spinnerContainer.appendChild(UI.spinner({ size: '32px' }));
+    
+    // Create dynamic popover with Shoelace
+    const popoverBtn = document.getElementById('dynamic-popover');
+    
+    // Create Shoelace popup wrapper
+    const popup = document.createElement('sl-popup');
+    popup.setAttribute('placement', 'bottom');
+    popup.setAttribute('trigger', 'click');
+    popup.setAttribute('distance', '8');
+    
+    // Create popover content
+    const popoverContent = document.createElement('div');
+    popoverContent.style.cssText = 'background: var(--bg-secondary); border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: var(--shadow-md); min-width: 250px;';
+    popoverContent.innerHTML = `
+        <h5 class="margin-0-0-2-0">Dynamic Popover</h5>
+        <p class="margin-0-0-3-0">This popover was created with JavaScript!</p>
+        <button class="btn btn-sm" onclick="UI.toast('Popover action!', 'info')">Action</button>
+    `;
+    
+    // Set up the popup structure
+    popoverBtn.setAttribute('slot', 'anchor');
+    popup.appendChild(popoverBtn.cloneNode(true));
+    popup.appendChild(popoverContent);
+    
+    // Replace the original button with the popup
+    popoverBtn.parentNode.replaceChild(popup, popoverBtn);
+    
+    
+    // Initialize icons
+    UI.icons();
+    
+    // Add dynamic tooltips
+    addMissingTooltips();
+    
+});
+
+// Helper function removed - using the more comprehensive scrollToSection above
+
+// Modal examples
+function showSimpleModal() {
+    UI.modal('This is a simple modal with just content.', {
+        title: 'Simple Modal'
+    });
+}
+
+function showConfirmModal() {
+    UI.modal('Are you sure you want to delete this file?', {
+        title: 'Confirm Delete',
+        actions: [
+            { text: 'Cancel', variant: 'default' },
+            { 
+                text: 'Delete', 
+                variant: 'error',
+                onclick: () => UI.toast('File deleted!', 'success')
+            }
+        ]
+    });
+}
+
+function showFormModal() {
+    const formHTML = `
+        <div class="form-group">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-input" placeholder="Enter name...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" placeholder="Enter email...">
+        </div>
+    `;
+    
+    UI.modal(formHTML, {
+        title: 'User Form',
+        actions: [
+            { text: 'Cancel' },
+            { 
+                text: 'Save', 
+                variant: 'primary',
+                onclick: () => UI.toast('Form saved!', 'success')
+            }
+        ]
+    });
+}
+
+// Menu functions
+function showMenu(button) {
+    document.querySelectorAll('.menu').forEach(menu => menu.remove());
+    
+    const menu = UI.menu([
+        { text: 'New File', icon: 'file-plus', onclick: () => UI.toast('New file created', 'success') },
+        { text: 'New Folder', icon: 'folder-plus', onclick: () => UI.toast('New folder created', 'success') },
+        { divider: true },
+        { text: 'Settings', icon: 'settings', onclick: () => UI.toast('Settings opened', 'info') },
+        { text: 'Help', icon: 'help-circle', onclick: () => UI.toast('Help opened', 'info') }
+    ]);
+    
+    const rect = button.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.left = rect.left + 'px';
+    menu.style.top = rect.bottom + 5 + 'px';
+    menu.classList.add('active');
+    
+    document.body.appendChild(menu);
+    
+    const closeMenu = (e) => {
+        if (!menu.contains(e.target) && e.target !== button) {
+            menu.classList.remove('active');
+            setTimeout(() => menu.remove(), 150);
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 0);
+}
+
+function showContextMenuDemo() {
+    const contextMenu = UI.contextMenu([
+        { text: 'Copy', icon: 'copy', onclick: () => UI.toast('Copied!', 'success') },
+        { text: 'Cut', icon: 'scissors', onclick: () => UI.toast('Cut!', 'success') },
+        { text: 'Paste', icon: 'clipboard', onclick: () => UI.toast('Pasted!', 'success') },
+        { divider: true },
+        { text: 'Delete', icon: 'trash-2', onclick: () => UI.toast('Deleted!', 'error') }
+    ]);
+    
+    contextMenu.show(window.innerWidth / 2, window.innerHeight / 2);
+}
+
+// Navigation menu configuration functions
+function showNavMenuConfig() {
+    const configCode = `// Navigation Panel Menu Configuration
+const navSections = [
+    {
+title: 'Overview',
+items: [
+    { id: 'intro', text: 'Introduction', icon: 'info', active: true, onclick: () => scrollToSection('buttons') },
+    { id: 'getting-started', text: 'Getting Started', icon: 'play', onclick: () => UI.toast('Getting Started', 'info') }
+]
+    },
+    {
+title: 'Components',
+items: [
+    { id: 'buttons', text: 'Buttons', icon: 'mouse-pointer', onclick: () => scrollToSection('buttons') },
+    { id: 'toasts', text: 'Toast Notifications', icon: 'bell', badge: '4', onclick: () => scrollToSection('toast') },
+    { id: 'cards', text: 'Cards', icon: 'square', onclick: () => scrollToSection('cards') },
+    { id: 'modals', text: 'Modals', icon: 'layers', onclick: () => scrollToSection('modals') },
+    { id: 'menus', text: 'Menus', icon: 'menu', onclick: () => scrollToSection('menus') },
+    { id: 'forms', text: 'Forms', icon: 'edit', onclick: () => scrollToSection('forms') },
+    { id: 'tags', text: 'Tags', icon: 'tag', onclick: () => scrollToSection('tags') }
+]
+    },
+    {
+title: 'Layout',
+items: [
+    { id: 'grid', text: 'Grid System', icon: 'grid', onclick: () => scrollToSection('grid') },
+    { id: 'panels', text: 'Panels', icon: 'layout', onclick: () => scrollToSection('panels') },
+    { id: 'typography', text: 'Typography', icon: 'type', onclick: () => scrollToSection('typography') }
+]
+    },
+    {
+title: 'Utilities',
+items: [
+    { id: 'badges', text: 'Badges & Spinners', icon: 'star', onclick: () => scrollToSection('badges') },
+    { id: 'colors', text: 'Colors', icon: 'palette', onclick: () => scrollToSection('colors') }
+]
+    }
+];
+
+// Create navigation panel
+const navPanel = UI.navPanel(navSections, {
+    title: 'FileUI Components',
+    icon: 'book-open',
+    startCollapsed: true
+});`;
+
+    UI.modal(`<pre><code>${configCode}</code></pre>`, {
+        title: 'Navigation Panel Menu Configuration',
+        size: 'lg'
+    });
+}
+
+function recreateNavPanel() {
+    // Remove existing nav panel
+    const existingPanel = document.getElementById('nav-panel');
+    if (existingPanel) {
+        existingPanel.remove();
+    }
+    
+    // Remove existing toggle
+    const existingToggle = document.querySelector('.nav-panel-toggle');
+    if (existingToggle) {
+        existingToggle.remove();
+    }
+    
+    // Create new nav panel with updated config
+    const newNavSections = [
+        {
+            title: 'Demo Sections',
+            items: [
+                { id: 'new-item', text: 'New Item', icon: 'plus', onclick: () => UI.toast('New item clicked!', 'success') },
+                { id: 'buttons', text: 'Buttons', icon: 'mouse-pointer', onclick: () => scrollToSection('buttons') },
+                { id: 'menus', text: 'Menus', icon: 'menu', active: true, onclick: () => scrollToSection('menus') }
+            ]
+        }
+    ];
+    
+    const navPanel = UI.navPanel(newNavSections, {
+        title: 'Demo Menu Config',
+        icon: 'settings'
+    });
+    document.body.insertBefore(navPanel, document.body.firstChild);
+    
+    const navToggle = UI.navToggle();
+    document.body.insertBefore(navToggle, document.body.firstChild);
+    
+    UI.toast('Navigation panel recreated with demo config!', 'info');
+}
+
+// Panel functions
+function addPanel() {
+    const container = document.getElementById('panels-container');
+    const panel = UI.panel('Sample Panel', 'This is a regular panel with some content.', {
+        icon: 'layout'
+    });
+    container.appendChild(panel);
+}
+
+function addCollapsiblePanel() {
+    const container = document.getElementById('panels-container');
+    const panel = UI.panel('Collapsible Panel', 'This panel can be collapsed and expanded.', {
+        icon: 'chevron-down',
+        collapsible: true
+    });
+    container.appendChild(panel);
+}
+
+// Tag functions
+let tagCounter = 1;
+function addTag() {
+    const container = document.getElementById('tags-container');
+    const variants = ['primary', 'success', 'warning', 'error', 'info'];
+    const variant = variants[Math.floor(Math.random() * variants.length)];
+    
+    const tag = UI.tag(`Tag ${tagCounter}`, { variant });
+    container.appendChild(tag);
+    tagCounter++;
+}
+
+function addClosableTag() {
+    const container = document.getElementById('tags-container');
+    const variants = ['primary', 'success', 'warning', 'error', 'info'];
+    const variant = variants[Math.floor(Math.random() * variants.length)];
+    
+    const tag = UI.tag(`Closable ${tagCounter}`, { 
+        variant, 
+        closable: true,
+        onClose: () => UI.toast('Tag removed!', 'info')
+    });
+    container.appendChild(tag);
+    tagCounter++;
+}
+
+// Function to add tooltips to elements that don't have them
+function addMissingTooltips() {
+    // Add tooltips to all buttons without existing tooltips
+    document.querySelectorAll('button:not(sl-tooltip button)').forEach(button => {
+        if (!button.closest('sl-tooltip') && !button.title) {
+            // Create tooltip text based on button content or class
+            let tooltipText = '';
+            if (button.classList.contains('theme-toggle-panel')) {
+                tooltipText = 'Toggle dark/light theme';
+            } else if (button.classList.contains('font-toggle')) {
+                tooltipText = button.title || 'Change font family';
+            } else if (button.classList.contains('density-toggle')) {
+                tooltipText = button.title || 'Change layout density';
+            } else if (button.classList.contains('nav-panel-toggle')) {
+                tooltipText = 'Toggle navigation panel';
+            } else if (button.textContent.trim()) {
+                tooltipText = `Click to ${button.textContent.trim().toLowerCase()}`;
+            } else {
+                tooltipText = 'Interactive button';
+            }
+            
+            // Add Shoelace tooltip
+            const tooltip = document.createElement('sl-tooltip');
+            tooltip.setAttribute('content', tooltipText);
+            tooltip.setAttribute('placement', 'top');
+            tooltip.setAttribute('distance', '8');
+            
+            // Wrap the button with the tooltip
+            button.parentNode.insertBefore(tooltip, button);
+            tooltip.appendChild(button);
+        }
+    });
+    
+    // Add tooltips to nav items that don't have them
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (!item.closest('sl-tooltip') && !item.title) {
+            const text = item.textContent.trim();
+            
+            // Add Shoelace tooltip
+            const tooltip = document.createElement('sl-tooltip');
+            tooltip.setAttribute('content', `Navigate to ${text} section`);
+            tooltip.setAttribute('placement', 'right');
+            
+            // Wrap the nav item with the tooltip
+            item.parentNode.insertBefore(tooltip, item);
+            tooltip.appendChild(item);
+        }
+    });
+}

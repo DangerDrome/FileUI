@@ -26,9 +26,9 @@
 <body>
     <!-- Main content with navigation spacing -->
     <div class="main-content">
-        <div style="padding: var(--space-8);">
+        <div class="padding-8">
             <h1>FileUI Component Library</h1>
-            <p class="lead" style="margin-bottom: var(--space-24);">All UI components with navigation panel and theme toggle</p>
+            <p class="lead margin-bottom-24">All UI components with navigation panel and theme toggle</p>
             
             <!-- Colors Section -->
             <div class="section">
@@ -39,21 +39,21 @@
                     <div class="card-body">
                     <h5>Semantic Colors</h5>
                     <div class="demo-row">
-                        <div style="background: var(--primary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Primary</div>
-                        <div style="background: var(--success); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Success</div>
-                        <div style="background: var(--warning); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Warning</div>
-                        <div style="background: var(--error); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Error</div>
-                        <div style="background: var(--info); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Info</div>
+                        <div class="semantic-color-chip">Primary</div>
+                        <div class="semantic-color-chip success">Success</div>
+                        <div class="semantic-color-chip warning">Warning</div>
+                        <div class="semantic-color-chip error">Error</div>
+                        <div class="semantic-color-chip info">Info</div>
                     </div>
                     
                     
                     <h5>Background Hierarchy</h5>
                     <div class="demo-row">
-                        <div style="background: var(--bg-quinary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-primary);">Quinary BG (Darkest)</div>
-                        <div style="background: var(--bg-quaternary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-primary);">Quaternary BG</div>
-                        <div style="background: var(--bg-primary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-primary);">Primary BG</div>
-                        <div style="background: var(--bg-secondary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-primary);">Secondary BG</div>
-                        <div style="background: var(--bg-tertiary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-primary);">Tertiary BG</div>
+                        <div class="bg-color-chip quinary">Quinary BG (Darkest)</div>
+                        <div class="bg-color-chip quaternary">Quaternary BG</div>
+                        <div class="bg-color-chip primary">Primary BG</div>
+                        <div class="bg-color-chip secondary">Secondary BG</div>
+                        <div class="bg-color-chip tertiary">Tertiary BG</div>
                     </div>
                     
                     </div>
@@ -68,333 +68,333 @@
                     </div>
                     <div class="card-body">
                     <h5>Common Icons</h5>
-                    <div class="demo-row" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-4);">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="home" style="width: 24px; height: 24px;"></i>
+                    <div class="demo-row grid-auto-fill-120">
+                        <div class="icon-grid-item">
+                            <i data-lucide="home" class="icon-sm"></i>
                             <span class="small">home</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="user" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="user" class="icon-sm"></i>
                             <span class="small">user</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="settings" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="settings" class="icon-sm"></i>
                             <span class="small">settings</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="search" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="search" class="icon-sm"></i>
                             <span class="small">search</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="bell" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="bell" class="icon-sm"></i>
                             <span class="small">bell</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="mail" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="mail" class="icon-sm"></i>
                             <span class="small">mail</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="calendar" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="calendar" class="icon-sm"></i>
                             <span class="small">calendar</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="file" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="file" class="icon-sm"></i>
                             <span class="small">file</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="folder" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="folder" class="icon-sm"></i>
                             <span class="small">folder</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="download" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="download" class="icon-sm"></i>
                             <span class="small">download</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="upload" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="upload" class="icon-sm"></i>
                             <span class="small">upload</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="trash-2" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="trash-2" class="icon-sm"></i>
                             <span class="small">trash-2</span>
                         </div>
                     </div>
                     
                     <h5>Action Icons</h5>
-                    <div class="demo-row" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-4);">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="edit" style="width: 24px; height: 24px;"></i>
+                    <div class="demo-row grid-auto-fill-120">
+                        <div class="icon-grid-item">
+                            <i data-lucide="edit" class="icon-sm"></i>
                             <span class="small">edit</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="save" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="save" class="icon-sm"></i>
                             <span class="small">save</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="copy" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="copy" class="icon-sm"></i>
                             <span class="small">copy</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="share-2" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="share-2" class="icon-sm"></i>
                             <span class="small">share-2</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="plus" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="plus" class="icon-sm"></i>
                             <span class="small">plus</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="minus" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="minus" class="icon-sm"></i>
                             <span class="small">minus</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="x" class="icon-sm"></i>
                             <span class="small">x</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="check" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="check" class="icon-sm"></i>
                             <span class="small">check</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="refresh-cw" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="refresh-cw" class="icon-sm"></i>
                             <span class="small">refresh-cw</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="more-horizontal" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="more-horizontal" class="icon-sm"></i>
                             <span class="small">more-horizontal</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="filter" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="filter" class="icon-sm"></i>
                             <span class="small">filter</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="sort-asc" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="sort-asc" class="icon-sm"></i>
                             <span class="small">sort-asc</span>
                         </div>
                     </div>
                     
                     <h5>Navigation Icons</h5>
-                    <div class="demo-row" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-4);">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
+                    <div class="demo-row grid-auto-fill-120">
+                        <div class="icon-grid-item">
+                            <i data-lucide="chevron-left" class="icon-sm"></i>
                             <span class="small">chevron-left</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="chevron-right" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="chevron-right" class="icon-sm"></i>
                             <span class="small">chevron-right</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="chevron-up" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="chevron-up" class="icon-sm"></i>
                             <span class="small">chevron-up</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="chevron-down" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="chevron-down" class="icon-sm"></i>
                             <span class="small">chevron-down</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="arrow-left" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="arrow-left" class="icon-sm"></i>
                             <span class="small">arrow-left</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="arrow-right" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="arrow-right" class="icon-sm"></i>
                             <span class="small">arrow-right</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="menu" class="icon-sm"></i>
                             <span class="small">menu</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="grid" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="grid" class="icon-sm"></i>
                             <span class="small">grid</span>
                         </div>
                     </div>
                     
                     <h5>Status Icons</h5>
-                    <div class="demo-row" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-4);">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="check-circle" style="width: 24px; height: 24px;"></i>
+                    <div class="demo-row grid-auto-fill-120">
+                        <div class="icon-grid-item">
+                            <i data-lucide="check-circle" class="icon-sm"></i>
                             <span class="small">check-circle</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="x-circle" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="x-circle" class="icon-sm"></i>
                             <span class="small">x-circle</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="alert-triangle" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="alert-triangle" class="icon-sm"></i>
                             <span class="small">alert-triangle</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="info" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="info" class="icon-sm"></i>
                             <span class="small">info</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="help-circle" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="help-circle" class="icon-sm"></i>
                             <span class="small">help-circle</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="star" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="star" class="icon-sm"></i>
                             <span class="small">star</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="heart" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="heart" class="icon-sm"></i>
                             <span class="small">heart</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="lock" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="lock" class="icon-sm"></i>
                             <span class="small">lock</span>
                         </div>
                     </div>
                     
                     <h5>Media Icons</h5>
-                    <div class="demo-row" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-4);">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="play" style="width: 24px; height: 24px;"></i>
+                    <div class="demo-row grid-auto-fill-120">
+                        <div class="icon-grid-item">
+                            <i data-lucide="play" class="icon-sm"></i>
                             <span class="small">play</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="pause" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="pause" class="icon-sm"></i>
                             <span class="small">pause</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="stop-circle" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="stop-circle" class="icon-sm"></i>
                             <span class="small">stop-circle</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="skip-back" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="skip-back" class="icon-sm"></i>
                             <span class="small">skip-back</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="skip-forward" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="skip-forward" class="icon-sm"></i>
                             <span class="small">skip-forward</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="volume-2" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="volume-2" class="icon-sm"></i>
                             <span class="small">volume-2</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="volume-x" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="volume-x" class="icon-sm"></i>
                             <span class="small">volume-x</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="image" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="image" class="icon-sm"></i>
                             <span class="small">image</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="video" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="video" class="icon-sm"></i>
                             <span class="small">video</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="music" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="music" class="icon-sm"></i>
                             <span class="small">music</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="mic" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="mic" class="icon-sm"></i>
                             <span class="small">mic</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="camera" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="camera" class="icon-sm"></i>
                             <span class="small">camera</span>
                         </div>
                     </div>
                     
                     <h5>VFX Type Icons</h5>
-                    <div class="demo-row" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-4);">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="box" style="width: 24px; height: 24px;"></i>
+                    <div class="demo-row grid-auto-fill-120">
+                        <div class="icon-grid-item">
+                            <i data-lucide="box" class="icon-sm"></i>
                             <span class="small">3D Models</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="layers" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="layers" class="icon-sm"></i>
                             <span class="small">Compositing</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="image" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="image" class="icon-sm"></i>
                             <span class="small">Textures</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="film" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="film" class="icon-sm"></i>
                             <span class="small">Sequences</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="folder-open" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="folder-open" class="icon-sm"></i>
                             <span class="small">Projects</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="zap" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="zap" class="icon-sm"></i>
                             <span class="small">Renders</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="cpu" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="cpu" class="icon-sm"></i>
                             <span class="small">Simulations</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="palette" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="palette" class="icon-sm"></i>
                             <span class="small">Materials</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="move-3d" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="move-3d" class="icon-sm"></i>
                             <span class="small">Animation</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="database" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="database" class="icon-sm"></i>
                             <span class="small">Assets</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="clapperboard" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="clapperboard" class="icon-sm"></i>
                             <span class="small">Editing</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="workflow" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="workflow" class="icon-sm"></i>
                             <span class="small">Pipeline</span>
                         </div>
                     </div>
                     
                     <h5>Animation Type Icons</h5>
-                    <div class="demo-row" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-4);">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="move" style="width: 24px; height: 24px;"></i>
+                    <div class="demo-row grid-auto-fill-120">
+                        <div class="icon-grid-item">
+                            <i data-lucide="move" class="icon-sm"></i>
                             <span class="small">Transform</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="rotate-3d" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="rotate-3d" class="icon-sm"></i>
                             <span class="small">Rotation</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="maximize" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="maximize" class="icon-sm"></i>
                             <span class="small">Scale</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="clock" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="clock" class="icon-sm"></i>
                             <span class="small">Keyframes</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="activity" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="activity" class="icon-sm"></i>
                             <span class="small">Curves</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="target" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="target" class="icon-sm"></i>
                             <span class="small">Rigging</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="git-branch" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="git-branch" class="icon-sm"></i>
                             <span class="small">Bones</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="repeat" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="repeat" class="icon-sm"></i>
                             <span class="small">Cycles</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="trending-up" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="trending-up" class="icon-sm"></i>
                             <span class="small">Easing</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="shuffle" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="shuffle" class="icon-sm"></i>
                             <span class="small">Procedural</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="wind" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="wind" class="icon-sm"></i>
                             <span class="small">Physics</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                            <i data-lucide="timer" style="width: 24px; height: 24px;"></i>
+                        <div class="icon-grid-item">
+                            <i data-lucide="timer" class="icon-sm"></i>
                             <span class="small">Timeline</span>
                         </div>
                     </div>
@@ -547,39 +547,39 @@ greetUser('Developer');</code></pre>
                     <div class="card-body">
                     <h5>2 Column Grid</h5>
                     <div class="grid grid-2">
-                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                        <div class="bg-tertiary-card">
                             Grid Item 1
                         </div>
-                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                        <div class="bg-tertiary-card">
                             Grid Item 2
                         </div>
                     </div>
                     
                     <h5>3 Column Grid</h5>
                     <div class="grid grid-3">
-                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                        <div class="bg-tertiary-card">
                             Item 1
                         </div>
-                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                        <div class="bg-tertiary-card">
                             Item 2
                         </div>
-                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                        <div class="bg-tertiary-card">
                             Item 3
                         </div>
                     </div>
                     
                     <h5>Auto-fit Grid</h5>
                     <div class="grid grid-auto-fit">
-                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                        <div class="bg-tertiary-card">
                             Responsive 1
                         </div>
-                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                        <div class="bg-tertiary-card">
                             Responsive 2
                         </div>
-                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                        <div class="bg-tertiary-card">
                             Responsive 3
                         </div>
-                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                        <div class="bg-tertiary-card">
                             Responsive 4
                         </div>
                     </div>
@@ -652,36 +652,31 @@ greetUser('Developer');</code></pre>
                         
                         <h5>Icon Buttons</h5>
                         <div class="demo-row">
-                            <div class="tooltip-wrapper">
+                            <sl-tooltip content="Edit item" placement="top">
                                 <button class="btn" onclick="UI.toast('Edit action', 'info')">
                                     <i data-lucide="edit"></i>
                                 </button>
-                                <div class="tooltip">Edit item</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Save changes" placement="top">
                                 <button class="btn btn-primary" onclick="UI.toast('Save action', 'success')">
                                     <i data-lucide="save"></i>
                                 </button>
-                                <div class="tooltip">Save changes</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Delete item" placement="top">
                                 <button class="btn btn-error" onclick="UI.toast('Delete action', 'error')">
                                     <i data-lucide="trash-2"></i>
                                 </button>
-                                <div class="tooltip">Delete item</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Open settings" placement="top">
                                 <button class="btn btn-sm" onclick="UI.toast('Settings', 'info')">
                                     <i data-lucide="settings"></i>
                                 </button>
-                                <div class="tooltip">Open settings</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Add new item" placement="top">
                                 <button class="btn btn-lg btn-success" onclick="UI.toast('Add new', 'success')">
                                     <i data-lucide="plus"></i>
                                 </button>
-                                <div class="tooltip">Add new item</div>
-                            </div>
+                            </sl-tooltip>
                         </div>
                         
                         <h5>Dynamic Buttons</h5>
@@ -698,36 +693,29 @@ greetUser('Developer');</code></pre>
                     </div>
                     <div class="card-body">
                         <div class="demo-row">
-                            <div class="tooltip-wrapper">
+                            <sl-tooltip content="Show success notification" placement="top">
                                 <button class="btn btn-success" onclick="UI.toast('Success message!', 'success')">Success Toast</button>
-                                <div class="tooltip">Show success notification</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Show error notification" placement="top">
                                 <button class="btn btn-error" onclick="UI.toast('Error occurred!', 'error')">Error Toast</button>
-                                <div class="tooltip">Show error notification</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Show warning notification" placement="top">
                                 <button class="btn btn-warning" onclick="UI.toast('Warning message', 'warning')">Warning Toast</button>
-                                <div class="tooltip">Show warning notification</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Show info notification" placement="top">
                                 <button class="btn btn-info" onclick="UI.toast('Info message', 'info')">Info Toast</button>
-                                <div class="tooltip">Show info notification</div>
-                            </div>
+                            </sl-tooltip>
                         </div>
                         <div class="demo-row">
-                            <div class="tooltip-wrapper">
+                            <sl-tooltip content="Toast with loading spinner" placement="top">
                                 <button class="btn btn-primary" onclick="UI.toast('Loading data...', 'info', { preloader: true, duration: 3000 })">Preloader Toast</button>
-                                <div class="tooltip">Toast with loading spinner</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Toast with close button" placement="top">
                                 <button class="btn btn-info" onclick="UI.toast('Click X to dismiss', 'info', { dismissible: true })">Dismissible Toast</button>
-                                <div class="tooltip">Toast with close button</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Toast with action button" placement="top">
                                 <button class="btn btn-warning" onclick="UI.toast('Action required', 'warning', { action: { text: 'Undo', callback: () => UI.toast('Undone!', 'success') }})">Action Toast</button>
-                                <div class="tooltip">Toast with action button</div>
-                            </div>
+                            </sl-tooltip>
                         </div>
                     </div>
                 </div>
@@ -741,18 +729,15 @@ greetUser('Developer');</code></pre>
                     </div>
                     <div class="card-body">
                         <div class="demo-row">
-                            <div class="tooltip-wrapper">
+                            <sl-tooltip content="Basic modal with content only" placement="top">
                                 <button class="btn" onclick="showSimpleModal()">Simple Modal</button>
-                                <div class="tooltip">Basic modal with content only</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Modal with confirmation actions" placement="top">
                                 <button class="btn" onclick="showConfirmModal()">Confirm Modal</button>
-                                <div class="tooltip">Modal with confirmation actions</div>
-                            </div>
-                            <div class="tooltip-wrapper">
+                            </sl-tooltip>
+                            <sl-tooltip content="Modal containing form elements" placement="top">
                                 <button class="btn" onclick="showFormModal()">Form Modal</button>
-                                <div class="tooltip">Modal containing form elements</div>
-                            </div>
+                            </sl-tooltip>
                         </div>
                     </div>
                 </div>
@@ -776,7 +761,7 @@ greetUser('Developer');</code></pre>
                         <div class="demo-row">
                             <button class="btn" onclick="showMenu(this)">Dropdown Menu</button>
                             <button class="btn" onclick="showContextMenuDemo()">Context Menu Demo</button>
-                            <div data-context-menu="context-menu-1" class="btn" style="cursor: context-menu;">
+                            <div data-context-menu="context-menu-1" class="btn cursor-context-menu">
                                 Right-click me
                             </div>
                         </div>
@@ -846,7 +831,7 @@ greetUser('Developer');</code></pre>
                             <button class="btn btn-sm" onclick="addTag()">Add Tag</button>
                             <button class="btn btn-sm" onclick="addClosableTag()">Add Closable Tag</button>
                         </div>
-                        <div id="tags-container" class="demo-row" style="margin-top: var(--space-4);"></div>
+                        <div id="tags-container" class="demo-row margin-top-4"></div>
                     </div>
                 </div>
             </div>
@@ -905,7 +890,7 @@ greetUser('Developer');</code></pre>
                         
                         <div class="form-group">
                             <label class="form-label">Checkboxes</label>
-                            <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                            <div class="flex-column-gap-2">
                                 <label class="form-checkbox">
                                     <input type="checkbox" checked>
                                     <span>Enable notifications</span>
@@ -923,7 +908,7 @@ greetUser('Developer');</code></pre>
                         
                         <div class="form-group">
                             <label class="form-label">Radio Buttons</label>
-                            <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                            <div class="flex-column-gap-2">
                                 <label class="form-radio">
                                     <input type="radio" name="plan" value="basic" checked>
                                     <span>Basic Plan</span>
@@ -942,7 +927,7 @@ greetUser('Developer');</code></pre>
                     
                     <h5>Other Inputs</h5>
                     <div class="grid grid-auto-fit-3">
-                        <div class="form-group" style="grid-column: span 2;">
+                        <div class="form-group grid-span-2">
                             <label class="form-label">Textarea</label>
                             <textarea class="form-textarea" rows="4" placeholder="Enter your message..."></textarea>
                         </div>
@@ -959,7 +944,7 @@ greetUser('Developer');</code></pre>
                         
                         <div class="form-group">
                             <label class="form-label">Color Picker</label>
-                            <input type="color" class="form-input" value="#b5d3b6" style="height: 50px; cursor: pointer;">
+                            <input type="color" class="form-input" value="#b5d3b6" class="clickable-50">
                         </div>
                         
                         <div class="form-group">
@@ -985,7 +970,7 @@ greetUser('Developer');</code></pre>
                     <div class="grid grid-auto-fit-3">
                         <div class="form-group">
                             <label class="form-label">Checkbox Colors</label>
-                            <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                            <div class="flex-column-gap-2">
                                 <label class="form-checkbox checkbox-primary">
                                     <input type="checkbox" checked>
                                     <span>Primary</span>
@@ -1011,7 +996,7 @@ greetUser('Developer');</code></pre>
                         
                         <div class="form-group">
                             <label class="form-label">Radio Button Colors</label>
-                            <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                            <div class="flex-column-gap-2">
                                 <label class="form-radio radio-primary">
                                     <input type="radio" name="color-demo" checked>
                                     <span>Primary</span>
@@ -1037,7 +1022,7 @@ greetUser('Developer');</code></pre>
                         
                         <div class="form-group">
                             <label class="form-label">Disabled States</label>
-                            <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                            <div class="flex-column-gap-2">
                                 <label class="form-checkbox">
                                     <input type="checkbox" disabled>
                                     <span>Disabled Checkbox</span>
@@ -1075,12 +1060,12 @@ greetUser('Developer');</code></pre>
                         <div class="card-header-left"><i data-lucide="star" class="card-icon"></i><h2 class="card-title">Badges, Spinners & Progress</h2></div>
                     </div>
                     <div class="card-body">
-                    <div class="grid grid-auto-fit-3" style="gap: var(--space-6);">
+                    <div class="grid grid-auto-fit-3 gap-6">
                         
                         <!-- Badges Column -->
                         <div>
                             <h5>Badges</h5>
-                            <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4);">
+                            <div class="flex-wrap-gap-2">
                                 <span class="badge">Default</span>
                                 <span class="badge badge-primary">Primary</span>
                                 <span class="badge badge-success">Success</span>
@@ -1093,12 +1078,12 @@ greetUser('Developer');</code></pre>
                         <!-- Spinners Column -->
                         <div>
                             <h5>Spinners</h5>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); justify-items: center; margin-bottom: var(--space-4);">
-                                <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--primary) 30%, transparent); border-top-color: var(--primary); width: 24px; height: 24px; border-width: 3px;"></div>
-                                <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--success) 30%, transparent); border-top-color: var(--success); width: 24px; height: 24px; border-width: 3px;"></div>
-                                <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--warning) 30%, transparent); border-top-color: var(--warning); width: 24px; height: 24px; border-width: 3px;"></div>
-                                <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--error) 30%, transparent); border-top-color: var(--error); width: 24px; height: 24px; border-width: 3px;"></div>
-                                <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--info) 30%, transparent); border-top-color: var(--info); width: 24px; height: 24px; border-width: 3px;"></div>
+                            <div class="grid-3-cols">
+                                <div class="loading-spinner loading-spinner-primary"></div>
+                                <div class="loading-spinner loading-spinner-success"></div>
+                                <div class="loading-spinner loading-spinner-warning"></div>
+                                <div class="loading-spinner loading-spinner-error"></div>
+                                <div class="loading-spinner loading-spinner-info"></div>
                                 <div id="dynamic-spinner"></div>
                             </div>
                         </div>
@@ -1106,45 +1091,45 @@ greetUser('Developer');</code></pre>
                         <!-- Progress Bars Column -->
                         <div>
                             <h5>Progress Bars</h5>
-                            <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            <div class="flex-column-gap-3">
                                 <div>
                                     <div class="progress">
-                                        <div class="progress-bar" style="width: 25%"></div>
+                                        <div class="progress-bar progress-bar-width-25"></div>
                                     </div>
                                     <small class="text-tertiary">Default (25%)</small>
                                 </div>
                                 
                                 <div>
                                     <div class="progress">
-                                        <div class="progress-bar progress-bar-primary" style="width: 50%"></div>
+                                        <div class="progress-bar progress-bar-primary progress-bar-width-50"></div>
                                     </div>
                                     <small class="text-tertiary">Primary (50%)</small>
                                 </div>
                                 
                                 <div>
                                     <div class="progress">
-                                        <div class="progress-bar progress-bar-success" style="width: 75%"></div>
+                                        <div class="progress-bar progress-bar-success progress-bar-width-75"></div>
                                     </div>
                                     <small class="text-tertiary">Success (75%)</small>
                                 </div>
                                 
                                 <div>
                                     <div class="progress">
-                                        <div class="progress-bar progress-bar-warning" style="width: 60%"></div>
+                                        <div class="progress-bar progress-bar-warning progress-bar-width-60"></div>
                                     </div>
                                     <small class="text-tertiary">Warning (60%)</small>
                                 </div>
                                 
                                 <div>
                                     <div class="progress">
-                                        <div class="progress-bar progress-bar-error" style="width: 30%"></div>
+                                        <div class="progress-bar progress-bar-error progress-bar-width-30"></div>
                                     </div>
                                     <small class="text-tertiary">Error (30%)</small>
                                 </div>
                                 
                                 <div>
                                     <div class="progress">
-                                        <div class="progress-bar progress-bar-info" style="width: 90%"></div>
+                                        <div class="progress-bar progress-bar-info progress-bar-width-90"></div>
                                     </div>
                                     <small class="text-tertiary">Info (90%)</small>
                                 </div>
@@ -1153,27 +1138,27 @@ greetUser('Developer');</code></pre>
                     </div>
                     
                     <!-- Progress Variations Row -->
-                    <div style="margin-top: var(--space-6);">
+                    <div class="margin-top-6">
                         <h5>Progress Variations</h5>
-                        <div class="grid grid-auto-fit-3" style="gap: var(--space-4);">
+                        <div class="grid grid-auto-fit-3 gap-4">
                             <div>
                                 <label class="form-label">Striped (Animated)</label>
                                 <div class="progress">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 65%"></div>
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated progress-bar-width-65"></div>
                                 </div>
                             </div>
                             
                             <div>
                                 <label class="form-label">Small Size</label>
                                 <div class="progress progress-sm">
-                                    <div class="progress-bar progress-bar-primary" style="width: 40%"></div>
+                                    <div class="progress-bar progress-bar-primary progress-bar-width-40"></div>
                                 </div>
                             </div>
                             
                             <div>
                                 <label class="form-label">Large with Label</label>
                                 <div class="progress progress-lg">
-                                    <div class="progress-bar progress-bar-success" style="width: 85%">
+                                    <div class="progress-bar progress-bar-success progress-bar-width-85">
                                         <span class="progress-label">85%</span>
                                     </div>
                                 </div>
@@ -1192,7 +1177,7 @@ greetUser('Developer');</code></pre>
                     </div>
                     <div class="card-body">
                     <h5>Default Scrollbar</h5>
-                    <div class="scrollbar-demo" style="height: 200px; overflow-y: scroll; background: var(--bg-secondary); padding: var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4);">
+                    <div class="scrollbar-demo scrollable-box scrollable-box-200">
                         <p>This is a scrollable area with custom styled scrollbars.</p>
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
                         <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
@@ -1204,7 +1189,7 @@ greetUser('Developer');</code></pre>
                     </div>
                     
                     <h5>Thin Scrollbar</h5>
-                    <div class="scrollbar-demo scrollbar-thin" style="height: 150px; overflow-y: scroll; background: var(--bg-secondary); padding: var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4);">
+                    <div class="scrollbar-demo scrollbar-thin scrollable-box scrollable-box-150">
                         <p>This area has a thinner scrollbar variant.</p>
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                         <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
@@ -1213,9 +1198,9 @@ greetUser('Developer');</code></pre>
                     </div>
                     
                     <h5>Horizontal Scrollbar</h5>
-                    <div class="scrollbar-demo" style="overflow-x: scroll; white-space: nowrap; background: var(--bg-secondary); padding: var(--space-4); border-radius: var(--radius-md);">
-                        <div style="width: 150%; display: inline-block;">
-                            <p style="display: inline;">This content extends horizontally beyond the container width. Keep scrolling to the right to see more content. The horizontal scrollbar also follows the same styling pattern.</p>
+                    <div class="scrollbar-demo horizontal-scroll">
+                        <div class="width-150">
+                            <p class="inline-display">This content extends horizontally beyond the container width. Keep scrolling to the right to see more content. The horizontal scrollbar also follows the same styling pattern.</p>
                         </div>
                     </div>
                     </div>
@@ -1225,504 +1210,5 @@ greetUser('Developer');</code></pre>
         </div>
     </div>
     
-    <script>
-        // Scroll to section and expand the card
-        function scrollToSection(sectionId) {
-            console.log('Scrolling to section:', sectionId);
-            
-            // Find the section
-            const sections = document.querySelectorAll('.section');
-            let targetSection = null;
-            let targetCard = null;
-            
-            // Try to find by matching card title
-            sections.forEach(section => {
-                const card = section.querySelector('.card');
-                if (card) {
-                    const title = card.querySelector('.card-title');
-                    if (title) {
-                        const titleText = title.textContent.toLowerCase();
-                        const searchText = sectionId.toLowerCase();
-                        
-                        // Check various matches
-                        if (titleText.includes(searchText) || 
-                            titleText.replace(/[^a-z0-9]/g, '').includes(searchText.replace(/[^a-z0-9]/g, '')) ||
-                            (searchText === 'toast' && titleText.includes('notification')) ||
-                            (searchText === 'badges' && titleText.includes('badges'))) {
-                            targetSection = section;
-                            targetCard = card;
-                        }
-                    }
-                }
-            });
-            
-            // If found, expand and scroll
-            if (targetSection && targetCard) {
-                // First scroll to the section
-                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                
-                // Then expand the card with a slight delay for visual effect
-                setTimeout(() => {
-                    targetCard.classList.remove('collapsed');
-                }, 100);
-                
-                // Also expand the corresponding nav section if it's collapsed
-                const navPanel = document.getElementById('nav-panel');
-                if (navPanel && !navPanel.classList.contains('collapsed')) {
-                    // Expand the nav section that contains this item
-                    const navItems = document.querySelectorAll('.nav-item');
-                    navItems.forEach(item => {
-                        if (item.dataset.navItem === sectionId) {
-                            const navSection = item.closest('.nav-section');
-                            if (navSection && navSection.classList.contains('collapsed')) {
-                                navSection.classList.remove('collapsed');
-                            }
-                        }
-                    });
-                }
-            } else {
-                console.log('Section not found:', sectionId);
-            }
-        }
-        
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            // Create navigation panel
-            const navSections = [
-                {
-                    title: 'Design',
-                    items: [
-                        { id: 'colors', text: 'Colors', icon: 'palette', onclick: () => scrollToSection('colors') },
-                        { id: 'icons', text: 'Icons', icon: 'package', onclick: () => scrollToSection('icons') },
-                        { id: 'typography', text: 'Typography', icon: 'type', onclick: () => scrollToSection('typography') }
-                    ]
-                },
-                {
-                    title: 'Layout',
-                    items: [
-                        { id: 'grid', text: 'Grid System', icon: 'grid', onclick: () => scrollToSection('grid') },
-                        { id: 'cards', text: 'Cards', icon: 'square', onclick: () => scrollToSection('cards') }
-                    ]
-                },
-                {
-                    title: 'Components',
-                    items: [
-                        { id: 'buttons', text: 'Buttons', icon: 'mouse-pointer', onclick: () => scrollToSection('buttons') },
-                        { id: 'toasts', text: 'Toast Notifications', icon: 'bell', onclick: () => scrollToSection('toast') },
-                        { id: 'modals', text: 'Modals', icon: 'layers', onclick: () => scrollToSection('modals') },
-                        { id: 'menus', text: 'Menus', icon: 'menu', onclick: () => scrollToSection('menus') },
-                        { id: 'panels', text: 'Panels', icon: 'layout', onclick: () => scrollToSection('panels') },
-                        { id: 'tags', text: 'Tags', icon: 'tag', onclick: () => scrollToSection('tags') },
-                        { id: 'forms', text: 'Forms', icon: 'edit', onclick: () => scrollToSection('forms') },
-                        { id: 'badges', text: 'Badges, Spinners & Progress', icon: 'star', onclick: () => scrollToSection('badges') }
-                    ]
-                },
-                {
-                    title: 'Advanced',
-                    items: [
-                        { id: 'scrollbars', text: 'Scrollbars', icon: 'scroll', onclick: () => scrollToSection('scrollbars') }
-                    ]
-                }
-            ];
-            
-            // Create and add navigation panel
-            const navPanel = UI.navPanel(navSections, {
-                title: 'Components',
-                icon: 'layers',
-                startCollapsed: true
-            });
-            document.body.insertBefore(navPanel, document.body.firstChild);
-            
-            // Create and add control panel
-            const controlPanel = UI.controlPanel();
-            document.body.appendChild(controlPanel);
-            
-            // Removed toggle buttons from footers - panels now toggle by clicking headers only
-            
-            // Add click handlers to panel headers to toggle collapse/expand
-            const navHeader = navPanel.querySelector('.nav-panel-header');
-            if (navHeader) {
-                navHeader.addEventListener('click', () => {
-                    navPanel.classList.toggle('collapsed');
-                });
-            }
-            
-            const controlHeader = controlPanel.querySelector('.control-panel-header');
-            if (controlHeader) {
-                controlHeader.addEventListener('click', () => {
-                    controlPanel.classList.toggle('collapsed');
-                });
-            }
-            
-            // Make all section cards collapsible and start expanded
-            document.querySelectorAll('.section .card').forEach(card => {
-                // Start expanded (no collapsed class added)
-                
-                const header = card.querySelector('.card-header');
-                if (header) {
-                    header.addEventListener('click', () => {
-                        card.classList.toggle('collapsed');
-                    });
-                }
-            });
-            
-            // Create dynamic components
-            const btnContainer = document.getElementById('dynamic-buttons');
-            btnContainer.appendChild(UI.button('Save', { variant: 'primary', icon: 'save' }));
-            btnContainer.appendChild(UI.button('Delete', { icon: 'trash-2', onclick: () => UI.toast('Deleted!', 'error') }));
-            btnContainer.appendChild(UI.button('Settings', { icon: 'settings', size: 'sm' }));
-            
-            const cardContainer = document.getElementById('card-demo');
-            cardContainer.appendChild(UI.card('Simple Card', 'This is a simple card with just title and content.'));
-            
-            cardContainer.appendChild(UI.card('Card with Icon', 'This card has an icon in the header.', {
-                icon: 'star'
-            }));
-            
-            cardContainer.appendChild(UI.card('Card with Actions', 'This card has action buttons in the header.', {
-                actions: [
-                    { icon: 'edit', onclick: () => UI.toast('Edit clicked!', 'info') },
-                    { icon: 'trash-2', variant: 'error', onclick: () => UI.toast('Delete clicked!', 'error') }
-                ]
-            }));
-            
-            cardContainer.appendChild(UI.card('Full Featured Card', 'This card has an icon, actions, and a footer.', {
-                icon: 'settings',
-                description: 'Complete example with all options',
-                actions: [
-                    { text: 'Save', icon: 'save', variant: 'primary', onclick: () => UI.toast('Saved!', 'success') },
-                    { icon: 'more-horizontal', onclick: () => UI.toast('More options', 'info') }
-                ],
-                footer: '<div class="demo-row"><span class="tag tag-success">Active</span><span class="tag tag-info">Featured</span></div>'
-            }));
-            
-            cardContainer.appendChild(UI.card('Card with Description', 'Card content goes here...', {
-                description: 'This card has a description'
-            }));
-            
-            cardContainer.appendChild(UI.card('Card with Footer', 'Main content area', {
-                footer: '<button class="btn btn-sm">Action</button>'
-            }));
-            
-            const spinnerContainer = document.getElementById('dynamic-spinner');
-            spinnerContainer.appendChild(UI.spinner({ size: '32px' }));
-            
-            // Create dynamic popover with Shoelace
-            const popoverBtn = document.getElementById('dynamic-popover');
-            
-            // Create Shoelace popup wrapper
-            const popup = document.createElement('sl-popup');
-            popup.setAttribute('placement', 'bottom');
-            popup.setAttribute('trigger', 'click');
-            popup.setAttribute('distance', '8');
-            
-            // Create popover content
-            const popoverContent = document.createElement('div');
-            popoverContent.style.cssText = 'background: var(--bg-secondary); border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: var(--shadow-md); min-width: 250px;';
-            popoverContent.innerHTML = `
-                <h5 style="margin: 0 0 var(--space-2) 0;">Dynamic Popover</h5>
-                <p style="margin: 0 0 var(--space-3) 0;">This popover was created with JavaScript!</p>
-                <button class="btn btn-sm" onclick="UI.toast('Popover action!', 'info')">Action</button>
-            `;
-            
-            // Set up the popup structure
-            popoverBtn.setAttribute('slot', 'anchor');
-            popup.appendChild(popoverBtn.cloneNode(true));
-            popup.appendChild(popoverContent);
-            
-            // Replace the original button with the popup
-            popoverBtn.parentNode.replaceChild(popup, popoverBtn);
-            
-            
-            // Initialize icons
-            UI.icons();
-            
-            // Add dynamic tooltips
-            addMissingTooltips();
-            
-        });
-        
-        // Helper function to scroll to sections
-        function scrollToSection(sectionName) {
-            const sections = document.querySelectorAll('.section');
-            sections.forEach((section, index) => {
-                const titleElement = section.querySelector('.card-title, .section-title');
-                if (titleElement && titleElement.textContent.toLowerCase().includes(sectionName)) {
-                    section.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        }
-        
-        // Modal examples
-        function showSimpleModal() {
-            UI.modal('This is a simple modal with just content.', {
-                title: 'Simple Modal'
-            });
-        }
-        
-        function showConfirmModal() {
-            UI.modal('Are you sure you want to delete this file?', {
-                title: 'Confirm Delete',
-                actions: [
-                    { text: 'Cancel', variant: 'default' },
-                    { 
-                        text: 'Delete', 
-                        variant: 'error',
-                        onclick: () => UI.toast('File deleted!', 'success')
-                    }
-                ]
-            });
-        }
-        
-        function showFormModal() {
-            const formHTML = `
-                <div class="form-group">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-input" placeholder="Enter name...">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" placeholder="Enter email...">
-                </div>
-            `;
-            
-            UI.modal(formHTML, {
-                title: 'User Form',
-                actions: [
-                    { text: 'Cancel' },
-                    { 
-                        text: 'Save', 
-                        variant: 'primary',
-                        onclick: () => UI.toast('Form saved!', 'success')
-                    }
-                ]
-            });
-        }
-        
-        // Menu functions
-        function showMenu(button) {
-            document.querySelectorAll('.menu').forEach(menu => menu.remove());
-            
-            const menu = UI.menu([
-                { text: 'New File', icon: 'file-plus', onclick: () => UI.toast('New file created', 'success') },
-                { text: 'New Folder', icon: 'folder-plus', onclick: () => UI.toast('New folder created', 'success') },
-                { divider: true },
-                { text: 'Settings', icon: 'settings', onclick: () => UI.toast('Settings opened', 'info') },
-                { text: 'Help', icon: 'help-circle', onclick: () => UI.toast('Help opened', 'info') }
-            ]);
-            
-            const rect = button.getBoundingClientRect();
-            menu.style.position = 'fixed';
-            menu.style.left = rect.left + 'px';
-            menu.style.top = rect.bottom + 5 + 'px';
-            menu.classList.add('active');
-            
-            document.body.appendChild(menu);
-            
-            const closeMenu = (e) => {
-                if (!menu.contains(e.target) && e.target !== button) {
-                    menu.classList.remove('active');
-                    setTimeout(() => menu.remove(), 150);
-                    document.removeEventListener('click', closeMenu);
-                }
-            };
-            setTimeout(() => document.addEventListener('click', closeMenu), 0);
-        }
-        
-        function showContextMenuDemo() {
-            const contextMenu = UI.contextMenu([
-                { text: 'Copy', icon: 'copy', onclick: () => UI.toast('Copied!', 'success') },
-                { text: 'Cut', icon: 'scissors', onclick: () => UI.toast('Cut!', 'success') },
-                { text: 'Paste', icon: 'clipboard', onclick: () => UI.toast('Pasted!', 'success') },
-                { divider: true },
-                { text: 'Delete', icon: 'trash-2', onclick: () => UI.toast('Deleted!', 'error') }
-            ]);
-            
-            contextMenu.show(window.innerWidth / 2, window.innerHeight / 2);
-        }
-        
-        // Navigation menu configuration functions
-        function showNavMenuConfig() {
-            const configCode = `// Navigation Panel Menu Configuration
-const navSections = [
-    {
-        title: 'Overview',
-        items: [
-            { id: 'intro', text: 'Introduction', icon: 'info', active: true, onclick: () => scrollToSection('buttons') },
-            { id: 'getting-started', text: 'Getting Started', icon: 'play', onclick: () => UI.toast('Getting Started', 'info') }
-        ]
-    },
-    {
-        title: 'Components',
-        items: [
-            { id: 'buttons', text: 'Buttons', icon: 'mouse-pointer', onclick: () => scrollToSection('buttons') },
-            { id: 'toasts', text: 'Toast Notifications', icon: 'bell', badge: '4', onclick: () => scrollToSection('toast') },
-            { id: 'cards', text: 'Cards', icon: 'square', onclick: () => scrollToSection('cards') },
-            { id: 'modals', text: 'Modals', icon: 'layers', onclick: () => scrollToSection('modals') },
-            { id: 'menus', text: 'Menus', icon: 'menu', onclick: () => scrollToSection('menus') },
-            { id: 'forms', text: 'Forms', icon: 'edit', onclick: () => scrollToSection('forms') },
-            { id: 'tags', text: 'Tags', icon: 'tag', onclick: () => scrollToSection('tags') }
-        ]
-    },
-    {
-        title: 'Layout',
-        items: [
-            { id: 'grid', text: 'Grid System', icon: 'grid', onclick: () => scrollToSection('grid') },
-            { id: 'panels', text: 'Panels', icon: 'layout', onclick: () => scrollToSection('panels') },
-            { id: 'typography', text: 'Typography', icon: 'type', onclick: () => scrollToSection('typography') }
-        ]
-    },
-    {
-        title: 'Utilities',
-        items: [
-            { id: 'badges', text: 'Badges & Spinners', icon: 'star', onclick: () => scrollToSection('badges') },
-            { id: 'colors', text: 'Colors', icon: 'palette', onclick: () => scrollToSection('colors') }
-        ]
-    }
-];
-
-// Create navigation panel
-const navPanel = UI.navPanel(navSections, {
-    title: 'FileUI Components',
-    icon: 'book-open',
-    startCollapsed: true
-});`;
-
-            UI.modal(`<pre><code>${configCode}</code></pre>`, {
-                title: 'Navigation Panel Menu Configuration',
-                size: 'lg'
-            });
-        }
-        
-        function recreateNavPanel() {
-            // Remove existing nav panel
-            const existingPanel = document.getElementById('nav-panel');
-            if (existingPanel) {
-                existingPanel.remove();
-            }
-            
-            // Remove existing toggle
-            const existingToggle = document.querySelector('.nav-panel-toggle');
-            if (existingToggle) {
-                existingToggle.remove();
-            }
-            
-            // Create new nav panel with updated config
-            const newNavSections = [
-                {
-                    title: 'Demo Sections',
-                    items: [
-                        { id: 'new-item', text: 'New Item', icon: 'plus', onclick: () => UI.toast('New item clicked!', 'success') },
-                        { id: 'buttons', text: 'Buttons', icon: 'mouse-pointer', onclick: () => scrollToSection('buttons') },
-                        { id: 'menus', text: 'Menus', icon: 'menu', active: true, onclick: () => scrollToSection('menus') }
-                    ]
-                }
-            ];
-            
-            const navPanel = UI.navPanel(newNavSections, {
-                title: 'Demo Menu Config',
-                icon: 'settings'
-            });
-            document.body.insertBefore(navPanel, document.body.firstChild);
-            
-            const navToggle = UI.navToggle();
-            document.body.insertBefore(navToggle, document.body.firstChild);
-            
-            UI.toast('Navigation panel recreated with demo config!', 'info');
-        }
-        
-        // Panel functions
-        function addPanel() {
-            const container = document.getElementById('panels-container');
-            const panel = UI.panel('Sample Panel', 'This is a regular panel with some content.', {
-                icon: 'layout'
-            });
-            container.appendChild(panel);
-        }
-        
-        function addCollapsiblePanel() {
-            const container = document.getElementById('panels-container');
-            const panel = UI.panel('Collapsible Panel', 'This panel can be collapsed and expanded.', {
-                icon: 'chevron-down',
-                collapsible: true
-            });
-            container.appendChild(panel);
-        }
-        
-        // Tag functions
-        let tagCounter = 1;
-        function addTag() {
-            const container = document.getElementById('tags-container');
-            const variants = ['primary', 'success', 'warning', 'error', 'info'];
-            const variant = variants[Math.floor(Math.random() * variants.length)];
-            
-            const tag = UI.tag(`Tag ${tagCounter}`, { variant });
-            container.appendChild(tag);
-            tagCounter++;
-        }
-        
-        function addClosableTag() {
-            const container = document.getElementById('tags-container');
-            const variants = ['primary', 'success', 'warning', 'error', 'info'];
-            const variant = variants[Math.floor(Math.random() * variants.length)];
-            
-            const tag = UI.tag(`Closable ${tagCounter}`, { 
-                variant, 
-                closable: true,
-                onClose: () => UI.toast('Tag removed!', 'info')
-            });
-            container.appendChild(tag);
-            tagCounter++;
-        }
-        
-        // Function to add tooltips to elements that don't have them
-        function addMissingTooltips() {
-            // Add tooltips to all buttons without existing tooltips
-            document.querySelectorAll('button:not(sl-tooltip button)').forEach(button => {
-                if (!button.closest('sl-tooltip') && !button.title) {
-                    // Create tooltip text based on button content or class
-                    let tooltipText = '';
-                    if (button.classList.contains('theme-toggle-panel')) {
-                        tooltipText = 'Toggle dark/light theme';
-                    } else if (button.classList.contains('font-toggle')) {
-                        tooltipText = button.title || 'Change font family';
-                    } else if (button.classList.contains('density-toggle')) {
-                        tooltipText = button.title || 'Change layout density';
-                    } else if (button.classList.contains('nav-panel-toggle')) {
-                        tooltipText = 'Toggle navigation panel';
-                    } else if (button.textContent.trim()) {
-                        tooltipText = `Click to ${button.textContent.trim().toLowerCase()}`;
-                    } else {
-                        tooltipText = 'Interactive button';
-                    }
-                    
-                    // Add Shoelace tooltip
-                    const tooltip = document.createElement('sl-tooltip');
-                    tooltip.setAttribute('content', tooltipText);
-                    tooltip.setAttribute('placement', 'top');
-                    
-                    // Wrap the button with the tooltip
-                    button.parentNode.insertBefore(tooltip, button);
-                    tooltip.appendChild(button);
-                }
-            });
-            
-            // Add tooltips to nav items that don't have them
-            document.querySelectorAll('.nav-item').forEach(item => {
-                if (!item.closest('sl-tooltip') && !item.title) {
-                    const text = item.textContent.trim();
-                    
-                    // Add Shoelace tooltip
-                    const tooltip = document.createElement('sl-tooltip');
-                    tooltip.setAttribute('content', `Navigate to ${text} section`);
-                    tooltip.setAttribute('placement', 'right');
-                    
-                    // Wrap the nav item with the tooltip
-                    item.parentNode.insertBefore(tooltip, item);
-                    tooltip.appendChild(item);
-                }
-            });
-        }
-    </script>
 </body>
 </html>

@@ -2,6 +2,21 @@
 
 ## Claude Development Rules
 
+⚠️ **MANDATORY: Before ANY task, Claude MUST complete this checklist:**
+
+### PRE-TASK CHECKLIST (REQUIRED):
+- [ ] Read CLAUDE.md completely  
+- [ ] Create plan in docs/plans/tasks.md
+- [ ] Get user approval for plan
+- [ ] Use TodoWrite for task tracking
+- [ ] Work systematically through todos
+
+### PRE-COMMIT CHECKLIST (REQUIRED):
+- [ ] NO Claude author/co-author in commit
+- [ ] Use user's credentials only
+- [ ] Always push after commit
+- [ ] Document work in docs/plans/tasks.md
+
 When working on this project, follow these 7 rules:
 
 1. **First think through the problem** - Read the codebase for relevant files and write a plan to docs/plans/tasks.md
@@ -85,6 +100,31 @@ python server.py
 - The panel system from v003 is already perfect - don't break it
 - This is a FILE MANAGER for VFX/media, NOT a code editor
 - Focus on file preview, metadata, and management features
+
+## Style Guide Updates (2024)
+
+### Recent Cleanup Work
+- **HTML**: Removed all 216 inline styles and 497 lines of inline JavaScript
+- **CSS**: Added 42 utility classes, ensured root variable usage
+- **JavaScript**: Consolidated all JS in styles.js, removed duplicates
+- **Tooltips**: Converted to Shoelace web components with dark theme (#1a1a1a bg, white text)
+
+### Key Style Guide Features
+- Complete UI component library with navigation panel
+- Theme toggle (dark/light modes)
+- Semantic color system with customizable colors
+- Typography with markdown support (callouts, code blocks, tables)
+- Comprehensive form elements and controls
+- Toast notifications, modals, menus, panels
+- Grid system and responsive layouts
+- Icon system using Lucide icons
+
+### Style Guide Best Practices
+- No inline styles or JavaScript in HTML
+- All styling through CSS classes using root variables
+- JavaScript uses global UI object for consistency
+- Shoelace components for tooltips and popovers
+- Clean separation of concerns (HTML/CSS/JS)
 
 ### VFX File Types to Support
 - **3D**: .blend, .ma, .mb, .hip, .c4d, .max, .fbx, .obj, .usd

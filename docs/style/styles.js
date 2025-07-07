@@ -53,7 +53,17 @@
         // Initialize icons after adding elements
         icons() {
             if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
+                lucide.createIcons({
+                    class: 'lucide'
+                });
+                
+                // Apply saved stroke width if exists
+                const savedStrokeWidth = localStorage.getItem('fileui-stroke-width');
+                if (savedStrokeWidth) {
+                    document.querySelectorAll('.lucide').forEach(icon => {
+                        icon.style.strokeWidth = savedStrokeWidth;
+                    });
+                }
             }
         },
         
@@ -75,62 +85,6 @@
             return classes.filter(Boolean).join(' ');
         },
         
-        // Position tooltip intelligently
-        positionTooltip(wrapper, tooltip) {
-            const rect = wrapper.getBoundingClientRect();
-            const tooltipRect = tooltip.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-            const margin = CONFIG.TOOLTIP_MARGIN;
-            
-            let position = 'top';
-            let left, top, transform = '';
-            
-            // Determine best position based on available space
-            const spaceAbove = rect.top;
-            const spaceBelow = viewportHeight - rect.bottom;
-            const spaceLeft = rect.left;
-            const spaceRight = viewportWidth - rect.right;
-            
-            // Try positions in order of preference: top, bottom, right, left
-            if (spaceAbove >= tooltipRect.height + margin) {
-                // Position above
-                position = 'top';
-                left = rect.left + rect.width / 2;
-                top = rect.top - tooltipRect.height - margin;
-                transform = 'translateX(-50%)';
-            } else if (spaceBelow >= tooltipRect.height + margin) {
-                // Position below
-                position = 'bottom';
-                left = rect.left + rect.width / 2;
-                top = rect.bottom + margin;
-                transform = 'translateX(-50%)';
-            } else if (spaceRight >= tooltipRect.width + margin) {
-                // Position right
-                position = 'right';
-                left = rect.right + margin;
-                top = rect.top + rect.height / 2;
-                transform = 'translateY(-50%)';
-            } else if (spaceLeft >= tooltipRect.width + margin) {
-                // Position left
-                position = 'left';
-                left = rect.left - tooltipRect.width - margin;
-                top = rect.top + rect.height / 2;
-                transform = 'translateY(-50%)';
-            } else {
-                // Fallback to top with viewport adjustment
-                position = 'top';
-                left = Math.max(margin, Math.min(viewportWidth - tooltipRect.width - margin, rect.left + rect.width / 2));
-                top = Math.max(margin, rect.top - tooltipRect.height - margin);
-                transform = 'translateX(-50%)';
-            }
-            
-            // Apply position and styling
-            tooltip.setAttribute('data-position', position);
-            tooltip.style.left = left + 'px';
-            tooltip.style.top = top + 'px';
-            tooltip.style.transform = transform;
-        },
 
         // Create a button element
         button(text, options = {}) {
@@ -143,10 +97,12 @@
                 options.class
             );
             
-            if (options.icon) {
-                btn.innerHTML = `<i data-lucide="${options.icon}"></i> ${text}`;
+            if (options.icon && text) {
+                btn.innerHTML = `<i data-lucide="${options.icon}" class="lucide"></i> <span>${text}</span>`;
+            } else if (options.icon) {
+                btn.innerHTML = `<i data-lucide="${options.icon}" class="lucide"></i>`;
             } else {
-                btn.textContent = text;
+                btn.innerHTML = `<span>${text}</span>`;
             }
             
             if (options.onclick) btn.onclick = options.onclick;
@@ -171,7 +127,7 @@
                 // Left side with icon and title
                 headerContent += '<div class="card-header-left">';
                 if (options.icon) {
-                    headerContent += `<i data-lucide="${options.icon}" class="card-icon"></i>`;
+                    headerContent += `<i data-lucide="${options.icon}" class="card-icon lucide"></i>`;
                 }
                 headerContent += `<h3 class="card-title">${title}</h3>`;
                 headerContent += '</div>';
@@ -195,15 +151,22 @@
                 html += `
                     <div class="card-header">
                         ${headerContent}
-                        ${options.description ? `<p class="card-description">${options.description}</p>` : ''}
                     </div>
                 `;
             }
             
             html += `<div class="card-body">${content}</div>`;
             
-            if (options.footer) {
-                html += `<div class="card-footer">${options.footer}</div>`;
+            // Add footer if there's a description or custom footer content
+            if (options.description || options.footer) {
+                html += '<div class="card-footer">';
+                if (options.description) {
+                    html += `<p class="card-description">${options.description}</p>`;
+                }
+                if (options.footer) {
+                    html += options.footer;
+                }
+                html += '</div>';
             }
             
             card.innerHTML = html;
@@ -245,7 +208,7 @@
             if (options.preloader) {
                 iconHTML = '<div class="loading-spinner toast-icon"></div>';
             } else {
-                iconHTML = `<i data-lucide="${icons[type] || 'info'}" class="toast-icon"></i>`;
+                iconHTML = `<i data-lucide="${icons[type] || 'info'}" class="toast-icon lucide"></i>`;
             }
             
             let toastHTML = `
@@ -258,7 +221,7 @@
             }
             
             if (options.dismissible) {
-                toastHTML += `<i data-lucide="x" class="toast-close"></i>`;
+                toastHTML += `<i data-lucide="x" class="toast-close lucide"></i>`;
             }
             
             toast.innerHTML = toastHTML;
@@ -329,7 +292,7 @@
                     <div class="modal-header">
                         <h3>${options.title}</h3>
                         <button class="modal-close" aria-label="Close">
-                            <i data-lucide="x"></i>
+                            <i data-lucide="x" class="lucide"></i>
                         </button>
                     </div>
                 `;
@@ -429,81 +392,7 @@
             return spinner;
         },
 
-        // Create a tooltip
-        tooltip(target, text, options = {}) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'tooltip-wrapper';
-            
-            const tooltip = document.createElement('div');
-            tooltip.className = 'tooltip';
-            tooltip.textContent = text;
-            
-            wrapper.appendChild(tooltip);
-            
-            // Insert wrapper around target
-            target.parentNode.insertBefore(wrapper, target);
-            wrapper.appendChild(target);
-            
-            // Add intelligent positioning on hover
-            wrapper.addEventListener('mouseenter', () => {
-                this.positionTooltip(wrapper, tooltip);
-            });
-            
-            return { wrapper, tooltip };
-        },
 
-        // Create a popover
-        popover(trigger, content, options = {}) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'popover-wrapper';
-            
-            const popover = document.createElement('div');
-            popover.className = 'popover';
-            
-            let html = '';
-            if (options.title) {
-                html += `
-                    <div class="popover-header">
-                        <span class="font-semibold">${options.title}</span>
-                    </div>
-                `;
-            }
-            
-            html += `<div class="popover-body">${content}</div>`;
-            popover.innerHTML = html;
-            
-            // Insert wrapper around trigger
-            trigger.parentNode.insertBefore(wrapper, trigger);
-            wrapper.appendChild(trigger);
-            
-            // Add popover to body instead of wrapper to prevent clipping
-            document.body.appendChild(popover);
-            
-            // Add trigger class
-            trigger.classList.add('popover-trigger');
-            
-            // Add click handler
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-                
-                // Close other popovers
-                document.querySelectorAll('.popover.active').forEach(p => {
-                    if (p !== popover) p.classList.remove('active');
-                });
-                
-                // Position popover relative to trigger
-                const rect = trigger.getBoundingClientRect();
-                
-                // Position below trigger by default
-                popover.style.left = rect.left + 'px';
-                popover.style.top = (rect.bottom + CONFIG.POPOVER_MARGIN) + 'px';
-                
-                // Toggle this popover
-                popover.classList.toggle('active');
-            });
-            
-            return { wrapper, popover };
-        },
 
         // Create a menu
         menu(items, options = {}) {
@@ -585,11 +474,11 @@
             let html = `
                 <div class="panel-header">
                     <div class="panel-title">
-                        ${options.icon ? `<i data-lucide="${options.icon}"></i>` : ''}
+                        ${options.icon ? `<i data-lucide="${options.icon}" class="lucide"></i>` : ''}
                         ${title}
                     </div>
                     <div class="panel-actions">
-                        ${options.collapsible ? '<button class="btn btn-sm panel-toggle"><i data-lucide="chevron-down"></i></button>' : ''}
+                        ${options.collapsible ? '<button class="btn btn-sm panel-toggle"><i data-lucide="chevron-down" class="lucide"></i></button>' : ''}
                     </div>
                 </div>
                 <div class="panel-body">${content}</div>
@@ -633,7 +522,7 @@
             if (options.closable) {
                 const closeBtn = document.createElement('button');
                 closeBtn.className = 'tag-close';
-                closeBtn.innerHTML = '<i data-lucide="x"></i>';
+                closeBtn.innerHTML = '<i data-lucide="x" class="lucide"></i>';
                 closeBtn.onclick = () => {
                     if (options.onClose) options.onClose();
                     tag.remove();
@@ -647,63 +536,27 @@
             return tag;
         },
 
-        // Create a navigation panel
-        navPanel(sections, options = {}) {
+        // Create a control panel (right side)
+        controlPanel() {
             const panel = document.createElement('div');
-            panel.className = 'nav-panel';
-            panel.id = 'nav-panel';
+            panel.className = 'control-panel collapsed';
+            panel.id = 'control-panel';
             
-            let html = '';
+            const header = document.createElement('div');
+            header.className = 'control-panel-header';
+            header.innerHTML = `
+                <div class="control-panel-title">
+                    <i data-lucide="settings" class="control-panel-icon lucide"></i>
+                    <span>Settings</span>
+                </div>
+            `;
+            panel.appendChild(header);
             
-            // Header
-            if (options.title) {
-                html += `
-                    <div class="nav-panel-header">
-                        <div class="nav-panel-title">
-                            ${options.icon ? `<i data-lucide="${options.icon}" class="nav-item-icon"></i>` : ''}
-                            ${options.title}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Content
-            html += '<div class="nav-panel-content">';
-            
-            sections.forEach(section => {
-                html += `<div class="nav-section">`;
-                if (section.title) {
-                    html += `<div class="nav-section-title">${section.title}</div>`;
-                }
-                
-                section.items.forEach(item => {
-                    const isActive = item.active ? ' active' : '';
-                    const badge = item.badge ? `<span class="nav-item-badge">${item.badge}</span>` : '';
-                    
-                    html += `
-                        <button class="nav-item${isActive}" data-nav-item="${item.id || ''}">
-                            ${item.icon ? `<i data-lucide="${item.icon}" class="nav-item-icon"></i>` : ''}
-                            ${item.text}
-                            ${badge}
-                        </button>
-                    `;
-                });
-                
-                html += '</div>';
-            });
-            
-            html += '</div>';
-            
-            html += '</div>';
-            
-            panel.innerHTML = html;
-            
-            // Add footer with dynamic controls
-            const footer = document.createElement('div');
-            footer.className = 'nav-panel-footer';
+            const content = document.createElement('div');
+            content.className = 'control-panel-content';
             
             const controls = document.createElement('div');
-            controls.className = 'nav-panel-controls';
+            controls.className = 'control-panel-controls';
             
             // Theme control group
             const themeGroup = document.createElement('div');
@@ -717,46 +570,82 @@
                     this.theme.toggle();
                     const isDark = this.theme.get() === 'dark';
                     themeBtn.querySelector('i').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-                    themeBtn.childNodes[1].textContent = isDark ? ' Light Mode' : ' Dark Mode';
+                    const textSpan = themeBtn.querySelector('span');
+                    if (textSpan) textSpan.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+                    themeBtn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
                     this.icons();
                 }
             });
             themeBtn.setAttribute('aria-label', 'Toggle theme');
-            themeBtn.setAttribute('title', 'Toggle theme');
+            themeBtn.setAttribute('title', this.theme.get() === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
             themeGroup.appendChild(themeBtn);
             
-            // Accent color control group
-            const colorGroup = document.createElement('div');
-            colorGroup.className = 'control-group';
-            colorGroup.innerHTML = '<span class="control-label">Accent</span>';
-            
+            // Add tint button to theme group
             const accentColors = CONFIG.ACCENT_COLORS;
-            
             let currentAccentIndex = 0;
             
-            const accentBtn = this.button('Cycle Colors', { 
-                icon: 'palette', 
+            const tintBtn = this.button('Tint', { 
+                icon: 'paint-bucket', 
                 size: 'sm',
-                class: 'accent-toggle',
+                class: 'tint-toggle',
                 onclick: () => {
                     currentAccentIndex = (currentAccentIndex + 1) % accentColors.length;
-                    const newAccent = accentColors[currentAccentIndex];
+                    const newTint = accentColors[currentAccentIndex];
+                    
+                    // Apply tint to body
+                    document.body.setAttribute('data-tint', newTint.name);
+                    
+                    // Update button tooltip
+                    tintBtn.setAttribute('title', `Theme tint: ${newTint.name}`);
+                    
+                    // Save preference
+                    localStorage.setItem('fileui-tint', newTint.name);
+                }
+            });
+            tintBtn.setAttribute('title', 'Cycle theme tint');
+            themeGroup.appendChild(tintBtn);
+            
+            // Add accent button to theme group
+            let currentAccentColorIndex = 0;
+            const accentBtn = this.button('Accent', { 
+                icon: 'droplet', 
+                size: 'sm',
+                class: 'accent-color-toggle',
+                onclick: () => {
+                    currentAccentColorIndex = (currentAccentColorIndex + 1) % accentColors.length;
+                    const newAccent = accentColors[currentAccentColorIndex];
+                    
+                    // Apply accent color directly
                     document.documentElement.style.setProperty('--accent', newAccent.color);
+                    
+                    // Update button tooltip
                     accentBtn.setAttribute('title', `Accent: ${newAccent.name}`);
-                    localStorage.setItem('fileui-accent', JSON.stringify(newAccent));
+                    
+                    // Save preference
+                    localStorage.setItem('fileui-accent-color', JSON.stringify(newAccent));
                 }
             });
             accentBtn.setAttribute('title', 'Cycle accent color');
-            colorGroup.appendChild(accentBtn);
+            themeGroup.appendChild(accentBtn);
+            
+            // Restore saved tint
+            const savedTint = localStorage.getItem('fileui-tint');
+            if (savedTint) {
+                document.body.setAttribute('data-tint', savedTint);
+                currentAccentIndex = accentColors.findIndex(c => c.name === savedTint);
+                if (currentAccentIndex === -1) currentAccentIndex = 0;
+                tintBtn.setAttribute('title', `Theme tint: ${savedTint}`);
+            }
             
             // Restore saved accent color
-            const savedAccent = localStorage.getItem('fileui-accent');
-            if (savedAccent) {
+            const savedAccentColor = localStorage.getItem('fileui-accent-color');
+            if (savedAccentColor) {
                 try {
-                    const accent = JSON.parse(savedAccent);
+                    const accent = JSON.parse(savedAccentColor);
                     document.documentElement.style.setProperty('--accent', accent.color);
-                    currentAccentIndex = accentColors.findIndex(c => c.name === accent.name);
-                    if (currentAccentIndex === -1) currentAccentIndex = 0;
+                    currentAccentColorIndex = accentColors.findIndex(c => c.name === accent.name);
+                    if (currentAccentColorIndex === -1) currentAccentColorIndex = 0;
+                    accentBtn.setAttribute('title', `Accent: ${accent.name}`);
                 } catch (e) {
                     console.log('Failed to restore accent color');
                 }
@@ -832,17 +721,260 @@
             densityBtnGroup.appendChild(compactBtn);
             densityGroup.appendChild(densityBtnGroup);
             
+            // Icon size control group
+            const iconSizeGroup = document.createElement('div');
+            iconSizeGroup.className = 'control-group';
+            iconSizeGroup.innerHTML = '<span class="control-label">Icon Size</span>';
             
-            // Assemble footer
+            const iconSizeSlider = document.createElement('input');
+            iconSizeSlider.type = 'range';
+            iconSizeSlider.min = '16';
+            iconSizeSlider.max = '24';
+            iconSizeSlider.value = '20';
+            iconSizeSlider.className = 'slider';
+            
+            const iconSizeValue = document.createElement('span');
+            iconSizeValue.className = 'slider-value';
+            iconSizeValue.textContent = '20px';
+            
+            const iconSizeContainer = document.createElement('div');
+            iconSizeContainer.className = 'slider-container';
+            iconSizeContainer.appendChild(iconSizeSlider);
+            iconSizeContainer.appendChild(iconSizeValue);
+            iconSizeGroup.appendChild(iconSizeContainer);
+            
+            iconSizeSlider.oninput = () => {
+                const size = iconSizeSlider.value;
+                iconSizeValue.textContent = size + 'px';
+                document.documentElement.style.setProperty('--icon-size-md', size + 'px');
+                localStorage.setItem('fileui-icon-size', size);
+            };
+            
+            // Icon stroke width control group
+            const strokeWidthGroup = document.createElement('div');
+            strokeWidthGroup.className = 'control-group';
+            strokeWidthGroup.innerHTML = '<span class="control-label">Icon Stroke</span>';
+            
+            const strokeWidthSlider = document.createElement('input');
+            strokeWidthSlider.type = 'range';
+            strokeWidthSlider.min = '1';
+            strokeWidthSlider.max = '3';
+            strokeWidthSlider.step = '0.5';
+            strokeWidthSlider.value = '2';
+            strokeWidthSlider.className = 'slider';
+            
+            const strokeWidthValue = document.createElement('span');
+            strokeWidthValue.className = 'slider-value';
+            strokeWidthValue.textContent = '2';
+            
+            const strokeWidthContainer = document.createElement('div');
+            strokeWidthContainer.className = 'slider-container';
+            strokeWidthContainer.appendChild(strokeWidthSlider);
+            strokeWidthContainer.appendChild(strokeWidthValue);
+            strokeWidthGroup.appendChild(strokeWidthContainer);
+            
+            strokeWidthSlider.oninput = () => {
+                const width = strokeWidthSlider.value;
+                strokeWidthValue.textContent = width;
+                document.querySelectorAll('.lucide').forEach(icon => {
+                    icon.style.strokeWidth = width;
+                });
+                localStorage.setItem('fileui-stroke-width', width);
+            };
+            
+            // Restore saved icon settings
+            const savedIconSize = localStorage.getItem('fileui-icon-size');
+            if (savedIconSize) {
+                iconSizeSlider.value = savedIconSize;
+                iconSizeValue.textContent = savedIconSize + 'px';
+                document.documentElement.style.setProperty('--icon-size-md', savedIconSize + 'px');
+            }
+            
+            const savedStrokeWidth = localStorage.getItem('fileui-stroke-width');
+            if (savedStrokeWidth) {
+                strokeWidthSlider.value = savedStrokeWidth;
+                strokeWidthValue.textContent = savedStrokeWidth;
+                document.querySelectorAll('.lucide').forEach(icon => {
+                    icon.style.strokeWidth = savedStrokeWidth;
+                });
+            }
+            
+            // Semantic colors control group
+            const semanticColorsGroup = document.createElement('div');
+            semanticColorsGroup.className = 'control-group';
+            semanticColorsGroup.innerHTML = '<span class="control-label">Semantic Colors</span>';
+            
+            const semanticColors = [
+                { name: 'primary', label: 'Primary', default: '#b3d9ff', icon: 'star' },
+                { name: 'success', label: 'Success', default: '#b8e6b8', icon: 'check-circle' },
+                { name: 'warning', label: 'Warning', default: '#ffe4a3', icon: 'alert-triangle' },
+                { name: 'error', label: 'Error', default: '#ffb3ba', icon: 'x-circle' },
+                { name: 'info', label: 'Info', default: '#d4c5f9', icon: 'info' }
+            ];
+            
+            semanticColors.forEach(color => {
+                const colorCard = document.createElement('div');
+                colorCard.className = 'color-card';
+                colorCard.style.cssText = 'background: var(--bg-tertiary); border-radius: var(--radius-md); padding: var(--space-3); margin-bottom: var(--space-2);';
+                
+                const colorContainer = document.createElement('div');
+                colorContainer.className = 'color-control';
+                colorContainer.style.cssText = 'display: flex; align-items: center; gap: var(--space-2);';
+                
+                const colorIcon = document.createElement('i');
+                colorIcon.setAttribute('data-lucide', color.icon);
+                colorIcon.className = 'color-icon lucide color-details';
+                colorIcon.style.cssText = 'width: var(--icon-size-md); height: var(--icon-size-md); flex-shrink: 0;';
+                
+                const colorLabel = document.createElement('span');
+                colorLabel.textContent = color.label;
+                colorLabel.className = 'color-label color-details';
+                colorLabel.style.cssText = 'font-size: var(--text-xs); min-width: 50px; font-weight: var(--font-medium);';
+                
+                const colorPicker = document.createElement('input');
+                colorPicker.type = 'color';
+                colorPicker.value = color.default;
+                colorPicker.className = 'color-swatch';
+                colorPicker.style.cssText = 'width: 32px; height: 32px; border: 2px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; background: none; padding: 0;';
+                
+                const resetBtn = document.createElement('button');
+                resetBtn.innerHTML = '<i data-lucide="rotate-ccw" class="lucide"></i>';
+                resetBtn.className = 'btn btn-reset color-details';
+                resetBtn.style.cssText = 'width: 32px; height: 32px; padding: 0; min-width: auto; background: var(--bg-tertiary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;';
+                resetBtn.title = `Reset ${color.label} to default`;
+                
+                // Load saved color
+                const savedColor = localStorage.getItem(`fileui-color-${color.name}`);
+                if (savedColor) {
+                    colorPicker.value = savedColor;
+                    document.documentElement.style.setProperty(`--${color.name}`, savedColor);
+                }
+                
+                // Color picker change handler
+                colorPicker.oninput = () => {
+                    const newColor = colorPicker.value;
+                    document.documentElement.style.setProperty(`--${color.name}`, newColor);
+                    localStorage.setItem(`fileui-color-${color.name}`, newColor);
+                };
+                
+                // Reset button handler
+                resetBtn.onclick = () => {
+                    colorPicker.value = color.default;
+                    document.documentElement.style.setProperty(`--${color.name}`, color.default);
+                    localStorage.setItem(`fileui-color-${color.name}`, color.default);
+                };
+                
+                colorContainer.appendChild(colorIcon);
+                colorContainer.appendChild(colorLabel);
+                colorContainer.appendChild(colorPicker);
+                colorContainer.appendChild(resetBtn);
+                colorCard.appendChild(colorContainer);
+                semanticColorsGroup.appendChild(colorCard);
+            });
+            
+            // Assemble control panel
             controls.appendChild(themeGroup);
             controls.appendChild(fontGroup);
             controls.appendChild(densityGroup);
-            controls.appendChild(colorGroup);
-            footer.appendChild(controls);
+            controls.appendChild(iconSizeGroup);
+            controls.appendChild(strokeWidthGroup);
+            controls.appendChild(semanticColorsGroup);
+            content.appendChild(controls);
+            panel.appendChild(content);
+            
+            // Add footer
+            const footer = document.createElement('div');
+            footer.className = 'control-panel-footer';
+            panel.appendChild(footer);
+            
+            // Initialize icons
+            this.deferIcons();
+            
+            return panel;
+        },
+
+        // Create a navigation panel
+        navPanel(sections, options = {}) {
+            const panel = document.createElement('div');
+            panel.className = options.startCollapsed ? 'nav-panel collapsed' : 'nav-panel';
+            panel.id = 'nav-panel';
+            
+            let html = '';
+            
+            // Header
+            if (options.title) {
+                html += `
+                    <div class="nav-panel-header">
+                        <div class="nav-panel-title">
+                            ${options.icon ? `<i data-lucide="${options.icon}" class="nav-panel-icon lucide"></i>` : ''}
+                            <span>${options.title}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Content
+            html += '<div class="nav-panel-content">';
+            
+            sections.forEach((section, index) => {
+                const sectionId = `nav-section-${index}`;
+                const isCollapsed = section.collapsed === true ? ' collapsed' : '';
+                
+                html += `<div class="nav-section${isCollapsed}" id="${sectionId}">`;
+                
+                if (section.title) {
+                    html += `
+                        <div class="nav-section-header" data-section-id="${sectionId}">
+                            <i data-lucide="chevron-down" class="nav-section-toggle lucide"></i>
+                            <span class="nav-section-title">${section.title}</span>
+                        </div>
+                    `;
+                }
+                
+                html += '<div class="nav-section-items">';
+                
+                section.items.forEach(item => {
+                    const isActive = item.active ? ' active' : '';
+                    const badge = item.badge ? `<span class="nav-item-badge">${item.badge}</span>` : '';
+                    
+                    html += `
+                        <button class="nav-item${isActive}" data-nav-item="${item.id || ''}" title="${item.text}">
+                            ${item.icon ? `<i data-lucide="${item.icon}" class="nav-item-icon lucide"></i>` : ''}
+                            <span>${item.text}</span>
+                            ${badge}
+                        </button>
+                    `;
+                });
+                
+                html += '</div></div>';
+            });
+            
+            html += '</div>';
+            
+            html += '</div>';
+            
+            panel.innerHTML = html;
+            
+            // Add footer with toggle button
+            const footer = document.createElement('div');
+            footer.className = 'nav-panel-footer';
             panel.appendChild(footer);
             
             // Add event handlers
             panel.addEventListener('click', (e) => {
+                // Handle section headers (collapse/expand)
+                const sectionHeader = e.target.closest('.nav-section-header');
+                if (sectionHeader) {
+                    const sectionId = sectionHeader.dataset.sectionId;
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        section.classList.toggle('collapsed');
+                        // Re-initialize icons for the chevron rotation
+                        this.icons();
+                    }
+                    return;
+                }
+                
                 // Handle nav items
                 const navItem = e.target.closest('.nav-item');
                 if (navItem) {
@@ -870,18 +1002,48 @@
         navToggle(targetPanelId = 'nav-panel') {
             const toggle = document.createElement('button');
             toggle.className = 'btn nav-panel-toggle';
-            toggle.innerHTML = '<i data-lucide="menu"></i>';
+            toggle.innerHTML = '<i data-lucide="chevron-left" class="lucide"></i> <span>Collapse</span>';
             toggle.setAttribute('aria-label', 'Toggle navigation');
             
             toggle.onclick = () => {
                 const panel = document.getElementById(targetPanelId);
                 if (panel) {
                     panel.classList.toggle('collapsed');
+                    const isCollapsed = panel.classList.contains('collapsed');
+                    toggle.querySelector('i').setAttribute('data-lucide', isCollapsed ? 'chevron-right' : 'chevron-left');
+                    const span = toggle.querySelector('span');
+                    if (span) span.textContent = isCollapsed ? 'Expand' : 'Collapse';
+                    this.icons();
                     
                     // On mobile, also toggle open class
                     if (window.innerWidth <= CONFIG.MOBILE_BREAKPOINT) {
                         panel.classList.toggle('open');
                     }
+                }
+            };
+            
+            // Initialize icon
+            this.deferIcons();
+            
+            return toggle;
+        },
+
+        // Create control panel toggle button
+        controlToggle(targetPanelId = 'control-panel') {
+            const toggle = document.createElement('button');
+            toggle.className = 'btn control-panel-toggle';
+            toggle.innerHTML = '<i data-lucide="chevron-right" class="lucide"></i> <span>Collapse</span>';
+            toggle.setAttribute('aria-label', 'Toggle settings');
+            
+            toggle.onclick = () => {
+                const panel = document.getElementById(targetPanelId);
+                if (panel) {
+                    panel.classList.toggle('collapsed');
+                    const isCollapsed = panel.classList.contains('collapsed');
+                    toggle.querySelector('i').setAttribute('data-lucide', isCollapsed ? 'chevron-left' : 'chevron-right');
+                    const span = toggle.querySelector('span');
+                    if (span) span.textContent = isCollapsed ? 'Expand' : 'Collapse';
+                    this.icons();
                 }
             };
             
@@ -909,51 +1071,11 @@
 
         // Initialize all interactive components
         init() {
-            this.initTooltips();
-            this.initPopovers();
             this.initContextMenus();
             this.initNavigation();
         },
 
-        // Initialize tooltips
-        initTooltips() {
-            document.querySelectorAll('.tooltip-wrapper').forEach(wrapper => {
-                const tooltip = wrapper.querySelector('.tooltip');
-                if (!tooltip) return;
-                
-                wrapper.addEventListener('mouseenter', () => {
-                    this.positionTooltip(wrapper, tooltip);
-                });
-            });
-        },
 
-        // Initialize popovers
-        initPopovers() {
-            document.querySelectorAll('.popover-trigger').forEach(trigger => {
-                trigger.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const wrapper = trigger.closest('.popover-wrapper');
-                    const popover = wrapper.querySelector('.popover');
-                    
-                    // Close other popovers
-                    document.querySelectorAll('.popover.active').forEach(p => {
-                        if (p !== popover) p.classList.remove('active');
-                    });
-                    
-                    // Toggle this popover
-                    popover.classList.toggle('active');
-                });
-            });
-            
-            // Close popovers when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.popover-wrapper')) {
-                    document.querySelectorAll('.popover.active').forEach(popover => {
-                        popover.classList.remove('active');
-                    });
-                }
-            });
-        },
 
         // Initialize context menus
         initContextMenus() {

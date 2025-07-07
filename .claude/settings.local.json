@@ -19,7 +19,11 @@
       "Bash(git checkout:*)",
       "Bash(ls:*)",
       "Bash(git branch:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(awk:*)",
+      "WebFetch(domain:shoelace.style)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

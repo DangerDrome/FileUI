@@ -3,2615 +3,941 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FileUI Style Guide</title>
+    <title>FileUI Complete Test</title>
+    
+    <!-- Load Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styleguide.css">
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script src="styleguide.js" defer></script>
+    
+    <!-- Load styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Load Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Load UI system -->
+    <script src="styles.js"></script>
 </head>
 <body>
-    <!-- Navigation Panel -->
-    <div class="nav-panel" id="navPanel">
-        <div class="nav-panel-header">
-            <div class="panel-title">
-                <i data-lucide="book-open" class="button-icon-lg"></i>
-                <h3>FileUI Style Guide</h3>
-            </div>
-            <div class="panel-actions">
-                <div class="popover-wrapper">
-                    <button class="btn btn-sm popover-trigger p-4px">
-                        <i data-lucide="settings" class="button-icon-sm"></i>
-                    </button>
-                    <div class="popover popover-bottom-end">
-                        <div class="popover-header">
-                            <span class="font-semibold">Navigation Options</p>
-                        </div>
-                        <div class="popover-body p-0">
-                            <a href="#" class="popover-item">
-                                <i data-lucide="minimize-2" class="button-icon-sm"></i>
-                                Collapse Navigation
-                            </a>
-                            <a href="#" class="popover-item">
-                                <i data-lucide="expand" class="button-icon-sm"></i>
-                                Expand All Sections
-                            </a>
-                            <a href="#" class="popover-item">
-                                <i data-lucide="search" class="button-icon-sm"></i>
-                                Search Topics
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="nav-panel-content">
-            <div class="nav-tree">
-                <div class="nav-section">
-                    <div class="tooltip-wrapper">
-                        <div class="nav-item nav-parent">
-                            <i data-lucide="book-open" class="nav-icon"></i>
-                            <span>Overview</p>
-                        </div>
-                        <div class="tooltip tooltip-right">Getting started with FileUI</div>
-                    </div>
-                    <div class="nav-children">
-                        <div class="tooltip-wrapper">
-                            <a href="#introduction" class="nav-item nav-child">
-                                <i data-lucide="info" class="nav-icon"></i>
-                                <span>Introduction</p>
-                            </a>
-                            <div class="tooltip tooltip-right">View the introduction and overview</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#panels" class="nav-item nav-child">
-                                <i data-lucide="layout-panel-left" class="nav-icon"></i>
-                                <span>Panels</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Learn about panel components</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#tooltips-popovers" class="nav-item nav-child">
-                                <i data-lucide="message-square" class="nav-icon"></i>
-                                <span>Tooltips & Popovers</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Explore tooltips and popovers</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#modals" class="nav-item nav-child">
-                                <i data-lucide="square-stack" class="nav-icon"></i>
-                                <span>Modals</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Modal dialogs</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#toasts" class="nav-item nav-child">
-                                <i data-lucide="bell" class="nav-icon"></i>
-                                <span>Toasts</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Toast notifications</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#headings" class="nav-item nav-child">
-                                <i data-lucide="heading" class="nav-icon"></i>
-                                <span>Headings</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Typography and heading styles</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="tooltip-wrapper">
-                        <div class="nav-item nav-parent">
-                            <i data-lucide="palette" class="nav-icon"></i>
-                            <span>Colors</p>
-                        </div>
-                        <div class="tooltip tooltip-right">Color palette and themes</div>
-                    </div>
-                    <div class="nav-children">
-                        <div class="tooltip-wrapper">
-                            <a href="#color-system" class="nav-item nav-child">
-                                <i data-lucide="droplet" class="nav-icon"></i>
-                                <span>Color System</p>
-                            </a>
-                            <div class="tooltip tooltip-right">View the color palette</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#semantic-colors" class="nav-item nav-child">
-                                <i data-lucide="tag" class="nav-icon"></i>
-                                <span>Semantic Colors</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Colors with specific meanings</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="tooltip-wrapper">
-                        <div class="nav-item nav-parent">
-                            <i data-lucide="mouse-pointer" class="nav-icon"></i>
-                            <span>Components</p>
-                        </div>
-                        <div class="tooltip tooltip-right">UI components and patterns</div>
-                    </div>
-                    <div class="nav-children">
-                        <div class="tooltip-wrapper">
-                            <a href="#buttons" class="nav-item nav-child">
-                                <i data-lucide="square" class="nav-icon"></i>
-                                <span>Buttons</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Button styles and variants</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#cards" class="nav-item nav-child">
-                                <i data-lucide="credit-card" class="nav-icon"></i>
-                                <span>Cards</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Card component layouts</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#forms" class="nav-item nav-child">
-                                <i data-lucide="edit" class="nav-icon"></i>
-                                <span>Forms</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Form elements and inputs</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="tooltip-wrapper">
-                        <div class="nav-item nav-parent">
-                            <i data-lucide="star" class="nav-icon"></i>
-                            <span>Icons</p>
-                        </div>
-                        <div class="tooltip tooltip-right">Icon library and usage</div>
-                    </div>
-                    <div class="nav-children">
-                        <div class="tooltip-wrapper">
-                            <a href="#icon-library" class="nav-item nav-child">
-                                <i data-lucide="library" class="nav-icon"></i>
-                                <span>Icon Library</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Browse available icons</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#icon-usage" class="nav-item nav-child">
-                                <i data-lucide="image" class="nav-icon"></i>
-                                <span>Usage Guidelines</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Icon best practices</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="tooltip-wrapper">
-                        <div class="nav-item nav-parent">
-                            <i data-lucide="layout" class="nav-icon"></i>
-                            <span>Layout</p>
-                        </div>
-                        <div class="tooltip tooltip-right">Layout system and spacing</div>
-                    </div>
-                    <div class="nav-children">
-                        <div class="tooltip-wrapper">
-                            <a href="#spacing" class="nav-item nav-child">
-                                <i data-lucide="space" class="nav-icon"></i>
-                                <span>Spacing System</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Spacing units and scale</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#scrollbars" class="nav-item nav-child">
-                                <i data-lucide="scroll" class="nav-icon"></i>
-                                <span>Scrollbars</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Custom scrollbar styling</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#tags" class="nav-item nav-child">
-                                <i data-lucide="hash" class="nav-icon"></i>
-                                <span>Tags</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Tag and badge components</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <a href="#grid" class="nav-item nav-child">
-                                <i data-lucide="grid-3x3" class="nav-icon"></i>
-                                <span>Grid System</p>
-                            </a>
-                            <div class="tooltip tooltip-right">Grid layouts and breakpoints</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Controls Panel -->
-    <div class="controls-panel" id="controlsPanel">
-        <div class="controls-panel-header">
-            <div class="panel-title">
-                <i data-lucide="sliders" class="button-icon-lg"></i>
-                <h3>Style Controls</h3>
-            </div>
-            <div class="panel-actions">
-                <div class="popover-wrapper">
-                    <button class="btn btn-sm popover-trigger p-4px">
-                        <i data-lucide="settings" class="button-icon-sm"></i>
-                    </button>
-                    <div class="popover popover-bottom-start">
-                        <div class="popover-header">
-                            <span class="font-semibold">Control Panel Options</p>
-                        </div>
-                        <div class="popover-body p-0">
-                            <a href="#" class="popover-item">
-                                <i data-lucide="rotate-ccw" class="button-icon-sm"></i>
-                                Reset to Defaults
-                            </a>
-                            <a href="#" class="popover-item">
-                                <i data-lucide="save" class="button-icon-sm"></i>
-                                Save Preferences
-                            </a>
-                            <a href="#" class="popover-item">
-                                <i data-lucide="x" class="button-icon-sm"></i>
-                                Hide Controls
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="controls-panel-content">
-            <div class="control-section">
-                <h4>Theme</h4>
-                <div class="flex flex-col gap-2">
-                    <div class="tooltip-wrapper">
-                        <button class="btn btn-sm" id="theme-toggle">
-                            <i data-lucide="sun" class="nav-icon"></i>
-                            Toggle Dark Mode
-                        </button>
-                        <div class="tooltip tooltip-left">Switch between light and dark themes</div>
-                    </div>
-                </div>
-            </div>
+    <!-- Main content with navigation spacing -->
+    <div class="main-content">
+        <div style="padding: var(--space-8);">
+            <h1>FileUI Complete Component Library</h1>
+            <p class="lead">All UI components with navigation panel and theme toggle</p>
             
-            <div class="control-section">
-                <h4>Typography</h4>
-                <div class="flex flex-col gap-2">
-                    <div class="tooltip-wrapper">
-                        <button class="btn btn-sm" data-font="system">
-                            <i data-lucide="type" class="nav-icon"></i>
-                            System Font
-                        </button>
-                        <div class="tooltip tooltip-left">Use the default system font</div>
-                    </div>
-                    <div class="tooltip-wrapper">
-                        <button class="btn btn-sm" data-font="mono">
-                            <i data-lucide="terminal" class="nav-icon"></i>
-                            Monospace
-                        </button>
-                        <div class="tooltip tooltip-left">Switch to monospace font</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="control-section">
-                <h4>Theme Tint</h4>
-                <div class="flex flex-col gap-2">
-                    <div class="tooltip-wrapper">
-                        <button class="btn btn-sm color-tint-btn active w-full" data-tint="default">
-                            <i data-lucide="palette" class="nav-icon"></i>
-                            Default (Green)
-                        </button>
-                        <div class="tooltip tooltip-left">Default green theme</div>
-                    </div>
-                    <div class="tooltip-wrapper">
-                        <button class="btn btn-sm color-tint-btn w-full bg-pastel-primary text-gray-800" data-tint="blue">
-                            <i data-lucide="droplet" class="nav-icon"></i>
-                            Blue Tint
-                        </button>
-                        <div class="tooltip tooltip-left">Cool blue theme</div>
-                    </div>
-                    <div class="tooltip-wrapper">
-                        <button class="btn btn-sm color-tint-btn w-full bg-pastel-error text-gray-800" data-tint="red">
-                            <i data-lucide="flame" class="nav-icon"></i>
-                            Red Tint
-                        </button>
-                        <div class="tooltip tooltip-left">Warm red theme</div>
-                    </div>
-                    <div class="tooltip-wrapper">
-                        <button class="btn btn-sm color-tint-btn w-full bg-pastel-warning text-gray-800" data-tint="amber">
-                            <i data-lucide="sun" class="nav-icon"></i>
-                            Amber Tint
-                        </button>
-                        <div class="tooltip tooltip-left">Golden amber theme</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="control-section">
-                <h4>Layout</h4>
-                <div class="flex flex-col gap-2">
-                    <div class="tooltip-wrapper">
-                        <button class="btn btn-sm" onclick="toggleLayout('compact')">
-                            <i data-lucide="minimize" class="nav-icon"></i>
-                            Compact
-                        </button>
-                        <div class="tooltip tooltip-left">Reduce spacing for more content</div>
-                    </div>
-                    <div class="tooltip-wrapper">
-                        <button class="btn btn-sm" onclick="toggleLayout('comfortable')">
-                            <i data-lucide="maximize" class="nav-icon"></i>
-                            Comfortable
-                        </button>
-                        <div class="tooltip tooltip-left">Increase spacing for readability</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="container">
-        <!-- Introduction Section -->
-        <section id="introduction" class="section">
-            <div class="card">
-                <div class="section-header">
-                    <h1 class="section-title">FileUI Design System</h1>
-                    <h6 class="section-description">
-                        A modern, clean design system for file management interfaces. Built with simplicity, 
-                        accessibility, and developer experience in mind. No gradients, clean typography, 
-                        and consistent iconography using Lucide icons.
-                    </h6>
-                </div>
-            </div>
-        </section>
-
-        <!-- Panels Section -->
-        <section id="panels" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Panels</h2>
-                <h6 class="section-description">
-                    Panels are containers with headers and injectable content areas for dynamic data.
-                </h6>
-            </div>
-            
-            <div class="grid grid-2">
-                <div class="panel">
-                    <div class="panel-header">
-                        <div class="panel-title">
-                            <i data-lucide="file-text" class="button-icon-lg"></i>
-                            <span class="font-semibold">File Browser</p>
-                        </div>
-                        <div class="panel-actions">
-                            <div class="popover-wrapper">
-                                <button class="btn btn-sm popover-trigger p-2">
-                                    <i data-lucide="settings" class="button-icon-md"></i>
-                                </button>
-                                <div class="popover popover-bottom-end">
-                                    <div class="popover-header">
-                                        <span class="font-semibold">Panel Options</p>
-                                    </div>
-                                    <div class="popover-body p-0">
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="pin" class="button-icon-md"></i>
-                                            Pin Panel
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="minimize-2" class="button-icon-md"></i>
-                                            Collapse
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="copy" class="button-icon-md"></i>
-                                            Duplicate
-                                        </a>
-                                        <div class="popover-divider"></div>
-                                        <a href="#" class="popover-item text-pastel-error">
-                                            <i data-lucide="x" class="button-icon-md"></i>
-                                            Close
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tooltip-wrapper">
-                                <button class="btn btn-sm p-2">
-                                    <i data-lucide="minimize-2" class="button-icon-md"></i>
-                                </button>
-                                <div class="tooltip tooltip-bottom">Collapse panel</div>
-                            </div>
-                            <div class="tooltip-wrapper">
-                                <button class="btn btn-sm p-2">
-                                    <i data-lucide="x" class="button-icon-md"></i>
-                                </button>
-                                <div class="tooltip tooltip-bottom">Close panel</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body h-250">
-                        <p class="text-sm text-secondary mb-4">This is the panel body where dynamic content can be injected.</p>
-                        <div class="flex flex-col gap-2">
-                            <div class="tooltip-wrapper">
-                                <div class="flex items-center gap-2 p-2 rounded hover:bg-tertiary">
-                                    <i data-lucide="folder" class="button-icon-md"></i>
-                                    <span class="text-sm">Documents</p>
-                                </div>
-                                <div class="tooltip tooltip-right">Folder - Click to open</div>
-                            </div>
-                            <div class="tooltip-wrapper">
-                                <div class="flex items-center gap-2 p-2 rounded hover:bg-tertiary">
-                                    <i data-lucide="image" class="button-icon-md"></i>
-                                    <span class="text-sm">image_001.exr</p>
-                                </div>
-                                <div class="tooltip tooltip-right">EXR Image - 32-bit float</div>
-                            </div>
-                            <div class="tooltip-wrapper">
-                                <div class="flex items-center gap-2 p-2 rounded hover:bg-tertiary">
-                                    <i data-lucide="video" class="button-icon-md"></i>
-                                    <span class="text-sm">render_output.mov</p>
-                                </div>
-                                <div class="tooltip tooltip-right">QuickTime Movie - ProRes 422</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="panel">
-                    <div class="panel-header">
-                        <div class="panel-title">
-                            <i data-lucide="terminal" class="button-icon-lg"></i>
-                            <span class="font-semibold">Console Output</p>
-                        </div>
-                        <div class="panel-actions">
-                            <div class="popover-wrapper">
-                                <button class="btn btn-sm popover-trigger p-2">
-                                    <i data-lucide="settings" class="button-icon-md"></i>
-                                </button>
-                                <div class="popover popover-bottom-end">
-                                    <div class="popover-header">
-                                        <span class="font-semibold">Console Options</p>
-                                    </div>
-                                    <div class="popover-body p-0">
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="download" class="button-icon-md"></i>
-                                            Export Logs
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="trash-2" class="button-icon-md"></i>
-                                            Clear Console
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="filter" class="button-icon-md"></i>
-                                            Filter Output
-                                        </a>
-                                        <div class="popover-divider"></div>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="maximize-2" class="button-icon-md"></i>
-                                            Maximize
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tooltip-wrapper">
-                                <button class="btn btn-sm p-2">
-                                    <i data-lucide="trash-2" class="button-icon-md"></i>
-                                </button>
-                                <div class="tooltip tooltip-bottom">Clear console</div>
-                            </div>
-                            <div class="tooltip-wrapper">
-                                <button class="btn btn-sm p-2">
-                                    <i data-lucide="download" class="button-icon-md"></i>
-                                </button>
-                                <div class="tooltip tooltip-bottom">Export logs</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body" style="height: 250px; background: var(--bg-tertiary); font-family: var(--font-mono); font-size: var(--text-sm);">
-                        <div class="text-secondary">$ python render_scene.py</div>
-                        <div class="text-pastel-info">[INFO] Loading scene file...</div>
-                        <div style="color: var(--pastel-success);">[OK] Scene loaded successfully</div>
-                        <div style="color: var(--pastel-warning);">[WARN] GPU memory usage: 85%</div>
-                        <div class="text-secondary">Rendering frame 1/250...</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-3 mt-6">
-                <div class="panel">
-                    <div class="panel-header p-3">
-                        <div class="panel-title">
-                            <i data-lucide="image" class="button-icon-md"></i>
-                            <span class="font-medium text-sm">Preview</p>
-                        </div>
-                        <div class="panel-actions">
-                            <div class="popover-wrapper">
-                                <button class="btn btn-sm popover-trigger p-4px">
-                                    <i data-lucide="settings" class="button-icon-sm"></i>
-                                </button>
-                                <div class="popover popover-bottom-end">
-                                    <div class="popover-body p-0">
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="maximize-2" class="button-icon-sm"></i>
-                                            Fullscreen
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="zoom-in" class="button-icon-sm"></i>
-                                            Zoom In
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="rotate-cw" class="button-icon-sm"></i>
-                                            Rotate
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body panel-body-centered">
-                        <div class="text-center">
-                            <i data-lucide="image" style="width: 48px; height: 48px; opacity: 0.3; margin: 0 auto var(--space-2);"></i>
-                            <p class="text-xs text-tertiary">Drop image here</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="panel">
-                    <div class="panel-header p-3">
-                        <div class="panel-title">
-                            <i data-lucide="info" class="button-icon-md"></i>
-                            <span class="font-medium text-sm">Properties</p>
-                        </div>
-                        <div class="panel-actions">
-                            <div class="popover-wrapper">
-                                <button class="btn btn-sm popover-trigger p-4px">
-                                    <i data-lucide="settings" class="button-icon-sm"></i>
-                                </button>
-                                <div class="popover popover-bottom-end">
-                                    <div class="popover-body p-0">
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="refresh-cw" class="button-icon-sm"></i>
-                                            Refresh
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="copy" class="button-icon-sm"></i>
-                                            Copy Info
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="external-link" class="button-icon-sm"></i>
-                                            Show in Finder
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body panel-body-200">
-                        <div class="flex flex-col gap-3">
-                            <div>
-                                <p class="text-xs text-tertiary">Type</p>
-                                <p class="text-sm">EXR Sequence</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-tertiary">Resolution</p>
-                                <p class="text-sm">1920 × 1080</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-tertiary">Bit Depth</p>
-                                <p class="text-sm">32-bit float</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="panel">
-                    <div class="panel-header p-3">
-                        <div class="panel-title">
-                            <i data-lucide="activity" class="button-icon-md"></i>
-                            <span class="font-medium text-sm">Render Status</p>
-                        </div>
-                        <div class="panel-actions">
-                            <div class="popover-wrapper">
-                                <button class="btn btn-sm popover-trigger p-4px">
-                                    <i data-lucide="settings" class="button-icon-sm"></i>
-                                </button>
-                                <div class="popover popover-bottom-end">
-                                    <div class="popover-body p-0">
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="pause" class="button-icon-sm"></i>
-                                            Pause Render
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="skip-forward" class="button-icon-sm"></i>
-                                            Skip Frame
-                                        </a>
-                                        <a href="#" class="popover-item">
-                                            <i data-lucide="bar-chart" class="button-icon-sm"></i>
-                                            View Statistics
-                                        </a>
-                                        <div class="popover-divider"></div>
-                                        <a href="#" class="popover-item text-pastel-error">
-                                            <i data-lucide="x-circle" class="button-icon-sm"></i>
-                                            Cancel Render
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body panel-body-200">
-                        <div class="flex flex-col gap-3">
-                            <div>
-                                <div class="flex justify-between mb-1">
-                                    <span class="text-xs">Progress</p>
-                                    <span class="text-xs">42%</p>
-                                </div>
-                                <div style="background: var(--bg-tertiary); height: 8px; border-radius: 4px; overflow: hidden;">
-                                    <div style="background: var(--pastel-success); width: 42%; height: 100%;"></div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 text-sm">
-                                <i data-lucide="clock" class="button-icon-sm"></i>
-                                <span>Est. 23 min remaining</p>
-                            </div>
-                            <div class="flex items-center gap-2 text-sm">
-                                <i data-lucide="cpu" class="button-icon-sm"></i>
-                                <span>CPU: 78% | RAM: 12.4GB</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Panel Structure Example -->
-            <div class="card mt-8">
-                <div class="card-header">
-                    <h3 class="card-title">Panel Structure</h3>
-                    <p class="card-description">Basic HTML structure for creating panels</p>
-                </div>
-                <pre style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); overflow-x: auto;">
-<code>&lt;div class="panel"&gt;
-    &lt;div class="panel-header"&gt;
-        &lt;div class="panel-title"&gt;
-            &lt;i data-lucide="icon-name"&gt;&lt;/i&gt;
-            &lt;span class="font-semibold"&gt;Panel Title&lt;/span&gt;
-        &lt;/div&gt;
-        &lt;div class="panel-actions"&gt;
-            &lt;!-- Panel actions --&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class="panel-body"&gt;
-        &lt;!-- Injectable content area --&gt;
-    &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-            </div>
-        </section>
-
-        <!-- Tooltips & Popovers Section -->
-        <section id="tooltips-popovers" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Tooltips & Popovers</h2>
-                <h6 class="section-description">
-                    Contextual overlays for displaying helpful information and interactive content.
-                </h6>
-            </div>
-            
-            <div class="flex gap-8 items-start">
-                <!-- Tooltips -->
-                <div class="card flex-1">
+            <!-- Colors Section -->
+            <div class="section">
+                <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Tooltips</h3>
-                        <p class="card-description">Small contextual hints that appear on hover</p>
+                        <div class="card-header-left"><i data-lucide="palette" class="card-icon"></i><h2 class="card-title">Colors</h2></div>
                     </div>
-                <div class="card-body p-8">
-                    <div class="flex gap-6 items-center justify-center flex-wrap">
-                        <div class="tooltip-wrapper">
-                            <button class="btn">Hover me</button>
-                            <div class="tooltip tooltip-top">Tooltip on top</div>
-                        </div>
-                        
-                        <div class="tooltip-wrapper">
-                            <button class="btn btn-primary">
-                                <i data-lucide="info" class="button-icon-md"></i>
-                                Info
-                            </button>
-                            <div class="tooltip tooltip-bottom">Additional information</div>
-                        </div>
-                        
-                        <div class="tooltip-wrapper">
-                            <button class="btn p-3">
-                                <i data-lucide="settings" class="button-icon-lg"></i>
-                            </button>
-                            <div class="tooltip tooltip-left">Settings</div>
-                        </div>
-                        
-                        <div class="tooltip-wrapper">
-                            <button class="btn p-3">
-                                <i data-lucide="download" class="button-icon-lg"></i>
-                            </button>
-                            <div class="tooltip tooltip-right">Download file</div>
-                        </div>
+                    <div class="card-body">
+                    <h5>Semantic Colors</h5>
+                    <div class="demo-row">
+                        <div style="background: var(--primary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Primary</div>
+                        <div style="background: var(--success); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Success</div>
+                        <div style="background: var(--warning); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Warning</div>
+                        <div style="background: var(--error); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Error</div>
+                        <div style="background: var(--info); padding: var(--space-3); border-radius: var(--radius-md); color: var(--grey-800);">Info</div>
                     </div>
                     
-                    <div class="flex gap-6 items-center justify-center flex-wrap mt-8">
-                        <div class="tooltip-wrapper">
-                            <span class="text-sm" style="padding: var(--space-2); background: var(--bg-tertiary); border-radius: var(--radius-sm);">
-                                File: <span class="text-pastel-info">scene_001.blend</p>
-                            </p>
-                            <div class="tooltip tooltip-top">
-                                <div class="text-xs">
-                                    <div>Size: 24.5 MB</div>
-                                    <div>Modified: 2 hours ago</div>
-                                    <div>Version: 2.93</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="tooltip-wrapper">
-                            <div class="flex items-center gap-2 p-2 rounded bg-pastel-warning text-gray-800">
-                                <i data-lucide="alert-triangle" class="button-icon-md"></i>
-                                <span class="text-sm font-medium">GPU Usage: 85%</p>
-                            </div>
-                            <div class="tooltip tooltip-bottom bg-pastel-warning text-gray-800">
-                                <div class="text-xs font-medium">
-                                    Consider reducing texture resolution
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Popovers -->
-                <div class="card flex-1">
-                    <div class="card-header">
-                        <h3 class="card-title">Popovers</h3>
-                        <p class="card-description">Interactive overlays with rich content</p>
-                    </div>
-                <div class="card-body p-8">
-                    <div class="flex gap-6 items-center justify-center flex-wrap">
-                        <div class="popover-wrapper">
-                            <button class="btn popover-trigger">
-                                <i data-lucide="user" class="button-icon-md"></i>
-                                User Menu
-                            </button>
-                            <div class="popover popover-bottom-start">
-                                <div class="popover-header">
-                                    <span class="font-semibold">John Doe</p>
-                                    <button class="btn btn-sm p-4px">
-                                        <i data-lucide="x" class="button-icon-sm"></i>
-                                    </button>
-                                </div>
-                                <div class="popover-body">
-                                    <a href="#" class="popover-item">
-                                        <i data-lucide="user" class="button-icon-md"></i>
-                                        Profile
-                                    </a>
-                                    <a href="#" class="popover-item">
-                                        <i data-lucide="settings" class="button-icon-md"></i>
-                                        Settings
-                                    </a>
-                                    <div class="popover-divider"></div>
-                                    <a href="#" class="popover-item">
-                                        <i data-lucide="log-out" class="button-icon-md"></i>
-                                        Sign out
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="popover-wrapper">
-                            <button class="btn btn-primary popover-trigger">
-                                <i data-lucide="filter" class="button-icon-md"></i>
-                                Filter
-                            </button>
-                            <div class="popover popover-bottom">
-                                <div class="popover-header">
-                                    <span class="font-semibold">Filter Options</p>
-                                </div>
-                                <div class="popover-body">
-                                    <div class="mb-4">
-                                        <label class="text-xs text-tertiary">File Type</label>
-                                        <div class="flex flex-col gap-2 mt-2">
-                                            <label class="flex items-center gap-2 text-sm">
-                                                <input type="checkbox" checked />
-                                                <span>3D Files (.blend, .ma)</p>
-                                            </label>
-                                            <label class="flex items-center gap-2 text-sm">
-                                                <input type="checkbox" checked />
-                                                <span>Images (.exr, .png)</p>
-                                            </label>
-                                            <label class="flex items-center gap-2 text-sm">
-                                                <input type="checkbox" />
-                                                <span>Videos (.mov, .mp4)</p>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button class="btn btn-sm btn-primary">Apply</button>
-                                        <button class="btn btn-sm">Clear</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="popover-wrapper">
-                            <button class="btn popover-trigger p-3">
-                                <i data-lucide="more-horizontal" class="button-icon-lg"></i>
-                            </button>
-                            <div class="popover popover-bottom-end">
-                                <div class="popover-body p-0">
-                                    <a href="#" class="popover-item">
-                                        <i data-lucide="edit" class="button-icon-md"></i>
-                                        Rename
-                                    </a>
-                                    <a href="#" class="popover-item">
-                                        <i data-lucide="copy" class="button-icon-md"></i>
-                                        Duplicate
-                                    </a>
-                                    <a href="#" class="popover-item">
-                                        <i data-lucide="folder" class="button-icon-md"></i>
-                                        Move to...
-                                    </a>
-                                    <div class="popover-divider"></div>
-                                    <a href="#" class="popover-item text-pastel-error">
-                                        <i data-lucide="trash-2" class="button-icon-md"></i>
-                                        Delete
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                    
+                    <h5>Background Hierarchy</h5>
+                    <div class="demo-row">
+                        <div style="background: var(--bg-quaternary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-primary);">Quaternary BG</div>
+                        <div style="background: var(--bg-primary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-primary);">Primary BG</div>
+                        <div style="background: var(--bg-secondary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-primary);">Secondary BG</div>
+                        <div style="background: var(--bg-tertiary); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-primary);">Tertiary BG</div>
                     </div>
                     
-                    <!-- Color Picker Example -->
-                    <div class="flex justify-center mt-8">
-                        <div class="popover-wrapper">
-                            <button class="btn popover-trigger">
-                                <div style="width: 16px; height: 16px; background: var(--pastel-primary); border-radius: 2px;"></div>
-                                Pick Color
-                            </button>
-                            <div class="popover popover-top" style="width: 240px;">
-                                <div class="popover-header">
-                                    <span class="font-semibold">Color Picker</p>
-                                </div>
-                                <div class="popover-body">
-                                    <div class="grid grid-cols-6 gap-2">
-                                        <div style="width: 32px; height: 32px; background: var(--pastel-primary); border-radius: 4px; cursor: pointer;"></div>
-                                        <div style="width: 32px; height: 32px; background: var(--pastel-success); border-radius: 4px; cursor: pointer;"></div>
-                                        <div style="width: 32px; height: 32px; background: var(--pastel-warning); border-radius: 4px; cursor: pointer;"></div>
-                                        <div style="width: 32px; height: 32px; background: var(--pastel-error); border-radius: 4px; cursor: pointer;"></div>
-                                        <div style="width: 32px; height: 32px; background: var(--pastel-info); border-radius: 4px; cursor: pointer;"></div>
-                                        <div style="width: 32px; height: 32px; background: var(--pastel-neutral); border-radius: 4px; cursor: pointer;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-            </div>
-        </section>
 
-        <!-- Modals Section -->
-        <section id="modals" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Modals</h2>
-                <h6 class="section-description">
-                    Overlay dialogs for focused interactions and important content.
-                </h6>
-            </div>
-            
-            <div class="grid grid-3">
-                <!-- Basic Modal -->
+            <!-- Typography Section -->
+            <div class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Basic Modal</h3>
-                        <p class="card-description">Simple modal with header and content</p>
+                        <div class="card-header-left"><i data-lucide="type" class="card-icon"></i><h2 class="card-title">Typography</h2></div>
                     </div>
                     <div class="card-body">
-                        <button class="btn btn-primary" onclick="showModal('basic-modal')">
-                            <i data-lucide="maximize" class="nav-icon"></i>
-                            Open Basic Modal
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Confirmation Modal -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Confirmation Modal</h3>
-                        <p class="card-description">Modal for confirming actions</p>
-                    </div>
-                    <div class="card-body">
-                        <button class="btn bg-pastel-warning text-gray-800" onclick="showModal('confirm-modal')">
-                            <i data-lucide="alert-triangle" class="nav-icon"></i>
-                            Open Confirmation
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Form Modal -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Form Modal</h3>
-                        <p class="card-description">Modal with form inputs</p>
-                    </div>
-                    <div class="card-body">
-                        <button class="btn" onclick="showModal('form-modal')">
-                            <i data-lucide="edit" class="nav-icon"></i>
-                            Open Form Modal
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-2 mt-8">
-                <!-- Image Modal -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Image Modal</h3>
-                        <p class="card-description">Full-screen image viewer</p>
-                    </div>
-                    <div class="card-body">
-                        <button class="btn" onclick="showModal('image-modal')">
-                            <i data-lucide="image" class="nav-icon"></i>
-                            Open Image Modal
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Loading Modal -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Loading Modal</h3>
-                        <p class="card-description">Non-dismissible loading state</p>
-                    </div>
-                    <div class="card-body">
-                        <button class="btn" onclick="showModal('loading-modal'); setTimeout(() => closeModal('loading-modal'), 3000)">
-                            <i data-lucide="loader-2" class="nav-icon"></i>
-                            Show Loading (3s)
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Modal Templates -->
-        <!-- Basic Modal -->
-        <div id="basic-modal" class="modal-backdrop" onclick="closeModal('basic-modal')">
-            <div class="modal" onclick="event.stopPropagation()">
-                <div class="modal-header">
-                    <h3>Basic Modal</h3>
-                    <button class="btn btn-sm p-2" onclick="closeModal('basic-modal')">
-                        <i data-lucide="x" class="button-icon-lg"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>This is a basic modal dialog. It can contain any content you need to display.</p>
-                    <p>Click outside the modal or use the close button to dismiss it.</p>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn" onclick="closeModal('basic-modal')">Cancel</button>
-                    <button class="btn btn-primary">
-                        <i data-lucide="check" class="nav-icon"></i>
-                        Confirm
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Confirmation Modal -->
-        <div id="confirm-modal" class="modal-backdrop" onclick="closeModal('confirm-modal')">
-            <div class="modal modal-sm" onclick="event.stopPropagation()">
-                <div class="modal-header">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="alert-triangle" style="width: 24px; height: 24px; color: var(--pastel-warning);"></i>
-                        <h3>Confirm Action</h3>
-                    </div>
-                    <button class="btn btn-sm p-2" onclick="closeModal('confirm-modal')">
-                        <i data-lucide="x" class="button-icon-lg"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete this file? This action cannot be undone.</p>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn" onclick="closeModal('confirm-modal')">Cancel</button>
-                    <button class="btn bg-pastel-error text-gray-800" onclick="closeModal('confirm-modal'); showToast('File deleted', 'success')">
-                        <i data-lucide="trash-2" class="nav-icon"></i>
-                        Delete
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Form Modal -->
-        <div id="form-modal" class="modal-backdrop" onclick="closeModal('form-modal')">
-            <div class="modal" onclick="event.stopPropagation()">
-                <div class="modal-header">
-                    <h3>Edit Profile</h3>
-                    <button class="btn btn-sm p-2" onclick="closeModal('form-modal')">
-                        <i data-lucide="x" class="button-icon-lg"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-input" placeholder="Enter your name" value="John Doe">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-input" placeholder="Enter your email" value="john@example.com">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Bio</label>
-                            <textarea class="form-input" rows="3" placeholder="Tell us about yourself">Creative professional working in digital media and design.</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Theme Preference</label>
-                            <select class="form-input">
-                                <option>System Default</option>
-                                <option>Light Mode</option>
-                                <option>Dark Mode</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn" onclick="closeModal('form-modal')">Cancel</button>
-                    <button class="btn btn-primary" onclick="closeModal('form-modal'); showToast('Profile updated', 'success')">
-                        <i data-lucide="save" class="nav-icon"></i>
-                        Save Changes
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Image Modal -->
-        <div id="image-modal" class="modal-backdrop modal-dark" onclick="closeModal('image-modal')">
-            <div class="modal modal-fullscreen modal-image" onclick="event.stopPropagation()" class="bg-black-95">
-                <div class="modal-header btn-transparent">
-                    <h3 style="color: white;">Image Preview</h3>
-                    <button class="btn btn-sm" style="padding: var(--space-2); background: rgba(255,255,255,0.1); color: white;" onclick="closeModal('image-modal')">
-                        <i data-lucide="x" class="button-icon-lg"></i>
-                    </button>
-                </div>
-                <div class="modal-body" style="display: flex; align-items: center; justify-content: center; padding: 0;">
-                    <div class="modal-content-box">
-                        <i data-lucide="image" style="width: 200px; height: 200px; color: rgba(255, 255, 255, 0.5);"></i>
-                        <p style="color: rgba(255, 255, 255, 0.7); margin-top: var(--space-4);">Image preview would appear here</p>
-                    </div>
-                </div>
-                <div class="modal-footer btn-transparent-center">
-                    <button class="btn bg-white-10 text-white">
-                        <i data-lucide="zoom-out" class="nav-icon"></i>
-                        Zoom Out
-                    </button>
-                    <button class="btn bg-white-10 text-white">
-                        <i data-lucide="zoom-in" class="nav-icon"></i>
-                        Zoom In
-                    </button>
-                    <button class="btn bg-white-10 text-white">
-                        <i data-lucide="download" class="nav-icon"></i>
-                        Download
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Loading Modal -->
-        <div id="loading-modal" class="modal-backdrop">
-            <div class="modal modal-sm" style="text-align: center;">
-                <div class="modal-body p-8">
-                    <i data-lucide="loader-2" class="spinner-accent"></i>
-                    <h4>Processing...</h4>
-                    <p class="text-secondary">Please wait while we complete your request</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Toasts Section -->
-        <section id="toasts" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Toasts</h2>
-                <h6 class="section-description">
-                    Non-blocking notifications that appear temporarily to provide feedback.
-                </h6>
-            </div>
-            
-            <div class="grid grid-2">
-                <!-- Toast Examples -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Toast Types</h3>
-                        <p class="card-description">Different toast styles for various feedback</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="flex flex-col gap-4">
-                            <button class="btn bg-pastel-success text-gray-800" onclick="showToast('Changes saved successfully!', 'success')">
-                                <i data-lucide="check-circle" class="nav-icon"></i>
-                                Show Success Toast
-                            </button>
-                            <button class="btn bg-pastel-info text-gray-800" onclick="showToast('Processing your request...', 'info')">
-                                <i data-lucide="info" class="nav-icon"></i>
-                                Show Info Toast
-                            </button>
-                            <button class="btn bg-pastel-warning text-gray-800" onclick="showToast('Please check your input', 'warning')">
-                                <i data-lucide="alert-triangle" class="nav-icon"></i>
-                                Show Warning Toast
-                            </button>
-                            <button class="btn bg-pastel-error text-gray-800" onclick="showToast('An error occurred!', 'error')">
-                                <i data-lucide="x-circle" class="nav-icon"></i>
-                                Show Error Toast
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Toast Configuration -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Toast Features</h3>
-                        <p class="card-description">Advanced toast functionality</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="flex flex-col gap-4">
-                            <button class="btn" onclick="showToast('This toast has an action', 'info', { action: { text: 'Undo', callback: () => showToast('Action clicked!', 'success') }})">
-                                <i data-lucide="mouse-pointer" class="nav-icon"></i>
-                                Toast with Action
-                            </button>
-                            <button class="btn" onclick="showToast('This toast stays longer', 'info', { duration: 8000 })">
-                                <i data-lucide="clock" class="nav-icon"></i>
-                                Long Duration Toast
-                            </button>
-                            <button class="btn" onclick="showToast('Multiple toasts stack vertically', 'info'); setTimeout(() => showToast('Second toast', 'success'), 500); setTimeout(() => showToast('Third toast', 'warning'), 1000)">
-                                <i data-lucide="layers" class="nav-icon"></i>
-                                Stacked Toasts
-                            </button>
-                            <button class="btn" onclick="showToast('Click me to dismiss', 'info', { dismissible: true })">
-                                <i data-lucide="x" class="nav-icon"></i>
-                                Dismissible Toast
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Headings Section -->
-        <section id="headings" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Headings</h2>
-                <h6 class="section-description">
-                    Consistent heading hierarchy for clear information structure.
-                </h6>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Heading Scale</h3>
-                </div>
-                <div class="typography-sample">
+                    <h5>Heading Scale</h5>
                     <h1>Heading 1</h1>
                     <h2>Heading 2 - Section Title</h2>
-                    <h3>Heading 3 - Subsection Title</h3>
+                    <h5>Heading 3 - Subsection Title</h5>
                     <h4>Heading 4 - Component Title</h4>
                     <h5>Heading 5 - Small Section</h5>
                     <h6>Heading 6 - Caption</h6>
-                    <br>
+                    
+                    <h5>Paragraph Styles</h5>
                     <p class="lead"><strong>This is a lead paragraph</strong> with <em>italic text</em>, <u>underlined text</u>, <s>strikethrough text</s>, <mark>highlighted text</mark>, <code>inline code</code>, and <kbd>keyboard input</kbd>.</p>
+                    
                     <p><strong>This is a standard paragraph</strong> with <em>emphasized text</em>, <strong><em>bold italic</em></strong>, <sup>superscript</sup>, <sub>subscript</sub>, <abbr title="Abbreviation">ABBR</abbr>, and <a href="#">linked text</a>. It has optimal line height for readability.</p>
+                    
                     <p class="small"><strong>This is a small paragraph</strong> with <var>variable</var>, <samp>sample output</samp>, <del>deleted text</del>, <ins>inserted text</ins>, <q>inline quote</q>, and <cite>citation</cite> examples.</p>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Color System Section -->
-        <section id="color-system" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Color System</h2>
-                <h6 class="section-description">
-                    A thoughtful color palette designed for clarity and accessibility.
-                </h6>
-            </div>
-            
-            <div class="card mb-8">
-                <div class="card-header">
-                    <h3 class="card-title">Gray Scale</h3>
-                    <p class="card-description">Base neutral colors for backgrounds and text</p>
-                </div>
-                <div class="grid grid-4">
-                    <div class="color-swatch">
-                        <div class="color-preview bg-gray-50"></div>
-                        <div class="color-info">
-                            <div class="color-name">Gray 50</div>
-                            <div class="color-value">#fafafa</div>
-                        </div>
-                    </div>
-                    <div class="color-swatch">
-                        <div class="color-preview bg-gray-100"></div>
-                        <div class="color-info">
-                            <div class="color-name">Gray 100</div>
-                            <div class="color-value">#f5f5f5</div>
-                        </div>
-                    </div>
-                    <div class="color-swatch">
-                        <div class="color-preview bg-gray-200"></div>
-                        <div class="color-info">
-                            <div class="color-name">Gray 200</div>
-                            <div class="color-value">#eeeeee</div>
-                        </div>
-                    </div>
-                    <div class="color-swatch">
-                        <div class="color-preview bg-gray-300"></div>
-                        <div class="color-info">
-                            <div class="color-name">Gray 300</div>
-                            <div class="color-value">#e0e0e0</div>
-                        </div>
-                    </div>
-                    <div class="color-swatch">
-                        <div class="color-preview bg-gray-400"></div>
-                        <div class="color-info">
-                            <div class="color-name">Gray 400</div>
-                            <div class="color-value">#bdbdbd</div>
-                        </div>
-                    </div>
-                    <div class="color-swatch">
-                        <div class="color-preview bg-gray-500"></div>
-                        <div class="color-info">
-                            <div class="color-name">Gray 500</div>
-                            <div class="color-value">#9e9e9e</div>
-                        </div>
-                    </div>
-                    <div class="color-swatch">
-                        <div class="color-preview bg-gray-600"></div>
-                        <div class="color-info">
-                            <div class="color-name">Gray 600</div>
-                            <div class="color-value">#757575</div>
-                        </div>
-                    </div>
-                    <div class="color-swatch">
-                        <div class="color-preview bg-gray-700"></div>
-                        <div class="color-info">
-                            <div class="color-name">Gray 700</div>
-                            <div class="color-value">#616161</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Semantic Colors Section -->
-        <section id="semantic-colors" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Semantic Colors</h2>
-                <h6 class="section-description">
-                    Essential colors with specific meanings for consistent UI communication.
-                </h6>
-            </div>
-            
-            <div class="grid grid-3">
-                <div class="color-swatch">
-                    <div class="color-preview bg-color-pastel-primary"></div>
-                    <div class="color-info">
-                        <div class="color-name">Primary</div>
-                        <div class="color-value">#b3d9ff</div>
-                    </div>
-                </div>
-                <div class="color-swatch">
-                    <div class="color-preview bg-color-pastel-success"></div>
-                    <div class="color-info">
-                        <div class="color-name">Success</div>
-                        <div class="color-value">#b8e6b8</div>
-                    </div>
-                </div>
-                <div class="color-swatch">
-                    <div class="color-preview bg-color-pastel-warning"></div>
-                    <div class="color-info">
-                        <div class="color-name">Warning</div>
-                        <div class="color-value">#ffe4a3</div>
-                    </div>
-                </div>
-                <div class="color-swatch">
-                    <div class="color-preview bg-color-pastel-error"></div>
-                    <div class="color-info">
-                        <div class="color-name">Error</div>
-                        <div class="color-value">#ffb3ba</div>
-                    </div>
-                </div>
-                <div class="color-swatch">
-                    <div class="color-preview bg-color-pastel-info"></div>
-                    <div class="color-info">
-                        <div class="color-name">Info</div>
-                        <div class="color-value">#d4c5f9</div>
-                    </div>
-                </div>
-                <div class="color-swatch">
-                    <div class="color-preview bg-color-pastel-neutral"></div>
-                    <div class="color-info">
-                        <div class="color-name">Neutral</div>
-                        <div class="color-value">#e8e3d9</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Buttons Section -->
-        <section id="buttons" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Buttons</h2>
-                <h6 class="section-description">
-                    Button components for various actions and states.
-                </h6>
-            </div>
-            
-            <div class="grid grid-3">
+            <!-- Grid System Section -->
+            <div class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Button Variants</h3>
-                    </div>
-                    <div class="flex flex-col gap-4">
-                        <button class="btn btn-primary">
-                            <i data-lucide="plus" class="nav-icon"></i>
-                            Primary Button
-                        </button>
-                        <button class="btn">
-                            <i data-lucide="edit" class="nav-icon"></i>
-                            Secondary Button
-                        </button>
-                        <button class="btn bg-pastel-success text-gray-800">
-                            <i data-lucide="check" class="nav-icon"></i>
-                            Success Button
-                        </button>
-                        <button class="btn bg-pastel-warning text-gray-800">
-                            <i data-lucide="alert-triangle" class="nav-icon"></i>
-                            Warning Button
-                        </button>
-                        <button class="btn bg-pastel-error text-gray-800">
-                            <i data-lucide="x-circle" class="nav-icon"></i>
-                            Error Button
-                        </button>
-                        <button class="btn bg-pastel-info text-gray-800">
-                            <i data-lucide="info" class="nav-icon"></i>
-                            Info Button
-                        </button>
-                        <button class="btn btn-outline-accent">
-                            <i data-lucide="external-link" class="nav-icon"></i>
-                            Outline Accent
-                        </button>
-                        <button class="btn" style="border: none; background: none; color: var(--accent);">
-                            <i data-lucide="link" class="nav-icon"></i>
-                            Text Button
-                        </button>
-                        <button class="btn" disabled class="disabled-state">
-                            <i data-lucide="lock" class="nav-icon"></i>
-                            Disabled Button
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Outline Buttons</h3>
-                        <p class="card-description">Outline button variants with semantic colors that fill on hover</p>
+                        <div class="card-header-left"><i data-lucide="grid" class="card-icon"></i><h2 class="card-title">Grid System</h2></div>
                     </div>
                     <div class="card-body">
-                        <div class="flex gap-4">
-                            <button class="btn btn-outline-primary">
-                                <i data-lucide="star" class="nav-icon"></i>
-                                Primary Outline
-                            </button>
-                            <button class="btn btn-outline-success">
-                                <i data-lucide="check-circle" class="nav-icon"></i>
-                                Success Outline
-                            </button>
-                            <button class="btn btn-outline-warning">
-                                <i data-lucide="alert-circle" class="nav-icon"></i>
-                                Warning Outline
-                            </button>
-                            <button class="btn btn-outline-error">
-                                <i data-lucide="x-octagon" class="nav-icon"></i>
-                                Error Outline
-                            </button>
-                            <button class="btn btn-outline-info">
-                                <i data-lucide="info" class="nav-icon"></i>
-                                Info Outline
-                            </button>
+                    <h5>2 Column Grid</h5>
+                    <div class="grid grid-2">
+                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                            Grid Item 1
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                            Grid Item 2
                         </div>
                     </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Button Sizes</h3>
+                    
+                    <h5>3 Column Grid</h5>
+                    <div class="grid grid-3">
+                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                            Item 1
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                            Item 2
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                            Item 3
+                        </div>
                     </div>
-                    <div class="flex flex-col gap-4 items-start">
-                        <button class="btn btn-sm btn-primary">
-                            <i data-lucide="star" class="nav-icon"></i>
-                            Small
-                        </button>
-                        <button class="btn btn-primary">
-                            <i data-lucide="star" class="nav-icon"></i>
-                            Medium
-                        </button>
-                        <button class="btn btn-lg btn-primary">
-                            <i data-lucide="star" class="nav-icon"></i>
-                            Large
-                        </button>
+                    
+                    <h5>Auto-fit Grid</h5>
+                    <div class="grid grid-auto-fit">
+                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                            Responsive 1
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                            Responsive 2
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                            Responsive 3
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md); text-align: center;">
+                            Responsive 4
+                        </div>
                     </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Icon Buttons</h3>
-                    </div>
-                    <div class="flex gap-2 flex-wrap">
-                        <div class="tooltip-wrapper">
-                            <button class="btn p-3">
-                                <i data-lucide="heart" class="nav-icon"></i>
-                            </button>
-                            <div class="tooltip tooltip-bottom">Add to favorites</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn p-3">
-                                <i data-lucide="share" class="nav-icon"></i>
-                            </button>
-                            <div class="tooltip tooltip-bottom">Share</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn p-3">
-                                <i data-lucide="bookmark" class="nav-icon"></i>
-                            </button>
-                            <div class="tooltip tooltip-bottom">Bookmark</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn p-3">
-                                <i data-lucide="more-horizontal" class="nav-icon"></i>
-                            </button>
-                            <div class="tooltip tooltip-bottom">More options</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn" style="padding: var(--space-3); background: var(--pastel-primary); color: var(--gray-800);">
-                                <i data-lucide="send" class="nav-icon"></i>
-                            </button>
-                            <div class="tooltip tooltip-bottom">Send</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn" style="padding: var(--space-3); background: var(--pastel-success); color: var(--gray-800);">
-                                <i data-lucide="check-circle" class="nav-icon"></i>
-                            </button>
-                            <div class="tooltip tooltip-bottom">Approve</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn" style="padding: var(--space-3); background: var(--pastel-error); color: var(--gray-800);">
-                                <i data-lucide="trash-2" class="nav-icon"></i>
-                            </button>
-                            <div class="tooltip tooltip-bottom">Delete</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn" style="padding: var(--space-3); background: var(--pastel-warning); color: var(--gray-800);">
-                                <i data-lucide="star" class="nav-icon"></i>
-                            </button>
-                            <div class="tooltip tooltip-bottom">Star</div>
-                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- More button examples -->
-            <div class="grid grid-3 mt-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Button States</h3>
-                    </div>
-                    <div class="flex flex-col gap-4">
-                        <button class="btn">
-                            <i data-lucide="mouse-pointer" class="nav-icon"></i>
-                            Normal State
-                        </button>
-                        <button class="btn" style="transform: translateY(-2px); box-shadow: var(--shadow-lg);">
-                            <i data-lucide="hand" class="nav-icon"></i>
-                            Hover State
-                        </button>
-                        <button class="btn" style="transform: translateY(0); box-shadow: none;">
-                            <i data-lucide="mouse-pointer-click" class="nav-icon"></i>
-                            Active State
-                        </button>
-                        <button class="btn" style="outline: 2px solid var(--accent); outline-offset: 2px;">
-                            <i data-lucide="target" class="nav-icon"></i>
-                            Focus State
-                        </button>
-                        <button class="btn" disabled class="disabled-state">
-                            <i data-lucide="ban" class="nav-icon"></i>
-                            Disabled State
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Loading Buttons</h3>
-                    </div>
-                    <div class="flex flex-col gap-4">
-                        <button class="btn btn-primary">
-                            <i data-lucide="loader-2" class="nav-icon animate-spin"></i>
-                            Loading...
-                        </button>
-                        <button class="btn">
-                            <i data-lucide="upload" class="nav-icon"></i>
-                            Uploading (42%)
-                        </button>
-                        <button class="btn bg-pastel-success text-gray-800">
-                            <i data-lucide="check-circle" class="nav-icon"></i>
-                            Complete!
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Button Groups</h3>
-                    </div>
-                    <div class="flex flex-col gap-4">
-                        <div class="flex">
-                            <button class="btn" style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-right: 1px solid var(--border-color);">
-                                <i data-lucide="align-left" class="button-icon-md"></i>
-                            </button>
-                            <button class="btn" style="border-radius: 0; border-right: 1px solid var(--border-color);">
-                                <i data-lucide="align-center" class="button-icon-md"></i>
-                            </button>
-                            <button class="btn" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
-                                <i data-lucide="align-right" class="button-icon-md"></i>
-                            </button>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="btn btn-sm">Previous</button>
-                            <button class="btn btn-sm btn-primary">1</button>
-                            <button class="btn btn-sm">2</button>
-                            <button class="btn btn-sm">3</button>
-                            <button class="btn btn-sm">Next</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        <!-- Cards Section -->
-        <section id="cards" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Cards</h2>
-                <h6 class="section-description">
-                    Card components for organizing and displaying content.
-                </h6>
-            </div>
-            
-            <div class="grid grid-3">
+            <!-- Cards Section -->
+            <div class="section">
                 <div class="card">
                     <div class="card-header">
-                        <div class="flex items-center gap-3 mb-4">
-                            <i data-lucide="file-text" style="width: 24px; height: 24px; color: var(--accent);"></i>
-                            <h3 class="card-title">Document Card</h3>
-                        </div>
-                        <p class="card-description">
-                            A card for displaying document information with icon and metadata.
-                        </p>
+                        <div class="card-header-left"><i data-lucide="square" class="card-icon"></i><h2 class="card-title">Cards</h2></div>
                     </div>
-                    <div class="flex gap-2 mt-4">
-                        <div class="tooltip-wrapper">
-                            <button class="btn btn-sm btn-primary">Open</button>
-                            <div class="tooltip tooltip-bottom">Open document</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn btn-sm">Share</button>
-                            <div class="tooltip tooltip-bottom">Share with others</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <div class="flex items-center gap-3 mb-4">
-                            <i data-lucide="folder" style="width: 24px; height: 24px; color: var(--amber-500);"></i>
-                            <h3 class="card-title">Folder Card</h3>
-                        </div>
-                        <p class="card-description">
-                            A card for displaying folder information with file count and size.
-                        </p>
-                    </div>
-                    <div class="flex gap-2 mt-4">
-                        <div class="tooltip-wrapper">
-                            <button class="btn btn-sm btn-primary">Open</button>
-                            <div class="tooltip tooltip-bottom">Open folder</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn btn-sm">Properties</button>
-                            <div class="tooltip tooltip-bottom">View folder properties</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <div class="flex items-center gap-3 mb-4">
-                            <i data-lucide="image" style="width: 24px; height: 24px; color: var(--purple-500);"></i>
-                            <h3 class="card-title">Media Card</h3>
-                        </div>
-                        <p class="card-description">
-                            A card for displaying media files with preview and metadata.
-                        </p>
-                    </div>
-                    <div class="flex gap-2 mt-4">
-                        <div class="tooltip-wrapper">
-                            <button class="btn btn-sm btn-primary">Preview</button>
-                            <div class="tooltip tooltip-bottom">Preview media file</div>
-                        </div>
-                        <div class="tooltip-wrapper">
-                            <button class="btn btn-sm">Edit</button>
-                            <div class="tooltip tooltip-bottom">Edit in default app</div>
-                        </div>
+                    <div class="card-body">
+                        <div class="grid grid-auto-fit-3" id="card-demo"></div>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Icon Library Section -->
-        <section id="icon-library" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Icon Library</h2>
-                <h6 class="section-description">
-                    Comprehensive icon set using Lucide icons for consistent visual language.
-                </h6>
-            </div>
-            
-            <div class="card mb-8">
-                <div class="card-header">
-                    <h3 class="card-title">Icon Collection (100 Icons)</h3>
-                    <p class="card-description">Complete set of 100 commonly used icons across the interface</p>
-                </div>
-                <div class="icon-grid">
-                    <div class="icon-item">
-                        <i data-lucide="home"></i>
-                        <p class="icon-name">home</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="folder"></i>
-                        <p class="icon-name">folder</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="file"></i>
-                        <p class="icon-name">file</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="search"></i>
-                        <p class="icon-name">search</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="settings"></i>
-                        <p class="icon-name">settings</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="user"></i>
-                        <p class="icon-name">user</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="download"></i>
-                        <p class="icon-name">download</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="upload"></i>
-                        <p class="icon-name">upload</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="edit"></i>
-                        <p class="icon-name">edit</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="trash"></i>
-                        <p class="icon-name">trash</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="copy"></i>
-                        <p class="icon-name">copy</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="share"></i>
-                        <p class="icon-name">share</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="save"></i>
-                        <p class="icon-name">save</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="refresh-cw"></i>
-                        <p class="icon-name">refresh</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="filter"></i>
-                        <p class="icon-name">filter</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="lock"></i>
-                        <p class="icon-name">lock</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="unlock"></i>
-                        <p class="icon-name">unlock</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="cloud"></i>
-                        <p class="icon-name">cloud</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="database"></i>
-                        <p class="icon-name">database</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="code"></i>
-                        <p class="icon-name">code</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="terminal"></i>
-                        <p class="icon-name">terminal</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="package"></i>
-                        <p class="icon-name">package</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="archive"></i>
-                        <p class="icon-name">archive</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="arrow-left"></i>
-                        <p class="icon-name">arrow-left</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="arrow-right"></i>
-                        <p class="icon-name">arrow-right</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="arrow-up"></i>
-                        <p class="icon-name">arrow-up</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="arrow-down"></i>
-                        <p class="icon-name">arrow-down</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="bell"></i>
-                        <p class="icon-name">bell</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="book"></i>
-                        <p class="icon-name">book</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="calendar"></i>
-                        <p class="icon-name">calendar</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="camera"></i>
-                        <p class="icon-name">camera</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="check"></i>
-                        <p class="icon-name">check</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="chevron-down"></i>
-                        <p class="icon-name">chevron-down</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="chevron-left"></i>
-                        <p class="icon-name">chevron-left</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="chevron-right"></i>
-                        <p class="icon-name">chevron-right</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="chevron-up"></i>
-                        <p class="icon-name">chevron-up</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="circle"></i>
-                        <p class="icon-name">circle</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="clipboard"></i>
-                        <p class="icon-name">clipboard</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="clock"></i>
-                        <p class="icon-name">clock</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="cpu"></i>
-                        <p class="icon-name">cpu</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="credit-card"></i>
-                        <p class="icon-name">credit-card</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="dollar-sign"></i>
-                        <p class="icon-name">dollar-sign</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="eye"></i>
-                        <p class="icon-name">eye</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="eye-off"></i>
-                        <p class="icon-name">eye-off</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="file-plus"></i>
-                        <p class="icon-name">file-plus</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="file-minus"></i>
-                        <p class="icon-name">file-minus</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="file-x"></i>
-                        <p class="icon-name">file-x</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="flag"></i>
-                        <p class="icon-name">flag</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="folder-open"></i>
-                        <p class="icon-name">folder-open</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="folder-plus"></i>
-                        <p class="icon-name">folder-plus</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="git-branch"></i>
-                        <p class="icon-name">git-branch</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="git-commit"></i>
-                        <p class="icon-name">git-commit</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="git-merge"></i>
-                        <p class="icon-name">git-merge</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="git-pull-request"></i>
-                        <p class="icon-name">git-pull-request</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="globe"></i>
-                        <p class="icon-name">globe</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="grid"></i>
-                        <p class="icon-name">grid</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="hard-drive"></i>
-                        <p class="icon-name">hard-drive</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="hash"></i>
-                        <p class="icon-name">hash</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="headphones"></i>
-                        <p class="icon-name">headphones</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="help-circle"></i>
-                        <p class="icon-name">help-circle</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="inbox"></i>
-                        <p class="icon-name">inbox</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="info"></i>
-                        <p class="icon-name">info</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="key"></i>
-                        <p class="icon-name">key</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="layers"></i>
-                        <p class="icon-name">layers</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="layout"></i>
-                        <p class="icon-name">layout</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="link"></i>
-                        <p class="icon-name">link</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="link-2"></i>
-                        <p class="icon-name">link-2</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="list"></i>
-                        <p class="icon-name">list</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="loader"></i>
-                        <p class="icon-name">loader</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="log-in"></i>
-                        <p class="icon-name">log-in</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="log-out"></i>
-                        <p class="icon-name">log-out</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="mail"></i>
-                        <p class="icon-name">mail</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="map"></i>
-                        <p class="icon-name">map</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="map-pin"></i>
-                        <p class="icon-name">map-pin</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="maximize"></i>
-                        <p class="icon-name">maximize</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="menu"></i>
-                        <p class="icon-name">menu</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="message-circle"></i>
-                        <p class="icon-name">message-circle</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="message-square"></i>
-                        <p class="icon-name">message-square</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="mic"></i>
-                        <p class="icon-name">mic</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="minimize"></i>
-                        <p class="icon-name">minimize</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="minus"></i>
-                        <p class="icon-name">minus</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="monitor"></i>
-                        <p class="icon-name">monitor</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="moon"></i>
-                        <p class="icon-name">moon</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="more-horizontal"></i>
-                        <p class="icon-name">more-horizontal</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="more-vertical"></i>
-                        <p class="icon-name">more-vertical</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="move"></i>
-                        <p class="icon-name">move</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="music"></i>
-                        <p class="icon-name">music</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="navigation"></i>
-                        <p class="icon-name">navigation</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="paperclip"></i>
-                        <p class="icon-name">paperclip</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="pause"></i>
-                        <p class="icon-name">pause</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="phone"></i>
-                        <p class="icon-name">phone</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="play"></i>
-                        <p class="icon-name">play</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="plus"></i>
-                        <p class="icon-name">plus</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="power"></i>
-                        <p class="icon-name">power</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="printer"></i>
-                        <p class="icon-name">printer</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="radio"></i>
-                        <p class="icon-name">radio</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="repeat"></i>
-                        <p class="icon-name">repeat</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="rotate-ccw"></i>
-                        <p class="icon-name">rotate-ccw</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="rss"></i>
-                        <p class="icon-name">rss</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="send"></i>
-                        <p class="icon-name">send</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="server"></i>
-                        <p class="icon-name">server</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="shield"></i>
-                        <p class="icon-name">shield</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="shopping-cart"></i>
-                        <p class="icon-name">shopping-cart</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="shuffle"></i>
-                        <p class="icon-name">shuffle</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="skip-back"></i>
-                        <p class="icon-name">skip-back</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="skip-forward"></i>
-                        <p class="icon-name">skip-forward</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="slash"></i>
-                        <p class="icon-name">slash</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="sliders"></i>
-                        <p class="icon-name">sliders</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="square"></i>
-                        <p class="icon-name">square</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="star"></i>
-                        <p class="icon-name">star</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="sun"></i>
-                        <p class="icon-name">sun</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="tag"></i>
-                        <p class="icon-name">tag</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="target"></i>
-                        <p class="icon-name">target</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="thumbs-down"></i>
-                        <p class="icon-name">thumbs-down</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="thumbs-up"></i>
-                        <p class="icon-name">thumbs-up</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="toggle-left"></i>
-                        <p class="icon-name">toggle-left</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="toggle-right"></i>
-                        <p class="icon-name">toggle-right</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="trending-down"></i>
-                        <p class="icon-name">trending-down</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="trending-up"></i>
-                        <p class="icon-name">trending-up</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="tv"></i>
-                        <p class="icon-name">tv</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="type"></i>
-                        <p class="icon-name">type</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="umbrella"></i>
-                        <p class="icon-name">umbrella</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="video"></i>
-                        <p class="icon-name">video</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="volume"></i>
-                        <p class="icon-name">volume</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="volume-2"></i>
-                        <p class="icon-name">volume-2</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="wifi"></i>
-                        <p class="icon-name">wifi</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="x"></i>
-                        <p class="icon-name">x</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="zap"></i>
-                        <p class="icon-name">zap</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="zoom-in"></i>
-                        <p class="icon-name">zoom-in</p>
-                    </div>
-                    <div class="icon-item">
-                        <i data-lucide="zoom-out"></i>
-                        <p class="icon-name">zoom-out</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Icon Usage Section -->
-        <section id="icon-usage" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Icon Usage Guidelines</h2>
-                <h6 class="section-description">
-                    Best practices for using icons consistently throughout the interface.
-                </h6>
-            </div>
-            
-            <div class="grid grid-2">
+            <!-- Buttons Section -->
+            <div class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Icon Sizes</h3>
-                        <p class="card-description">Standard icon sizes for different contexts</p>
+                        <div class="card-header-left"><i data-lucide="mouse-pointer" class="card-icon"></i><h2 class="card-title">Buttons</h2></div>
                     </div>
-                    <div class="flex items-center gap-4 flex-wrap">
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" class="nav-icon-size"></i>
-                            <span class="text-xs">12px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" class="button-icon-sm"></i>
-                            <span class="text-xs">14px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" class="button-icon-md"></i>
-                            <span class="text-xs">16px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" style="width: 18px; height: 18px;"></i>
-                            <span class="text-xs">18px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" class="button-icon-lg"></i>
-                            <span class="text-xs">20px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" style="width: 24px; height: 24px;"></i>
-                            <span class="text-xs">24px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" style="width: 28px; height: 28px;"></i>
-                            <span class="text-xs">28px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" style="width: 32px; height: 32px;"></i>
-                            <span class="text-xs">32px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" class="size-40"></i>
-                            <span class="text-xs">40px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" class="size-48"></i>
-                            <span class="text-xs">48px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" class="size-56"></i>
-                            <span class="text-xs">56px</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2">
-                            <i data-lucide="star" class="size-64"></i>
-                            <span class="text-xs">64px</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Icon with Text</h3>
-                        <p class="card-description">Proper alignment and spacing with text</p>
-                    </div>
-                    <div class="flex flex-col gap-3">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="check-circle" style="width: 16px; height: 16px; color: var(--green-500);"></i>
-                            <span class="text-sm">Task completed</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="alert-circle" style="width: 16px; height: 16px; color: var(--amber-500);"></i>
-                            <span class="text-sm">Warning message</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="x-circle" style="width: 16px; height: 16px; color: var(--red-500);"></i>
-                            <span class="text-sm">Error occurred</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Spacing System Section -->
-        <section id="spacing" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Spacing System</h2>
-                <h6 class="section-description">
-                    Consistent spacing scale for margins, padding, and layout elements.
-                </h6>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Spacing Scale</h3>
-                    <p class="card-description">Base spacing units for consistent layouts</p>
-                </div>
-                <div class="grid grid-4">
-                    <div class="flex items-center gap-3">
-                        <div class="square-accent-4"></div>
-                        <span class="text-sm font-mono">1 (4px)</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="square-accent-8"></div>
-                        <span class="text-sm font-mono">2 (8px)</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div style="width: 16px; height: 16px; background: var(--accent);"></div>
-                        <span class="text-sm font-mono">4 (16px)</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div style="width: 24px; height: 24px; background: var(--accent);"></div>
-                        <span class="text-sm font-mono">6 (24px)</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div style="width: 32px; height: 32px; background: var(--accent);"></div>
-                        <span class="text-sm font-mono">8 (32px)</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="square-accent-40"></div>
-                        <span class="text-sm font-mono">10 (40px)</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="square-accent-48"></div>
-                        <span class="text-sm font-mono">12 (48px)</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="square-accent-64"></div>
-                        <span class="text-sm font-mono">16 (64px)</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Scrollbar Section -->
-        <section id="scrollbars" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Scrollbars</h2>
-                <h6 class="section-description">
-                    Custom scrollbar styling for a refined user experience.
-                </h6>
-            </div>
-            
-            <div class="grid grid-2">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Default Scrollbar</h3>
-                        <p class="card-description">Hidden until hover, minimal design</p>
-                    </div>
-                    <div class="scrollbar-demo panel-content">
-                        <h4>Scroll this content</h4>
-                        <p>This is a demonstration of the custom scrollbar styling. The scrollbar is hidden by default and only appears when you hover over the scrollable area.</p>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-                        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                        <p>Continue scrolling to see more content...</p>
-                        <p>The scrollbar will appear on hover with a subtle design that matches the overall aesthetic.</p>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Always Visible Scrollbar</h3>
-                        <p class="card-description">For important scrollable areas</p>
-                    </div>
-                    <div class="scrollbar-demo scrollbar-visible panel-content">
-                        <h4>Always visible scrollbar</h4>
-                        <p>This scrollbar is always visible to indicate scrollable content. It uses a more prominent style while still maintaining the design aesthetic.</p>
-                        <ul>
-                            <li>Item 1: File management interface</li>
-                            <li>Item 2: Panel system architecture</li>
-                            <li>Item 3: Color customization</li>
-                            <li>Item 4: Typography controls</li>
-                            <li>Item 5: Icon library</li>
-                            <li>Item 6: Component library</li>
-                            <li>Item 7: Layout system</li>
-                            <li>Item 8: Theme configuration</li>
-                            <li>Item 9: Responsive design</li>
-                            <li>Item 10: Accessibility features</li>
-                        </ul>
-                        <p>The scrollbar remains visible but subtle, using appropriate colors for both light and dark themes.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card mt-8">
-                <div class="card-header">
-                    <h3 class="card-title">Horizontal Scrollbar</h3>
-                    <p class="card-description">For wide content areas</p>
-                </div>
-                <div class="scrollbar-demo" style="overflow-x: auto; background: var(--bg-tertiary); padding: var(--space-4); border-radius: var(--radius-md);">
-                    <div style="width: 1200px;">
-                        <div class="flex gap-4">
-                            <div class="card min-w-200">
-                                <h4>Column 1</h4>
-                                <p>Scroll horizontally to see more columns</p>
+                    <div class="card-body">
+                        <div class="demo-row">
+                            <div class="tooltip-wrapper">
+                                <button class="btn">Default Button</button>
+                                <div class="tooltip">Standard button for general actions</div>
                             </div>
-                            <div class="card min-w-200">
-                                <h4>Column 2</h4>
-                                <p>Custom horizontal scrollbar styling</p>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-primary">Primary Button</button>
+                                <div class="tooltip">Primary action button with emphasis</div>
                             </div>
-                            <div class="card min-w-200">
-                                <h4>Column 3</h4>
-                                <p>Appears on hover by default</p>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-sm">Small Button</button>
+                                <div class="tooltip">Compact button for limited space</div>
                             </div>
-                            <div class="card min-w-200">
-                                <h4>Column 4</h4>
-                                <p>Minimal and unobtrusive design</p>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-lg">Large Button</button>
+                                <div class="tooltip">Large button for prominent actions</div>
                             </div>
-                            <div class="card min-w-200">
-                                <h4>Column 5</h4>
-                                <p>Matches the overall theme</p>
+                            <div class="tooltip-wrapper">
+                                <button class="btn" disabled>Disabled</button>
+                                <div class="tooltip">Button in disabled state</div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Tags Section -->
-        <section id="tags" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Tags</h2>
-                <h6 class="section-description">
-                    Labels, badges, and tags for categorization and status indication.
-                </h6>
-            </div>
-            
-            <div class="grid grid-3">
-                <!-- Basic Tags -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Basic Tags</h3>
-                        <p class="card-description">Default tag styles</p>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="tag">Default</p>
-                        <span class="tag tag-primary">Primary</p>
-                        <span class="tag tag-success">Success</p>
-                        <span class="tag tag-warning">Warning</p>
-                        <span class="tag tag-error">Error</p>
-                        <span class="tag tag-info">Info</p>
-                    </div>
-                </div>
-                
-                <!-- Tag Sizes -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Tag Sizes</h3>
-                        <p class="card-description">Different tag dimensions</p>
-                    </div>
-                    <div class="flex flex-col gap-3">
-                        <div class="flex items-center gap-2">
-                            <span class="tag tag-sm">Small Tag</p>
-                            <span class="tag">Medium Tag</p>
-                            <span class="tag tag-lg">Large Tag</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Tags with Icons -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Tags with Icons</h3>
-                        <p class="card-description">Enhanced with icons</p>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="tag">
-                            <i data-lucide="star" class="nav-icon-size"></i>
-                            Featured
-                        </p>
-                        <span class="tag tag-success">
-                            <i data-lucide="check" class="nav-icon-size"></i>
-                            Approved
-                        </p>
-                        <span class="tag tag-warning">
-                            <i data-lucide="clock" class="nav-icon-size"></i>
-                            Pending
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-2 mt-8">
-                <!-- Removable Tags -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Removable Tags</h3>
-                        <p class="card-description">Tags with close buttons</p>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="tag">
-                            JavaScript
-                            <button class="tag-close">
-                                <i data-lucide="x" class="nav-icon-size"></i>
-                            </button>
-                        </p>
-                        <span class="tag tag-primary">
-                            React
-                            <button class="tag-close">
-                                <i data-lucide="x" class="nav-icon-size"></i>
-                            </button>
-                        </p>
-                        <span class="tag tag-info">
-                            TypeScript
-                            <button class="tag-close">
-                                <i data-lucide="x" class="nav-icon-size"></i>
-                            </button>
-                        </p>
-                    </div>
-                </div>
-                
-                <!-- Badge Examples -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Badges</h3>
-                        <p class="card-description">Numeric indicators and status badges</p>
-                    </div>
-                    <div class="flex flex-wrap gap-4">
-                        <span class="badge">42</p>
-                        <span class="badge badge-primary">New</p>
-                        <span class="badge badge-success">
-                            <i data-lucide="trending-up" class="nav-icon-size"></i>
-                            12%
-                        </p>
-                        <span class="badge badge-error">99+</p>
-                        <div class="relative">
-                            <button class="btn">
-                                <i data-lucide="bell" class="nav-icon"></i>
-                                Notifications
-                            </button>
-                            <span class="badge badge-error" style="position: absolute; top: -8px; right: -8px;">5</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Grid System Section -->
-        <section id="grid" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Grid System</h2>
-                <h6 class="section-description">
-                    Flexible grid system for organizing content and creating layouts.
-                </h6>
-            </div>
-            
-            <div class="grid grid-2">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Grid Examples</h3>
-                        <p class="card-description">Common grid configurations</p>
-                    </div>
-                    <div class="flex flex-col gap-4">
-                        <div class="text-sm font-semibold">2 Columns</div>
-                        <div class="grid grid-2 gap-2">
-                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 1</div>
-                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 2</div>
                         </div>
                         
-                        <div class="text-sm font-semibold">3 Columns</div>
-                        <div class="grid grid-3 gap-2">
-                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 1</div>
-                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 2</div>
-                            <div class="bg-tertiary p-4 rounded text-center text-sm">Item 3</div>
+                        <h5>Semantic Button Colors</h5>
+                        <div class="demo-row">
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-success">Success</button>
+                                <div class="tooltip">Success action (save, confirm)</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-warning">Warning</button>
+                                <div class="tooltip">Warning action (caution required)</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-error">Error</button>
+                                <div class="tooltip">Destructive action (delete, remove)</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-info">Info</button>
+                                <div class="tooltip">Informational action (details, help)</div>
+                            </div>
                         </div>
                         
-                        <div class="text-sm font-semibold">4 Columns</div>
-                        <div class="grid grid-4 gap-2">
-                            <div class="bg-tertiary p-4 rounded text-center text-sm">1</div>
-                            <div class="bg-tertiary p-4 rounded text-center text-sm">2</div>
-                            <div class="bg-tertiary p-4 rounded text-center text-sm">3</div>
-                            <div class="bg-tertiary p-4 rounded text-center text-sm">4</div>
+                        <h5>Active States</h5>
+                        <div class="demo-row">
+                            <button class="btn active">Active Default</button>
+                            <button class="btn btn-primary active">Active Primary</button>
+                            <button class="btn btn-success active">Active Success</button>
+                            <button class="btn btn-warning active">Active Warning</button>
+                            <button class="btn btn-error active">Active Error</button>
+                            <button class="btn btn-info active">Active Info</button>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Responsive Grid</h3>
-                        <p class="card-description">Grid adapts to different screen sizes</p>
-                    </div>
-                    <div class="typography-sample">
-                        <p class="text-sm mb-4">Grid breakpoints:</p>
-                        <ul class="text-sm text-secondary" style="list-style: disc; margin-left: 20px;">
-                            <li>Desktop: 3-4 columns</li>
-                            <li>Tablet: 2 columns</li>
-                            <li>Mobile: 1 column</li>
-                        </ul>
+                        
+                        <h5>Icon Buttons</h5>
+                        <div class="demo-row">
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="UI.toast('Edit action', 'info')">
+                                    <i data-lucide="edit"></i>
+                                </button>
+                                <div class="tooltip">Edit item</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-primary" onclick="UI.toast('Save action', 'success')">
+                                    <i data-lucide="save"></i>
+                                </button>
+                                <div class="tooltip">Save changes</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-error" onclick="UI.toast('Delete action', 'error')">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                                <div class="tooltip">Delete item</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-sm" onclick="UI.toast('Settings', 'info')">
+                                    <i data-lucide="settings"></i>
+                                </button>
+                                <div class="tooltip">Open settings</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn btn-lg btn-success" onclick="UI.toast('Add new', 'success')">
+                                    <i data-lucide="plus"></i>
+                                </button>
+                                <div class="tooltip">Add new item</div>
+                            </div>
+                        </div>
+                        
+                        <h5>Dynamic Buttons</h5>
+                        <div class="demo-row" id="dynamic-buttons"></div>
                     </div>
                 </div>
             </div>
-        </section>
+
+            <!-- Toast Section -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="bell" class="card-icon"></i><h2 class="card-title">Toast Notifications</h2></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="demo-row">
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="UI.toast('Success message!', 'success')">Success Toast</button>
+                                <div class="tooltip">Show success notification</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="UI.toast('Error occurred!', 'error')">Error Toast</button>
+                                <div class="tooltip">Show error notification</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="UI.toast('Warning message', 'warning')">Warning Toast</button>
+                                <div class="tooltip">Show warning notification</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="UI.toast('Info message', 'info')">Info Toast</button>
+                                <div class="tooltip">Show info notification</div>
+                            </div>
+                        </div>
+                        <div class="demo-row">
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="UI.toast('Loading data...', 'info', { preloader: true, duration: 3000 })">Preloader Toast</button>
+                                <div class="tooltip">Toast with loading spinner</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="UI.toast('Click X to dismiss', 'info', { dismissible: true })">Dismissible Toast</button>
+                                <div class="tooltip">Toast with close button</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="UI.toast('Action required', 'warning', { action: { text: 'Undo', callback: () => UI.toast('Undone!', 'success') }})">Action Toast</button>
+                                <div class="tooltip">Toast with action button</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Section -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="layers" class="card-icon"></i><h2 class="card-title">Modals</h2></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="demo-row">
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="showSimpleModal()">Simple Modal</button>
+                                <div class="tooltip">Basic modal with content only</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="showConfirmModal()">Confirm Modal</button>
+                                <div class="tooltip">Modal with confirmation actions</div>
+                            </div>
+                            <div class="tooltip-wrapper">
+                                <button class="btn" onclick="showFormModal()">Form Modal</button>
+                                <div class="tooltip">Modal containing form elements</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tooltips & Popovers Section -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="message-circle" class="card-icon"></i><h2 class="card-title">Tooltips & Popovers</h2></div>
+                    </div>
+                    <div class="card-body">
+                    <h5>Tooltips</h5>
+                    <div class="demo-row">
+                        <div class="tooltip-wrapper">
+                            <button class="btn">Hover for tooltip</button>
+                            <div class="tooltip">This is a helpful tooltip</div>
+                        </div>
+                        <button class="btn" id="dynamic-tooltip">Dynamic Tooltip</button>
+                    </div>
+                    
+                    <h5>Popovers</h5>
+                    <div class="demo-row">
+                        <button class="btn" id="static-popover">Click for popover</button>
+                        <button class="btn" id="dynamic-popover">Dynamic Popover</button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menus Section -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="menu" class="card-icon"></i><h2 class="card-title">Menus</h2></div>
+                    </div>
+                    <div class="card-body">
+                        <h5>Navigation Panel Menu</h5>
+                        <div class="demo-row">
+                            <button class="btn" onclick="showNavMenuConfig()">Show Nav Menu Config</button>
+                            <button class="btn" onclick="recreateNavPanel()">Recreate Nav Panel</button>
+                        </div>
+                        
+                        <h5>Dropdown & Context Menus</h5>
+                        <div class="demo-row">
+                            <button class="btn" onclick="showMenu(this)">Dropdown Menu</button>
+                            <button class="btn" onclick="showContextMenuDemo()">Context Menu Demo</button>
+                            <div data-context-menu="context-menu-1" class="btn" style="cursor: context-menu;">
+                                Right-click me
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden context menu -->
+                        <div id="context-menu-1" class="context-menu">
+                            <button class="menu-item">
+                                <i data-lucide="copy"></i> Copy
+                            </button>
+                            <button class="menu-item">
+                                <i data-lucide="cut"></i> Cut
+                            </button>
+                            <button class="menu-item">
+                                <i data-lucide="clipboard"></i> Paste
+                            </button>
+                            <div class="menu-divider"></div>
+                            <button class="menu-item">
+                                <i data-lucide="trash-2"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panels Section -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="layout" class="card-icon"></i><h2 class="card-title">Panels</h2></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="demo-row">
+                            <button class="btn" onclick="addPanel()">Add Panel</button>
+                            <button class="btn" onclick="addCollapsiblePanel()">Add Collapsible Panel</button>
+                        </div>
+                        <div id="panels-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tags Section -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="tag" class="card-icon"></i><h2 class="card-title">Tags</h2></div>
+                    </div>
+                    <div class="card-body">
+                        <h5>Static Tags</h5>
+                        <div class="demo-row">
+                            <span class="tag">Default</span>
+                            <span class="tag tag-primary">Primary</span>
+                            <span class="tag tag-success">Success</span>
+                            <span class="tag tag-warning">Warning</span>
+                            <span class="tag tag-error">Error</span>
+                            <span class="tag tag-info">Info</span>
+                        </div>
+                        
+                        <h5>Tag Sizes</h5>
+                        <div class="demo-row">
+                            <span class="tag tag-sm tag-primary">Small</span>
+                            <span class="tag tag-primary">Normal</span>
+                            <span class="tag tag-lg tag-primary">Large</span>
+                        </div>
+                        
+                        <h5>Dynamic Tags</h5>
+                        <div class="demo-row">
+                            <button class="btn btn-sm" onclick="addTag()">Add Tag</button>
+                            <button class="btn btn-sm" onclick="addClosableTag()">Add Closable Tag</button>
+                        </div>
+                        <div id="tags-container" class="demo-row" style="margin-top: var(--space-4);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forms Section -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="edit" class="card-icon"></i><h2 class="card-title">Form Elements</h2></div>
+                    </div>
+                    <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">Input Field</label>
+                        <div class="tooltip-wrapper">
+                            <input type="text" class="form-input" placeholder="Enter text...">
+                            <div class="tooltip">Standard text input field</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Textarea</label>
+                        <div class="tooltip-wrapper">
+                            <textarea class="form-textarea" placeholder="Enter message..."></textarea>
+                            <div class="tooltip">Multi-line text input area</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Select</label>
+                        <div class="tooltip-wrapper">
+                            <select class="form-select">
+                                <option>Option 1</option>
+                                <option>Option 2</option>
+                                <option>Option 3</option>
+                            </select>
+                            <div class="tooltip">Dropdown selection menu</div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badges Section -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="star" class="card-icon"></i><h2 class="card-title">Badges & Spinners</h2></div>
+                    </div>
+                    <div class="card-body">
+                    <h5>Badges</h5>
+                    <div class="demo-row">
+                        <span class="badge">Default</span>
+                        <span class="badge badge-primary">Primary</span>
+                        <span class="badge badge-success">Success</span>
+                        <span class="badge badge-warning">Warning</span>
+                        <span class="badge badge-error">Error</span>
+                        <span class="badge badge-info">Info</span>
+                    </div>
+                    
+                    <h5>Spinners</h5>
+                    <div class="demo-row">
+                        <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--primary) 30%, transparent); border-top-color: var(--primary); width: 32px; height: 32px; border-width: 4px;"></div>
+                        <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--success) 30%, transparent); border-top-color: var(--success); width: 32px; height: 32px; border-width: 4px;"></div>
+                        <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--warning) 30%, transparent); border-top-color: var(--warning); width: 32px; height: 32px; border-width: 4px;"></div>
+                        <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--error) 30%, transparent); border-top-color: var(--error); width: 32px; height: 32px; border-width: 4px;"></div>
+                        <div class="loading-spinner" style="border-color: color-mix(in srgb, var(--info) 30%, transparent); border-top-color: var(--info); width: 32px; height: 32px; border-width: 4px;"></div>
+                        <div id="dynamic-spinner"></div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
-
+    
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create navigation panel
+            const navSections = [
+                {
+                    title: 'Overview',
+                    items: [
+                        { id: 'intro', text: 'Introduction', icon: 'info', active: true, onclick: () => scrollToSection('buttons') },
+                        { id: 'getting-started', text: 'Getting Started', icon: 'play', onclick: () => UI.toast('Getting Started', 'info') }
+                    ]
+                },
+                {
+                    title: 'Components',
+                    items: [
+                        { id: 'buttons', text: 'Buttons', icon: 'mouse-pointer', onclick: () => scrollToSection('buttons') },
+                        { id: 'toasts', text: 'Toast Notifications', icon: 'bell', badge: '4', onclick: () => scrollToSection('toast') },
+                        { id: 'cards', text: 'Cards', icon: 'square', onclick: () => scrollToSection('cards') },
+                        { id: 'modals', text: 'Modals', icon: 'layers', onclick: () => scrollToSection('modals') },
+                        { id: 'tooltips', text: 'Tooltips & Popovers', icon: 'message-circle', onclick: () => scrollToSection('tooltips') },
+                        { id: 'menus', text: 'Menus', icon: 'menu', onclick: () => scrollToSection('menus') },
+                        { id: 'forms', text: 'Forms', icon: 'edit', onclick: () => scrollToSection('forms') },
+                        { id: 'tags', text: 'Tags', icon: 'tag', onclick: () => scrollToSection('tags') }
+                    ]
+                },
+                {
+                    title: 'Layout',
+                    items: [
+                        { id: 'grid', text: 'Grid System', icon: 'grid', onclick: () => scrollToSection('grid') },
+                        { id: 'panels', text: 'Panels', icon: 'layout', onclick: () => scrollToSection('panels') },
+                        { id: 'typography', text: 'Typography', icon: 'type', onclick: () => scrollToSection('typography') }
+                    ]
+                },
+                {
+                    title: 'Utilities',
+                    items: [
+                        { id: 'badges', text: 'Badges & Spinners', icon: 'star', onclick: () => scrollToSection('badges') },
+                        { id: 'colors', text: 'Colors', icon: 'palette', onclick: () => scrollToSection('colors') }
+                    ]
+                }
+            ];
+            
+            // Create and add navigation panel
+            const navPanel = UI.navPanel(navSections, {
+                title: 'FileUI Components',
+                icon: 'book-open'
+            });
+            document.body.insertBefore(navPanel, document.body.firstChild);
+            
+            // Create and add navigation toggle (always visible)
+            const navToggle = UI.navToggle();
+            document.body.insertBefore(navToggle, document.body.firstChild);
+            
+            // Create dynamic components
+            const btnContainer = document.getElementById('dynamic-buttons');
+            btnContainer.appendChild(UI.button('Save', { variant: 'primary', icon: 'save' }));
+            btnContainer.appendChild(UI.button('Delete', { icon: 'trash-2', onclick: () => UI.toast('Deleted!', 'error') }));
+            btnContainer.appendChild(UI.button('Settings', { icon: 'settings', size: 'sm' }));
+            
+            const cardContainer = document.getElementById('card-demo');
+            cardContainer.appendChild(UI.card('Simple Card', 'This is a simple card with just title and content.'));
+            
+            cardContainer.appendChild(UI.card('Card with Icon', 'This card has an icon in the header.', {
+                icon: 'star'
+            }));
+            
+            cardContainer.appendChild(UI.card('Card with Actions', 'This card has action buttons in the header.', {
+                actions: [
+                    { icon: 'edit', onclick: () => UI.toast('Edit clicked!', 'info') },
+                    { icon: 'trash-2', variant: 'error', onclick: () => UI.toast('Delete clicked!', 'error') }
+                ]
+            }));
+            
+            cardContainer.appendChild(UI.card('Full Featured Card', 'This card has an icon, actions, and a footer.', {
+                icon: 'settings',
+                description: 'Complete example with all options',
+                actions: [
+                    { text: 'Save', icon: 'save', variant: 'primary', onclick: () => UI.toast('Saved!', 'success') },
+                    { icon: 'more-horizontal', onclick: () => UI.toast('More options', 'info') }
+                ],
+                footer: '<div class="demo-row"><span class="tag tag-success">Active</span><span class="tag tag-info">Featured</span></div>'
+            }));
+            
+            cardContainer.appendChild(UI.card('Card with Description', 'Card content goes here...', {
+                description: 'This card has a description'
+            }));
+            
+            cardContainer.appendChild(UI.card('Card with Footer', 'Main content area', {
+                footer: '<button class="btn btn-sm">Action</button>'
+            }));
+            
+            const spinnerContainer = document.getElementById('dynamic-spinner');
+            spinnerContainer.appendChild(UI.spinner({ size: '32px' }));
+            
+            // Create dynamic tooltip and popover
+            const tooltipBtn = document.getElementById('dynamic-tooltip');
+            UI.tooltip(tooltipBtn, 'This tooltip was added dynamically!');
+            
+            // Add working popover to static button
+            const staticPopoverBtn = document.getElementById('static-popover');
+            UI.popover(staticPopoverBtn, `
+                <button class="popover-item">
+                    <i data-lucide="edit"></i> Edit
+                </button>
+                <button class="popover-item">
+                    <i data-lucide="copy"></i> Copy
+                </button>
+                <div class="popover-divider"></div>
+                <button class="popover-item">
+                    <i data-lucide="trash-2"></i> Delete
+                </button>
+            `, { title: 'Static Popover' });
+            
+            const popoverBtn = document.getElementById('dynamic-popover');
+            UI.popover(popoverBtn, `
+                <p>This popover was created with JavaScript!</p>
+                <button class="btn btn-sm" onclick="UI.toast('Popover action!', 'info')">Action</button>
+            `, { title: 'Dynamic Popover' });
+            
+            // Initialize icons
+            UI.icons();
+            
+            // Add tooltips to elements that don't have them
+            addMissingTooltips();
+            
+            // Make the static tooltip work
+            const staticTooltipWrapper = document.querySelector('.tooltip-wrapper');
+            const staticTooltip = staticTooltipWrapper.querySelector('.tooltip');
+            
+            staticTooltipWrapper.addEventListener('mouseenter', () => {
+                // Position tooltip intelligently
+                const rect = staticTooltipWrapper.getBoundingClientRect();
+                const tooltipRect = staticTooltip.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const margin = 12;
+                
+                let position = 'top';
+                let left, top, transform = '';
+                
+                // Determine best position based on available space
+                const spaceAbove = rect.top;
+                const spaceBelow = viewportHeight - rect.bottom;
+                const spaceLeft = rect.left;
+                const spaceRight = viewportWidth - rect.right;
+                
+                // Try positions in order of preference: top, bottom, right, left
+                if (spaceAbove >= tooltipRect.height + margin) {
+                    position = 'top';
+                    left = rect.left + rect.width / 2;
+                    top = rect.top - tooltipRect.height - margin;
+                    transform = 'translateX(-50%)';
+                } else if (spaceBelow >= tooltipRect.height + margin) {
+                    position = 'bottom';
+                    left = rect.left + rect.width / 2;
+                    top = rect.bottom + margin;
+                    transform = 'translateX(-50%)';
+                } else if (spaceRight >= tooltipRect.width + margin) {
+                    position = 'right';
+                    left = rect.right + margin;
+                    top = rect.top + rect.height / 2;
+                    transform = 'translateY(-50%)';
+                } else {
+                    position = 'left';
+                    left = rect.left - tooltipRect.width - margin;
+                    top = rect.top + rect.height / 2;
+                    transform = 'translateY(-50%)';
+                }
+                
+                // Apply position and styling
+                staticTooltip.setAttribute('data-position', position);
+                staticTooltip.style.left = left + 'px';
+                staticTooltip.style.top = top + 'px';
+                staticTooltip.style.transform = transform;
+            });
+        });
         
-        // Simple theme toggle
-        function toggleTheme() {
-            document.body.classList.toggle('dark');
+        // Helper function to scroll to sections
+        function scrollToSection(sectionName) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach((section, index) => {
+                const titleElement = section.querySelector('.card-title, .section-title');
+                if (titleElement && titleElement.textContent.toLowerCase().includes(sectionName)) {
+                    section.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
         }
         
-        // Layout toggles
-        function toggleLayout(layout) {
-            document.body.className = document.body.className.replace(/layout-\w+/g, '');
-            document.body.classList.add(`layout-${layout}`);
+        // Modal examples
+        function showSimpleModal() {
+            UI.modal('This is a simple modal with just content.', {
+                title: 'Simple Modal'
+            });
+        }
+        
+        function showConfirmModal() {
+            UI.modal('Are you sure you want to delete this file?', {
+                title: 'Confirm Delete',
+                actions: [
+                    { text: 'Cancel', variant: 'default' },
+                    { 
+                        text: 'Delete', 
+                        variant: 'error',
+                        onclick: () => UI.toast('File deleted!', 'success')
+                    }
+                ]
+            });
+        }
+        
+        function showFormModal() {
+            const formHTML = `
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" placeholder="Enter name...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" placeholder="Enter email...">
+                </div>
+            `;
+            
+            UI.modal(formHTML, {
+                title: 'User Form',
+                actions: [
+                    { text: 'Cancel' },
+                    { 
+                        text: 'Save', 
+                        variant: 'primary',
+                        onclick: () => UI.toast('Form saved!', 'success')
+                    }
+                ]
+            });
+        }
+        
+        // Menu functions
+        function showMenu(button) {
+            document.querySelectorAll('.menu').forEach(menu => menu.remove());
+            
+            const menu = UI.menu([
+                { text: 'New File', icon: 'file-plus', onclick: () => UI.toast('New file created', 'success') },
+                { text: 'New Folder', icon: 'folder-plus', onclick: () => UI.toast('New folder created', 'success') },
+                { divider: true },
+                { text: 'Settings', icon: 'settings', onclick: () => UI.toast('Settings opened', 'info') },
+                { text: 'Help', icon: 'help-circle', onclick: () => UI.toast('Help opened', 'info') }
+            ]);
+            
+            const rect = button.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.left = rect.left + 'px';
+            menu.style.top = rect.bottom + 5 + 'px';
+            menu.classList.add('active');
+            
+            document.body.appendChild(menu);
+            
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target) && e.target !== button) {
+                    menu.classList.remove('active');
+                    setTimeout(() => menu.remove(), 150);
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            setTimeout(() => document.addEventListener('click', closeMenu), 0);
+        }
+        
+        function showContextMenuDemo() {
+            const contextMenu = UI.contextMenu([
+                { text: 'Copy', icon: 'copy', onclick: () => UI.toast('Copied!', 'success') },
+                { text: 'Cut', icon: 'scissors', onclick: () => UI.toast('Cut!', 'success') },
+                { text: 'Paste', icon: 'clipboard', onclick: () => UI.toast('Pasted!', 'success') },
+                { divider: true },
+                { text: 'Delete', icon: 'trash-2', onclick: () => UI.toast('Deleted!', 'error') }
+            ]);
+            
+            contextMenu.show(window.innerWidth / 2, window.innerHeight / 2);
+        }
+        
+        // Navigation menu configuration functions
+        function showNavMenuConfig() {
+            const configCode = `// Navigation Panel Menu Configuration
+const navSections = [
+    {
+        title: 'Overview',
+        items: [
+            { id: 'intro', text: 'Introduction', icon: 'info', active: true, onclick: () => scrollToSection('buttons') },
+            { id: 'getting-started', text: 'Getting Started', icon: 'play', onclick: () => UI.toast('Getting Started', 'info') }
+        ]
+    },
+    {
+        title: 'Components',
+        items: [
+            { id: 'buttons', text: 'Buttons', icon: 'mouse-pointer', onclick: () => scrollToSection('buttons') },
+            { id: 'toasts', text: 'Toast Notifications', icon: 'bell', badge: '4', onclick: () => scrollToSection('toast') },
+            { id: 'cards', text: 'Cards', icon: 'square', onclick: () => scrollToSection('cards') },
+            { id: 'modals', text: 'Modals', icon: 'layers', onclick: () => scrollToSection('modals') },
+            { id: 'tooltips', text: 'Tooltips & Popovers', icon: 'message-circle', onclick: () => scrollToSection('tooltips') },
+            { id: 'menus', text: 'Menus', icon: 'menu', onclick: () => scrollToSection('menus') },
+            { id: 'forms', text: 'Forms', icon: 'edit', onclick: () => scrollToSection('forms') },
+            { id: 'tags', text: 'Tags', icon: 'tag', onclick: () => scrollToSection('tags') }
+        ]
+    },
+    {
+        title: 'Layout',
+        items: [
+            { id: 'grid', text: 'Grid System', icon: 'grid', onclick: () => scrollToSection('grid') },
+            { id: 'panels', text: 'Panels', icon: 'layout', onclick: () => scrollToSection('panels') },
+            { id: 'typography', text: 'Typography', icon: 'type', onclick: () => scrollToSection('typography') }
+        ]
+    },
+    {
+        title: 'Utilities',
+        items: [
+            { id: 'badges', text: 'Badges & Spinners', icon: 'star', onclick: () => scrollToSection('badges') },
+            { id: 'colors', text: 'Colors', icon: 'palette', onclick: () => scrollToSection('colors') }
+        ]
+    }
+];
+
+// Create navigation panel
+const navPanel = UI.navPanel(navSections, {
+    title: 'FileUI Components',
+    icon: 'book-open'
+});`;
+
+            UI.modal(`<pre><code>${configCode}</code></pre>`, {
+                title: 'Navigation Panel Menu Configuration',
+                size: 'lg'
+            });
+        }
+        
+        function recreateNavPanel() {
+            // Remove existing nav panel
+            const existingPanel = document.getElementById('nav-panel');
+            if (existingPanel) {
+                existingPanel.remove();
+            }
+            
+            // Remove existing toggle
+            const existingToggle = document.querySelector('.nav-panel-toggle');
+            if (existingToggle) {
+                existingToggle.remove();
+            }
+            
+            // Create new nav panel with updated config
+            const newNavSections = [
+                {
+                    title: 'Demo Sections',
+                    items: [
+                        { id: 'new-item', text: 'New Item', icon: 'plus', onclick: () => UI.toast('New item clicked!', 'success') },
+                        { id: 'buttons', text: 'Buttons', icon: 'mouse-pointer', onclick: () => scrollToSection('buttons') },
+                        { id: 'menus', text: 'Menus', icon: 'menu', active: true, onclick: () => scrollToSection('menus') }
+                    ]
+                }
+            ];
+            
+            const navPanel = UI.navPanel(newNavSections, {
+                title: 'Demo Menu Config',
+                icon: 'settings'
+            });
+            document.body.insertBefore(navPanel, document.body.firstChild);
+            
+            const navToggle = UI.navToggle();
+            document.body.insertBefore(navToggle, document.body.firstChild);
+            
+            UI.toast('Navigation panel recreated with demo config!', 'info');
+        }
+        
+        // Panel functions
+        function addPanel() {
+            const container = document.getElementById('panels-container');
+            const panel = UI.panel('Sample Panel', 'This is a regular panel with some content.', {
+                icon: 'layout'
+            });
+            container.appendChild(panel);
+        }
+        
+        function addCollapsiblePanel() {
+            const container = document.getElementById('panels-container');
+            const panel = UI.panel('Collapsible Panel', 'This panel can be collapsed and expanded.', {
+                icon: 'chevron-down',
+                collapsible: true
+            });
+            container.appendChild(panel);
+        }
+        
+        // Tag functions
+        let tagCounter = 1;
+        function addTag() {
+            const container = document.getElementById('tags-container');
+            const variants = ['primary', 'success', 'warning', 'error', 'info'];
+            const variant = variants[Math.floor(Math.random() * variants.length)];
+            
+            const tag = UI.tag(`Tag ${tagCounter}`, { variant });
+            container.appendChild(tag);
+            tagCounter++;
+        }
+        
+        function addClosableTag() {
+            const container = document.getElementById('tags-container');
+            const variants = ['primary', 'success', 'warning', 'error', 'info'];
+            const variant = variants[Math.floor(Math.random() * variants.length)];
+            
+            const tag = UI.tag(`Closable ${tagCounter}`, { 
+                variant, 
+                closable: true,
+                onClose: () => UI.toast('Tag removed!', 'info')
+            });
+            container.appendChild(tag);
+            tagCounter++;
+        }
+        
+        // Function to add tooltips to elements that don't have them
+        function addMissingTooltips() {
+            // Add tooltips to all buttons without existing tooltips
+            document.querySelectorAll('button:not(.tooltip-wrapper button)').forEach(button => {
+                if (!button.closest('.tooltip-wrapper') && !button.title) {
+                    // Create tooltip text based on button content or class
+                    let tooltipText = '';
+                    if (button.classList.contains('theme-toggle-panel')) {
+                        tooltipText = 'Toggle dark/light theme';
+                    } else if (button.classList.contains('font-toggle')) {
+                        tooltipText = button.title || 'Change font family';
+                    } else if (button.classList.contains('density-toggle')) {
+                        tooltipText = button.title || 'Change layout density';
+                    } else if (button.classList.contains('nav-panel-toggle')) {
+                        tooltipText = 'Toggle navigation panel';
+                    } else if (button.textContent.trim()) {
+                        tooltipText = `Click to ${button.textContent.trim().toLowerCase()}`;
+                    } else {
+                        tooltipText = 'Interactive button';
+                    }
+                    
+                    // Add tooltip using our UI system
+                    UI.tooltip(button, tooltipText);
+                }
+            });
+            
+            // Add tooltips to nav items that don't have them
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (!item.closest('.tooltip-wrapper') && !item.title) {
+                    const text = item.textContent.trim();
+                    UI.tooltip(item, `Navigate to ${text} section`);
+                }
+            });
         }
     </script>
 </body>

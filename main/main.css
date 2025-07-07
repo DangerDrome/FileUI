@@ -206,6 +206,8 @@ body {
 /* Force a thinner stroke on all Lucide icons */
 .lucide {
     stroke-width: 1.5;
+    vertical-align: middle;
+    display: inline-block;
 }
 
 /* --- MAIN LAYOUT --- */
@@ -225,6 +227,13 @@ body {
     align-items: center;
     gap: var(--spacing-unit);
     color: var(--color-text-quaternary);
+    line-height: 1;
+}
+
+.header-title h1 {
+    line-height: 1.2;
+    font-size: 1.25rem;
+    font-weight: 500;
 }
 
 .main-footer {
@@ -357,6 +366,9 @@ body.is-resizing-v {
     line-height: 0;
     transition: all var(--transition-duration) ease-out;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .activity-btn-bottom {
@@ -477,6 +489,12 @@ body.is-resizing-v {
     flex-shrink: 0;
 }
 
+.panel-view-title {
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+}
+
 .panel-header-actions {
     display: flex;
     gap: var(--panel-header-action-gap);
@@ -565,12 +583,14 @@ body.is-resizing-v {
     padding: var(--file-tree-item-padding);
     cursor: pointer;
     border-radius: var(--border-radius);
+    line-height: 1;
 }
 
 .file-icon-container {
     margin-right: var(--spacing-unit);
     display: inline-flex;
     align-items: center;
+    line-height: 0;
 }
 
 .file-icon {
@@ -593,6 +613,13 @@ body.is-resizing-v {
     height: var(--icon-size-md);
     margin-right: calc(var(--spacing-unit) / 2);
     flex-shrink: 0;
+}
+
+.file-tree-item > span:last-child {
+    flex-grow: 1;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
 }
 
 .file-tree-item:hover {
@@ -815,6 +842,7 @@ body.is-resizing .split-pane {
     transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease;
     color: var(--color-text-tertiary);
     opacity: 0.5;
+    line-height: 1;
 }
 
 .tab-item:hover {
@@ -857,6 +885,9 @@ body.is-resizing .split-pane {
 
 .tab-item span {
     flex-grow: 1;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
 }
 
 .tab-close-btn {
@@ -1130,12 +1161,16 @@ body.is-resizing .split-pane {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    line-height: 1;
 }
 
 .breadcrumb-item {
     cursor: pointer;
     padding: var(--breadcrumb-padding);
     border-radius: var(--border-radius);
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.2;
 }
 
 .breadcrumb-item:hover {
@@ -1179,6 +1214,7 @@ body.is-resizing .split-pane {
     white-space: nowrap;
     text-align: left;
     min-width: 0;
+    line-height: 1.2;
 }
 
 .file-type-html { color: var(--color-file-type-html); }

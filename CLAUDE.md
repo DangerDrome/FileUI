@@ -12,6 +12,10 @@ When working on this project, follow these 7 rules:
 6. **Keep it simple** - Make every task and code change as simple as possible. Avoid massive or complex changes. Every change should impact as little code as possible. Everything is about simplicity.
 7. **Document your work** - Add a review section to the docs/plans/tasks.md file with a summary of the changes made and any other relevant information
 
+## Contribution Guidelines
+- Never commit using claude as the contributor 
+- commit and push to repo using my credentials 
+
 ## Project Overview
 FileUI is a web-based file manager for VFX and media content creation, featuring an advanced panel system for managing various file types (.blend, .ma, .mb, .hip, .nk, .aep, .prproj, .exr, .dpx, etc.). Designed to work everywhere (locally, Cloudflare, browser-only).
 
@@ -86,3 +90,4 @@ python server.py
 - **Images**: .exr, .dpx, .tiff, .png, .jpg, .psd
 - **Video**: .mov, .mp4, .mxf, .r3d, .ari
 - **Projects**: .prproj, .drp, .fcp
+```

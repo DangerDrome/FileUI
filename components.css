@@ -1,0 +1,556 @@
+/* Essential Components CSS - Extracted from FileUI Style Guide */
+
+/* CSS Variables/Custom Properties */
+:root {
+    /* Modern Typography */
+    --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+    
+    /* Font Sizes */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    
+    /* Font Weights */
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    
+    /* Gray Scale */
+    --gray-50: #fafafa;
+    --gray-100: #f5f5f5;
+    --gray-200: #eeeeee;
+    --gray-300: #e0e0e0;
+    --gray-400: #bdbdbd;
+    --gray-500: #9e9e9e;
+    --gray-600: #757575;
+    --gray-700: #616161;
+    --gray-800: #424242;
+    --gray-900: #212121;
+    
+    /* Semantic Pastel Colors */
+    --pastel-primary: #b3d9ff;
+    --pastel-success: #b8e6b8;
+    --pastel-warning: #ffe4a3;
+    --pastel-error: #ffb3ba;
+    --pastel-info: #d4c5f9;
+    --pastel-neutral: #e8e3d9;
+    
+    /* Semantic Colors */
+    --bg-primary: #a8a8a0;
+    --bg-secondary: #b4b4ac;
+    --bg-tertiary: #c0c0b8;
+    --text-primary: var(--gray-800);
+    --text-secondary: var(--gray-700);
+    --text-tertiary: var(--gray-600);
+    --border-color: var(--gray-200);
+    --border-strong: var(--gray-300);
+    --accent: #b5d3b6;
+    --accent-hover: #9fc5a1;
+    
+    /* Spacing */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    
+    /* Opacity Values */
+    --opacity-10: 0.1;
+    --opacity-20: 0.2;
+    --opacity-30: 0.3;
+    --opacity-50: 0.5;
+    
+    /* Z-Index Scale */
+    --z-index-dropdown: 1000;
+    --z-index-modal-backdrop: 1040;
+    --z-index-modal: 1050;
+    --z-index-toast: 1080;
+    
+    /* Durations */
+    --duration-fast: 150ms;
+    --duration-normal: 300ms;
+}
+
+/* Dark Mode Support */
+body.dark {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #242424;
+    --bg-tertiary: #2e2e2e;
+    --text-primary: #f0f0f0;
+    --text-secondary: #b8b8b8;
+    --text-tertiary: #888888;
+    --border-color: #3a3a3a;
+    --border-strong: #4a4a4a;
+    --accent: #94b896;
+    --accent-hover: #7fa582;
+    
+    /* Dark mode pastels - muted versions */
+    --pastel-primary: #7aa9d9;
+    --pastel-success: #8ab88a;
+    --pastel-warning: #d4b574;
+    --pastel-error: #d4848a;
+    --pastel-info: #a799d4;
+    --pastel-neutral: #b8b3a9;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--bg-tertiary);
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.btn:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+}
+
+.btn:disabled,
+.btn.inactive {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn:disabled:hover,
+.btn.inactive:hover {
+    transform: none;
+}
+
+/* Button Variants */
+.btn-primary {
+    background: var(--accent);
+    color: var(--gray-700);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.btn-sm {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+}
+
+.btn-lg {
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--text-base);
+}
+
+/* Dark mode button adjustments */
+body.dark .btn {
+    background: #3a3a3a;
+    border: none;
+    color: var(--text-primary);
+}
+
+body.dark .btn:hover {
+    background: var(--accent);
+    color: var(--gray-800);
+}
+
+body.dark .btn-primary {
+    background: var(--accent);
+    color: var(--gray-800);
+}
+
+body.dark .btn-primary:hover {
+    background: var(--accent-hover);
+    color: var(--gray-800);
+}
+
+body.dark .btn:disabled,
+body.dark .btn.inactive {
+    background: #2a2a2a;
+    color: var(--text-tertiary);
+}
+
+body.dark .btn:disabled:hover,
+body.dark .btn.inactive:hover {
+    background: #2a2a2a;
+    color: var(--text-tertiary);
+}
+
+/* Card Styles */
+.card {
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+    transition: all var(--transition-normal);
+}
+
+.card:hover {
+    background: var(--bg-tertiary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+body:not(.dark) .card:hover {
+    background: var(--bg-tertiary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+    margin-bottom: var(--space-4);
+}
+
+.card-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-2);
+}
+
+.card-description {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+}
+
+/* Modal Styles */
+.modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, var(--opacity-50));
+    backdrop-filter: blur(4px);
+    z-index: var(--z-index-modal-backdrop);
+    animation: fadeIn var(--duration-fast) ease-out;
+}
+
+.modal-backdrop.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+}
+
+.modal {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn var(--duration-normal) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-6);
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: var(--text-xl);
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: var(--space-6);
+    overflow-y: auto;
+    max-height: calc(90vh - 200px);
+}
+
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    background: var(--bg-tertiary);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Modal animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Toast Styles */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: var(--z-index-toast);
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-3);
+    pointer-events: none;
+}
+
+.toast {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    min-width: 300px;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    pointer-events: auto;
+    animation: slideIn var(--duration-normal) ease-out;
+    transition: all 300ms ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.toast.hiding {
+    animation: slideOut var(--duration-normal) ease-in;
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+/* Toast Types */
+.toast-success {
+    background: var(--pastel-success);
+    color: var(--gray-800);
+}
+
+.toast-error {
+    background: var(--pastel-error);
+    color: var(--gray-800);
+}
+
+.toast-warning {
+    background: var(--pastel-warning);
+    color: var(--gray-800);
+}
+
+.toast-info {
+    background: var(--pastel-info);
+    color: var(--gray-800);
+}
+
+/* Toast Content */
+.toast-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+}
+
+.toast-close {
+    flex-shrink: 0;
+    margin-left: var(--space-2);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity var(--transition-fast);
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
+
+/* Dark mode toast adjustments */
+body.dark .toast {
+    background: var(--bg-tertiary);
+}
+
+body.dark .toast-success,
+body.dark .toast-error,
+body.dark .toast-warning,
+body.dark .toast-info {
+    color: var(--gray-900);
+}
+
+/* Toast progress timer */
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    width: 100%;
+    transform-origin: left;
+    animation: toastProgress 5s linear;
+}
+
+/* Toast Animations */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes toastProgress {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+/* Badge Styles */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    min-width: 24px;
+    padding: var(--space-1) var(--space-2);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 0.625rem;
+    font-weight: var(--font-bold);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.badge-primary {
+    background: var(--pastel-primary);
+    color: var(--gray-800);
+}
+
+.badge-success {
+    background: var(--pastel-success);
+    color: var(--gray-800);
+}
+
+.badge-warning {
+    background: var(--pastel-warning);
+    color: var(--gray-800);
+}
+
+.badge-error {
+    background: var(--pastel-error);
+    color: var(--gray-800);
+}
+
+.badge-info {
+    background: var(--pastel-info);
+    color: var(--gray-800);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Loading spinner when used as toast icon */
+.toast-icon.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Form Basic Styles */
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(181, 211, 182, 0.2);
+}
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}

@@ -1227,6 +1227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: 'Design',
             items: [
                 { id: 'colors', text: 'Colors', icon: 'palette', onclick: () => scrollToSection('colors') },
+                { id: 'css-vars', text: 'CSS Variables', icon: 'code-2', onclick: () => scrollToSection('css variables') },
                 { id: 'icons', text: 'Icons', icon: 'package', onclick: () => scrollToSection('icons') },
                 { id: 'typography', text: 'Typography', icon: 'type', onclick: () => scrollToSection('typography') }
             ]
@@ -1373,6 +1374,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add dynamic tooltips
     addMissingTooltips();
+    
+    // Populate CSS variables
+    populateCSSVariables();
+    
+    // Initialize font specimen
+    initFontSpecimen();
     
 });
 
@@ -1600,6 +1607,222 @@ function addClosableTag() {
     tagCounter++;
 }
 
+// Function to populate CSS variables
+function populateCSSVariables() {
+    const container = document.getElementById('css-vars-container');
+    if (!container) return;
+    
+    // Get all CSS variables from computed styles
+    const computedStyles = getComputedStyle(document.documentElement);
+    const cssVars = [];
+    
+    // Get all CSS custom properties from the computed styles
+    // This is more reliable than parsing stylesheets
+    const allStyles = document.documentElement.computedStyleMap ? 
+        Array.from(document.documentElement.computedStyleMap()) : [];
+    
+    // Fallback method: parse from stylesheets
+    if (allStyles.length === 0) {
+        // Look through all stylesheets
+        for (let i = 0; i < document.styleSheets.length; i++) {
+            try {
+                const sheet = document.styleSheets[i];
+                const rules = sheet.cssRules || sheet.rules;
+                
+                for (let j = 0; j < rules.length; j++) {
+                    const rule = rules[j];
+                    if (rule.selectorText === ':root' && rule.style) {
+                        // Get all properties from the style
+                        for (let k = 0; k < rule.style.length; k++) {
+                            const prop = rule.style[k];
+                            if (prop.startsWith('--')) {
+                                const value = rule.style.getPropertyValue(prop).trim();
+                                cssVars.push({
+                                    name: prop,
+                                    value: value || computedStyles.getPropertyValue(prop).trim()
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('Error accessing stylesheet:', e);
+            }
+        }
+    } else {
+        // Use computedStyleMap if available
+        allStyles.forEach(([prop, value]) => {
+            if (prop.startsWith('--')) {
+                cssVars.push({
+                    name: prop,
+                    value: value.toString()
+                });
+            }
+        });
+    }
+    
+    // If still no variables found, manually add the known ones
+    if (cssVars.length === 0) {
+        const knownVars = [
+            '--font-system', '--font-mono',
+            '--bg-primary', '--bg-secondary', '--bg-tertiary', '--bg-quaternary', '--bg-quinary',
+            '--text-primary', '--text-secondary', '--text-tertiary',
+            '--border-color', '--border-strong',
+            '--accent', '--accent-hover', '--accent-active',
+            '--primary', '--success', '--warning', '--error', '--info', '--neutral',
+            '--grey-50', '--grey-100', '--grey-200', '--grey-300', '--grey-400', 
+            '--grey-500', '--grey-600', '--grey-700', '--grey-800', '--grey-900',
+            '--space-0', '--space-1', '--space-2', '--space-3', '--space-4', '--space-5',
+            '--space-6', '--space-8', '--space-10', '--space-12', '--space-16', '--space-20', '--space-24',
+            '--text-xs', '--text-sm', '--text-base', '--text-lg', '--text-xl', '--text-2xl', '--text-3xl', '--text-4xl',
+            '--radius-sm', '--radius-md', '--radius-lg', '--radius-xl', '--radius-full',
+            '--shadow-sm', '--shadow-md', '--shadow-lg', '--shadow-xl',
+            '--transition-fast', '--transition-base', '--transition-slow',
+            '--z-base', '--z-dropdown', '--z-sticky', '--z-modal', '--z-popover', '--z-tooltip',
+            '--nav-width', '--nav-width-mobile', '--card-min-width', '--card-header-min-height',
+            '--icon-size-sm', '--icon-size-md', '--icon-size-lg',
+            '--spinner-size-sm', '--spinner-size-md', '--spinner-size-lg',
+            '--overlay-light', '--overlay-medium', '--overlay-backdrop',
+            '--overlay-light-dark', '--overlay-medium-dark',
+            '--duration-toast', '--duration-modal',
+            '--font-light', '--font-normal', '--font-medium', '--font-semibold', '--font-bold',
+            '--h1-letter-spacing', '--h2-letter-spacing', '--h3-letter-spacing',
+            '--line-height-tight', '--line-height-normal', '--line-height-relaxed',
+            '--border-width', '--sl-tooltip-background-color', '--sl-tooltip-color'
+        ];
+        
+        knownVars.forEach(varName => {
+            const value = computedStyles.getPropertyValue(varName).trim();
+            if (value) {
+                cssVars.push({ name: varName, value });
+            }
+        });
+    }
+    
+    console.log('Found CSS variables:', cssVars.length);
+    
+    // If in dark mode, also check for dark mode overrides
+    if (document.body.classList.contains('dark')) {
+        // Add dark mode specific variables
+        const darkModeVars = [
+            '--bg-primary', '--bg-secondary', '--bg-tertiary', '--bg-quaternary', '--bg-quinary',
+            '--text-primary', '--text-secondary', '--text-tertiary',
+            '--border-color', '--border-strong'
+        ];
+        
+        darkModeVars.forEach(varName => {
+            // Check if we already have this variable
+            const existing = cssVars.find(v => v.name === varName);
+            if (existing) {
+                // Update with current computed value (which will be the dark mode value)
+                existing.value = computedStyles.getPropertyValue(varName).trim();
+            }
+        });
+    }
+    
+    // Group variables by category
+    const groups = {
+        'Typography': ['--font-', '--text-', '--line-height', '--letter-spacing'],
+        'Colors': ['--bg-', '--text-primary', '--text-secondary', '--text-tertiary', '--border-', '--accent', '--primary', '--success', '--warning', '--error', '--info', '--neutral', '--grey-'],
+        'Spacing': ['--space-'],
+        'Dimensions': ['--nav-', '--card-', '--icon-size', '--spinner-size', '--width', '--height'],
+        'Shadows': ['--shadow-'],
+        'Borders': ['--radius-', '--border-width'],
+        'Animations': ['--transition-', '--duration-'],
+        'Z-Index': ['--z-'],
+        'Other': []
+    };
+    
+    const categorized = {};
+    Object.keys(groups).forEach(key => categorized[key] = []);
+    
+    // Categorize variables
+    cssVars.forEach(cssVar => {
+        let added = false;
+        for (const [category, patterns] of Object.entries(groups)) {
+            if (category === 'Other') continue;
+            for (const pattern of patterns) {
+                if (cssVar.name.includes(pattern)) {
+                    categorized[category].push(cssVar);
+                    added = true;
+                    break;
+                }
+            }
+            if (added) break;
+        }
+        if (!added) {
+            categorized['Other'].push(cssVar);
+        }
+    });
+    
+    // Render groups
+    let html = '';
+    for (const [category, vars] of Object.entries(categorized)) {
+        if (vars.length === 0) continue;
+        
+        html += `
+            <div class="css-var-group">
+                <h5 class="css-var-group-title">
+                    <i data-lucide="${getCategoryIcon(category)}" class="icon-sm"></i>
+                    ${category}
+                </h5>
+                <div class="css-var-grid">
+        `;
+        
+        vars.sort((a, b) => a.name.localeCompare(b.name));
+        
+        vars.forEach(cssVar => {
+            const isColor = cssVar.value.match(/^(#|rgb|hsl)/);
+            html += `
+                <div class="css-var-item" onclick="copyCSSVariable('${cssVar.name}', '${cssVar.value.replace(/'/g, "\\'")}')">
+                    <div class="css-var-name">${cssVar.name}</div>
+                    <div class="css-var-value">${cssVar.value}</div>
+                    ${isColor ? `<div class="css-var-preview" style="background: ${cssVar.value};"></div>` : ''}
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+    UI.icons();
+}
+
+// Helper function to get category icon
+function getCategoryIcon(category) {
+    const icons = {
+        'Typography': 'type',
+        'Colors': 'palette',
+        'Spacing': 'move',
+        'Dimensions': 'ruler',
+        'Shadows': 'layers',
+        'Borders': 'square',
+        'Animations': 'zap',
+        'Z-Index': 'layers',
+        'Other': 'more-horizontal'
+    };
+    return icons[category] || 'code';
+}
+
+// Function to copy CSS variable
+window.copyCSSVariable = function(name, value) {
+    const text = `var(${name})`;
+    navigator.clipboard.writeText(text).then(() => {
+        // Find the clicked element and add copied class
+        event.target.closest('.css-var-item').classList.add('copied');
+        UI.toast(`Copied: ${text}`, 'success');
+        
+        // Remove copied class after animation
+        setTimeout(() => {
+            event.target.closest('.css-var-item').classList.remove('copied');
+        }, 1000);
+    });
+}
+
 // Function to add tooltips to elements that don't have them
 function addMissingTooltips() {
     // Add tooltips to all buttons without existing tooltips
@@ -1648,4 +1871,48 @@ function addMissingTooltips() {
             tooltip.appendChild(item);
         }
     });
+}
+
+
+// Font specimen functionality
+function initFontSpecimen() {
+    const fontSizeSlider = document.getElementById("font-size-slider");
+    const fontSizeDisplay = document.getElementById("font-size-display");
+    const fontPreview = document.getElementById("font-preview");
+    
+    if (fontSizeSlider && fontSizeDisplay && fontPreview) {
+        // Initialize display with current value
+        const initialSize = fontSizeSlider.value;
+        fontSizeDisplay.textContent = initialSize + "px";
+        fontPreview.style.fontSize = initialSize + "px";
+        
+        // Handle slider input events (both input and change for better compatibility)
+        const updateFontSize = (e) => {
+            const size = e.target.value;
+            fontSizeDisplay.textContent = size + "px";
+            fontPreview.style.fontSize = size + "px";
+        };
+        
+        fontSizeSlider.addEventListener("input", updateFontSize);
+        fontSizeSlider.addEventListener("change", updateFontSize);
+        
+        // Make preview text editable
+        fontPreview.addEventListener("click", () => {
+            fontPreview.focus();
+        });
+        
+        // Prevent line breaks
+        fontPreview.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+            }
+        });
+        
+        // Prevent text selection when dragging slider
+        fontPreview.addEventListener("selectstart", (e) => {
+            if (document.activeElement === fontSizeSlider) {
+                e.preventDefault();
+            }
+        });
+    }
 }

@@ -60,6 +60,22 @@
                 </div>
             </div>
 
+            <!-- CSS Variables Section -->
+            <div class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="code-2" class="card-icon"></i><h2 class="card-title">CSS Variables</h2></div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-secondary">All CSS custom properties defined in :root. Click on any value to copy it.</p>
+                        
+                        <div id="css-vars-container" class="margin-top-4">
+                            <!-- Variables will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Icons Section -->
             <div class="section">
                 <div class="card">
@@ -409,6 +425,79 @@
                         <div class="card-header-left"><i data-lucide="type" class="card-icon"></i><h2 class="card-title">Typography</h2></div>
                     </div>
                     <div class="card-body">
+                    <h5>Inter Font Specimen</h5>
+                    <div class="font-specimen">
+                        <div class="font-specimen-header">
+                            <h2 class="font-specimen-title">Inter</h2>
+                            <div class="font-specimen-controls">
+                                <input type="range" id="font-size-slider" min="8" max="120" value="48" class="slider font-size-slider">
+                                <span id="font-size-display" class="font-size-display">48px</span>
+                            </div>
+                        </div>
+                        
+                        <div class="font-specimen-preview">
+                            <div class="font-preview-editable" contenteditable="true" id="font-preview">
+                                Almost before we knew it, we had left the ground.
+                            </div>
+                        </div>
+                        
+                        <div class="font-specimen-weights">
+                            <div class="font-weight-item">
+                                <div class="font-weight-label">Light 300</div>
+                                <div class="font-weight-sample" style="font-weight: 300;">The quick brown fox jumps over the lazy dog</div>
+                            </div>
+                            <div class="font-weight-item">
+                                <div class="font-weight-label">Regular 400</div>
+                                <div class="font-weight-sample" style="font-weight: 400;">The quick brown fox jumps over the lazy dog</div>
+                            </div>
+                            <div class="font-weight-item">
+                                <div class="font-weight-label">Medium 500</div>
+                                <div class="font-weight-sample" style="font-weight: 500;">The quick brown fox jumps over the lazy dog</div>
+                            </div>
+                            <div class="font-weight-item">
+                                <div class="font-weight-label">Semibold 600</div>
+                                <div class="font-weight-sample" style="font-weight: 600;">The quick brown fox jumps over the lazy dog</div>
+                            </div>
+                            <div class="font-weight-item">
+                                <div class="font-weight-label">Bold 700</div>
+                                <div class="font-weight-sample" style="font-weight: 700;">The quick brown fox jumps over the lazy dog</div>
+                            </div>
+                            <div class="font-weight-item">
+                                <div class="font-weight-label">Extra Bold 800</div>
+                                <div class="font-weight-sample" style="font-weight: 800;">The quick brown fox jumps over the lazy dog</div>
+                            </div>
+                            <div class="font-weight-item">
+                                <div class="font-weight-label">Black 900</div>
+                                <div class="font-weight-sample" style="font-weight: 900;">The quick brown fox jumps over the lazy dog</div>
+                            </div>
+                        </div>
+                        
+                        <div class="font-specimen-sizes margin-top-6">
+                            <h5>Size Samples</h5>
+                            <div class="font-size-item" style="font-size: 48px; line-height: 1.2;">
+                                <span class="font-size-label">48px</span>
+                                Whereas a common understanding of these rights and freedoms is
+                            </div>
+                            <div class="font-size-item" style="font-size: 36px; line-height: 1.3;">
+                                <span class="font-size-label">36px</span>
+                                No one shall be held in slavery or servitude; slavery and the slave trade shall be prohibited in all their forms.
+                            </div>
+                            <div class="font-size-item" style="font-size: 32px; line-height: 1.3;">
+                                <span class="font-size-label">32px</span>
+                                Everyone has the right to an effective remedy by the competent national tribunals for acts violating the fundamental rights granted him by the constitution or by law.
+                            </div>
+                            <div class="font-size-item" style="font-size: 21px; line-height: 1.4;">
+                                <span class="font-size-label">21px</span>
+                                No one shall be subjected to arbitrary arrest, detention or exile. Everyone is entitled in full equality to a fair and public hearing by an independent and impartial tribunal, in the determination of his rights and obligations and of any criminal charge against him.
+                            </div>
+                            <div class="font-size-item" style="font-size: 16px; line-height: 1.5;">
+                                <span class="font-size-label">16px</span>
+                                Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance. Everyone has the right to freedom of opinion and expression; this right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h5 class="margin-top-6">Typography Scale</h5>
                     <h1>Heading 1 &lt;h1&gt;</h1>
                     <h2>Heading 2 &lt;h2&gt;</h2>
                     <h3>Heading 3 &lt;h3&gt;</h3>

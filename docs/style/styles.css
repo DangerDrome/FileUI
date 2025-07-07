@@ -3080,6 +3080,187 @@ body.dark .callout-error {
     background: rgba(255, 179, 186, 0.05);
 }
 
+/* Font Specimen */
+.font-specimen {
+    margin: var(--space-6) 0;
+}
+
+.font-specimen-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-6);
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.font-specimen-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin: 0;
+}
+
+.font-specimen-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-width: 200px;
+    flex: 0 1 300px;
+}
+
+.font-size-display {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    min-width: 50px;
+    text-align: right;
+}
+
+.font-size-slider {
+    flex: 1;
+    min-width: 100px;
+}
+
+.font-specimen-preview {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+    margin-bottom: var(--space-6);
+}
+
+.font-preview-editable {
+    font-size: 48px;
+    line-height: 1.2;
+    color: var(--text-primary);
+    font-weight: var(--font-normal);
+    outline: none;
+    transition: font-size var(--transition-fast);
+}
+
+.font-preview-editable:focus {
+    background: var(--bg-quaternary);
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    margin: calc(var(--space-2) * -1);
+}
+
+.font-specimen-weights {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.font-weight-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    align-items: baseline;
+    gap: var(--space-4);
+}
+
+.font-weight-label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.font-weight-sample {
+    font-size: var(--text-lg);
+    color: var(--text-primary);
+}
+
+.font-specimen-sizes {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+.font-size-item {
+    position: relative;
+    padding: var(--space-3) 0;
+    color: var(--text-primary);
+}
+
+.font-size-label {
+    position: absolute;
+    right: 0;
+    top: var(--space-3);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    background: var(--bg-primary);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+}
+
+/* CSS Variables Display */
+.css-var-group {
+    margin-bottom: var(--space-6);
+}
+
+.css-var-group-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.css-var-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-3);
+}
+
+.css-var-item {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.css-var-item:hover {
+    background: var(--bg-quaternary);
+    transform: translateY(-1px);
+}
+
+.css-var-item.copied {
+    background: var(--success);
+}
+
+.css-var-item.copied .css-var-name,
+.css-var-item.copied .css-var-value {
+    color: var(--grey-800);
+}
+
+.css-var-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
+}
+
+.css-var-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.css-var-preview {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--bg-primary);
+}
+
 /* Utility Classes - Replace inline styles */
 .icon-sm {
     width: 24px;

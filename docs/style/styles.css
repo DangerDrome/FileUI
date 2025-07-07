@@ -2755,13 +2755,23 @@ body:has(.control-panel.collapsed) .main-content {
 
 /* Mobile responsive */
 @media (max-width: 768px) {
+    /* Left navigation sticks below the header on small screens */
     .nav-panel {
-        width: var(--nav-width-mobile);
-        transform: translateX(-100%);
+        position: sticky;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        transform: none; /* no slide-in animation on mobile */
     }
-    
+
+    /* Ensure collapsed state does not reduce width on mobile */
+    .nav-panel.collapsed {
+        width: 100%;
+    }
+
     .nav-panel.open {
-        transform: translateX(0);
+        transform: none;
     }
     
     .nav-panel:not(.collapsed) + .nav-panel-toggle {
@@ -2769,17 +2779,29 @@ body:has(.control-panel.collapsed) .main-content {
     }
     
     .control-panel {
-        width: var(--nav-width-mobile);
-        transform: translateX(100%);
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        transform: none; /* no slide-in animation on mobile */
+    }
+    
+    /* Prevent width shrink when collapsed on mobile */
+    .control-panel.collapsed {
+        width: 100%;
     }
     
     .control-panel.open {
-        transform: translateX(0);
+        transform: none;
     }
     
     .main-content {
         margin-left: 0;
         margin-right: 0;
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
     }
     
     .nav-backdrop {
@@ -2798,6 +2820,101 @@ body:has(.control-panel.collapsed) .main-content {
     .nav-panel.open ~ .nav-backdrop {
         opacity: 1;
         visibility: visible;
+    }
+
+    /* Horizontal layout for top & bottom sticky panels */
+    .nav-panel,
+    .control-panel {
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: var(--space-2);
+    }
+
+    /* Hide panel headers on mobile to save vertical space */
+    .nav-panel-header,
+    .control-panel-header {
+        display: none;
+    }
+
+    /* Ensure internal content flows horizontally */
+    .nav-panel-content,
+    .control-panel-content {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        flex: 1;
+    }
+
+    /* Keep nav items & controls from shrinking */
+    .nav-item,
+    .control-panel .btn,
+    .control-group {
+        flex: 0 0 auto;
+    }
+
+    /* Flatten nav sections into a horizontal list */
+    .nav-section {
+        display: contents;
+    }
+
+    .nav-section-header {
+        display: none;
+    }
+
+    .nav-section-items {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap; /* allow nav buttons to wrap to new lines */
+        gap: var(--space-2);
+        padding: 0;
+    }
+
+    /* Ensure nav items flow visually in a row without stretching */
+    .nav-item {
+        flex: 0 0 auto;
+    }
+
+    /* Horizontal layout for control panel controls */
+    .control-panel-controls {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap; /* allow buttons to flow onto next line */
+        gap: var(--space-2);
+        overflow-x: visible;
+        overflow-y: hidden;
+    }
+
+    .control-group {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    /* Make nav items and control buttons fit inline rows */
+    .nav-item {
+        width: auto;
+        margin: 0;
+    }
+
+    .control-panel .control-group .btn {
+        width: auto;
+        justify-content: center;
+        margin: 0;
+    }
+
+    /* Disallow line breaks by preventing wrap and enabling horizontal scroll */
+    .nav-section-items {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    .control-panel-controls {
+        flex-wrap: nowrap;
+        overflow-x: auto;
     }
 }
 
@@ -3496,5 +3613,122 @@ body.dark .callout-error {
     width: 24px;
     height: 24px;
     border-width: 3px;
+}
+
+@media (max-width: 768px) {
+    /* Override margin rules when panels carry 'collapsed' class on mobile */
+    body:has(.nav-panel.collapsed) .main-content,
+    body:has(.control-panel.collapsed) .main-content {
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Override margin rules when panels carry 'collapsed' class on mobile */
+    body:has(.nav-panel.collapsed) .main-content,
+    body:has(.control-panel.collapsed) .main-content {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* Scale typography for smaller screens */
+    h1 { font-size: 2.5rem; } /* ~40px */
+    h2 { font-size: 2rem; }   /* ~32px */
+    h3 { font-size: 1.75rem; }/* ~28px */
+    h4 { font-size: 1.5rem; } /* ~24px */
+    h5 { font-size: 1.25rem; }/* ~20px */
+    h6 { font-size: 1.125rem; }/* ~18px */
+
+    p { font-size: 0.9375rem; } /* 15px */
+    p.lead { font-size: 1.0625rem; } /* 17px */
+}
+
+@media (max-width: 768px) {
+    /* Prevent card overflow cropping auto-fit content */
+    .card {
+        min-width: 0;
+        width: 100%;
+    }
+
+    /* Ensure card grids are full width without overflow */
+    .section .card {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Responsive min widths for auto-fit grids to avoid cropping */
+    .grid-auto-fit {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .grid-auto-fit-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-auto-fill,
+    .grid-auto-fill-120 {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    /* Typography specimen responsiveness */
+    .font-specimen-sizes {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    /* Clamp large sample font sizes so they don't overflow small screens */
+    .font-size-item {
+        font-size: clamp(1rem, 6vw, 32px) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Typography specimen responsiveness */
+    .font-specimen-sizes {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    /* Clamp large sample font sizes so they don't overflow small screens */
+    .font-size-item {
+        font-size: clamp(1rem, 6vw, 32px) !important;
+    }
+
+    /* Inter Font Specimen Preview scaling */
+    .font-preview-editable {
+        font-size: clamp(1.5rem, 7vw, 3rem) !important;
+        word-break: break-word;
+    }
+
+    .font-specimen-preview {
+        overflow-x: auto;
+    }
+
+    /* Font weights grid responsive */
+    .font-specimen-weights {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    /* Responsive typography scale headings */
+    h1 { font-size: clamp(2rem, 8vw, 2.5rem); }
+    h2 { font-size: clamp(1.75rem, 7vw, 2rem); }
+    h3 { font-size: clamp(1.5rem, 6.5vw, 1.75rem); }
+    h4 { font-size: clamp(1.25rem, 6vw, 1.5rem); }
+    h5 { font-size: clamp(1.125rem, 5.5vw, 1.25rem); }
+    h6 { font-size: clamp(1rem, 5vw, 1.125rem); }
+}
+
+@media (max-width: 768px) {
+    /* Ensure form grids collapse to single column on mobile */
+    .grid-auto-fit-3 {
+        grid-template-columns: 1fr;
+    }
+
+    /* Force elements that span multiple columns to full row width */
+    .grid-span-2 {
+        grid-column: 1 / -1;
+    }
 }
 

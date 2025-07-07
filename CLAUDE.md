@@ -1,5 +1,17 @@
 # FileUI Project Memory
 
+## Claude Development Rules
+
+When working on this project, follow these 7 rules:
+
+1. **First think through the problem** - Read the codebase for relevant files and write a plan to docs/plans/tasks.md
+2. **Create actionable todo items** - The plan should have a list of todo items that you can check off as you complete them
+3. **Verify the plan** - Before beginning work, check in with the user to verify the plan
+4. **Work systematically** - Begin working on the todo items, marking them as complete as you go
+5. **Communicate clearly** - Every step of the way, give a high level explanation of what changes you made
+6. **Keep it simple** - Make every task and code change as simple as possible. Avoid massive or complex changes. Every change should impact as little code as possible. Everything is about simplicity.
+7. **Document your work** - Add a review section to the docs/plans/tasks.md file with a summary of the changes made and any other relevant information
+
 ## Project Overview
 FileUI is a web-based file manager for VFX and media content creation, featuring an advanced panel system for managing various file types (.blend, .ma, .mb, .hip, .nk, .aep, .prproj, .exr, .dpx, etc.). Designed to work everywhere (locally, Cloudflare, browser-only).
 

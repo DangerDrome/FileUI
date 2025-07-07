@@ -1,5 +1,17 @@
 # FileUI Style Guide Configuration
 
+## Claude Development Rules for Style Guide
+
+When working on the style guide, follow these 7 rules:
+
+1. **First think through the problem** - Read the existing styles and components, and write a plan to ../plans/tasks.md
+2. **Create actionable todo items** - The plan should have a list of todo items that you can check off as you complete them
+3. **Verify the plan** - Before beginning work, check in with the user to verify the plan
+4. **Work systematically** - Begin working on the todo items, marking them as complete as you go
+5. **Communicate clearly** - Every step of the way, give a high level explanation of what changes you made
+6. **Keep it simple** - Make every style change as simple as possible. Avoid massive CSS refactors. Every change should be minimal and focused. Maintain existing design patterns.
+7. **Document your work** - Add a review section to the ../plans/tasks.md file with a summary of the changes made and any design decisions
+
 ## Current Design System (Pastel Theme)
 
 ### Design Principles

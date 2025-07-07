@@ -14,7 +14,9 @@ When working on this project, follow these 7 rules:
 
 ## Contribution Guidelines
 - Never commit using claude as the contributor 
-- commit and push to repo using my credentials 
+- commit and push to repo using my credentials
+- commit = commit & push (always push after committing) 
+- NEVER ADD CLAUDE AS THE FUCKING CO AUTHOR OR AUTHOR OF COMMITS!
 
 ## Project Overview
 FileUI is a web-based file manager for VFX and media content creation, featuring an advanced panel system for managing various file types (.blend, .ma, .mb, .hip, .nk, .aep, .prproj, .exr, .dpx, etc.). Designed to work everywhere (locally, Cloudflare, browser-only).
@@ -90,4 +92,3 @@ python server.py
 - **Images**: .exr, .dpx, .tiff, .png, .jpg, .psd
 - **Video**: .mov, .mp4, .mxf, .r3d, .ari
 - **Projects**: .prproj, .drp, .fcp
-```

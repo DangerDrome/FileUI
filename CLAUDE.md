@@ -101,30 +101,61 @@ python server.py
 - This is a FILE MANAGER for VFX/media, NOT a code editor
 - Focus on file preview, metadata, and management features
 
-## Style Guide Updates (2024)
+## Style Guide (REQUIRED FOR ALL FILEUI DEVELOPMENT)
 
-### Recent Cleanup Work
-- **HTML**: Removed all 216 inline styles and 497 lines of inline JavaScript
-- **CSS**: Added 42 utility classes, ensured root variable usage
-- **JavaScript**: Consolidated all JS in styles.js, removed duplicates
-- **Tooltips**: Converted to Shoelace web components with dark theme (#1a1a1a bg, white text)
+### 📍 Style Guide Location
+**ALWAYS USE**: `/home/danger/Documents/GitHub/FileUI/docs/style/`
+- `index.html` - Component showcase
+- `styles.css` - All project styles  
+- `styles.js` - UI component system
 
-### Key Style Guide Features
-- Complete UI component library with navigation panel
-- Theme toggle (dark/light modes)
-- Semantic color system with customizable colors
-- Typography with markdown support (callouts, code blocks, tables)
-- Comprehensive form elements and controls
-- Toast notifications, modals, menus, panels
-- Grid system and responsive layouts
-- Icon system using Lucide icons
+### 🎨 Design System Rules
+When developing ANY part of FileUI, you MUST use these styles:
 
-### Style Guide Best Practices
-- No inline styles or JavaScript in HTML
-- All styling through CSS classes using root variables
-- JavaScript uses global UI object for consistency
-- Shoelace components for tooltips and popovers
-- Clean separation of concerns (HTML/CSS/JS)
+#### Color Palette (from :root)
+```css
+/* Primary Colors */
+--bg-primary: #a8a8a0;
+--bg-secondary: #b4b4ac;
+--bg-tertiary: #c0c0b8;
+--bg-quaternary: #9c9c94;
+--bg-quinary: #90908c;
+
+/* Accent & Semantic */
+--accent: #b5d3b6;
+--primary: #b3d9ff;
+--success: #b8e6b8;
+--warning: #ffe4a3;
+--error: #ffb3ba;
+--info: #d4c5f9;
+```
+
+#### Typography
+- Font: Inter (system fallback)
+- Sizes: Use CSS variables (--text-xs to --text-4xl)
+- Weights: 300-900 available
+
+#### Component Usage
+- **Buttons**: Use `UI.button()` with variants
+- **Cards**: Standard card structure with header/body
+- **Forms**: Consistent input/select/textarea styling
+- **Toasts**: `UI.toast()` for notifications
+- **Modals**: `UI.modal()` for dialogs
+- **Icons**: Lucide icons via `data-lucide`
+
+### 📋 Development Checklist
+- [ ] Import styles.css for any new HTML
+- [ ] Use CSS variables for ALL values
+- [ ] Follow component patterns from style guide
+- [ ] Test in both light/dark themes
+- [ ] Ensure responsive behavior
+
+### Recent Updates
+- CSS Variables section with click-to-copy
+- Inter font specimen with size slider
+- Auto-fit grid layouts throughout
+- Shoelace tooltips with dark theme
+- Complete component library
 
 ### VFX File Types to Support
 - **3D**: .blend, .ma, .mb, .hip, .c4d, .max, .fbx, .obj, .usd

@@ -1344,29 +1344,30 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Create dynamic popover with Shoelace
     const popoverBtn = document.getElementById('dynamic-popover');
-    
-    // Create Shoelace popup wrapper
-    const popup = document.createElement('sl-popup');
-    popup.setAttribute('placement', 'bottom');
-    popup.setAttribute('trigger', 'click');
-    popup.setAttribute('distance', '8');
-    
-    // Create popover content
-    const popoverContent = document.createElement('div');
-    popoverContent.style.cssText = 'background: var(--bg-secondary); border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: var(--shadow-md); min-width: 250px;';
-    popoverContent.innerHTML = `
-        <h5 class="margin-0-0-2-0">Dynamic Popover</h5>
-        <p class="margin-0-0-3-0">This popover was created with JavaScript!</p>
-        <button class="btn btn-sm" onclick="UI.toast('Popover action!', 'info')">Action</button>
-    `;
-    
-    // Set up the popup structure
-    popoverBtn.setAttribute('slot', 'anchor');
-    popup.appendChild(popoverBtn.cloneNode(true));
-    popup.appendChild(popoverContent);
-    
-    // Replace the original button with the popup
-    popoverBtn.parentNode.replaceChild(popup, popoverBtn);
+    if (popoverBtn) {
+        // Create Shoelace popup wrapper
+        const popup = document.createElement('sl-popup');
+        popup.setAttribute('placement', 'bottom');
+        popup.setAttribute('trigger', 'click');
+        popup.setAttribute('distance', '8');
+
+        // Create popover content
+        const popoverContent = document.createElement('div');
+        popoverContent.style.cssText = 'background: var(--bg-secondary); border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: var(--shadow-md); min-width: 250px;';
+        popoverContent.innerHTML = `
+            <h5 class="margin-0-0-2-0">Dynamic Popover</h5>
+            <p class="margin-0-0-3-0">This popover was created with JavaScript!</p>
+            <button class="btn btn-sm" onclick="UI.toast('Popover action!', 'info')">Action</button>
+        `;
+
+        // Set up the popup structure
+        popoverBtn.setAttribute('slot', 'anchor');
+        popup.appendChild(popoverBtn.cloneNode(true));
+        popup.appendChild(popoverContent);
+
+        // Replace the original button with the popup
+        popoverBtn.parentNode.replaceChild(popup, popoverBtn);
+    }
     
     
     // Initialize icons

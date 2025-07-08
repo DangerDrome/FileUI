@@ -561,7 +561,7 @@
             // Theme control group
             const themeGroup = document.createElement('div');
             themeGroup.className = 'control-group';
-            themeGroup.innerHTML = '<span class="control-label">Theme</span>';
+            themeGroup.innerHTML = '<span class="control-label" data-i18n="theme">Theme</span>';
             const themeBtn = this.button(this.theme.get() === 'dark' ? 'Light Mode' : 'Dark Mode', { 
                 icon: this.theme.get() === 'dark' ? 'sun' : 'moon', 
                 size: 'sm',
@@ -653,7 +653,7 @@
             // Font control group
             const fontGroup = document.createElement('div');
             fontGroup.className = 'control-group';
-            fontGroup.innerHTML = '<span class="control-label">Font</span>';
+            fontGroup.innerHTML = '<span class="control-label" data-i18n="font">Font</span>';
             const fontBtnGroup = document.createElement('div');
             fontBtnGroup.className = 'btn-group';
             
@@ -688,7 +688,7 @@
             // Density control group
             const densityGroup = document.createElement('div');
             densityGroup.className = 'control-group';
-            densityGroup.innerHTML = '<span class="control-label">Density</span>';
+            densityGroup.innerHTML = '<span class="control-label" data-i18n="density">Density</span>';
             const densityBtnGroup = document.createElement('div');
             densityBtnGroup.className = 'btn-group';
             
@@ -720,6 +720,21 @@
             densityBtnGroup.appendChild(compactBtn);
             densityGroup.appendChild(densityBtnGroup);
             
+            // Language control group
+            const langGroup = document.createElement('div');
+            langGroup.className = 'control-group';
+            langGroup.innerHTML = '<span class="control-label" data-i18n="language">Language</span>';
+            const langToggle = this.button(this.language.get() === 'zh' ? 'EN' : '中文', {
+                icon: 'globe',
+                size: 'sm',
+                onclick: () => {
+                    const newLang = this.language.toggle();
+                    langToggle.innerHTML = `<i data-lucide="globe" class="lucide"></i> <span>${newLang === 'zh' ? 'EN' : '中文'}</span>`;
+                    this.icons();
+                }
+            });
+            langGroup.appendChild(langToggle);
+
             // Icon size control group
             const iconSizeGroup = document.createElement('div');
             iconSizeGroup.className = 'control-group';
@@ -875,6 +890,7 @@
             controls.appendChild(themeGroup);
             controls.appendChild(fontGroup);
             controls.appendChild(densityGroup);
+            controls.appendChild(langGroup);
             controls.appendChild(iconSizeGroup);
             controls.appendChild(strokeWidthGroup);
             controls.appendChild(semanticColorsGroup);
@@ -1137,6 +1153,617 @@
                 this.set(newTheme);
                 return newTheme;
             }
+        },
+
+        language: {
+            translations: {
+                en: {
+                    // Left Nav
+                    componentsNav: 'Components',
+                    design: 'DESIGN',
+                    colors: 'Colors',
+                    cssVariables: 'CSS Variables',
+                    icons: 'Icons',
+                    typography: 'Typography',
+                    layout: 'LAYOUT',
+                    gridSystem: 'Grid System',
+                    gridPatterns: 'Grid Patterns',
+                    cards: 'Cards',
+                    components: 'COMPONENTS',
+                    buttons: 'Buttons',
+                    toastNotifications: 'Toast Notifications',
+                    modals: 'Modals',
+                    menus: 'Menus',
+                    panels: 'Panels',
+                    tags: 'Tags',
+                    forms: 'Forms',
+                    badgesSpinnersProgress: 'Badges, Spinners & Progress',
+                    advanced: 'ADVANCED',
+                    scrollbars: 'Scrollbars',
+                    tables: 'Tables',
+
+                    // Main Content
+                    mainTitle: 'FileUI Component Library',
+                    mainSubtitle: 'All UI components with navigation panel and theme toggle',
+
+                    // Section: Colors
+                    semanticColors: 'Semantic Colors',
+                    primary: 'Primary',
+                    success: 'Success',
+                    warning: 'Warning',
+                    error: 'Error',
+                    info: 'Info',
+                    backgroundHierarchy: 'Background Hierarchy',
+                    quinaryBG: 'Quinary BG (Darkest)',
+                    quaternaryBG: 'Quaternary BG',
+                    primaryBG: 'Primary BG',
+                    secondaryBG: 'Secondary BG',
+                    tertiaryBG: 'Tertiary BG',
+
+                    // Section: CSS Variables
+                    cssVarsSubtitle: 'All CSS custom properties defined in :root. Click on any value to copy it.',
+
+                    // Section: Icons
+                    commonIcons: 'Common Icons',
+                    actionIcons: 'Action Icons',
+                    navigationIcons: 'Navigation Icons',
+                    statusIcons: 'Status Icons',
+                    mediaIcons: 'Media Icons',
+                    vfxTypeIcons: 'VFX Type Icons',
+                    animationTypeIcons: 'Animation Type Icons',
+
+                    // Section: Typography
+                    interFontSpecimen: 'Inter Font Specimen',
+                    interSampleSentence: 'Almost before we knew it, we had left the ground.',
+                    quickBrownFox: 'The quick brown fox jumps over the lazy dog',
+                    light300: 'Light 300',
+                    regular400: 'Regular 400',
+                    medium500: 'Medium 500',
+                    semibold600: 'Semibold 600',
+                    bold700: 'Bold 700',
+                    extraBold800: 'Extra Bold 800',
+                    black900: 'Black 900',
+                    sizeSamples: 'Size Samples',
+                    sample48: 'Whereas a common understanding of these rights and freedoms is',
+                    sample36: 'No one shall be held in slavery or servitude; slavery and the slave trade shall be prohibited in all their forms.',
+                    sample32: 'Everyone has the right to an effective remedy by the competent national tribunals for acts violating the fundamental rights granted him by the constitution or by law.',
+                    sample21: 'No one shall be subjected to arbitrary arrest, detention or exile. Everyone is entitled in full equality to a fair and public hearing by an independent and impartial tribunal, in the determination of his rights and obligations and of any criminal charge against him.',
+                    sample16: 'Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance. Everyone has the right to freedom of opinion and expression; this right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers.',
+                    typographyScale: 'Typography Scale',
+                    heading1: 'Heading 1',
+                    heading2: 'Heading 2',
+                    heading3: 'Heading 3',
+                    heading4: 'Heading 4',
+                    heading5: 'Heading 5',
+                    heading6: 'Heading 6',
+                    paragraphStyles: 'Paragraph Styles',
+                    leadParagraph: 'This is a lead paragraph with italic text, underlined text, strikethrough text, highlighted text, inline code, and keyboard input.',
+                    standardParagraph: 'This is a standard paragraph with emphasized text, bold italic, superscript, subscript, ABBR, and linked text. It has optimal line height for readability.',
+                    smallParagraph: 'This is a small paragraph with variable, sample output, deleted text, inserted text, inline quote, and citation examples.',
+                    codeBlocks: 'Code Blocks',
+                    jsCodeComment: '// JavaScript code block',
+                    inlineCode: 'Inline Code',
+                    inlineCodeSample: 'Use const to declare constants, let for variables, and import to load modules. Press Ctrl + C to copy.',
+                    blockquotes: 'Blockquotes',
+                    steveJobsQuote: 'Design is not just what it looks like and feels like. Design is how it works.',
+                    steveJobs: '— Steve Jobs',
+
+                    // Section: Callouts
+                    calloutInfoTitle: 'Information',
+                    calloutInfoText: 'This is an informational callout with helpful details about the component library.',
+                    calloutWarningTitle: 'Warning',
+                    calloutWarningText: 'This is a warning callout that highlights important considerations or potential issues.',
+                    calloutSuccessTitle: 'Success',
+                    calloutSuccessText: 'This is a success callout that confirms completed actions or positive outcomes.',
+                    calloutErrorTitle: 'Error',
+                    calloutErrorText: 'This is an error callout that highlights critical issues that need attention.',
+
+                    // Section: Lists
+                    lists: 'Lists',
+                    unorderedList: 'Unordered List',
+                    firstItem: 'First item',
+                    secondItem: 'Second item with bold text',
+                    thirdItem: 'Third item',
+                    nestedItem1: 'Nested item 1',
+                    nestedItem2: 'Nested item 2',
+                    fourthItem: 'Fourth item',
+                    orderedList: 'Ordered List',
+                    installDeps: 'Install dependencies',
+                    configSettings: 'Configure settings',
+                    runDevServer: 'Run development server',
+                    startBackend: 'Start backend',
+                    startFrontend: 'Start frontend',
+                    openBrowser: 'Open browser',
+
+                    // Section: Tables
+                    tableComponent: 'Component',
+                    tableDescription: 'Description',
+                    tableStatus: 'Status',
+                    tableButtonDesc: 'Interactive button component',
+                    tableCardDesc: 'Content container with header and footer',
+                    tableModalDesc: 'Overlay dialog for focused interactions',
+                    tableStatusStable: 'Stable',
+                    tableStatusBeta: 'Beta',
+
+                    // Section: Grid Patterns
+                    gridPatternsSubtitle: 'Tileable CSS grid patterns useful for subtle background textures.',
+                    dots: 'Dots',
+                    lines: 'Lines',
+                    cross: 'Cross',
+                    diagonal: 'Diagonal',
+
+                    // Section: Grid System
+                    grid2Col: '2 Column Grid',
+                    grid3Col: '3 Column Grid',
+                    gridAutoFit: 'Auto-fit Grid',
+                    gridItem1: 'Grid Item 1',
+                    gridItem2: 'Grid Item 2',
+                    item1: 'Item 1',
+                    item2: 'Item 2',
+                    item3: 'Item 3',
+                    responsive1: 'Responsive 1',
+                    responsive2: 'Responsive 2',
+                    responsive3: 'Responsive 3',
+                    responsive4: 'Responsive 4',
+
+                    // Section: Cards
+                    simpleCard: 'Simple Card',
+                    simpleCardText: 'This is a simple card with just title and content.',
+                    cardWithIcon: 'Card with Icon',
+                    cardWithIconText: 'This card has an icon in the header.',
+                    cardWithActions: 'Card with Actions',
+                    cardWithActionsText: 'This card has action buttons in the header.',
+                    fullFeaturedCard: 'Full Featured Card',
+                    fullFeaturedCardText: 'This card has an icon, actions, and a footer.',
+                    completeExample: 'Complete example with all options',
+                    active: 'Active',
+                    featured: 'Featured',
+                    cardWithDesc: 'Card with Description',
+                    cardContentGoesHere: 'Card content goes here...',
+                    cardHasDesc: 'This card has a description',
+                    cardWithFooter: 'Card with Footer',
+                    mainContentArea: 'Main content area',
+
+                    // Section: Buttons
+                    semanticButtonColors: 'Semantic Button Colors',
+                    activeStates: 'Active States',
+                    iconButtons: 'Icon Buttons',
+                    dynamicButtons: 'Dynamic Buttons',
+
+                    // Section: Menus
+                    navPanelMenu: 'Navigation Panel Menu',
+                    dropdownContextMenus: 'Dropdown & Context Menus',
+
+                    // Section: Tags
+                    staticTags: 'Static Tags',
+                    default: 'Default',
+                    tagSizes: 'Tag Sizes',
+                    small: 'Small',
+                    normal: 'Normal',
+                    large: 'Large',
+                    dynamicTags: 'Dynamic Tags',
+
+                    // Section: Forms
+                    textInputs: 'Text Inputs',
+                    textInputLabel: 'Text Input',
+                    textInputPlaceholder: 'Enter text...',
+                    emailInputLabel: 'Email Input',
+                    emailInputPlaceholder: 'name@example.com',
+                    passwordInputLabel: 'Password Input',
+                    passwordInputPlaceholder: 'Enter password...',
+                    numberInputLabel: 'Number Input',
+                    searchInputLabel: 'Search Input',
+                    searchInputPlaceholder: 'Search...',
+                    urlInputLabel: 'URL Input',
+                    urlInputPlaceholder: 'https://example.com',
+                    selectionInputs: 'Selection Inputs',
+                    selectDropdown: 'Select Dropdown',
+                    selectPlaceholder: 'Choose an option...',
+                    checkboxes: 'Checkboxes',
+                    checkboxEnableNotifs: 'Enable notifications',
+                    checkboxSubscribe: 'Subscribe to newsletter',
+                    checkboxAcceptTerms: 'Accept terms and conditions',
+                    radioButtons: 'Radio Buttons',
+                    radioBasic: 'Basic Plan',
+                    radioPro: 'Pro Plan',
+                    radioEnterprise: 'Enterprise Plan',
+                    otherInputs: 'Other Inputs',
+                    textareaLabel: 'Textarea',
+                    textareaPlaceholder: 'Enter your message...',
+                    dateInputLabel: 'Date Input',
+                    timeInputLabel: 'Time Input',
+                    colorPickerLabel: 'Color Picker',
+                    rangeSliderLabel: 'Range Slider',
+                    inputStates: 'Input States',
+                    disabledInputLabel: 'Disabled Input',
+                    disabledInputPlaceholder: 'Disabled input',
+                    readonlyInputLabel: 'Read-only Input',
+                    readonlyInputPlaceholder: 'Read-only content',
+                    semanticCheckboxesRadios: 'Semantic Color Checkboxes & Radio Buttons',
+                    checkboxColors: 'Checkbox Colors',
+                    radioColors: 'Radio Button Colors',
+                    disabledStates: 'Disabled States',
+                    disabledCheckbox: 'Disabled Checkbox',
+                    disabledChecked: 'Disabled Checked',
+                    disabledRadio: 'Disabled Radio',
+                    disabledSelected: 'Disabled Selected',
+                    formActions: 'Form Actions',
+
+                    // Section: Badges, Spinners, Progress
+                    badges: 'Badges',
+                    loadingSpinners: 'Loading Spinners',
+                    progressBars: 'Progress Bars',
+                    progressDefault: 'Default (25%)',
+                    progressPrimary: 'Primary (50%)',
+                    progressSuccess: 'Success (75%)',
+                    progressWarning: 'Warning (60%)',
+                    progressError: 'Error (30%)',
+                    progressInfo: 'Info (90%)',
+                    progressVariations: 'Progress Variations',
+                    progressStriped: 'Striped (Animated)',
+                    progressSmall: 'Small Size',
+                    progressLarge: 'Large with Label',
+
+                    // Section: Scrollbars
+                    defaultScrollbar: 'Default Scrollbar',
+                    scrollbarLorem: 'This is a scrollable area with custom styled scrollbars.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n\nExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\nKeep scrolling to see more content...\n\nThe scrollbar styling adapts to both light and dark themes.\n\nNotice the custom colors and rounded corners.',
+                    thinScrollbar: 'Thin Scrollbar',
+                    thinScrollbarLorem: 'This area has a thinner scrollbar variant.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit.\n\nSed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum.',
+                    horizontalScrollbar: 'Horizontal Scrollbar',
+                    horizontalScrollbarLorem: 'This content extends horizontally beyond the container width. Keep scrolling to the right to see more content. The horizontal scrollbar also follows the same styling pattern.',
+
+                    // Control Panel
+                    settings: 'Settings',
+                    language: 'Language',
+                    theme: 'Theme',
+                    dark_mode: 'Dark Mode',
+                    tint: 'Tint',
+                    accent: 'Accent',
+                    font: 'Font',
+                    system: 'System',
+                    mono: 'Mono',
+                    density: 'Density',
+                    comfortable: 'Comfortable',
+                    compact: 'Compact',
+                    iconSize: 'Icon Size',
+                    iconStroke: 'Icon Stroke',
+
+                    // ... existing english translations block near heading props...
+                    heading1Tag: 'Heading 1 <h1>',
+                    heading2Tag: 'Heading 2 <h2>',
+                    heading3Tag: 'Heading 3 <h3>',
+                    heading4Tag: 'Heading 4 <h4>',
+                    heading5Tag: 'Heading 5 <h5>',
+                    heading6Tag: 'Heading 6 <h6>',
+                    tooltips: 'Tooltips',
+                },
+                zh: {
+                    // 左侧导航
+                    componentsNav: '组件',
+                    design: '设计',
+                    colors: '颜色',
+                    cssVariables: 'CSS 变量',
+                    icons: '图标',
+                    typography: '排版',
+                    layout: '布局',
+                    gridSystem: '网格系统',
+                    gridPatterns: '网格图案',
+                    cards: '卡片',
+                    components: '组件',
+                    buttons: '按钮',
+                    toastNotifications: '消息通知',
+                    modals: '模态框',
+                    menus: '菜单',
+                    panels: '面板',
+                    tags: '标签',
+                    forms: '表单',
+                    badgesSpinnersProgress: '徽章、加载器和进度条',
+                    advanced: '高级',
+                    scrollbars: '滚动条',
+                    tables: '表格',
+
+                    // 主要内容
+                    mainTitle: 'FileUI 组件库',
+                    mainSubtitle: '包含导航面板和主题切换的所有UI组件',
+
+                    // 颜色部分
+                    semanticColors: '语义颜色',
+                    primary: '主要',
+                    success: '成功',
+                    warning: '警告',
+                    error: '错误',
+                    info: '信息',
+                    backgroundHierarchy: '背景层级',
+                    quinaryBG: '五级背景 (最暗)',
+                    quaternaryBG: '四级背景',
+                    primaryBG: '主背景',
+                    secondaryBG: '次背景',
+                    tertiaryBG: '三级背景',
+
+                    // CSS 变量部分
+                    cssVarsSubtitle: '在 :root 中定义的所有 CSS 自定义属性。点击任何值即可复制。',
+
+                    // 图标部分
+                    commonIcons: '通用图标',
+                    actionIcons: '操作图标',
+                    navigationIcons: '导航图标',
+                    statusIcons: '状态图标',
+                    mediaIcons: '媒体图标',
+                    vfxTypeIcons: '视觉效果类型图标',
+                    animationTypeIcons: '动画类型图标',
+
+                    // 排版部分
+                    interFontSpecimen: 'Inter 字体样本',
+                    interSampleSentence: '我们还没来得及反应，就已经离开了地面。',
+                    quickBrownFox: '敏捷的棕色狐狸跳过了懒惰的狗。',
+                    light300: '细体 300',
+                    regular400: '常规 400',
+                    medium500: '中等 500',
+                    semibold600: '半粗体 600',
+                    bold700: '粗体 700',
+                    extraBold800: '特粗体 800',
+                    black900: '超粗体 900',
+                    sizeSamples: '字号示例',
+                    sample48: '鉴于对这些权利和自由的普遍了解至关重要',
+                    sample36: '任何人不得使为奴隶或奴役；一切形式的奴隶制度和奴隶买卖，均应予以禁止。',
+                    sample32: '任何人于其宪法或法律所赋予之基本权利被侵害时，有权享受国家管辖法庭之有效救济。',
+                    sample21: '任何人不得加以任意逮捕、拘禁或放逐。 人人完全平等，有权由一个独立而无偏倚的法庭进行公正和公开的审讯，以确定他的权利和义务并判定对他提出的任何刑事指控。',
+                    sample16: '人人有思想、良心和宗教自由的权利；此项权利包括改变他的宗教或信仰的自由，以及单独或集体、公开或秘密地以教义、实践、礼拜和戒律表示他的宗教或信仰的自由。 人人有权享有主张和发表意见的自由；此项权利包括持有主张而不受干涉的自由，和通过任何媒介和不论国界寻求、接受和传递消息和思想的自由。',
+                    typographyScale: '排版尺寸',
+                    heading1: '标题 1',
+                    heading2: '标题 2',
+                    heading3: '标题 3',
+                    heading4: '标题 4',
+                    heading5: '标题 5',
+                    heading6: '标题 6',
+                    paragraphStyles: '段落样式',
+                    leadParagraph: '这是一个引导段落，包含斜体文本、下划线文本、删除线文本、高亮文本、行内代码和键盘输入。',
+                    standardParagraph: '这是一个标准段落，包含强调文本、粗斜体、上标、下标、缩写和链接文本。它具有最佳的行高以便阅读。',
+                    smallParagraph: '这是一个小段落，包含变量、示例输出、删除文本、插入文本、行内引用和引文示例。',
+                    codeBlocks: '代码块',
+                    jsCodeComment: '// JavaScript 代码块',
+                    inlineCode: '行内代码',
+                    inlineCodeSample: '使用 const 声明常量，let 声明变量，并使用 import 加载模块。按 Ctrl + C 复制。',
+                    blockquotes: '块引用',
+                    steveJobsQuote: '设计不仅仅是它的外观和感觉。设计是它的工作方式。',
+                    steveJobs: '— 史蒂夫·乔布斯',
+
+                    // 标注部分
+                    calloutInfoTitle: '信息',
+                    calloutInfoText: '这是一个信息性标注，提供有关组件库的有用细节。',
+                    calloutWarningTitle: '警告',
+                    calloutWarningText: '这是一个警告标注，突出显示了重要的注意事项或潜在问题。',
+                    calloutSuccessTitle: '成功',
+                    calloutSuccessText: '这是一个成功标注，确认已完成的操作或积极的结果。',
+                    calloutErrorTitle: '错误',
+                    calloutErrorText: '这是一个错误标注，突出显示需要注意的关键问题。',
+
+                    // 列表部分
+                    lists: '列表',
+                    unorderedList: '无序列表',
+                    firstItem: '第一项',
+                    secondItem: '带粗体文本的第二项',
+                    thirdItem: '第三项',
+                    nestedItem1: '嵌套项 1',
+                    nestedItem2: '嵌套项 2',
+                    fourthItem: '第四项',
+                    orderedList: '有序列表',
+                    installDeps: '安装依赖',
+                    configSettings: '配置设置',
+                    runDevServer: '运行开发服务器',
+                    startBackend: '启动后端',
+                    startFrontend: '启动前端',
+                    openBrowser: '打开浏览器',
+
+                    // 表格部分
+                    tableComponent: '组件',
+                    tableDescription: '描述',
+                    tableStatus: '状态',
+                    tableButtonDesc: '交互式按钮组件',
+                    tableCardDesc: '带页眉和页脚的内容容器',
+                    tableModalDesc: '用于集中交互的覆盖对话框',
+                    tableStatusStable: '稳定',
+                    tableStatusBeta: '测试版',
+
+                    // 网格图案部分
+                    gridPatternsSubtitle: '可平铺的 CSS 网格图案，可用于微妙的背景纹理。',
+                    dots: '点状',
+                    lines: '线条',
+                    cross: '十字',
+                    diagonal: '斜线',
+
+                    // 网格系统部分
+                    grid2Col: '2 列网格',
+                    grid3Col: '3 列网格',
+                    gridAutoFit: '自适应网格',
+                    gridItem1: '网格项 1',
+                    gridItem2: '网格项 2',
+                    item1: '项 1',
+                    item2: '项 2',
+                    item3: '项 3',
+                    responsive1: '响应式 1',
+                    responsive2: '响应式 2',
+                    responsive3: '响应式 3',
+                    responsive4: '响应式 4',
+
+                    // 卡片部分
+                    simpleCard: '简单卡片',
+                    simpleCardText: '这只是一个包含标题和内容的简单卡片。',
+                    cardWithIcon: '带图标的卡片',
+                    cardWithIconText: '此卡片的页眉中有一个图标。',
+                    cardWithActions: '带操作的卡片',
+                    cardWithActionsText: '此卡片的页眉中有操作按钮。',
+                    fullFeaturedCard: '功能齐全的卡片',
+                    fullFeaturedCardText: '此卡片有图标、操作和页脚。',
+                    completeExample: '包含所有选项的完整示例',
+                    active: '激活',
+                    featured: '特色',
+                    cardWithDesc: '带描述的卡片',
+                    cardContentGoesHere: '卡片内容在此处...',
+                    cardHasDesc: '此卡片有描述',
+                    cardWithFooter: '带页脚的卡片',
+                    mainContentArea: '主要内容区域',
+
+                    // 按钮部分
+                    semanticButtonColors: '语义按钮颜色',
+                    activeStates: '激活状态',
+                    iconButtons: '图标按钮',
+                    dynamicButtons: '动态按钮',
+
+                    // 菜单部分
+                    navPanelMenu: '导航面板菜单',
+                    dropdownContextMenus: '下拉和上下文菜单',
+
+                    // 标签部分
+                    staticTags: '静态标签',
+                    default: '默认',
+                    tagSizes: '标签尺寸',
+                    small: '小',
+                    normal: '正常',
+                    large: '大',
+                    dynamicTags: '动态标签',
+
+                    // 表单部分
+                    textInputs: '文本输入',
+                    textInputLabel: '文本输入',
+                    textInputPlaceholder: '输入文本...',
+                    emailInputLabel: '电子邮件输入',
+                    emailInputPlaceholder: 'name@example.com',
+                    passwordInputLabel: '密码输入',
+                    passwordInputPlaceholder: '输入密码...',
+                    numberInputLabel: '数字输入',
+                    searchInputLabel: '搜索输入',
+                    searchInputPlaceholder: '搜索...',
+                    urlInputLabel: '网址输入',
+                    urlInputPlaceholder: 'https://example.com',
+                    selectionInputs: '选择输入',
+                    selectDropdown: '下拉选择',
+                    selectPlaceholder: '选择一个选项...',
+                    checkboxes: '复选框',
+                    checkboxEnableNotifs: '启用通知',
+                    checkboxSubscribe: '订阅新闻通讯',
+                    checkboxAcceptTerms: '接受条款和条件',
+                    radioButtons: '单选按钮',
+                    radioBasic: '基础计划',
+                    radioPro: '专业计划',
+                    radioEnterprise: '企业计划',
+                    otherInputs: '其他输入',
+                    textareaLabel: '文本区域',
+                    textareaPlaceholder: '输入您的消息...',
+                    dateInputLabel: '日期输入',
+                    timeInputLabel: '时间输入',
+                    colorPickerLabel: '颜色选择器',
+                    rangeSliderLabel: '范围滑块',
+                    inputStates: '输入状态',
+                    disabledInputLabel: '禁用输入',
+                    disabledInputPlaceholder: '禁用的输入',
+                    readonlyInputLabel: '只读输入',
+                    readonlyInputPlaceholder: '只读内容',
+                    semanticCheckboxesRadios: '语义颜色复选框和单选按钮',
+                    checkboxColors: '复选框颜色',
+                    radioColors: '单选按钮颜色',
+                    disabledStates: '禁用状态',
+                    disabledCheckbox: '禁用复选框',
+                    disabledChecked: '禁用已选',
+                    disabledRadio: '禁用单选按钮',
+                    disabledSelected: '禁用已选',
+                    formActions: '表单操作',
+
+                    // 徽章、加载器和进度条部分
+                    badges: '徽章',
+                    loadingSpinners: '加载旋转器',
+                    progressBars: '进度条',
+                    progressDefault: '默认 (25%)',
+                    progressPrimary: '主要 (50%)',
+                    progressSuccess: '成功 (75%)',
+                    progressWarning: '警告 (60%)',
+                    progressError: '错误 (30%)',
+                    progressInfo: '信息 (90%)',
+                    progressVariations: '进度条变体',
+                    progressStriped: '条纹 (动画)',
+                    progressSmall: '小尺寸',
+                    progressLarge: '带标签大尺寸',
+
+                    // 滚动条部分
+                    defaultScrollbar: '默认滚动条',
+                    scrollbarLorem: '这是一个可滚动的区域，带有自定义样式的滚动条。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n\nExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\n继续滚动以查看更多内容...\n\n滚动条样式会适应明暗主题。\n\n请注意自定义颜色和圆角。',
+                    thinScrollbar: '细滚动条',
+                    thinScrollbarLorem: '该区域有一个更细的滚动条变体。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit.\n\nSed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum.',
+                    horizontalScrollbar: '水平滚动条',
+                    horizontalScrollbarLorem: '此内容水平超出容器宽度。继续向右滚动以查看更多内容。水平滚动条也遵循相同的样式模式。',
+                    
+                    // 控制面板
+                    settings: '设置',
+                    language: '语言',
+                    theme: '主题',
+                    dark_mode: '暗黑模式',
+                    tint: '色调',
+                    accent: '强调',
+                    font: '字体',
+                    system: '系统',
+                    mono: '等宽',
+                    density: '密度',
+                    comfortable: '舒适',
+                    compact: '紧凑',
+                    iconSize: '图标大小',
+                    iconStroke: '图标描边',
+
+                    // ... existing chinese translations block...
+                    heading1Tag: '标题 1 <h1>',
+                    heading2Tag: '标题 2 <h2>',
+                    heading3Tag: '标题 3 <h3>',
+                    heading4Tag: '标题 4 <h4>',
+                    heading5Tag: '标题 5 <h5>',
+                    heading6Tag: '标题 6 <h6>',
+                    tooltips: '工具提示',
+                }
+            },
+            apply() {
+                const lang = this.get();
+                const dictTo = this.translations[lang] || {};
+                const otherLang = lang === 'zh' ? 'en' : 'zh';
+                const dictFrom = this.translations[otherLang] || {};
+                // Attributes translation
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (dictTo[key]) el.textContent = dictTo[key];
+                });
+                // Text node translation fallback
+                const map = {};
+                Object.keys(dictFrom).forEach(k => {
+                    map[dictFrom[k]] = dictTo[k] || dictFrom[k];
+                });
+                const walk = (node) => {
+                    node.childNodes.forEach(child => {
+                        if (child.nodeType === 3) { // text
+                            const txt = child.nodeValue.trim();
+                            if (map[txt]) child.nodeValue = child.nodeValue.replace(txt, map[txt]);
+                        } else {
+                            walk(child);
+                        }
+                    });
+                };
+                walk(document.body);
+                // Update toggle button
+                const btn = document.querySelector('.language-toggle-btn');
+                if (btn) {
+                    btn.innerHTML = `<i data-lucide="globe" class="lucide"></i> <span>${lang === 'zh' ? 'EN' : '中文'}</span>`;
+                }
+                window.UI.icons();
+            },
+            set(lang) {
+                document.documentElement.setAttribute('lang', lang);
+                localStorage.setItem('fileui-lang', lang);
+                this.apply();
+            },
+            get() {
+                return document.documentElement.getAttribute('lang') || 'en';
+            },
+            toggle() {
+                const newLang = this.get() === 'zh' ? 'en' : 'zh';
+                this.set(newLang);
+                return newLang;
+            }
         }
     };
     
@@ -1148,6 +1775,9 @@
         const savedTheme = localStorage.getItem('fileui-theme');
         if (savedTheme) {
             UI.theme.set(savedTheme);
+        } else {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            UI.theme.set(prefersDark ? 'dark' : 'light');
         }
         
         // Initialize all interactive components
@@ -1162,49 +1792,36 @@
 // Scroll to section and expand the card
 function scrollToSection(sectionId) {
     console.log('Scrolling to section:', sectionId);
-    
-    // Find the section
-    const sections = document.querySelectorAll('.section');
-    let targetSection = null;
-    let targetCard = null;
-    
-    // Try to find by matching card title
-    sections.forEach(section => {
-        const card = section.querySelector('.card');
-        if (card) {
+    // Direct lookup by section id first
+    let targetSection = document.querySelector(`.section#${CSS.escape(sectionId)}`);
+    let targetCard = targetSection ? targetSection.querySelector('.card') : null;
+    if (!targetSection) {
+        // fallback previous logic
+        const sections = document.querySelectorAll('.section');
+        targetSection = null;
+        targetCard = null;
+        const searchText = sectionId.toLowerCase();
+        sections.forEach(section => {
+            const card = section.querySelector('.card');
+            if (!card) return;
             const title = card.querySelector('.card-title');
-            if (title) {
-                const titleText = title.textContent.toLowerCase();
-                const searchText = sectionId.toLowerCase();
-                
-                // Check various matches
-                if (titleText.includes(searchText) || 
-                    titleText.replace(/[^a-z0-9]/g, '').includes(searchText.replace(/[^a-z0-9]/g, '')) ||
-                    (searchText === 'toast' && titleText.includes('notification')) ||
-                    (searchText === 'badges' && titleText.includes('badges'))) {
-                    targetSection = section;
-                    targetCard = card;
-                }
+            if (!title) return;
+            const titleText = title.textContent.toLowerCase();
+            if (titleText.includes(searchText) ||
+                titleText.replace(/[^a-z0-9]/g, '').includes(searchText.replace(/[^a-z0-9]/g, '')) ||
+                (searchText === 'toast' && titleText.includes('notification')) ||
+                (searchText === 'badges' && titleText.includes('badges'))) {
+                targetSection = section;
+                targetCard = card;
             }
-        }
-    });
-    
-    // If found, expand and scroll
+        });
+    }
     if (targetSection && targetCard) {
-        // First scroll to the section
         targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
-        // Then expand the card with a slight delay for visual effect
-        setTimeout(() => {
-            targetCard.classList.remove('collapsed');
-        }, 100);
-        
-        // Also expand the corresponding nav section if it's collapsed
+        setTimeout(() => targetCard.classList.remove('collapsed'), 100);
         const navPanel = document.getElementById('nav-panel');
         if (navPanel && !navPanel.classList.contains('collapsed')) {
-            // Expand the nav section that contains this item
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
+            document.querySelectorAll('.nav-item').forEach(item => {
                 if (item.dataset.navItem === sectionId) {
                     const navSection = item.closest('.nav-section');
                     if (navSection && navSection.classList.contains('collapsed')) {
@@ -1235,7 +1852,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: 'Layout',
             items: [
                 { id: 'grid', text: 'Grid System', icon: 'grid', onclick: () => scrollToSection('grid') },
-                { id: 'grid-patterns', text: 'Grid Patterns', icon: 'grid', onclick: () => scrollToSection('grid patterns') },
+                { id: 'grid-patterns', text: 'Grid Patterns', icon: 'grip-horizontal', onclick: () => scrollToSection('grid patterns') },
                 { id: 'cards', text: 'Cards', icon: 'square', onclick: () => scrollToSection('cards') }
             ]
         },
@@ -1249,7 +1866,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 'panels', text: 'Panels', icon: 'layout', onclick: () => scrollToSection('panels') },
                 { id: 'tags', text: 'Tags', icon: 'tag', onclick: () => scrollToSection('tags') },
                 { id: 'forms', text: 'Forms', icon: 'edit', onclick: () => scrollToSection('forms') },
-                { id: 'badges', text: 'Badges, Spinners & Progress', icon: 'star', onclick: () => scrollToSection('badges') }
+                { id: 'badges', text: 'Badges, Spinners & Progress', icon: 'star', onclick: () => scrollToSection('badges') },
+                { id: 'tooltips', text: 'Tooltips', icon: 'help-circle', onclick: () => scrollToSection('tooltips') }
             ]
         },
         {
@@ -1846,6 +2464,7 @@ function addMissingTooltips() {
             tooltip.setAttribute('content', tooltipText);
             tooltip.setAttribute('placement', 'top');
             tooltip.setAttribute('distance', '8');
+            tooltip.setAttribute('hoist', '');
             
             // Wrap the button with the tooltip
             button.parentNode.insertBefore(tooltip, button);
@@ -1862,14 +2481,34 @@ function addMissingTooltips() {
             const tooltip = document.createElement('sl-tooltip');
             tooltip.setAttribute('content', `Navigate to ${text} section`);
             tooltip.setAttribute('placement', 'right');
+            tooltip.setAttribute('hoist', '');
             
             // Wrap the nav item with the tooltip
             item.parentNode.insertBefore(tooltip, item);
             tooltip.appendChild(item);
         }
     });
+    
+    // Add tooltips to any element with a title attribute (generic fallback)
+    document.querySelectorAll('[title]:not(sl-tooltip [title])').forEach(el => {
+        if (!el.closest('sl-tooltip')) {
+            const titleText = el.getAttribute('title');
+            if (!titleText) return;
+            const tooltip = document.createElement('sl-tooltip');
+            tooltip.setAttribute('content', titleText);
+            tooltip.setAttribute('placement', 'top');
+            tooltip.setAttribute('distance', '8');
+            tooltip.setAttribute('hoist', '');
+            el.removeAttribute('title');
+            el.parentNode.insertBefore(tooltip, el);
+            tooltip.appendChild(el);
+        }
+    });
 }
 
+// Observe DOM mutations to add tooltips to dynamically inserted elements
+const tooltipObserver = new MutationObserver(() => addMissingTooltips());
+tooltipObserver.observe(document.body, { childList: true, subtree: true });
 
 // Font specimen functionality
 function initFontSpecimen() {

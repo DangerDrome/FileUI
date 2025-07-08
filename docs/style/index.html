@@ -10,6 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Load Noto Sans SC for Chinese support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
     <!-- Load styles -->
     <link rel="stylesheet" href="styles.css">
     
@@ -956,7 +959,7 @@ greetUser('Developer');</code></pre>
             </div>
 
             <!-- Forms Section -->
-            <div class="section">
+            <div class="section" id="forms">
                 <div class="card">
                     <div class="card-header">
                         <div class="card-header-left"><i data-lucide="edit" class="card-icon"></i><h2 class="card-title">Form Elements</h2></div>
@@ -1322,6 +1325,23 @@ greetUser('Developer');</code></pre>
                             <p class="inline-display">This content extends horizontally beyond the container width. Keep scrolling to the right to see more content. The horizontal scrollbar also follows the same styling pattern.</p>
                         </div>
                     </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tooltips Section -->
+            <div class="section" id="tooltips">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-header-left"><i data-lucide="help-circle" class="card-icon"></i><h2 class="card-title">Tooltips</h2></div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-secondary">Hover over the buttons and icons below to see tooltips.</p>
+                        <div class="demo-row">
+                            <button class="btn" title="Default tooltip">Hover me</button>
+                            <button class="btn btn-primary" title="Primary tooltip">Primary</button>
+                            <i data-lucide="info" class="icon-lg margin-left-2" title="Info icon"></i>
+                        </div>
                     </div>
                 </div>
             </div>

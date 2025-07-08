@@ -12,7 +12,7 @@
 /* CSS Custom Properties */
 :root {
     /* Typography */
-    --font-system: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-system: Inter, 'Noto Sans SC', PingFang SC, 'Microsoft YaHei', Heiti SC, sans-serif;
     --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
     
     /* Colors - Light Mode (Original Style Guide) */
@@ -841,7 +841,7 @@ q {
 .card {
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
-    overflow: hidden;
+    overflow: visible;
     transition: all var(--transition-base);
     min-width: 350px;
 }
@@ -1880,7 +1880,7 @@ body.dark .progress-bar-striped {
 .panel {
     background: var(--bg-primary);
     border-radius: var(--radius-lg);
-    overflow: hidden;
+    overflow: visible;
     margin-bottom: var(--space-6);
     position: relative;
     transition: all var(--transition-base);
@@ -2775,7 +2775,7 @@ body:has(.control-panel.collapsed) .main-content {
     .nav-panel.collapsed {
         width: 100%;
     }
-
+    
     .nav-panel.open {
         transform: none;
     }
@@ -3952,5 +3952,95 @@ input[type="color"].color-swatch::-moz-color-swatch {
     padding: var(--space-3);
     margin-bottom: var(--space-2);
     border-radius: var(--radius-md);
+}
+
+/* Accessibility & Preference Enhancements */
+:root {
+    --focus-ring: var(--accent);
+}
+
+/* Focus-visible outline for interactive elements */
+.btn:focus-visible,
+.nav-item:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.color-swatch:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High-contrast mode overrides */
+@media (forced-colors: active) {
+    body {
+        forced-color-adjust: none;
+        background: Canvas;
+        color: CanvasText;
+    }
+    .btn,
+    .card,
+    .nav-panel,
+    .control-panel,
+    .panel {
+        background: Canvas;
+        color: CanvasText;
+        border: 1px solid CanvasText;
+    }
+}
+
+/* Print stylesheet */
+@media print {
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    .nav-panel,
+    .control-panel {
+        display: none !important;
+    }
+    .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    a {
+        color: #000 !important;
+        text-decoration: underline;
+    }
+}
+
+/* Motion variables */
+:root {
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Replace existing transitions to reference new easing if desired (future work) */
+
+/* RTL Support */
+:dir(rtl) .nav-panel {
+    left: auto;
+    right: var(--space-4);
+}
+:dir(rtl) .control-panel {
+    right: auto;
+    left: var(--space-4);
+}
+:dir(rtl) .main-content {
+    margin-left: calc(320px + var(--space-8));
+    margin-right: calc(var(--nav-width) + var(--space-8));
+}
+:dir(rtl) body:has(.nav-panel.collapsed) .main-content {
+    margin-right: calc(64px + var(--space-8));
+}
+:dir(rtl) body:has(.control-panel.collapsed) .main-content {
+    margin-left: calc(64px + var(--space-8));
 }
 

@@ -1236,9 +1236,9 @@ q {
 
 /* Loading Spinner */
 .loading-spinner {
-    width: var(--spinner-size-lg);
-    height: var(--spinner-size-lg);
-    border: 6px solid var(--grey-800);
+    width: 32px;
+    height: 32px;
+    border: 8px solid var(--grey-800);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -1251,9 +1251,9 @@ q {
 
 /* Loading spinner when used as toast icon */
 .toast-icon.loading-spinner {
-    width: var(--spinner-size-sm);
-    height: var(--spinner-size-sm);
-    border-width: 4px;
+    width: 32px;
+    height: 32px;
+    border-width: 8px;
     border-color: var(--grey-800);
     border-top-color: var(--accent);
     flex-shrink: 0;
@@ -1264,7 +1264,7 @@ q {
 .progress {
     width: 100%;
     height: 20px;
-    background: var(--bg-tertiary);
+    background: var(--bg-quaternary);
     border-radius: var(--radius-md);
     overflow: hidden;
     position: relative;
@@ -1347,7 +1347,7 @@ q {
 
 /* Dark theme progress bar adjustments */
 body.dark .progress {
-    background: var(--bg-tertiary);
+    background: var(--bg-quaternary);
 }
 
 body.dark .progress-label {
@@ -1981,6 +1981,12 @@ body.dark .progress-bar-striped {
 
 .tag-info {
     background: var(--info);
+    color: var(--grey-800);
+}
+
+/* Accent colored tag */
+.tag-accent {
+    background: var(--accent);
     color: var(--grey-800);
 }
 
@@ -3092,22 +3098,22 @@ blockquote footer {
 }
 
 .callout-info {
-    background: rgba(212, 197, 249, 0.1);
+    background: rgba(212, 197, 249, 0.35);
     border-left-color: var(--info);
 }
 
 .callout-warning {
-    background: rgba(255, 228, 163, 0.1);
+    background: rgba(255, 228, 163, 0.35);
     border-left-color: var(--warning);
 }
 
 .callout-success {
-    background: rgba(184, 230, 184, 0.1);
+    background: rgba(184, 230, 184, 0.35);
     border-left-color: var(--success);
 }
 
 .callout-error {
-    background: rgba(255, 179, 186, 0.1);
+    background: rgba(255, 179, 186, 0.35);
     border-left-color: var(--error);
 }
 
@@ -3182,19 +3188,19 @@ body:not(.dark) sl-tooltip::part(base) {
 
 /* Dark mode adjustments for markdown elements */
 body.dark .callout-info {
-    background: rgba(212, 197, 249, 0.05);
+    background: rgba(212, 197, 249, 0.2);
 }
 
 body.dark .callout-warning {
-    background: rgba(255, 228, 163, 0.05);
+    background: rgba(255, 228, 163, 0.2);
 }
 
 body.dark .callout-success {
-    background: rgba(184, 230, 184, 0.05);
+    background: rgba(184, 230, 184, 0.2);
 }
 
 body.dark .callout-error {
-    background: rgba(255, 179, 186, 0.05);
+    background: rgba(255, 179, 186, 0.2);
 }
 
 /* Font Specimen */
@@ -3578,41 +3584,41 @@ body.dark .callout-error {
 .loading-spinner-primary {
     border-color: color-mix(in srgb, var(--primary) 30%, transparent);
     border-top-color: var(--primary);
-    width: 24px;
-    height: 24px;
-    border-width: 3px;
+    width: 32px;
+    height: 32px;
+    border-width: 8px;
 }
 
 .loading-spinner-success {
     border-color: color-mix(in srgb, var(--success) 30%, transparent);
     border-top-color: var(--success);
-    width: 24px;
-    height: 24px;
-    border-width: 3px;
+    width: 32px;
+    height: 32px;
+    border-width: 8px;
 }
 
 .loading-spinner-warning {
     border-color: color-mix(in srgb, var(--warning) 30%, transparent);
     border-top-color: var(--warning);
-    width: 24px;
-    height: 24px;
-    border-width: 3px;
+    width: 32px;
+    height: 32px;
+    border-width: 8px;
 }
 
 .loading-spinner-error {
     border-color: color-mix(in srgb, var(--error) 30%, transparent);
     border-top-color: var(--error);
-    width: 24px;
-    height: 24px;
-    border-width: 3px;
+    width: 32px;
+    height: 32px;
+    border-width: 8px;
 }
 
 .loading-spinner-info {
     border-color: color-mix(in srgb, var(--info) 30%, transparent);
     border-top-color: var(--info);
-    width: 24px;
-    height: 24px;
-    border-width: 3px;
+    width: 32px;
+    height: 32px;
+    border-width: 8px;
 }
 
 @media (max-width: 768px) {
@@ -3729,6 +3735,66 @@ body.dark .callout-error {
     /* Force elements that span multiple columns to full row width */
     .grid-span-2 {
         grid-column: 1 / -1;
+    }
+
+    /* Show only icon buttons in bottom (control) panel */
+    .control-panel .btn span {
+        display: none;
+    }
+
+    /* Flatten control groups to avoid vertical stacking and large gaps */
+    .control-panel-controls {
+        align-items: center;
+    }
+
+    .control-panel .control-group {
+        display: contents; /* remove extra flex wrapper */
+        gap: var(--space-1);
+        margin: 0;
+    }
+
+    .control-panel .btn-group {
+        flex-direction: row;
+        gap: var(--space-1);
+    }
+
+    .control-panel .btn {
+        padding: var(--space-2);
+        margin: 0;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Ensure control panel collapsed btn groups are horizontal on mobile */
+    .control-panel.collapsed .btn-group {
+        flex-direction: row !important;
+        gap: var(--space-1);
+    }
+
+    /* Hide color swatches in bottom control panel on small screens */
+    .control-panel .color-swatch {
+        display: none;
+    }
+
+    /* Hide color cards entirely in collapsed control panel on mobile */
+    .control-panel.collapsed .color-card {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Hide generic panel headers to maximize space */
+    .panel-header {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Ensure control panel collapsed header is hidden on mobile */
+    .control-panel.collapsed .control-panel-header,
+    .nav-panel.collapsed .nav-panel-header {
+        display: none !important;
     }
 }
 

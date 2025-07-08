@@ -189,6 +189,8 @@
 
         // Show a toast notification
         toast(message, type = 'info', options = {}) {
+            // Translate message
+            message = UI.language.translate(message);
             // Create or get toast container
             let container = document.querySelector('.toast-container');
             if (!container) {
@@ -843,7 +845,7 @@
                 const colorLabel = document.createElement('span');
                 colorLabel.textContent = color.label;
                 colorLabel.className = 'color-label color-details';
-                colorLabel.style.cssText = 'font-size: var(--text-xs); min-width: 50px; font-weight: var(--font-medium);';
+                colorLabel.style.cssText = 'min-width: 50px; font-weight: var(--font-medium);';
                 
                 const colorPicker = document.createElement('input');
                 colorPicker.type = 'color';
@@ -1436,6 +1438,83 @@
                     heading5Tag: 'Heading 5 <h5>',
                     heading6Tag: 'Heading 6 <h6>',
                     tooltips: 'Tooltips',
+                    save: 'Save',
+                    delete: 'Delete',
+                    settingsBtn: 'Settings',
+                    action: 'Action',
+                    newFile: 'New File',
+                    newFolder: 'New Folder',
+                    help: 'Help',
+                    defaultBtn: 'Default',
+                    secondary: 'Secondary',
+                    tertiary: 'Tertiary',
+                    neutral: 'Neutral',
+                    semanticButtonColors: 'Semantic Button Colors',
+                    iconButtons: 'Icon Buttons',
+                    dynamicButtons: 'Dynamic Buttons',
+                    activeStates: 'Active States',
+                    progressBars: 'Progress Bars',
+                    progressVariations: 'Progress Variations',
+                    loadingSpinners: 'Loading Spinners',
+                    copiedPrefix: 'Copied:',
+                    deleted: 'Deleted!',
+                    saved: 'Saved!',
+                    newFileCreated: 'New file created',
+                    newFolderCreated: 'New folder created',
+                    settingsOpened: 'Settings opened',
+                    helpOpened: 'Help opened',
+                    successToast: 'Success Toast',
+                    errorToast: 'Error Toast',
+                    warningToast: 'Warning Toast',
+                    infoToast: 'Info Toast',
+                    preloaderToast: 'Preloader Toast',
+                    dismissibleToast: 'Dismissible Toast',
+                    actionToast: 'Action Toast',
+                    showSuccessNotification: 'Show success notification',
+                    showErrorNotification: 'Show error notification',
+                    showWarningNotification: 'Show warning notification',
+                    showInfoNotification: 'Show info notification',
+                    successMessage: 'Success message!',
+                    errorOccurred: 'Error occurred!',
+                    warningMessage: 'Warning message',
+                    infoMessage: 'Info message',
+                    loadingData: 'Loading data...',
+                    clickToDismiss: 'Click X to dismiss',
+                    actionRequired: 'Action required',
+                    undone: 'Undone!',
+                    editClicked: 'Edit clicked!',
+                    deleteClicked: 'Delete clicked!',
+                    moreOptions: 'More options',
+                    popoverAction: 'Popover action!',
+                    tagRemoved: 'Tag removed!',
+                    simpleModal: 'Simple Modal',
+                    simpleModalContent: 'This is a simple modal with just content.',
+                    confirmDelete: 'Confirm Delete',
+                    confirmDeleteContent: 'Are you sure you want to delete this file?',
+                    delete: 'Delete',
+                    cancel: 'Cancel',
+                    userForm: 'User Form',
+                    nameLabel: 'Name',
+                    emailLabel: 'Email',
+                    save: 'Save',
+                    Spacing: 'Spacing',
+                    Dimensions: 'Dimensions',
+                    Shadows: 'Shadows',
+                    Borders: 'Borders',
+                    Animations: 'Animations',
+                    'Z-Index': 'Z-Index',
+                    Other: 'Other',
+                    defaultButton: 'Default Button',
+                    primaryButton: 'Primary Button',
+                    smallButton: 'Small Button',
+                    largeButton: 'Large Button',
+                    disabledButton: 'Disabled',
+                    activeDefault: 'Active Default',
+                    activePrimary: 'Active Primary',
+                    activeSuccess: 'Active Success',
+                    activeWarning: 'Active Warning',
+                    activeError: 'Active Error',
+                    activeInfo: 'Active Info',
                 },
                 zh: {
                     // 左侧导航
@@ -1716,6 +1795,83 @@
                     heading5Tag: '标题 5 <h5>',
                     heading6Tag: '标题 6 <h6>',
                     tooltips: '工具提示',
+                    save: '保存',
+                    delete: '删除',
+                    settingsBtn: '设置',
+                    action: '操作',
+                    newFile: '新建文件',
+                    newFolder: '新建文件夹',
+                    help: '帮助',
+                    defaultBtn: '默认',
+                    secondary: '次要',
+                    tertiary: '三级',
+                    neutral: '中性',
+                    semanticButtonColors: '语义按钮颜色',
+                    iconButtons: '图标按钮',
+                    dynamicButtons: '动态按钮',
+                    activeStates: '激活状态',
+                    progressBars: '进度条',
+                    progressVariations: '进度条变体',
+                    loadingSpinners: '加载旋转器',
+                    copiedPrefix: '已复制：',
+                    deleted: '已删除！',
+                    saved: '已保存！',
+                    newFileCreated: '已创建新文件',
+                    newFolderCreated: '已创建新文件夹',
+                    settingsOpened: '已打开设置',
+                    helpOpened: '已打开帮助',
+                    successToast: '成功提示',
+                    errorToast: '错误提示',
+                    warningToast: '警告提示',
+                    infoToast: '信息提示',
+                    preloaderToast: '加载提示',
+                    dismissibleToast: '可关闭提示',
+                    actionToast: '操作提示',
+                    showSuccessNotification: '显示成功通知',
+                    showErrorNotification: '显示错误通知',
+                    showWarningNotification: '显示警告通知',
+                    showInfoNotification: '显示信息通知',
+                    successMessage: '成功消息！',
+                    errorOccurred: '发生错误！',
+                    warningMessage: '警告信息',
+                    infoMessage: '信息',
+                    loadingData: '正在加载数据...',
+                    clickToDismiss: '点击 X 关闭',
+                    actionRequired: '需要操作',
+                    undone: '已撤销！',
+                    editClicked: '已点击编辑！',
+                    deleteClicked: '已点击删除！',
+                    moreOptions: '更多选项',
+                    popoverAction: '弹出操作！',
+                    tagRemoved: '标签已删除！',
+                    simpleModal: '简单模态框',
+                    simpleModalContent: '这是一个只包含内容的简单模态框。',
+                    confirmDelete: '确认删除',
+                    confirmDeleteContent: '您确定要删除此文件吗？',
+                    delete: '删除',
+                    cancel: '取消',
+                    userForm: '用户表单',
+                    nameLabel: '姓名',
+                    emailLabel: '电子邮件',
+                    save: '保存',
+                    Spacing: '间距',
+                    Dimensions: '尺寸',
+                    Shadows: '阴影',
+                    Borders: '边框',
+                    Animations: '动画',
+                    'Z-Index': '层级',
+                    Other: '其他',
+                    defaultButton: '默认按钮',
+                    primaryButton: '主按钮',
+                    smallButton: '小按钮',
+                    largeButton: '大按钮',
+                    disabledButton: '禁用',
+                    activeDefault: '激活默认',
+                    activePrimary: '激活主按钮',
+                    activeSuccess: '激活成功',
+                    activeWarning: '激活警告',
+                    activeError: '激活错误',
+                    activeInfo: '激活信息',
                 }
             },
             apply() {
@@ -1723,33 +1879,45 @@
                 const dictTo = this.translations[lang] || {};
                 const otherLang = lang === 'zh' ? 'en' : 'zh';
                 const dictFrom = this.translations[otherLang] || {};
-                // Attributes translation
+                // Attribute translation
                 document.querySelectorAll('[data-i18n]').forEach(el => {
                     const key = el.getAttribute('data-i18n');
-                    if (dictTo[key]) el.textContent = dictTo[key];
+                    if (dictTo[key]) {
+                        const val = dictTo[key];
+                        if (val.includes('<')) {
+                            el.innerHTML = val;
+                        } else {
+                            el.textContent = val;
+                        }
+                    }
                 });
-                // Text node translation fallback
+                // Build case-insensitive map
                 const map = {};
                 Object.keys(dictFrom).forEach(k => {
-                    map[dictFrom[k]] = dictTo[k] || dictFrom[k];
+                    const fromText = dictFrom[k];
+                    const toText = dictTo[k] || fromText;
+                    if (!fromText) return;
+                    map[fromText] = toText;
+                    map[fromText.toLowerCase()] = toText;
+                    map[fromText.toUpperCase()] = toText;
+                    map[fromText.replace(/^./, c => c.toUpperCase())] = toText;
                 });
+                // Walk all text nodes and replace
                 const walk = (node) => {
                     node.childNodes.forEach(child => {
                         if (child.nodeType === 3) { // text
-                            const txt = child.nodeValue.trim();
-                            if (map[txt]) child.nodeValue = child.nodeValue.replace(txt, map[txt]);
+                            const text = child.nodeValue.trim();
+                            if (!text) return;
+                            const replacement = map[text] || map[text.toLowerCase()] || map[text.toUpperCase()] || map[text.replace(/^./, c => c.toUpperCase())];
+                            if (replacement && replacement !== text) {
+                                child.nodeValue = child.nodeValue.replace(text, replacement);
+                            }
                         } else {
                             walk(child);
                         }
                     });
                 };
                 walk(document.body);
-                // Update toggle button
-                const btn = document.querySelector('.language-toggle-btn');
-                if (btn) {
-                    btn.innerHTML = `<i data-lucide="globe" class="lucide"></i> <span>${lang === 'zh' ? 'EN' : '中文'}</span>`;
-                }
-                window.UI.icons();
             },
             set(lang) {
                 document.documentElement.setAttribute('lang', lang);
@@ -1763,7 +1931,22 @@
                 const newLang = this.get() === 'zh' ? 'en' : 'zh';
                 this.set(newLang);
                 return newLang;
-            }
+            },
+            translate(text) {
+                const lang = this.get();
+                if (lang === 'en') return text;
+                const dictTo = this.translations[lang] || {};
+                const dictFrom = this.translations['en'] || {};
+                // Exact match
+                if (dictTo[text]) return dictTo[text];
+                // Prefix match (e.g., Copied: ...)
+                const enPrefix = dictFrom.copiedPrefix || 'Copied:';
+                const zhPrefix = dictTo.copiedPrefix || '已复制：';
+                if (text.startsWith(enPrefix)) {
+                    return zhPrefix + text.slice(enPrefix.length);
+                }
+                return text;
+            },
         }
     };
     
@@ -2006,21 +2189,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Modal examples
 function showSimpleModal() {
-    UI.modal('This is a simple modal with just content.', {
-        title: 'Simple Modal'
+    UI.modal(UI.language.translate('This is a simple modal with just content.'), {
+        title: UI.language.translate('Simple Modal')
     });
 }
 
 function showConfirmModal() {
-    UI.modal('Are you sure you want to delete this file?', {
-        title: 'Confirm Delete',
+    UI.modal(UI.language.translate('Are you sure you want to delete this file?'), {
+        title: UI.language.translate('Confirm Delete'),
         actions: [
-            { text: 'Cancel', variant: 'default' },
-            { 
-                text: 'Delete', 
-                variant: 'error',
-                onclick: () => UI.toast('File deleted!', 'success')
-            }
+            { text: UI.language.translate('Cancel') },
+            { text: UI.language.translate('Delete'), variant: 'error', onclick: () => UI.toast(UI.language.translate('File deleted!'), 'success') }
         ]
     });
 }
@@ -2028,24 +2207,19 @@ function showConfirmModal() {
 function showFormModal() {
     const formHTML = `
         <div class="form-group">
-            <label class="form-label">Name</label>
-            <input type="text" class="form-input" placeholder="Enter name...">
+            <label class="form-label">${UI.language.translate('Name')}</label>
+            <input type="text" class="form-input" placeholder="${UI.language.translate('Enter name...')}">
         </div>
         <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-input" placeholder="Enter email...">
+            <label class="form-label">${UI.language.translate('Email')}</label>
+            <input type="email" class="form-input" placeholder="${UI.language.translate('Enter email...')}">
         </div>
     `;
-    
     UI.modal(formHTML, {
-        title: 'User Form',
+        title: UI.language.translate('User Form'),
         actions: [
-            { text: 'Cancel' },
-            { 
-                text: 'Save', 
-                variant: 'primary',
-                onclick: () => UI.toast('Form saved!', 'success')
-            }
+            { text: UI.language.translate('Cancel') },
+            { text: UI.language.translate('Save'), variant: 'primary', onclick: () => UI.toast(UI.language.translate('Form saved!'), 'success') }
         ]
     });
 }
@@ -2507,8 +2681,8 @@ function addMissingTooltips() {
 }
 
 // Observe DOM mutations to add tooltips to dynamically inserted elements
-const tooltipObserver = new MutationObserver(() => addMissingTooltips());
-tooltipObserver.observe(document.body, { childList: true, subtree: true });
+// const tooltipObserver = new MutationObserver(() => addMissingTooltips());
+// tooltipObserver.observe(document.body, { childList: true, subtree: true });
 
 // Font specimen functionality
 function initFontSpecimen() {
@@ -2552,3 +2726,13 @@ function initFontSpecimen() {
         });
     }
 }
+
+// Observe DOM mutations to handle dynamic tooltips and translations
+const uiObserver = new MutationObserver(() => {
+    addMissingTooltips();
+    if (UI.language.get() === 'zh') {
+        UI.language.apply();
+    }
+});
+uiObserver.observe(document.body, { childList: true, subtree: true });
+// Remove earlier tooltipObserver to avoid duplicate observers

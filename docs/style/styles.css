@@ -3122,9 +3122,20 @@ blockquote footer {
 
 /* Tables */
 .table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: var(--space-4) 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.table th,
+.table td {
+    border-bottom: none !important;
+}
+
+.table tbody tr:nth-child(even) {
+    background: var(--bg-quaternary);
 }
 
 .table th,
@@ -3135,9 +3146,7 @@ blockquote footer {
 }
 
 .table th {
-    background: var(--bg-tertiary);
-    font-weight: var(--font-semibold);
-    font-size: var(--text-sm);
+    background: var(--bg-quaternary);
     color: var(--text-primary);
 }
 
@@ -4043,4 +4052,34 @@ textarea:focus-visible,
 :dir(rtl) body:has(.control-panel.collapsed) .main-content {
     margin-left: calc(64px + var(--space-8));
 }
+
+/* Darker table header */
+.table th {
+    background: var(--bg-quaternary);
+    color: var(--text-primary);
+}
+
+/* Semantic color chips as cards in expanded right panel */
+.control-panel:not(.collapsed) .semantic-color-chip {
+    background: var(--bg-tertiary);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    display: inline-block;
+    margin-bottom: var(--space-2);
+}
+
+/* Card look for semantic color rows in expanded control panel */
+.control-panel:not(.collapsed) .color-control {
+    background: var(--bg-tertiary);
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-2);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-base);
+    line-height: 1.5;
+}
+
+.control-panel:not(.collapsed) .color-label { font-size: var(--text-sm); }
 

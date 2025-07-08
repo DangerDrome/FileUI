@@ -569,9 +569,8 @@
                 onclick: () => {
                     this.theme.toggle();
                     const isDark = this.theme.get() === 'dark';
-                    themeBtn.querySelector('i').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-                    const textSpan = themeBtn.querySelector('span');
-                    if (textSpan) textSpan.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+                    // Rebuild button contents to avoid null reference after Lucide replaces <i> with <svg>
+                    themeBtn.innerHTML = `<i data-lucide="${isDark ? 'sun' : 'moon'}" class="lucide"></i> <span>${isDark ? 'Light Mode' : 'Dark Mode'}</span>`;
                     themeBtn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
                     this.icons();
                 }
@@ -835,7 +834,7 @@
                 colorPicker.type = 'color';
                 colorPicker.value = color.default;
                 colorPicker.className = 'color-swatch';
-                colorPicker.style.cssText = 'width: 32px; height: 32px; border: 2px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; background: none; padding: 0;';
+                colorPicker.style.cssText = 'width: 32px; height: 32px; border-radius: var(--radius-md); cursor: pointer; background: none; padding: 0;';
                 
                 const resetBtn = document.createElement('button');
                 resetBtn.innerHTML = '<i data-lucide="rotate-ccw" class="lucide"></i>';
@@ -1236,6 +1235,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: 'Layout',
             items: [
                 { id: 'grid', text: 'Grid System', icon: 'grid', onclick: () => scrollToSection('grid') },
+                { id: 'grid-patterns', text: 'Grid Patterns', icon: 'grid', onclick: () => scrollToSection('grid patterns') },
                 { id: 'cards', text: 'Cards', icon: 'square', onclick: () => scrollToSection('cards') }
             ]
         },
@@ -1700,59 +1700,55 @@ function populateCSSVariables() {
         });
     }
     
-    console.log('Found CSS variables:', cssVars.length);
-    
-    // If in dark mode, also check for dark mode overrides
-    if (document.body.classList.contains('dark')) {
-        // Add dark mode specific variables
-        const darkModeVars = [
-            '--bg-primary', '--bg-secondary', '--bg-tertiary', '--bg-quaternary', '--bg-quinary',
-            '--text-primary', '--text-secondary', '--text-tertiary',
-            '--border-color', '--border-strong'
-        ];
-        
-        darkModeVars.forEach(varName => {
-            // Check if we already have this variable
-            const existing = cssVars.find(v => v.name === varName);
-            if (existing) {
-                // Update with current computed value (which will be the dark mode value)
-                existing.value = computedStyles.getPropertyValue(varName).trim();
+    // Helper — detect if a variable is referenced anywhere via var(--name)
+    function isCSSVarUsed(name) {
+        const search = `var(${name})`;
+        const sheets = Array.from(document.styleSheets);
+        for (const sheet of sheets) {
+            let rules;
+            try {
+                rules = sheet.cssRules || sheet.rules;
+            } catch (e) {
+                // Cross-origin or inaccessible stylesheet – skip it
+                continue;
             }
-        });
+            if (!rules) continue;
+            for (const rule of rules) {
+                const cssText = rule.cssText || '';
+                if (cssText.includes(search)) return true;
+            }
+        }
+        // Fallback: search HTML
+        return document.documentElement.innerHTML.includes(search);
     }
-    
-    // Group variables by category
+
+    // Keep only variables that are actually referenced in CSS/HTML
+    const usedVars = cssVars.filter(v => isCSSVarUsed(v.name));
+
+    console.log('Used CSS variables:', usedVars.length);
+
+    // Group variables by category (unmatched vars are ignored)
     const groups = {
-        'Typography': ['--font-', '--text-', '--line-height', '--letter-spacing'],
-        'Colors': ['--bg-', '--text-primary', '--text-secondary', '--text-tertiary', '--border-', '--accent', '--primary', '--success', '--warning', '--error', '--info', '--neutral', '--grey-'],
+        'Typography': ['--font-', '--text-', 'letter-spacing'],
+        'Colors': ['--bg-', '--overlay-', '--text-primary', '--text-secondary', '--text-tertiary', '--border-', '--accent', '--primary', '--success', '--warning', '--error', '--info', '--neutral', '--grey-'],
         'Spacing': ['--space-'],
         'Dimensions': ['--nav-', '--card-', '--icon-size', '--spinner-size', '--width', '--height'],
         'Shadows': ['--shadow-'],
         'Borders': ['--radius-', '--border-width'],
         'Animations': ['--transition-', '--duration-'],
-        'Z-Index': ['--z-'],
-        'Other': []
+        'Z-Index': ['--z-']
     };
     
     const categorized = {};
-    Object.keys(groups).forEach(key => categorized[key] = []);
-    
-    // Categorize variables
+    Object.keys(groups).forEach(key => (categorized[key] = []));
+
+    // Categorize variables – show every root variable, skip unmatched
     cssVars.forEach(cssVar => {
-        let added = false;
         for (const [category, patterns] of Object.entries(groups)) {
-            if (category === 'Other') continue;
-            for (const pattern of patterns) {
-                if (cssVar.name.includes(pattern)) {
-                    categorized[category].push(cssVar);
-                    added = true;
-                    break;
-                }
+            if (patterns.some(pattern => cssVar.name.includes(pattern))) {
+                categorized[category].push(cssVar);
+                break;
             }
-            if (added) break;
-        }
-        if (!added) {
-            categorized['Other'].push(cssVar);
         }
     });
     

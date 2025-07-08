@@ -158,10 +158,10 @@ body.dark {
     --bg-quaternary: #323230;
     --bg-quinary: #161614;      /* Darkest background */
     
-    /* Light text colors for dark background */
-    --text-primary: #e0e0e0;
-    --text-secondary: #b0b0b0;
-    --text-tertiary: #909090;
+    /* Dimmed text colors for dark theme */
+    --text-primary: #bbbbbb;
+    --text-secondary: #8c8c8c;
+    --text-tertiary: #6c6c6c;
     
     /* Darker borders for dark theme */
     --border-color: #3a3a3a;
@@ -2410,7 +2410,7 @@ body.dark ::-webkit-scrollbar-corner {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    margin-bottom: var(--space-2);
+    margin-bottom: 0;
 }
 
 .color-swatch {
@@ -3000,6 +3000,9 @@ body.compact .btn {
     margin-bottom: var(--space-1) !important;
     display: flex !important;
     justify-content: center !important;
+    background: none !important;
+    box-shadow: none !important;
+    border: none !important;
 }
 
 .control-panel.collapsed .color-control {
@@ -3332,7 +3335,7 @@ body.dark .callout-error {
 
 .css-var-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* auto-fit ensures last row stretches */
     gap: var(--space-3);
 }
 
@@ -3796,5 +3799,158 @@ body.dark .callout-error {
     .nav-panel.collapsed .nav-panel-header {
         display: none !important;
     }
+}
+
+/* Background Grid Patterns */
+.pattern-demo {
+    height: 120px;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+}
+
+.pattern-grid-dots {
+    background-image: radial-gradient(var(--grey-600) 1px, transparent 1px);
+    background-size: 12px 12px;
+}
+
+.pattern-grid-lines {
+    background-image: repeating-linear-gradient(var(--grey-600) 0 5px, transparent 1px 7px), /* horizontal dashed */ repeating-linear-gradient(90deg, var(--grey-600) 0 2px, transparent 1px 10px);
+    background-size: 12px 12px;
+}
+
+.pattern-grid-cross {
+    background-image: radial-gradient(var(--grey-600) 4px, transparent 4px);
+    background-size: 8px 8px;
+}
+
+.pattern-grid-diagonal {
+    background-image: repeating-linear-gradient(45deg, var(--grey-600) 0 1px, transparent 1px 2px);
+    background-size: 20px 20px;
+}
+
+@media (max-width: 768px) {
+    /* Ensure CSS Variables grid adapts without overflowing on mobile */
+    .css-var-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    /* Make tables scrollable and prevent overflow on small screens */
+    .table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table thead {
+        display: none; /* Hide header to save space */
+    }
+
+    .table tbody tr {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--space-2);
+        padding: var(--space-2) 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table td {
+        border: none;
+        padding: var(--space-2) 0;
+        word-break: break-word;
+    }
+}
+
+/* Slightly reduce icon brightness in dark mode */
+body.dark .lucide {
+    stroke-opacity: 0.75;
+}
+
+/* Progressive heading color dimming */
+h1 { color: var(--text-primary); }
+h2 { color: var(--text-secondary); }
+h3 { color: var(--text-tertiary); }
+h4 { color: var(--grey-600); }
+h5 { color: var(--grey-700); }
+h6 { color: var(--grey-800); }
+
+/* Dark mode - Accent colored tags */
+body.dark .tag-accent {
+    color: var(--grey-50) !important;
+}
+
+/* Dark theme overrides for tileable grid patterns */
+body.dark .pattern-grid-dots {
+    background-image: radial-gradient(var(--grey-400) 1px, transparent 1px);
+}
+
+body.dark .pattern-grid-lines {
+    background-image: repeating-linear-gradient(var(--grey-400) 0 5px, transparent 1px 7px), repeating-linear-gradient(90deg, var(--grey-400) 0 2px, transparent 1px 10px);
+}
+
+body.dark .pattern-grid-cross {
+    background-image: radial-gradient(var(--grey-400) 4px, transparent 4px);
+}
+
+body.dark .pattern-grid-diagonal {
+    background-image: repeating-linear-gradient(45deg, var(--grey-400) 0 1px, transparent 1px 2px);
+}
+
+/* Dark mode - Semantic color chips */
+body.dark .semantic-color-chip {
+    color: var(--grey-50) !important;
+}
+
+/* Simplified color swatch style inside control panel */
+.control-panel .color-swatch {
+    border: none;
+    transition: none;
+}
+
+.control-panel .color-swatch:hover,
+.control-panel .color-swatch:focus {
+    transform: none;
+    box-shadow: none;
+    outline: none;
+}
+
+/* Remove default browser border around <input type="color"> swatches */
+input[type="color"].color-swatch {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    padding: 0;
+    background: none;
+    border-radius: var(--radius-md);
+}
+
+input[type="color"].color-swatch::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border: none;
+}
+input[type="color"].color-swatch::-webkit-color-swatch {
+    border: none;
+    border-radius: var(--radius-md);
+}
+input[type="color"].color-swatch::-moz-color-swatch {
+    border: none;
+    border-radius: var(--radius-md);
+}
+
+.color-card {
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+}
+
+/* Expanded control-panel color cards */
+.control-panel:not(.collapsed) .color-card {
+    background: var(--bg-tertiary);
+    padding: var(--space-3);
+    margin-bottom: var(--space-2);
+    border-radius: var(--radius-md);
 }
 

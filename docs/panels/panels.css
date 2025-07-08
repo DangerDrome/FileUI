@@ -1,0 +1,516 @@
+/* BSP Panels Specific Styles */
+
+/* Reset body/html overflow for panels page */
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Accent Color Variations */
+[data-accent="mint"] {
+    --accent: #b5d3b6;
+    --accent-hover: #9fc5a1;
+}
+
+[data-accent="blue"] {
+    --accent: #b3d9ff;
+    --accent-hover: #8ac4ff;
+}
+
+[data-accent="pink"] {
+    --accent: #ffb3ba;
+    --accent-hover: #ff9aa3;
+}
+
+[data-accent="purple"] {
+    --accent: #d4c5f9;
+    --accent-hover: #c4b0f7;
+}
+
+[data-accent="yellow"] {
+    --accent: #ffe4a3;
+    --accent-hover: #ffd882;
+}
+
+/* App Container */
+.app-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    overflow: hidden;
+}
+
+/* App Header */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-primary);
+    z-index: 100;
+}
+
+.app-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.divider-vertical {
+    width: 1px;
+    height: 20px;
+    background: var(--border-primary);
+    margin: 0 var(--space-2);
+}
+
+/* Panels Container */
+.panels-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+    padding: var(--space-4);
+    gap: var(--space-4);
+}
+
+/* Panel Styles */
+.panel {
+    position: absolute;
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel:hover {
+    transform: none;
+}
+
+.panel.panel-grow-in {
+    animation: panelGrowIn 0.2s ease-out;
+}
+
+@keyframes panelGrowIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Panel Header */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-tertiary);
+    user-select: none;
+    cursor: move;
+    min-height: 30px;
+    position: relative;
+}
+
+.panel.is-pinned .panel-header {
+    cursor: default;
+}
+
+.panel-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.panel-title {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.panel-title-editor {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    padding: 2px 6px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.panel-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.panel-action-btn {
+    padding: var(--space-1);
+    opacity: 0.7;
+}
+
+.panel-action-btn:hover {
+    opacity: 1;
+}
+
+/* Panel Body */
+.panel-body {
+    flex: 1;
+    overflow: hidden;
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+}
+
+.panel-content {
+    color: var(--text-primary);
+}
+
+/* Panel States */
+.panel.is-pinned .icon-pin {
+    display: none;
+}
+
+.panel:not(.is-pinned) .icon-pin-off {
+    display: none;
+}
+
+.panel.is-collapsed .panel-body {
+    display: none;
+}
+
+.panel.is-collapsed .panel-header {
+    border-bottom: none;
+}
+
+.panel.is-collapsed .icon-collapse {
+    display: none;
+}
+
+.panel:not(.is-collapsed) .icon-expand {
+    display: none;
+}
+
+.panel.is-collapsed-vertically {
+    writing-mode: vertical-rl;
+}
+
+.panel.is-collapsed-vertically .panel-header {
+    width: 30px;
+    height: 100%;
+    padding: var(--space-3) var(--space-2);
+}
+
+.panel.is-collapsed-horizontally .panel-header {
+    height: 30px;
+}
+
+.panel.is-toolbar {
+    background: var(--bg-quaternary);
+}
+
+.panel.is-toolbar .panel-header {
+    background: var(--bg-quaternary);
+    min-height: 30px;
+    padding: var(--space-1) var(--space-2);
+}
+
+.panel.is-toolbar .panel-body {
+    padding: var(--space-2);
+}
+
+.panel.is-main-content {
+    background: var(--bg-secondary);
+}
+
+.panel.is-dragging {
+    opacity: 0.9;
+    z-index: 1000;
+}
+
+.panel.is-dragging::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--accent);
+    opacity: 0.3;
+    border-radius: var(--radius-lg);
+    pointer-events: none;
+}
+
+/* Resizers */
+.resizer {
+    position: absolute;
+    background: transparent;
+    z-index: 10;
+}
+
+.resizer:hover {
+    background: var(--accent);
+    opacity: 0.3;
+}
+
+.resizer-vertical {
+    cursor: col-resize;
+}
+
+.resizer-horizontal {
+    cursor: row-resize;
+}
+
+/* Preview Mode */
+.preview-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.panel-preview {
+    position: absolute;
+    background: var(--bg-tertiary);
+    opacity: 0.5;
+    border-radius: var(--radius-lg);
+    border: 2px dashed var(--border-primary);
+}
+
+.panel-preview-source {
+    background: var(--bg-quaternary);
+    opacity: 0.6;
+    border: 2px dashed var(--border-primary);
+}
+
+.panels-container.preview-mode .panel:not(.is-dragging) {
+    pointer-events: none;
+}
+
+/* Context Menu (Panel Menu) */
+.dropdown-menu {
+    position: absolute;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-2);
+    z-index: 1000;
+    min-width: 160px;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.dropdown-item i {
+    width: 16px;
+    height: 16px;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--border-primary);
+    margin: var(--space-2) 0;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    position: relative;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-2xl);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    background: var(--bg-tertiary);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: var(--space-4);
+    max-height: calc(80vh - 120px);
+    overflow-y: auto;
+}
+
+.modal-body h4 {
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-2);
+    font-size: var(--text-md);
+    font-weight: 600;
+}
+
+.modal-body ul {
+    margin: 0;
+    padding-left: var(--space-4);
+}
+
+.modal-body li {
+    margin-bottom: var(--space-1);
+    color: var(--text-secondary);
+}
+
+.modal-body strong {
+    color: var(--text-primary);
+}
+
+.modal-footer {
+    padding: var(--space-4);
+    border-top: 1px solid var(--border-primary);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Alignment Guides */
+.alignment-guide {
+    position: absolute;
+    background: var(--border-primary);
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* Drop Zones */
+.panel.drop-target {
+    outline: 2px dashed var(--border-primary);
+    outline-offset: -2px;
+}
+
+.panel.drop-target-left::before,
+.panel.drop-target-right::before,
+.panel.drop-target-top::before,
+.panel.drop-target-bottom::before {
+    content: '';
+    position: absolute;
+    background: var(--bg-quaternary);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.panel.drop-target-left::before {
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+}
+
+.panel.drop-target-right::before {
+    right: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+}
+
+.panel.drop-target-top::before {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 50%;
+}
+
+.panel.drop-target-bottom::before {
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 50%;
+}
+
+.alignment-guide-vertical {
+    width: 2px;
+    height: 100%;
+}
+
+.alignment-guide-horizontal {
+    width: 100%;
+    height: 2px;
+}
+
+/* Dark Theme Overrides - Let styles.css handle the color variables */
+
+/* Responsive */
+@media (max-width: 768px) {
+    .app-header {
+        padding: var(--space-2) var(--space-3);
+    }
+    
+    .app-title {
+        font-size: var(--text-base);
+    }
+    
+    .header-right {
+        gap: var(--space-1);
+    }
+    
+    .panel-body {
+        padding: var(--space-3);
+    }
+}

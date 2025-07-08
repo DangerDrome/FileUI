@@ -94,15 +94,21 @@
                 'btn',
                 options.variant && `btn-${options.variant}`,
                 options.size && `btn-${options.size}`,
+                options.mono && 'font-mono',
                 options.class
             );
-            
-            if (options.icon && text) {
-                btn.innerHTML = `<i data-lucide="${options.icon}" class="lucide"></i> <span>${text}</span>`;
-            } else if (options.icon) {
-                btn.innerHTML = `<i data-lucide="${options.icon}" class="lucide"></i>`;
-            } else {
-                btn.innerHTML = `<span>${text}</span>`;
+
+            if (options.icon) {
+                const icon = document.createElement('i');
+                icon.setAttribute('data-lucide', options.icon);
+                icon.className = 'lucide';
+                btn.appendChild(icon);
+            }
+
+            if (text) {
+                const span = document.createElement('span');
+                span.textContent = text;
+                btn.appendChild(span);
             }
             
             if (options.onclick) btn.onclick = options.onclick;
@@ -118,23 +124,31 @@
         card(title, content, options = {}) {
             const card = document.createElement('div');
             card.className = this.buildClasses('card', options.class);
-            
-            let html = '';
+
             if (title) {
-                // Build card header with icon and actions
-                let headerContent = '';
-                
-                // Left side with icon and title
-                headerContent += '<div class="card-header-left">';
+                const cardHeader = document.createElement('div');
+                cardHeader.className = 'card-header';
+
+                const headerLeft = document.createElement('div');
+                headerLeft.className = 'card-header-left';
+
                 if (options.icon) {
-                    headerContent += `<i data-lucide="${options.icon}" class="card-icon lucide"></i>`;
+                    const icon = document.createElement('i');
+                    icon.setAttribute('data-lucide', options.icon);
+                    icon.className = 'card-icon lucide';
+                    headerLeft.appendChild(icon);
                 }
-                headerContent += `<h3 class="card-title">${title}</h3>`;
-                headerContent += '</div>';
-                
-                // Right side with actions
+
+                const cardTitle = document.createElement('h3');
+                cardTitle.className = 'card-title';
+                cardTitle.textContent = title;
+                headerLeft.appendChild(cardTitle);
+
+                cardHeader.appendChild(headerLeft);
+
                 if (options.actions) {
-                    headerContent += '<div class="card-header-actions">';
+                    const headerActions = document.createElement('div');
+                    headerActions.className = 'card-header-actions';
                     options.actions.forEach(action => {
                         const btn = this.button(action.text || '', {
                             icon: action.icon,
@@ -143,47 +157,36 @@
                             onclick: action.onclick,
                             class: 'card-action-btn'
                         });
-                        headerContent += btn.outerHTML;
+                        headerActions.appendChild(btn);
                     });
-                    headerContent += '</div>';
+                    cardHeader.appendChild(headerActions);
                 }
-                
-                html += `
-                    <div class="card-header">
-                        ${headerContent}
-                    </div>
-                `;
+                card.appendChild(cardHeader);
             }
-            
-            html += `<div class="card-body">${content}</div>`;
-            
-            // Add footer if there's a description or custom footer content
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+            cardBody.innerHTML = content;
+            card.appendChild(cardBody);
+
             if (options.description || options.footer) {
-                html += '<div class="card-footer">';
+                const cardFooter = document.createElement('div');
+                cardFooter.className = 'card-footer';
                 if (options.description) {
-                    html += `<p class="card-description">${options.description}</p>`;
+                    const p = document.createElement('p');
+                    p.className = 'card-description';
+                    p.textContent = options.description;
+                    cardFooter.appendChild(p);
                 }
                 if (options.footer) {
-                    html += options.footer;
+                    const footerContent = document.createElement('div');
+                    footerContent.innerHTML = options.footer;
+                    cardFooter.appendChild(footerContent);
                 }
-                html += '</div>';
+                card.appendChild(cardFooter);
             }
-            
-            card.innerHTML = html;
-            
-            // Re-bind action button events after DOM insertion
-            if (options.actions) {
-                setTimeout(() => {
-                    options.actions.forEach((action, index) => {
-                        if (action.onclick) {
-                            const btn = card.querySelectorAll('.card-action-btn')[index];
-                            if (btn) btn.onclick = action.onclick;
-                        }
-                    });
-                }, 0);
-                this.deferIcons();
-            }
-            
+
+            this.deferIcons();
             return card;
         },
 
@@ -524,7 +527,10 @@
             if (options.closable) {
                 const closeBtn = document.createElement('button');
                 closeBtn.className = 'tag-close';
-                closeBtn.innerHTML = '<i data-lucide="x" class="lucide"></i>';
+                const icon = document.createElement('i');
+                icon.setAttribute('data-lucide', 'x');
+                icon.className = 'lucide';
+                closeBtn.appendChild(icon);
                 closeBtn.onclick = () => {
                     if (options.onClose) options.onClose();
                     tag.remove();
@@ -652,40 +658,25 @@
                 }
             }
             
-            // Font control group
+            """            // Font control group
             const fontGroup = document.createElement('div');
             fontGroup.className = 'control-group';
             fontGroup.innerHTML = '<span class="control-label" data-i18n="font">Font</span>';
-            const fontBtnGroup = document.createElement('div');
-            fontBtnGroup.className = 'btn-group';
             
-            const systemBtn = this.button('System', { 
-                icon: 'type', 
-                size: 'sm',
-                class: 'font-toggle active',
-                onclick: () => {
-                    this.toggleActive('.font-toggle', systemBtn);
-                    document.body.style.fontFamily = 'var(--font-system)';
-                }
-            });
-            systemBtn.dataset.font = 'system';
-            systemBtn.setAttribute('title', 'System Font');
-            
-            const monoBtn = this.button('Mono', { 
+            const fontBtn = this.button('Mono', { 
                 icon: 'terminal', 
                 size: 'sm',
                 class: 'font-toggle',
                 onclick: () => {
-                    this.toggleActive('.font-toggle', monoBtn);
-                    document.body.style.fontFamily = 'var(--font-mono)';
+                    document.body.classList.toggle('use-mono-font');
+                    const isMono = document.body.classList.contains('use-mono-font');
+                    fontBtn.innerHTML = `<i data-lucide="${isMono ? 'type' : 'terminal'}" class="lucide"></i> <span>${isMono ? 'System' : 'Mono'}</span>`;
+                    this.icons();
                 }
             });
-            monoBtn.dataset.font = 'mono';
-            monoBtn.setAttribute('title', 'Monospace Font');
-            
-            fontBtnGroup.appendChild(systemBtn);
-            fontBtnGroup.appendChild(monoBtn);
-            fontGroup.appendChild(fontBtnGroup);
+            fontBtn.setAttribute('title', 'Toggle Font');
+            fontGroup.appendChild(fontBtn);
+""
             
             // Density control group
             const densityGroup = document.createElement('div');

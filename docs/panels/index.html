@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSP Panels - FileUI</title>
+    
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Load Noto Sans SC for Chinese support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Load styles -->
+    <link rel="stylesheet" href="../style/styles.css">
+    <link rel="stylesheet" href="panels.css">
+    
+    <!-- Load Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Load Shoelace -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/light.css" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/shoelace-autoloader.js"></script>
+    
+    <!-- Load panels script -->
+    <script src="panels.js" defer></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1 class="app-title">BSP Panels</h1>
+                <span class="text-secondary">Binary Space Partitioning Panel System</span>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-ghost btn-sm" id="add-panel-btn" title="Add Panel">
+                    <i data-lucide="plus-square"></i>
+                </button>
+                <div class="divider-vertical"></div>
+                <button class="btn btn-ghost btn-sm" id="undo-btn" title="Undo">
+                    <i data-lucide="undo-2"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm" id="redo-btn" title="Redo">
+                    <i data-lucide="redo-2"></i>
+                </button>
+                <div class="divider-vertical"></div>
+                <button class="btn btn-ghost btn-sm" id="save-layout-btn" title="Save Layout">
+                    <i data-lucide="save"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm" id="load-layout-btn" title="Load Layout">
+                    <i data-lucide="upload"></i>
+                </button>
+                <input type="file" id="load-layout-input" accept=".json" style="display: none;">
+                <div class="divider-vertical"></div>
+                <button class="btn btn-ghost btn-sm" id="reset-layout-btn" title="Reset Layout">
+                    <i data-lucide="refresh-cw"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm" id="theme-toggle" title="Toggle Theme">
+                    <i data-lucide="moon"></i>
+                </button>
+                <button class="btn btn-ghost btn-sm" id="accent-toggle" title="Toggle Accent Color">
+                    <i data-lucide="palette"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Panel Container -->
+        <div class="panels-container" id="panels-container">
+            <!-- Panels will be dynamically created here -->
+        </div>
+
+        <!-- Preview Root (for drag preview) -->
+        <div class="preview-root" id="preview-root" style="display: none;"></div>
+    </div>
+
+    <!-- Panel Context Menu -->
+    <div class="dropdown-menu" id="panel-menu" style="display: none;">
+        <button class="dropdown-item" data-action="split-horizontal">
+            <i data-lucide="rows-2"></i>
+            Split Horizontal
+        </button>
+        <button class="dropdown-item" data-action="split-vertical">
+            <i data-lucide="columns-2"></i>
+            Split Vertical
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" data-action="pin">
+            <i data-lucide="pin"></i>
+            <span class="pin-text">Pin Panel</span>
+        </button>
+        <button class="dropdown-item" data-action="collapse">
+            <i data-lucide="minimize-2"></i>
+            <span class="collapse-text">Collapse Panel</span>
+        </button>
+        <button class="dropdown-item" data-action="toolbar">
+            <i data-lucide="layout-dashboard"></i>
+            <span class="toolbar-text">Make Toolbar</span>
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" data-action="close">
+            <i data-lucide="x"></i>
+            Close Panel
+        </button>
+    </div>
+
+    <!-- Demo Content Modal -->
+    <div class="modal" id="demo-modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>BSP Panels Demo</h3>
+                <button class="btn btn-ghost btn-sm" onclick="document.getElementById('demo-modal').style.display='none'">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>Features:</h4>
+                <ul>
+                    <li><strong>Drag & Drop:</strong> Drag panels to rearrange layout</li>
+                    <li><strong>Split Panels:</strong> Right-click to split horizontally or vertically</li>
+                    <li><strong>Resize:</strong> Drag the borders between panels</li>
+                    <li><strong>Pin Panels:</strong> Pin panels to prevent moving (can still collapse)</li>
+                    <li><strong>Collapse:</strong> Minimize panels to save space</li>
+                    <li><strong>Toolbar Mode:</strong> Convert panels to toolbar style</li>
+                    <li><strong>Undo/Redo:</strong> Full history of layout changes</li>
+                    <li><strong>Save/Load:</strong> Export and import layouts as JSON</li>
+                    <li><strong>Preview Mode:</strong> See where panels will land before dropping</li>
+                </ul>
+                <h4>Tips:</h4>
+                <ul>
+                    <li>Double-click panel headers to edit titles</li>
+                    <li>Drag collapsed panels to edges to collapse them directionally</li>
+                    <li>Hold Shift while resizing for finer control</li>
+                    <li>Alignment guides appear when dragging near edges</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="document.getElementById('demo-modal').style.display='none'">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show demo modal on first visit
+        if (!localStorage.getItem('bsp-panels-visited')) {
+            setTimeout(() => {
+                document.getElementById('demo-modal').style.display = 'flex';
+                localStorage.setItem('bsp-panels-visited', 'true');
+            }, 500);
+        }
+    </script>
+</body>
+</html>

@@ -422,7 +422,7 @@ body.dark [style*="--warning"],
 body.dark [style*="--error"],
 body.dark [style*="--info"],
 body.dark [style*="--accent"] {
-    color: var(--grey-50) !important;
+    color: var(--grey-50);
 }
 
 /* Dark mode - Any element with semantic background classes */
@@ -432,7 +432,7 @@ body.dark .bg-warning,
 body.dark .bg-error,
 body.dark .bg-info,
 body.dark .bg-accent {
-    color: var(--grey-50) !important;
+    color: var(--grey-50);
 }
 
 /* Dark mode - Tags with semantic colors */
@@ -441,7 +441,7 @@ body.dark .tag-success,
 body.dark .tag-warning,
 body.dark .tag-error,
 body.dark .tag-info {
-    color: var(--grey-50) !important;
+    color: var(--grey-50);
 }
 
 /* Dark mode - Badges with semantic colors */
@@ -450,7 +450,7 @@ body.dark .badge-success,
 body.dark .badge-warning,
 body.dark .badge-error,
 body.dark .badge-info {
-    color: var(--grey-50) !important;
+    color: var(--grey-50);
 }
 
 /* Dark mode - Toast notifications */
@@ -458,7 +458,7 @@ body.dark .toast-success,
 body.dark .toast-warning,
 body.dark .toast-error,
 body.dark .toast-info {
-    color: var(--grey-50) !important;
+    color: var(--grey-50);
 }
 
 /* Dark mode - Form elements with semantic colors */
@@ -472,12 +472,12 @@ body.dark .form-radio.radio-success input[type="radio"]:checked + span,
 body.dark .form-radio.radio-warning input[type="radio"]:checked + span,
 body.dark .form-radio.radio-error input[type="radio"]:checked + span,
 body.dark .form-radio.radio-info input[type="radio"]:checked + span {
-    color: var(--grey-50) !important;
+    color: var(--grey-50);
 }
 
 /* Dark mode - Nav item badge */
 body.dark .nav-item-badge {
-    color: var(--grey-50) !important;
+    color: var(--grey-50);
 }
 
 /* Base Styles */
@@ -516,6 +516,10 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.2;
     color: var(--text-primary);
     margin-bottom: var(--space-4);
+}
+
+h1.font-mono, h2.font-mono, h3.font-mono, h4.font-mono, h5.font-mono, h6.font-mono {
+    font-family: var(--font-mono);
 }
 
 h1 { 
@@ -693,6 +697,10 @@ q {
     color: var(--text-secondary);
 }
 
+body.use-mono-font {
+    font-family: var(--font-mono);
+}
+
 /* Typography Utility Classes */
 .text-center { text-align: center; }
 .text-right { text-align: right; }
@@ -725,7 +733,6 @@ q {
     justify-content: center;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
-    font-family: var(--font-system);
     font-size: var(--text-base);
     font-weight: var(--font-medium);
     line-height: 1;
@@ -1662,8 +1669,8 @@ body.dark .progress-bar-striped {
 /* Tooltip Component */
 .tooltip {
     position: fixed;
-    background: #1a1a1a !important;
-    color: #ffffff !important;
+    background: #1a1a1a;
+    color: #ffffff;
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-md);
     font-size: var(--text-xs);
@@ -1688,28 +1695,28 @@ body.dark .progress-bar-striped {
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    border-top-color: #1a1a1a !important;
+    border-top-color: #1a1a1a;
 }
 
 .tooltip[data-position="bottom"]::after {
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    border-bottom-color: #1a1a1a !important;
+    border-bottom-color: #1a1a1a;
 }
 
 .tooltip[data-position="left"]::after {
     top: 50%;
     left: 100%;
     transform: translateY(-50%);
-    border-left-color: #1a1a1a !important;
+    border-left-color: #1a1a1a;
 }
 
 .tooltip[data-position="right"]::after {
     top: 50%;
     right: 100%;
     transform: translateY(-50%);
-    border-right-color: #1a1a1a !important;
+    border-right-color: #1a1a1a;
 }
 
 .tooltip-wrapper {

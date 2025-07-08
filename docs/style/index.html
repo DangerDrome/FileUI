@@ -33,6 +33,19 @@
             <h1>FileUI Component Library</h1>
             <p class="lead margin-bottom-24">All UI components with navigation panel and theme toggle</p>
             
+            <!-- Web Components Notice -->
+            <div class="card margin-bottom-8" style="background: var(--accent); color: var(--grey-900);">
+                <div class="card-body" style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h4 style="margin: 0; color: var(--grey-900);">🚀 New: Web Components Implementation</h4>
+                        <p style="margin: var(--space-2) 0 0 0; color: var(--grey-800);">Check out our modern Web Components with Shadow DOM encapsulation</p>
+                    </div>
+                    <a href="web-components-demo.html" class="btn btn-lg" style="background: var(--grey-900); color: var(--grey-50);">
+                        View Web Components Demo →
+                    </a>
+                </div>
+            </div>
+            
             <!-- Colors Section -->
             <div class="section">
                 <div class="card">
@@ -875,15 +888,15 @@ greetUser('Developer');</code></pre>
                     <div class="card-body">
                         <h5>Navigation Panel Menu</h5>
                         <div class="demo-row">
-                            <button class="btn" onclick="showNavMenuConfig()">Show Nav Menu Config</button>
-                            <button class="btn" onclick="recreateNavPanel()">Recreate Nav Panel</button>
+                            <button class="btn font-mono" onclick="showNavMenuConfig()">Show Nav Menu Config</button>
+                            <button class="btn font-mono" onclick="recreateNavPanel()">Recreate Nav Panel</button>
                         </div>
                         
                         <h5>Dropdown & Context Menus</h5>
                         <div class="demo-row">
-                            <button class="btn" onclick="showMenu(this)">Dropdown Menu</button>
-                            <button class="btn" onclick="showContextMenuDemo()">Context Menu Demo</button>
-                            <div data-context-menu="context-menu-1" class="btn cursor-context-menu">
+                            <button class="btn font-mono" onclick="showMenu(this)">Dropdown Menu</button>
+                            <button class="btn font-mono" onclick="showContextMenuDemo()">Context Menu Demo</button>
+                            <div data-context-menu="context-menu-1" class="btn cursor-context-menu font-mono">
                                 Right-click me
                             </div>
                         </div>

@@ -353,7 +353,7 @@ q {
     color: var(--text-secondary);
 }
 
-@media (max-width: 768px) {
+@media (max-width: var(--breakpoint-sm)) {
     h1 { font-size: calc(var(--text-4xl) * 2); }
     h2 { font-size: calc(var(--text-3xl) * 1.5); }
     h3 { font-size: calc(var(--text-3xl) * 1.2); }

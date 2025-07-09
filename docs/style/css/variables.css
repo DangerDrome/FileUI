@@ -184,6 +184,11 @@
     --z-popover: 1060;
     --z-tooltip: 1070;
 
+    /* Breakpoints */
+    --breakpoint-lg: 1400px;
+    --breakpoint-md: 1024px;
+    --breakpoint-sm: 768px;
+
     /* Motion variables */
     --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
     

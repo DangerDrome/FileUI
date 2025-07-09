@@ -310,7 +310,7 @@ textarea:focus-visible,
 }
 
 .style-guide-layout.right-collapsed .right-panel .panel-header {
-    cursor: pointer;
+    justify-content: center;
 }
 
 .style-guide-layout.right-collapsed .right-panel .panel-title-text {
@@ -341,7 +341,7 @@ header {
     margin-bottom: var(--space-8);
 }
 
-@media (max-width: 1400px) {
+@media (max-width: var(--breakpoint-lg)) {
     .right-panel {
         display: none;
     }
@@ -350,7 +350,7 @@ header {
     }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: var(--breakpoint-md)) {
     .style-guide-layout {
         flex-direction: column;
     }
@@ -393,7 +393,7 @@ header {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: var(--breakpoint-sm)) {
     .main-container {
         padding: var(--space-4) var(--space-4);
     }

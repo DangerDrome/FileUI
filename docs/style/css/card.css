@@ -127,7 +127,7 @@
     background: var(--bg-layer-3);
 } 
 
-@media (max-width: 768px) {
+@media (max-width: var(--breakpoint-sm)) {
     .card-header {
         flex-wrap: wrap;
     }

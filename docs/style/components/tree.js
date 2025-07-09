@@ -51,6 +51,10 @@
                 label.className = 'tree-item-label';
                 label.textContent = itemData.label;
                 content.appendChild(label);
+                
+                if (itemData.element) {
+                    content.appendChild(itemData.element);
+                }
 
                 li.appendChild(content);
 
@@ -104,11 +108,12 @@
                 // --- Collapse/Expand Logic ---
                 if (item.classList.contains('tree-item') && item.querySelector('.tree-children')) {
                     item.classList.toggle('collapsed');
+                    e.stopPropagation(); // Prevent event from bubbling up to parent tree items
                 }
 
                 // --- Click Logic ---
-                if (itemData.onclick && typeof itemData.onclick === 'function' && !isLink) {
-                    itemData.onclick();
+                if (content.closest('.tree-item').itemData?.onclick && typeof content.closest('.tree-item').itemData.onclick === 'function' && !isLink) {
+                    content.closest('.tree-item').itemData.onclick();
                 }
             }
         });

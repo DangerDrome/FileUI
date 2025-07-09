@@ -3,16 +3,23 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const layoutContainer = document.querySelector('.style-guide-layout');
-        const toggleTrigger = document.getElementById('left-panel-toggle');
+        const leftToggleTrigger = document.getElementById('left-panel-toggle');
+        const rightToggleTrigger = document.getElementById('right-panel-toggle');
 
-        if (!layoutContainer || !toggleTrigger) {
+        if (!layoutContainer || !leftToggleTrigger) {
             console.error('Layout toggle trigger not found.');
             return;
         }
 
-        toggleTrigger.addEventListener('click', () => {
+        leftToggleTrigger.addEventListener('click', () => {
             layoutContainer.classList.toggle('collapsed');
         });
+
+        if (rightToggleTrigger) {
+            rightToggleTrigger.addEventListener('click', () => {
+                layoutContainer.classList.toggle('right-collapsed');
+            });
+        }
     });
 
 })(); 

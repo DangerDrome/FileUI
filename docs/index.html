@@ -57,6 +57,7 @@
 
     <!-- Layout scripts -->
     <script src="style/layout.js"></script>
+    <script src="style/settings.js"></script>
 </head>
 <body>
     <div class="style-guide-layout">
@@ -85,6 +86,22 @@
             </header>
             <main id="sections-container"></main>
         </div>
+        <aside class="panel right-panel">
+            <div class="panel-header" id="right-panel-toggle">
+                <h2 class="panel-title">
+                    <i data-lucide="settings" class="icon"></i>
+                    <span class="panel-title-text">Settings</span>
+                </h2>
+            </div>
+            <div class="panel-body">
+                <div id="settings-container">
+                    <!-- Settings controls will be dynamically inserted here -->
+                </div>
+                <div id="collapsed-settings-container">
+                    <!-- Collapsed settings icons will be dynamically inserted here -->
+                </div>
+            </div>
+        </aside>
     </div>
     <script src="style/sections/sections_loader.js"></script>
 </body>

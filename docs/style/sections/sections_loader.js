@@ -22,25 +22,29 @@
         ];
 
         const sections = [
+            // Foundations
+            'variables',
             'colors',
             'typography',
-            'buttons',
-            'cards',
-            'modals',
-            'toasts',
-            'trees',
-            'menus',
-            'forms',
-            'icons',
-            'tooltips',
-            'tags',
             'grid',
-            'panels',
-            'spinners',
+            // Base Elements
+            'icons',
+            'buttons',
+            'forms',
+            'tags',
+            // Components
+            'tooltips',
+            'toasts',
             'progress',
+            'spinners',
+            'menus',
             'scrollbars',
-            'patterns',
-            'variables'
+            'cards',
+            'trees',
+            'panels',
+            'modals',
+            // Patterns
+            'patterns'
         ];
 
         async function loadScript(path) {

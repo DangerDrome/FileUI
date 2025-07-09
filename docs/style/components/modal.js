@@ -13,15 +13,16 @@
      * @param {function} [options.onclose] - Callback function when the modal is closed.
      * @returns {{modal: HTMLElement, backdrop: HTMLElement, close: function}} The modal elements and close function.
      */
-    UI.modal = function(content, options = {}) {
+    UI.modal = function(config = {}) {
         const {
+            content,
             title = '',
             icon,
             size,
             actions = [],
             closeOnBackdrop = true,
             onclose
-        } = options;
+        } = config;
 
         const modal = document.createElement('div');
         modal.className = this.buildClasses('modal', size && `modal-${size}`);
@@ -46,8 +47,10 @@
             });
         }
 
-        const card = UI.card(title, content, {
-            icon: icon,
+        const card = UI.card({
+            title,
+            content,
+            icon,
             footer: cardFooter,
             actions: title ? [{
                 icon: 'x',

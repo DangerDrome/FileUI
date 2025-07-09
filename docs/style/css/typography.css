@@ -419,4 +419,24 @@ tbody tr:nth-of-type(odd):hover {
     border-radius: var(--radius-lg);
     background-color: var(--bg-layer-3);
     margin-top: var(--space-4);
+}
+
+.scrollbar-demo-container .wide-content {
+    width: 150%;
+    padding: var(--space-2);
+}
+
+.scrollbar-demo-horizontal {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+.scrollbar-demo-both {
+    overflow: auto;
+}
+
+.scrollbar-demo-styled {
+    background-color: var(--bg-layer-4);
+    color: var(--text-primary);
 } 

@@ -22,13 +22,15 @@
         content.appendChild(buttonWrapper);
 
         const showSimpleModal = () => {
-            UI.modal('<p>This is a simple modal with just some text content.</p>', {
+            UI.modal({
+                content: '<p>This is a simple modal with just some text content.</p>',
                 title: 'Simple Modal'
             });
         };
 
         const showConfirmModal = () => {
-            UI.modal('<p>Are you sure you want to delete this item? This action cannot be undone.</p>', {
+            UI.modal({
+                content: '<p>Are you sure you want to delete this item? This action cannot be undone.</p>',
                 title: 'Confirm Deletion',
                 icon: 'alert-triangle',
                 actions: [
@@ -54,7 +56,8 @@
                 placeholder: 'Enter a secure password'
             }));
 
-            UI.modal(formContent, {
+            UI.modal({
+                content: formContent,
                 title: 'User Login',
                 icon: 'user',
                 actions: [

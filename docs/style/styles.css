@@ -1041,6 +1041,18 @@ body.use-mono-font {
     background: var(--bg-secondary);
 }
 
+.modal-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.modal-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
 .modal-header h3 {
     margin: 0;
     font-size: var(--text-xl);
@@ -1142,6 +1154,9 @@ body.use-mono-font {
 
 .toast-icon {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .toast-message {
@@ -1240,9 +1255,10 @@ body.use-mono-font {
 
 /* Loading Spinner */
 .loading-spinner {
+    display: inline-block;
     width: 32px;
     height: 32px;
-    border: 8px solid var(--grey-800);
+    border: 8px solid rgba(0, 0, 0, 0.1);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -1254,12 +1270,15 @@ body.use-mono-font {
 }
 
 /* Loading spinner when used as toast icon */
-.toast-icon.loading-spinner {
-    width: 32px;
-    height: 32px;
-    border-width: 8px;
-    border-color: var(--grey-800);
-    border-top-color: var(--accent);
+.toast-icon.loading-spinner,
+.toast-icon.loading-spinner-primary,
+.toast-icon.loading-spinner-success,
+.toast-icon.loading-spinner-warning,
+.toast-icon.loading-spinner-error,
+.toast-icon.loading-spinner-info {
+    width: 20px;
+    height: 20px;
+    border-width: 3px;
     flex-shrink: 0;
 }
 
@@ -3597,44 +3616,54 @@ body.dark .callout-error {
 }
 
 /* Semantic colored spinners */
-.loading-spinner-primary {
-    border-color: color-mix(in srgb, var(--primary) 30%, transparent);
-    border-top-color: var(--primary);
+.loading-spinner-primary,
+.loading-spinner-success,
+.loading-spinner-warning,
+.loading-spinner-error,
+.loading-spinner-info {
+    display: inline-block;
     width: 32px;
     height: 32px;
     border-width: 8px;
+    border-style: solid;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* When used in colored toasts, spinners need dark colors for contrast */
+.toast-primary .loading-spinner-primary,
+.toast-success .loading-spinner-success,
+.toast-warning .loading-spinner-warning,
+.toast-error .loading-spinner-error,
+.toast-info .loading-spinner-info {
+    border-color: rgba(0, 0, 0, 0.2);
+    border-top-color: var(--grey-800);
+}
+
+/* Default colored spinners for use outside toasts */
+.loading-spinner-primary {
+    border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+    border-top-color: var(--primary);
 }
 
 .loading-spinner-success {
     border-color: color-mix(in srgb, var(--success) 30%, transparent);
     border-top-color: var(--success);
-    width: 32px;
-    height: 32px;
-    border-width: 8px;
 }
 
 .loading-spinner-warning {
     border-color: color-mix(in srgb, var(--warning) 30%, transparent);
     border-top-color: var(--warning);
-    width: 32px;
-    height: 32px;
-    border-width: 8px;
 }
 
 .loading-spinner-error {
     border-color: color-mix(in srgb, var(--error) 30%, transparent);
     border-top-color: var(--error);
-    width: 32px;
-    height: 32px;
-    border-width: 8px;
 }
 
 .loading-spinner-info {
     border-color: color-mix(in srgb, var(--info) 30%, transparent);
     border-top-color: var(--info);
-    width: 32px;
-    height: 32px;
-    border-width: 8px;
 }
 
 @media (max-width: 768px) {
@@ -4214,5 +4243,122 @@ body[data-theme="dark"] .control-panel-style .control-panel-header {
 
 body[data-theme="dark"] .nav-panel-style .nav-item:hover {
     background: var(--bg-tertiary);
+}
+
+/* Inline Navigation Panel Demo */
+.demo-nav-panel {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    max-width: 400px;
+    margin: var(--space-4) 0;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.demo-nav-panel .nav-panel-header {
+    padding: var(--space-4) var(--space-4);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.demo-nav-panel .nav-panel-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 600;
+}
+
+.demo-nav-panel .nav-panel-body {
+    padding: var(--space-4);
+}
+
+.demo-nav-panel .nav-section {
+    margin-bottom: var(--space-4);
+}
+
+.demo-nav-panel .nav-section:last-child {
+    margin-bottom: 0;
+}
+
+.demo-nav-panel .nav-section-title {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.demo-nav-panel .nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    margin: var(--space-1) 0;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    position: relative;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+}
+
+.demo-nav-panel .nav-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.demo-nav-panel .nav-item.active {
+    background: var(--accent);
+    color: var(--grey-800);
+}
+
+.demo-nav-panel .nav-item i {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    flex-shrink: 0;
+}
+
+.demo-nav-panel .nav-item span:first-of-type {
+    flex: 1;
+}
+
+.demo-nav-panel .nav-item-badge {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    color: var(--text-secondary);
+}
+
+.demo-nav-panel .nav-item.active .nav-item-badge {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--grey-800);
+}
+
+/* Dark mode adjustments for inline nav panel */
+body[data-theme="dark"] .demo-nav-panel {
+    background: var(--bg-secondary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="dark"] .demo-nav-panel .nav-panel-header {
+    background: var(--bg-tertiary);
+}
+
+body[data-theme="dark"] .demo-nav-panel .nav-item:hover {
+    background: var(--bg-tertiary);
+}
+
+body[data-theme="dark"] .demo-nav-panel .nav-item.active {
+    background: var(--accent);
+    color: var(--grey-800);
+}
+
+body[data-theme="dark"] .demo-nav-panel .nav-item.active .nav-item-badge {
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--grey-800);
 }
 

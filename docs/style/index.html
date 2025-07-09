@@ -896,7 +896,82 @@ greetUser('Developer');</code></pre>
                     </div>
                     <div class="card-body">
                         <h5>Navigation Panel Menu</h5>
-                        <div class="demo-row">
+                        <p class="text-secondary margin-bottom-4">An inline navigation menu using the left panel styles</p>
+                        
+                        <div class="demo-nav-panel">
+                            <div class="nav-panel-header">
+                                <div class="nav-panel-title">
+                                    <i data-lucide="command" class="lucide"></i>
+                                    <span>Command Menu</span>
+                                </div>
+                            </div>
+                            <div class="nav-panel-body">
+                            <div class="nav-section">
+                                <div class="nav-section-title">File Operations</div>
+                                <div class="nav-item" onclick="UI.toast('New File clicked', 'info')">
+                                    <i data-lucide="file-plus" class="lucide"></i>
+                                    <span>New File</span>
+                                    <span class="nav-item-badge">Ctrl+N</span>
+                                </div>
+                                <div class="nav-item" onclick="UI.toast('New Folder clicked', 'info')">
+                                    <i data-lucide="folder-plus" class="lucide"></i>
+                                    <span>New Folder</span>
+                                </div>
+                                <div class="nav-item active" onclick="UI.toast('File saved!', 'success')">
+                                    <i data-lucide="save" class="lucide"></i>
+                                    <span>Save</span>
+                                    <span class="nav-item-badge">Ctrl+S</span>
+                                </div>
+                                <div class="nav-item">
+                                    <i data-lucide="save-all" class="lucide"></i>
+                                    <span>Save All</span>
+                                </div>
+                            </div>
+                            <div class="nav-section">
+                                <div class="nav-section-title">Edit</div>
+                                <div class="nav-item" onclick="UI.toast('Undo action', 'warning')">
+                                    <i data-lucide="undo" class="lucide"></i>
+                                    <span>Undo</span>
+                                    <span class="nav-item-badge">Ctrl+Z</span>
+                                </div>
+                                <div class="nav-item">
+                                    <i data-lucide="redo" class="lucide"></i>
+                                    <span>Redo</span>
+                                    <span class="nav-item-badge">Ctrl+Y</span>
+                                </div>
+                                <div class="nav-item">
+                                    <i data-lucide="copy" class="lucide"></i>
+                                    <span>Copy</span>
+                                </div>
+                                <div class="nav-item">
+                                    <i data-lucide="scissors" class="lucide"></i>
+                                    <span>Cut</span>
+                                </div>
+                                <div class="nav-item">
+                                    <i data-lucide="clipboard" class="lucide"></i>
+                                    <span>Paste</span>
+                                </div>
+                            </div>
+                            <div class="nav-section">
+                                <div class="nav-section-title">View</div>
+                                <div class="nav-item">
+                                    <i data-lucide="sidebar-open" class="lucide"></i>
+                                    <span>Toggle Sidebar</span>
+                                </div>
+                                <div class="nav-item" onclick="UI.toast('Opening terminal...', 'info', { preloader: true, duration: 2000 })">
+                                    <i data-lucide="terminal" class="lucide"></i>
+                                    <span>Terminal</span>
+                                    <span class="nav-item-badge">2</span>
+                                </div>
+                                <div class="nav-item">
+                                    <i data-lucide="search" class="lucide"></i>
+                                    <span>Search</span>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        
+                        <div class="demo-row margin-top-4">
                             <button class="btn font-mono" onclick="showNavMenuConfig()">Show Nav Menu Config</button>
                             <button class="btn font-mono" onclick="recreateNavPanel()">Recreate Nav Panel</button>
                         </div>

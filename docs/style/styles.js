@@ -222,7 +222,9 @@
             
             let iconHTML = '';
             if (options.preloader) {
-                iconHTML = '<div class="loading-spinner toast-icon"></div>';
+                // Use semantic color spinner based on type
+                const spinnerClass = type ? `loading-spinner-${type}` : 'loading-spinner';
+                iconHTML = `<div class="${spinnerClass} toast-icon"></div>`;
             } else {
                 iconHTML = `<i data-lucide="${icons[type] || 'info'}" class="toast-icon lucide"></i>`;
             }
@@ -304,9 +306,13 @@
             
             // Modal header
             if (options.title) {
+                const iconHTML = options.icon ? `<i data-lucide="${options.icon}" class="modal-icon lucide"></i>` : '';
                 html += `
                     <div class="modal-header">
-                        <h3>${options.title}</h3>
+                        <div class="modal-header-left">
+                            ${iconHTML}
+                            <h3>${options.title}</h3>
+                        </div>
                         <button class="modal-close" aria-label="Close">
                             <i data-lucide="x" class="lucide"></i>
                         </button>
@@ -693,36 +699,37 @@
             const densityGroup = document.createElement('div');
             densityGroup.className = 'control-group';
             densityGroup.innerHTML = '<span class="control-label" data-i18n="density">Density</span>';
-            const densityBtnGroup = document.createElement('div');
-            densityBtnGroup.className = 'btn-group';
             
-            const comfortableBtn = this.button('Comfortable', { 
+            const densityToggle = this.button('<span>Comfortable</span>', { 
                 icon: 'maximize', 
                 size: 'sm',
-                class: 'density-toggle active',
-                onclick: () => {
-                    this.toggleActive('.density-toggle', comfortableBtn);
-                    document.body.classList.remove('compact');
+                onclick: (e) => {
+                    const btn = e.target.closest('button');
+                    const isCompact = document.body.classList.contains('compact');
+                    
+                    if (isCompact) {
+                        document.body.classList.remove('compact');
+                        btn.innerHTML = '<i data-lucide="maximize" class="lucide"></i><span>Comfortable</span>';
+                        btn.setAttribute('title', 'Switch to Compact Spacing');
+                        localStorage.setItem('fileui-density', 'comfortable');
+                    } else {
+                        document.body.classList.add('compact');
+                        btn.innerHTML = '<i data-lucide="minimize" class="lucide"></i><span>Compact</span>';
+                        btn.setAttribute('title', 'Switch to Comfortable Spacing');
+                        localStorage.setItem('fileui-density', 'compact');
+                    }
+                    this.icons(); // Re-initialize icons
                 }
             });
-            comfortableBtn.dataset.density = 'comfortable';
-            comfortableBtn.setAttribute('title', 'Comfortable Spacing');
+            densityToggle.setAttribute('title', 'Switch to Compact Spacing');
             
-            const compactBtn = this.button('Compact', { 
-                icon: 'minimize', 
-                size: 'sm',
-                class: 'density-toggle',
-                onclick: () => {
-                    this.toggleActive('.density-toggle', compactBtn);
-                    document.body.classList.add('compact');
-                }
-            });
-            compactBtn.dataset.density = 'compact';
-            compactBtn.setAttribute('title', 'Compact Spacing');
+            // Set initial state based on current body class
+            if (document.body.classList.contains('compact')) {
+                densityToggle.innerHTML = '<i data-lucide="minimize" class="lucide"></i><span>Compact</span>';
+                densityToggle.setAttribute('title', 'Switch to Comfortable Spacing');
+            }
             
-            densityBtnGroup.appendChild(comfortableBtn);
-            densityBtnGroup.appendChild(compactBtn);
-            densityGroup.appendChild(densityBtnGroup);
+            densityGroup.appendChild(densityToggle);
             
             // Language control group
             const langGroup = document.createElement('div');
@@ -1965,6 +1972,12 @@
             UI.theme.set(prefersDark ? 'dark' : 'light');
         }
         
+        // Restore density setting
+        const savedDensity = localStorage.getItem('fileui-density');
+        if (savedDensity === 'compact') {
+            document.body.classList.add('compact');
+        }
+        
         // Initialize all interactive components
         UI.init();
     });
@@ -2192,13 +2205,15 @@ document.addEventListener('DOMContentLoaded', () => {
 // Modal examples
 function showSimpleModal() {
     UI.modal(UI.language.translate('This is a simple modal with just content.'), {
-        title: UI.language.translate('Simple Modal')
+        title: UI.language.translate('Simple Modal'),
+        icon: 'info'
     });
 }
 
 function showConfirmModal() {
     UI.modal(UI.language.translate('Are you sure you want to delete this file?'), {
         title: UI.language.translate('Confirm Delete'),
+        icon: 'trash-2',
         actions: [
             { text: UI.language.translate('Cancel') },
             { text: UI.language.translate('Delete'), variant: 'error', onclick: () => UI.toast(UI.language.translate('File deleted!'), 'success') }
@@ -2219,6 +2234,7 @@ function showFormModal() {
     `;
     UI.modal(formHTML, {
         title: UI.language.translate('User Form'),
+        icon: 'user',
         actions: [
             { text: UI.language.translate('Cancel') },
             { text: UI.language.translate('Save'), variant: 'primary', onclick: () => UI.toast(UI.language.translate('Form saved!'), 'success') }

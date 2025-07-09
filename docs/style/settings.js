@@ -7,7 +7,18 @@
         const container = document.createElement('div');
         container.className = 'setting-control-container';
 
-        if (controlData.type !== 'icon-toggle' && controlData.type !== 'swatch-picker' && controlData.type !== 'cycle-button' && controlData.type !== 'cycle-swatch') {
+        const labelsOnRight = ['Theme', 'Accent', 'Tint', 'Font', 'Spacing', 'Size', 'Stroke', 'Primary', 'Success', 'Warning', 'Error', 'Info', 'Language'];
+        if (labelsOnRight.includes(controlData.label)) {
+            container.classList.add('label-on-right');
+        }
+
+        const showLabel =
+            (controlData.type !== 'icon-toggle' &&
+            controlData.type !== 'swatch-picker' &&
+            controlData.type !== 'cycle-button' &&
+            controlData.type !== 'cycle-swatch') || labelsOnRight.includes(controlData.label);
+
+        if (showLabel) {
             const label = document.createElement('span');
             label.className = 'setting-label';
             label.textContent = controlData.label;
@@ -138,7 +149,7 @@
                     },
                     {
                         type: 'cycle-swatch',
-                        label: 'Accent Color',
+                        label: 'Accent',
                         action: (state) => {
                             const root = document.documentElement;
                             root.style.setProperty('--accent', `var(${state.colorVar})`);
@@ -157,7 +168,7 @@
                     },
                     {
                         type: 'cycle-button',
-                        label: 'Tint Color',
+                        label: 'Tint',
                         action: (value) => {
                             document.body.dataset.tint = value;
                         },
@@ -180,7 +191,7 @@
                 controls: [
                     {
                         type: 'icon-toggle',
-                        label: 'Monospace Font',
+                        label: 'Font',
                         action: (checked) => document.body.classList.toggle('font-mono', checked),
                         initialState: () => document.body.classList.contains('font-mono'),
                         iconOn: 'code',
@@ -210,7 +221,7 @@
                 controls: [
                     {
                         type: 'icon-toggle',
-                        label: 'Icon Size',
+                        label: 'Size',
                         action: (checked) => document.body.classList.toggle('icons-large', checked),
                         initialState: () => document.body.classList.contains('icons-large'),
                         iconOn: 'zoom-in',
@@ -218,7 +229,7 @@
                     },
                     {
                         type: 'icon-toggle',
-                        label: 'Stroke Width',
+                        label: 'Stroke',
                         action: (checked) => document.body.classList.toggle('icons-thick-stroke', checked),
                         initialState: () => document.body.classList.contains('icons-thick-stroke'),
                         iconOn: 'bold',
@@ -257,31 +268,12 @@
 
         // --- Build Collapsed Icon Bar ---
         settingsSections.forEach(section => {
-            section.controls.forEach(control => {
-                let icon;
-                // Specific icons for semantic colors
-                if (section.id === 'settings-colors' || section.id === 'settings-appearance') {
-                    switch (control.label) {
-                        case 'Primary': icon = 'zap'; break;
-                        case 'Success': icon = 'check-circle'; break;
-                        case 'Warning': icon = 'alert-triangle'; break;
-                        case 'Error': icon = 'x-circle'; break;
-                        case 'Info': icon = 'info'; break;
-                    }
+            section.controls.forEach(controlData => {
+                const control = createControl(controlData);
+                const interactiveElement = control.querySelector('button, input, select');
+                if (interactiveElement) {
+                    collapsedContainer.appendChild(interactiveElement);
                 }
-                if (!icon) {
-                    switch (control.type) {
-                        case 'toggle': icon = 'toggle-right'; break;
-                        case 'icon-toggle': icon = control.iconOff; break;
-                        case 'color': icon = 'pipette'; break;
-                        case 'select': icon = 'chevron-down'; break;
-                        case 'slider': icon = 'sliders-horizontal'; break;
-                        default: icon = 'circle';
-                    }
-                }
-                const button = UI.button({ icon: icon, variant: 'ghost' });
-                UI.tooltip(button, control.label, 'left');
-                collapsedContainer.appendChild(button);
             });
         });
 

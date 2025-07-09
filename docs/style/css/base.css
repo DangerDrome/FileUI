@@ -346,7 +346,7 @@ header {
         display: none;
     }
     .main-container {
-        margin-right: auto;
+        margin-right: 0;
     }
 }
 
@@ -368,6 +368,7 @@ header {
         margin-left: 0;
     }
 
+    /* Override collapsed states for mobile */
     .style-guide-layout.collapsed .left-panel {
         width: 100%;
     }
@@ -390,6 +391,17 @@ header {
 
     .style-guide-layout.collapsed .left-panel .panel-header {
         justify-content: space-between;
+    }
+
+    /* On medium screens, the right panel should stack if it were visible, but it's hidden by the LG breakpoint. 
+       This ensures if we decide to show it, it behaves correctly. */
+    .right-panel {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-radius: 0;
+        border-bottom: 1px solid var(--border-color);
+        /* The display property is handled by the larger breakpoint */
     }
 }
 

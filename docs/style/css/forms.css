@@ -57,7 +57,7 @@ textarea.form-control {
 }
 
 .setting-label {
-    font-weight: 500;
+    font-weight: var(--font-normal);
     color: var(--text-secondary);
 }
 
@@ -482,4 +482,10 @@ input[type="range"]::-moz-range-thumb {
 
 .tree .color-picker-trigger {
     min-width: 60px;
+} 
+
+.label-on-right {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: var(--space-3);
 } 

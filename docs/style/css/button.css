@@ -1,0 +1,150 @@
+/**
+ * FileUI Styles - Button
+ * Component-specific styles for buttons.
+ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    line-height: 1;
+    color: var(--text-primary);
+    background-color: var(--bg-layer-2);
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.btn.icon-only {
+    padding: var(--space-2);
+}
+
+.btn:hover:not(:disabled) {
+    background-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.btn i,
+.btn svg {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Ghost Button Style */
+.btn-ghost {
+    background-color: transparent;
+    border-color: transparent;
+    font-weight: var(--font-normal);
+}
+
+.btn-ghost:hover {
+    background-color: var(--overlay-light);
+    border-color: transparent;
+    color: var(--text-primary);
+}
+
+.btn-ghost.selected {
+    background-color: var(--accent);
+    color: var(--accent-text);
+}
+
+.btn-ghost.selected:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.btn-success {
+    background-color: var(--success);
+    color: var(--success-dark);
+}
+
+.btn-warning {
+    background-color: var(--warning);
+    color: var(--warning-dark);
+}
+
+.btn-error {
+    background-color: var(--error);
+    color: var(--error-dark);
+}
+
+.btn-info {
+    background-color: var(--info);
+    color: var(--info-dark);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+}
+.btn-success:hover:not(:disabled) {
+    background-color: var(--success-hover);
+}
+.btn-warning:hover:not(:disabled) {
+    background-color: var(--warning-hover);
+}
+.btn-error:hover:not(:disabled) {
+    background-color: var(--error-hover);
+}
+.btn-info:hover:not(:disabled) {
+    background-color: var(--info-hover);
+}
+
+.btn-sm {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+}
+
+.btn-lg {
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--text-lg);
+}
+
+.btn.active {
+    background-color: var(--accent);
+    color: var(--grey-800);
+}
+
+.btn-primary.active {
+    background-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.btn-success.active {
+    background-color: var(--success);
+    color: var(--success-dark);
+}
+
+.btn-warning.active {
+    background-color: var(--warning);
+    color: var(--warning-dark);
+}
+
+.btn-error.active {
+    background-color: var(--error);
+    color: var(--error-dark);
+}
+
+.btn-info.active {
+    background-color: var(--info);
+    color: var(--info-dark);
+} 

@@ -1,0 +1,128 @@
+/**
+ * FileUI Styles - Card
+ * Component-specific styles for cards.
+ */
+
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-layer-1);
+    border: none;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    width: 100%;
+    margin-bottom: var(--space-6);
+    /* Transitions and shadows are now handled by .interactive-lift or other utilities */
+}
+
+.card-header {
+    padding: var(--space-8);
+    background: var(--bg-layer-2);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: nowrap;
+    min-height: 60px;
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+    cursor: pointer;
+}
+
+.card-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.card-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+.card-icon {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    flex-shrink: 0;
+}
+
+.card-title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    line-height: 1.4;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.card-action-btn {
+    flex-shrink: 0;
+}
+
+.card-body {
+    padding: var(--space-8);
+    background: var(--bg-layer-2);
+    transition: max-height var(--transition-base), opacity var(--transition-base), padding var(--transition-base);
+    overflow: hidden;
+}
+
+.card.collapsed .card-body {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 var(--space-8);
+}
+
+.card-footer {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+    padding: var(--space-4) var(--space-8);
+    background: var(--bg-layer-2);
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+}
+
+.section .card-header::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.section .card.collapsed .card-header::after {
+    transform: rotate(-90deg);
+}
+
+.card-description {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    line-height: var(--line-height-relaxed);
+}
+
+/* Nested card styles */
+.card .card {
+    background: var(--bg-layer-2);
+    margin-bottom: 0;
+}
+
+.card .card .card-header,
+.card .card .card-body,
+.card .card .card-footer {
+    background: var(--bg-layer-3);
+} 

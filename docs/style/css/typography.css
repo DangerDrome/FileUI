@@ -1,0 +1,325 @@
+/**
+ * FileUI Styles - Typography
+ * This file contains all typography-related styles.
+ */
+
+/*------------------------------------*\
+    #TYPOGRAPHY
+\*------------------------------------*/
+
+/* Standardize Lucide icon stroke width and color */
+.lucide {
+    stroke-width: 2;
+    stroke: currentColor;
+    fill: none;
+}
+
+/* Force all SVG icons to use consistent size */
+svg.lucide {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-bold);
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: var(--space-4);
+}
+
+h1.font-mono, h2.font-mono, h3.font-mono, h4.font-mono, h5.font-mono, h6.font-mono {
+    font-family: var(--font-mono);
+}
+
+h1 { 
+    font-size: calc(var(--text-4xl) * 4); 
+    font-family: 'Inter', var(--font-system);
+    font-weight: 800;
+    letter-spacing: var(--h1-letter-spacing);
+    font-kerning: normal;
+    font-feature-settings: "kern" 1;
+    text-rendering: optimizeLegibility;
+    margin-top: var(--space-2);
+}
+
+h2 { 
+    font-size: calc(var(--text-3xl) * 2); 
+    font-family: 'Inter', var(--font-system);
+    font-weight: 700;
+    letter-spacing: var(--h2-letter-spacing);
+    font-kerning: normal;
+    font-feature-settings: "kern" 1;
+    text-rendering: optimizeLegibility;
+    width: fit-content;
+}
+
+h3 { 
+    font-size: calc(var(--text-3xl) * 1.5); 
+    font-family: 'Inter', var(--font-system);
+    font-weight: 600;
+    letter-spacing: var(--h3-letter-spacing);
+    font-kerning: normal;
+    font-feature-settings: "kern" 1;
+    text-rendering: optimizeLegibility;
+}
+
+h4 { font-size: calc(var(--text-xl) * 1.5); }
+h5 { font-size: calc(var(--text-lg) * 1.5); }
+h6 { font-size: calc(var(--text-base) * 1.2); }
+
+p {
+    font-size: var(--text-base);
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-4);
+    max-width: 65ch;
+}
+
+p.lead {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+    color: var(--text-primary);
+    font-weight: var(--font-normal);
+}
+
+p.small {
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--text-tertiary);
+}
+
+a {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-decoration-color: var(--overlay-medium);
+    text-underline-offset: 2px;
+    transition: all var(--transition-fast);
+    background-color: var(--overlay-light);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--overlay-medium);
+    font-weight: var(--font-bold);
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: fit-content;
+    margin: 0 var(--space-2) var(--space-2) 0;
+}
+
+a:hover {
+    color: var(--text-primary);
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background-color: var(--bg-layer-4);
+    border: 1px solid var(--overlay-medium);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-lg);
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: fit-content;
+    margin: 0 var(--space-2) var(--space-2) 0;
+}
+
+pre {
+    font-family: var(--font-mono);
+    background-color: var(--bg-layer-2);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: none;
+    overflow-x: auto;
+    margin-bottom: var(--space-4);
+}
+
+mark {
+    background-color: var(--warning);
+    border: 1px solid var(--warning);
+    color: var(--grey-800);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-lg);
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: fit-content;
+    margin: 0 var(--space-2) var(--space-2) 0;
+}
+
+kbd {
+    background-color: var(--overlay-light);
+    border: 1px solid var(--overlay-medium);
+    border-bottom-width: 3px;
+    border-radius: var(--radius-lg);
+    padding: var(--space-1) var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: fit-content;
+    margin: 0 var(--space-2) var(--space-2) 0;
+}
+
+abbr[title] {
+    text-decoration: underline dotted;
+    cursor: help;
+    border-bottom: 1px dotted var(--text-tertiary);
+    text-decoration: none;
+}
+
+del {
+    color: var(--text-tertiary);
+    text-decoration: line-through;
+    opacity: 0.7;
+    padding: 0 var(--space-1);
+}
+
+ins {
+    color: var(--text-secondary);
+    text-decoration: none;
+    background-color: rgba(200, 230, 201, 0.2);
+    border-bottom: 2px solid rgba(200, 230, 201, 0.5);
+    padding: var(--space-1) var(--space-2);
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: fit-content;
+    margin: 0 var(--space-2) var(--space-2) 0;
+}
+
+var {
+    font-family: var(--font-mono);
+    font-style: italic;
+    color: var(--text-secondary);
+    background-color: var(--overlay-light);
+    border: 1px solid var(--overlay-medium);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-lg);
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: fit-content;
+    margin: 0 var(--space-2) var(--space-2) 0;
+}
+
+samp {
+    font-family: var(--font-mono);
+    background-color: var(--overlay-light);
+    border: 1px solid var(--overlay-medium);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-lg);
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: fit-content;
+    margin: 0 var(--space-2) var(--space-2) 0;
+}
+
+cite {
+    font-style: italic;
+    color: var(--text-secondary);
+    border-left: 3px solid var(--accent);
+    padding-left: var(--space-2);
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: fit-content;
+    margin: 0 var(--space-2) var(--space-2) 0;
+}
+
+q {
+    font-style: italic;
+    color: var(--text-secondary);
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    width: fit-content;
+    margin: 0 var(--space-2) var(--space-2) 0;
+}
+
+/*------------------------------------*\
+    #UTILITY CLASSES
+\*------------------------------------*/
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+.font-mono { font-family: var(--font-mono); }
+.font-bold { font-weight: var(--font-bold); }
+.font-semibold { font-weight: var(--font-semibold); }
+.font-medium { font-weight: var(--font-medium); }
+.font-light { font-weight: var(--font-light); }
+.text-xs { font-size: var(--text-xs); }
+.text-sm { font-size: var(--text-sm); }
+.text-lg { font-size: var(--text-lg); }
+.text-xl { font-size: var(--text-xl); }
+.text-2xl { font-size: var(--text-2xl); }
+.text-3xl { font-size: var(--text-3xl); }
+.text-4xl { font-size: var(--text-4xl); }
+
+.leading-normal { line-height: 1.5; }
+.leading-relaxed { line-height: 1.625; }
+.leading-loose { line-height: 2; } 
+
+/*------------------------------------*\\
+#CALLOUTS
+\\*------------------------------------*/
+
+.callout {
+    display: flex;
+    align-items: flex-start;
+    padding: var(--space-4);
+    margin: var(--space-4) 0;
+    border-radius: var(--radius-lg);
+    border: 1px solid;
+    gap: var(--space-3);
+}
+
+.callout .icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.callout p {
+    margin: 0;
+}
+
+.callout-info {
+    background-color: rgba(var(--info-rgba), 0.5);
+    border-color: rgba(var(--info-rgba), 0.3);
+    color: var(--info-dark);
+}
+.callout-info .icon {
+    color: var(--text-secondary);
+}
+
+.callout-success {
+    background-color: rgba(var(--success-rgba), 0.5);
+    border-color: rgba(var(--success-rgba), 0.3);
+    color: var(--success-dark);
+}
+.callout-success .icon {
+    color: var(--text-secondary);
+}
+
+.callout-warning {
+    background-color: rgba(var(--warning-rgba), 0.5);
+    border-color: rgba(var(--warning-rgba), 0.3);
+    color: var(--warning-dark);
+}
+.callout-warning .icon {
+    color: var(--text-secondary);
+}
+
+.callout-error {
+    background-color: rgba(var(--error-rgba), 0.5);
+    border-color: rgba(var(--error-rgba), 0.3);
+    color: var(--error-dark);
+}
+.callout-error .icon {
+    color: var(--text-secondary);
+} 

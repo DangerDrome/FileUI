@@ -1,0 +1,40 @@
+/**
+ * FileUI Styles - Colors
+ * Styles for the color chips in the style guide.
+ */
+
+.demo-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.color-chip {
+    width: auto;
+    height: 80px;
+    border-radius: var(--radius-lg);
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+    display: flex;
+    flex-direction: column; /* Stack name and hex vertically */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-2);
+    cursor: pointer;
+}
+
+.color-chip:active {
+    animation: press 0.1s ease-out forwards;
+}
+
+.color-chip-name {
+    font-weight: var(--font-semibold);
+}
+
+.color-chip-hex {
+    font-size: var(--text-xs);
+    opacity: 0.7;
+    margin-top: var(--space-1);
+} 

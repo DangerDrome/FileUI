@@ -1,0 +1,69 @@
+/**
+ * FileUI Styles - Tag
+ * Component-specific styles for tags/badges.
+ */
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-bold);
+    line-height: 1.4;
+    color: var(--text-secondary);
+    background-color: var(--bg-layer-1);
+    border: 0px solid var(--overlay-medium);
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+    user-select: none;
+    margin: 0; /* Remove margin to let container handle spacing */
+}
+
+.tag .lucide {
+    width: 1.5em;
+    height: 1.5em;
+}
+
+/* Color Variants */
+.tag-primary {
+    background-color: var(--primary);
+    color: var(--primary-dark);
+}
+.tag-success {
+    background-color: var(--success);
+    color: var(--success-dark);
+}
+.tag-warning {
+    background-color: var(--warning);
+    color: var(--warning-dark);
+}
+.tag-error {
+    background-color: var(--error);
+    color: var(--error-dark);
+}
+.tag-info {
+    background-color: var(--info);
+    color: var(--info-dark);
+}
+.tag-neutral {
+    background-color: var(--neutral);
+    color: var(--text-primary);
+}
+.tag-accent {
+    background-color: var(--accent);
+    color: var(--bg-layer-0);
+}
+
+
+/* Size Variants */
+.tag-lg {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-base);
+}
+
+.tag-icon-only {
+    padding: var(--space-2);
+    border-radius: var(--radius-full);
+} 

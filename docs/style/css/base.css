@@ -1,0 +1,189 @@
+/**
+ * FileUI Styles - Base
+ * This file contains foundational styles for the entire application,
+ * including typography, resets, accessibility features, and global element styling.
+ */
+
+/*------------------------------------*\
+    #BASE STYLES
+\*------------------------------------*/
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-system);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--bg-layer-0);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+/*------------------------------------*\
+    #TYPOGRAPHY
+\*------------------------------------*/
+
+/* Typography styles are now in css/typography.css */
+
+/*------------------------------------*\
+    #SCROLLBAR
+\*------------------------------------*/
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-quaternary);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--bg-secondary);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    border: none;
+}
+
+/* Firefox */
+* {
+    scrollbar-width: auto;
+    scrollbar-color: var(--bg-quaternary) var(--bg-secondary);
+}
+
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+body.dark ::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+body.dark ::-webkit-scrollbar-thumb {
+    background: var(--bg-quaternary);
+    border: 2px solid var(--bg-tertiary);
+}
+
+body.dark ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+body.dark ::-webkit-scrollbar-corner {
+    background: var(--bg-tertiary);
+}
+
+
+/*------------------------------------*\
+    #ACCESSIBILITY & DEFAULTS
+\*------------------------------------*/
+
+.btn:focus-visible,
+.nav-item:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.color-swatch:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@media (forced-colors: active) {
+    body {
+        forced-color-adjust: none;
+        background: Canvas;
+        color: CanvasText;
+    }
+    .btn,
+    .card,
+    .nav-panel,
+    .control-panel,
+    .panel {
+        background: Canvas;
+        color: CanvasText;
+        border: 1px solid CanvasText;
+    }
+}
+
+@media print {
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    .nav-panel,
+    .control-panel {
+        display: none !important;
+    }
+    .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    a {
+        color: #000 !important;
+        text-decoration: underline;
+    }
+}
+
+:dir(rtl) .nav-panel {
+    left: auto;
+    right: var(--space-4);
+}
+:dir(rtl) .control-panel {
+    right: auto;
+    left: var(--space-4);
+}
+:dir(rtl) .main-content {
+    margin-left: calc(320px + var(--space-8));
+    margin-right: calc(var(--nav-width) + var(--space-8));
+}
+:dir(rtl) body:has(.nav-panel.collapsed) .main-content {
+    margin-right: calc(64px + var(--space-8));
+}
+:dir(rtl) body:has(.control-panel.collapsed) .main-content {
+    margin-left: calc(64px + var(--space-8));
+} 
+
+/*------------------------------------*\
+    #LAYOUT UTILITIES
+\*------------------------------------*/
+.d-flex {
+    display: flex;
+}
+.gap-8 {
+    gap: var(--space-8);
+}
+.align-items-start {
+    align-items: flex-start;
+}
+.flex-1 {
+    flex: 1;
+} 

@@ -1,0 +1,63 @@
+/*------------------------------------*\\
+#ICONS
+\\*------------------------------------*/
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background-color: var(--bg-layer-1);
+    transition: background-color var(--transition-fast);
+}
+
+.icon-item:hover {
+    background-color: var(--bg-layer-2);
+}
+
+.icon-item .lucide {
+    width: 32px;
+    height: 32px;
+}
+
+.icon-item-name {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Colored Icons */
+.lucide.icon-primary {
+    color: rgb(var(--primary-rgba));
+    fill: rgba(var(--primary-rgba), 0.2);
+}
+.lucide.icon-success {
+    color: rgb(var(--success-rgba));
+    fill: rgba(var(--success-rgba), 0.2);
+}
+.lucide.icon-warning {
+    color: rgb(var(--warning-rgba));
+    fill: rgba(var(--warning-rgba), 0.2);
+}
+.lucide.icon-error {
+    color: rgb(var(--error-rgba));
+    fill: rgba(var(--error-rgba), 0.2);
+}
+.lucide.icon-info {
+    color: rgb(var(--info-rgba));
+    fill: rgba(var(--info-rgba), 0.2);
+}
+.lucide.icon-accent {
+    color: rgb(var(--accent-rgb));
+    fill: rgba(var(--accent-rgb), 0.2);
+} 

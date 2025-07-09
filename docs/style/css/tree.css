@@ -1,0 +1,101 @@
+/**
+ * FileUI Styles - Tree
+ * Component-specific styles for tree views with connecting lines.
+ */
+
+.tree {
+    list-style: none;
+    padding: 0;
+    position: relative;
+}
+
+.tree-item {
+    position: relative;
+    padding-left: var(--space-6); /* Indent all items */
+}
+
+/* --- Guide Lines --- */
+.tree-item::before {
+    content: '';
+    position: absolute;
+    top: 22px; 
+    left: 8px; /* Start of the horizontal line */
+    width: 15px; /* Connect from edge to the content area */
+    height: 1px;
+    background: var(--overlay-medium);
+}
+
+.tree-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 8px; /* Vertical line alignment */
+    width: 1px;
+    background: var(--overlay-medium);
+}
+
+.tree-item:last-child::after {
+    height: 22px; /* Stop line at the item */
+}
+
+/* --- Content & Toggle --- */
+.tree-item-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    border-radius: var(--radius-md);
+    position: relative;
+    justify-content: flex-start; /* Override .btn centering */
+    /* Base styles inherited from .btn */
+    padding: var(--space-2) 0 !important; /* Override button padding */
+}
+
+/* Remove hover since it's handled by .btn-ghost */
+
+/* --- Toggle Icon --- */
+.tree-item-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+    margin-left: -2px; /* Align toggle with lines */
+}
+
+.tree-item.collapsed > .tree-item-content > .tree-item-toggle {
+    transform: rotate(-90deg);
+}
+
+.tree-item-toggle .lucide {
+    width: 14px;
+    height: 14px;
+}
+
+/* --- Snake Path & Selection Styling --- */
+.tree-item.ancestor > .tree-item-content::before,
+.tree-item.ancestor > .tree-item-content::after,
+.tree-item.selected > .tree-item-content::before {
+    background: var(--accent);
+}
+
+.tree-item.path-sibling-connector::after {
+    background: var(--accent);
+}
+
+/* Selection is now handled by .btn-ghost.selected */
+
+/* --- Children --- */
+.tree-children {
+    list-style: none;
+    padding-left: 0;
+    transition: max-height var(--transition-base);
+    overflow: hidden;
+    position: relative;
+}
+
+.tree-item.collapsed > .tree-children {
+    max-height: 0;
+} 

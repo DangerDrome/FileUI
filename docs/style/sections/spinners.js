@@ -2,16 +2,22 @@
     'use strict';
 
     const createSpinnersSection = () => {
+        const section = document.createElement('section');
+        
+        const title = 'Spinners';
+        const blurb = 'Spinners are used to indicate a loading state.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.className = 'grid-container';
-
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Spinners are used to indicate a loading state.</p>
-        `;
-        content.appendChild(callout);
 
         // --- Spinner Sizes ---
         const h5Sizes = document.createElement('h5');
@@ -77,13 +83,14 @@
         
         content.appendChild(buttonsDemo);
 
-        const panel = UI.panel('Spinners', content, {
+        const panel = UI.panel('', content, {
             icon: 'loader',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
 
-        return panel;
+        section.appendChild(panel);
+
+        return section;
     };
 
     // Expose the function to the global scope

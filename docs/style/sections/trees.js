@@ -3,17 +3,23 @@
     if (!UI.sections) UI.sections = {};
 
     UI.sections.trees = function() {
+        const section = document.createElement('section');
+
+        const title = 'Trees';
+        const blurb = 'Trees are used to display hierarchical data. They can be used to represent a file system, a set of nested categories, or any other data that has a parent-child relationship.';
+        
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         // --- Main container for the section ---
         const content = document.createElement('div');
         content.className = 'row';
-
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info col-12';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Trees are used to display hierarchical data. They can be used to represent a file system, a set of nested categories, or any other data that has a parent-child relationship.</p>
-        `;
-        content.appendChild(callout);
 
         const h5 = document.createElement('h5');
         h5.textContent = 'Tree Examples';
@@ -74,10 +80,13 @@
         content.appendChild(createTreeExample('Pre-expanded Tree', treeData2));
         content.appendChild(createTreeExample('Complex File System', treeData3));
 
-        return UI.panel('Trees', content, { 
+        const panel = UI.panel('', content, { 
             icon: 'file-tree',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
+
+        section.appendChild(panel);
+
+        return section;
     };
 })(); 

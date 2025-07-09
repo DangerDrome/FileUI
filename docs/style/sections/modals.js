@@ -3,15 +3,21 @@
     if (!UI.sections) UI.sections = {};
 
     UI.sections.modals = function() {
-        const content = document.createElement('div');
+        const section = document.createElement('section');
 
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Modals are used to display content in a layer above the app. They can be used for alerts, confirmations, or to display forms. The background is dimmed to draw attention to the modal.</p>
-        `;
-        content.appendChild(callout);
+        const title = 'Modals';
+        const blurb = 'Modals are used to display content in a layer above the app. They can be used for alerts, confirmations, or to display forms. The background is dimmed to draw attention to the modal.';
+        
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
+        const content = document.createElement('div');
 
         const h5 = document.createElement('h5');
         h5.textContent = 'Modal Examples';
@@ -72,12 +78,13 @@
 
         buttonWrapper.append(btn1, btn2, btn3);
 
-        const panel = UI.panel('Modals', content, {
+        const panel = UI.panel('', content, {
             icon: 'layout-template',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
 
-        return panel;
+        section.appendChild(panel);
+
+        return section;
     };
 })(); 

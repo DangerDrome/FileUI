@@ -2,15 +2,21 @@
     'use strict';
 
     function createFormsSection() {
-        const content = document.createElement('div');
+        const section = document.createElement('section');
         
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>This section demonstrates various form controls, including text inputs, selection inputs, checkboxes, and radio buttons. All components are styled for consistency and accessibility.</p>
-        `;
-        content.appendChild(callout);
+        const title = 'Forms';
+        const blurb = 'This section demonstrates various form controls, including text inputs, selection inputs, checkboxes, and radio buttons. All components are styled for consistency and accessibility.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+        
+        const content = document.createElement('div');
         
         const form = document.createElement('form');
         form.addEventListener('submit', (e) => {
@@ -144,11 +150,14 @@
 
         content.appendChild(form);
 
-        return UI.panel('Forms', content, {
+        const panel = UI.panel('', content, {
             icon: 'text-cursor-input',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
+
+        section.appendChild(panel);
+
+        return section;
     }
 
     // Expose to global scope

@@ -3,16 +3,22 @@
     if (!UI.sections) UI.sections = {};
 
     UI.sections.cards = function() {
+        const section = document.createElement('section');
+
+        const title = 'Cards';
+        const blurb = 'Cards are used to group related content and actions. They can contain a header, body, and footer, and can be configured with icons, actions, and other custom elements. The cards below are arranged in a responsive grid.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.className = 'row';
-
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info col-12';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Cards are used to group related content and actions. They can contain a header, body, and footer, and can be configured with icons, actions, and other custom elements. The cards below are arranged in a responsive grid.</p>
-        `;
-        content.appendChild(callout);
 
         const h5 = document.createElement('h5');
         h5.textContent = 'Card Examples';
@@ -61,12 +67,13 @@
         card3Col.appendChild(card3);
         content.appendChild(card3Col);
 
-        const panel = UI.panel('Cards', content, { 
+        const panel = UI.panel('', content, { 
             icon: 'square',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
         
-        return panel;
+        section.appendChild(panel);
+        
+        return section;
     };
 })(); 

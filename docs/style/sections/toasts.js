@@ -3,12 +3,22 @@
     if (!UI.sections) UI.sections = {};
 
     UI.sections.toasts = function() {
+        const section = document.createElement('section');
+
+        const title = 'Toast Notifications';
+        const blurb = 'Toasts are used to display brief, temporary notifications. They can be used to provide feedback on an operation, or to display a system message. Toasts appear at the bottom of the screen and are automatically dismissed after a short period.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.innerHTML = `
-            <div class="callout callout-info">
-                <i data-lucide="info" class="icon"></i>
-                <p>Toasts are used to display brief, temporary notifications. They can be used to provide feedback on an operation, or to display a system message. Toasts appear at the bottom of the screen and are automatically dismissed after a short period.</p>
-            </div>
             <h5>Toast Examples</h5>
             <div class="demo-row">
                 <sl-tooltip content="Show success notification" placement="top"></sl-tooltip>
@@ -34,12 +44,13 @@
         tooltips[5].appendChild(UI.button('Dismissible Toast', { variant: 'info', onclick: () => UI.toast('Click X to dismiss', 'info', { dismissible: true }) }));
         tooltips[6].appendChild(UI.button('Action Toast', { variant: 'warning', onclick: () => UI.toast('Action required', 'warning', { action: { text: 'Undo', callback: () => UI.toast('Undone!', 'success') }}) }));
 
-        const panel = UI.panel('Toast Notifications', content, { 
+        const panel = UI.panel('', content, { 
             icon: 'bell',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
         
-        return panel;
+        section.appendChild(panel);
+        
+        return section;
     };
 })(); 

@@ -2,16 +2,22 @@
     'use strict';
 
     const createPatternsSection = () => {
+        const section = document.createElement('section');
+
+        const title = 'Background Patterns';
+        const blurb = 'Use these tileable CSS patterns to add subtle background textures to elements. The patterns are applied to a pseudo-element to not interfere with content.';
+        
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.className = 'grid-container';
-
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Use these tileable CSS patterns to add subtle background textures to elements. The patterns are applied to a pseudo-element to not interfere with content.</p>
-        `;
-        content.appendChild(callout);
 
         const patterns = [
             { name: 'Dots', class: 'pattern-dots' },
@@ -40,13 +46,14 @@
         
         content.appendChild(row);
 
-        const panel = UI.panel('Background Patterns', content, {
+        const panel = UI.panel('', content, {
             icon: 'grid',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
 
-        return panel;
+        section.appendChild(panel);
+
+        return section;
     };
 
     // Expose the function to the global scope

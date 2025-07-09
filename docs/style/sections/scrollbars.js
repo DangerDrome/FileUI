@@ -2,16 +2,22 @@
     'use strict';
 
     const createScrollbarsSection = () => {
+        const section = document.createElement('section');
+
+        const title = 'Scrollbars';
+        const blurb = 'Custom scrollbar styles are applied globally to maintain a consistent look and feel across the application.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.className = 'row';
-
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info col-12';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Custom scrollbar styles are applied globally to maintain a consistent look and feel across the application.</p>
-        `;
-        content.appendChild(callout);
 
         const createScrollbarExample = (title, containerClass, innerHTML) => {
             const col = document.createElement('div');
@@ -56,13 +62,14 @@
         }
         content.appendChild(createScrollbarExample('Styled Scroll Container', 'scrollbar-demo-styled', styledContent));
 
-        const panel = UI.panel('Scrollbars', content, {
+        const panel = UI.panel('', content, {
             icon: 'move-vertical',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
 
-        return panel;
+        section.appendChild(panel);
+
+        return section;
     };
 
     // Expose the function to the global scope

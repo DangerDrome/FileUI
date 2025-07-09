@@ -2,15 +2,21 @@
     'use strict';
 
     const createTagsSection = () => {
-        const content = document.createElement('div');
+        const section = document.createElement('section');
 
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Tags are used to label, categorize, or organize items using keywords that describe them.</p>
-        `;
-        content.appendChild(callout);
+        const title = 'Tags';
+        const blurb = 'Tags are used to label, categorize, or organize items using keywords that describe them.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
+        const content = document.createElement('div');
 
         // --- Color Variants ---
         const h5Colors = document.createElement('h5');
@@ -93,15 +99,16 @@
 
         content.appendChild(iconOnlyDemo);
         
-        const panel = UI.panel('Tags', content, {
+        const panel = UI.panel('', content, {
             icon: 'tag',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
+
+        section.appendChild(panel);
 
         UI.icons();
 
-        return panel;
+        return section;
     };
 
     // Expose the function to the global scope

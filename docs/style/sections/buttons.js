@@ -3,12 +3,22 @@
     if (!UI.sections) UI.sections = {};
 
     UI.sections.buttons = function() {
+        const section = document.createElement('section');
+
+        const title = 'Buttons';
+        const blurb = 'Buttons are used for actions, such as submitting a form, opening a dialog, or canceling an operation. They come in various styles, sizes, and semantic colors to fit different contexts.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.innerHTML = `
-            <div class="callout callout-info">
-                <i data-lucide="info" class="icon"></i>
-                <p>Buttons are used for actions, such as submitting a form, opening a dialog, or canceling an operation. They come in various styles, sizes, and semantic colors to fit different contexts.</p>
-            </div>
             <h5>Default Buttons</h5>
             <div class="demo-row">
                 <sl-tooltip content="Standard button for general actions" placement="top"></sl-tooltip>
@@ -51,11 +61,13 @@
         tooltips[10].appendChild(UI.button('', { icon: 'save', variant: 'primary' }));
         tooltips[11].appendChild(UI.button('', { icon: 'trash-2', variant: 'error' }));
         
-        const panel = UI.panel('Buttons', content, { 
+        const panel = UI.panel('', content, { 
             icon: 'mouse-pointer',
-            collapsible: true 
+            collapsible: false 
         });
         
-        return panel;
+        section.appendChild(panel);
+        
+        return section;
     };
 })(); 

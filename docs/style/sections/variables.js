@@ -2,16 +2,22 @@
     'use strict';
 
     const createVariablesSection = () => {
+        const section = document.createElement('section');
+
+        const title = 'CSS Variables';
+        const blurb = 'This section documents all the global CSS variables (custom properties) used in the design system. These variables are the foundation of the UI\'s look and feel.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.className = 'row';
-
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info col-12';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>This section documents all the global CSS variables (custom properties) used in the design system. These variables are the foundation of the UI's look and feel.</p>
-        `;
-        content.appendChild(callout);
 
         const createCardAndHeader = (title, variables) => {
             if (!variables || variables.length === 0) return null;
@@ -135,13 +141,14 @@
             }
         }
 
-        const panel = UI.panel('CSS Variables', content, {
+        const panel = UI.panel('', content, {
             icon: 'book-marked',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
+        
+        section.appendChild(panel);
 
-        return panel;
+        return section;
     };
 
     window.UI = window.UI || {};

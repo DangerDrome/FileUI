@@ -24,8 +24,12 @@
                     }
                 }
 
-                const content = document.createElement('div');
+                const isLink = itemData.href && typeof itemData.href === 'string';
+                const content = isLink ? document.createElement('a') : document.createElement('div');
                 content.className = 'tree-item-content btn btn-ghost';
+                if (isLink) {
+                    content.href = itemData.href;
+                }
                 
                 const toggle = document.createElement('span');
                 toggle.className = 'tree-item-toggle';
@@ -100,6 +104,11 @@
                 // --- Collapse/Expand Logic ---
                 if (item.classList.contains('tree-item') && item.querySelector('.tree-children')) {
                     item.classList.toggle('collapsed');
+                }
+
+                // --- Click Logic ---
+                if (itemData.onclick && typeof itemData.onclick === 'function' && !isLink) {
+                    itemData.onclick();
                 }
             }
         });

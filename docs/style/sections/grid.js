@@ -2,16 +2,22 @@
     'use strict';
 
     const createGridSection = () => {
+        const section = document.createElement('section');
+
+        const title = 'Grid System';
+        const blurb = 'A simple, 12-column responsive flexbox grid system. Columns will stack on screens smaller than 768px.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+        
         const content = document.createElement('div');
         content.classList.add('grid-demo');
-
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>A simple, 12-column responsive flexbox grid system. Columns will stack on screens smaller than 768px.</p>
-        `;
-        content.appendChild(callout);
 
         const demoContent = document.createElement('div');
         demoContent.innerHTML = `
@@ -55,13 +61,14 @@
         `;
         content.appendChild(demoContent);
         
-        const panel = UI.panel('Grid System', content, {
+        const panel = UI.panel('', content, {
             icon: 'layout-grid',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
 
-        return panel;
+        section.appendChild(panel);
+
+        return section;
     };
 
     // Expose the function to the global scope

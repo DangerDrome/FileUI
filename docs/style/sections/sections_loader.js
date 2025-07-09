@@ -22,29 +22,25 @@
         ];
 
         const sections = [
-            // Foundations
-            'variables',
-            'colors',
-            'typography',
-            'grid',
-            // Base Elements
-            'icons',
-            'buttons',
-            'forms',
-            'tags',
-            // Components
-            'tooltips',
-            'toasts',
-            'progress',
-            'spinners',
-            'menus',
-            'scrollbars',
-            'cards',
-            'trees',
-            'panels',
-            'modals',
-            // Patterns
-            'patterns'
+            {
+                name: 'Foundations',
+                children: ['variables', 'colors', 'typography']
+            },
+            {
+                name: 'Layout',
+                children: ['grid', 'panels', 'scrollbars']
+            },
+            {
+                name: 'Components',
+                children: [
+                    'buttons', 'cards', 'forms', 'icons', 'menus', 'modals', 'progress', 
+                    'spinners', 'tags', 'toasts', 'tooltips', 'trees'
+                ]
+            },
+            {
+                name: 'Patterns',
+                children: ['patterns']
+            }
         ];
 
         async function loadScript(path) {
@@ -62,7 +58,10 @@
             await loadScript(path);
             if (UI.sections[sectionName]) {
                 const sectionElement = await UI.sections[sectionName]();
-                sectionsContainer.appendChild(sectionElement);
+                if (sectionElement) {
+                    sectionElement.id = `section-${sectionName}`;
+                    sectionsContainer.appendChild(sectionElement);
+                }
             } else {
                 console.error(`Section "${sectionName}" did not register itself correctly.`);
             }
@@ -74,10 +73,24 @@
                 await loadScript(path);
             }
             
-            // 2. Then load and render all section scripts
-            for (const name of sections) {
-                await loadSection(name);
+            // 2. Load navigation tree script
+            await loadScript('navigation.js');
+            
+            // 3. Then load and render all section scripts
+            for (const group of sections) {
+                const groupHeader = document.createElement('h1');
+                groupHeader.className = 'group-header';
+                groupHeader.textContent = group.name;
+                groupHeader.id = `group-${group.name.toLowerCase().replace(/\s+/g, '-')}`;
+                sectionsContainer.appendChild(groupHeader);
+                
+                for (const name of group.children) {
+                    await loadSection(name);
+                }
             }
+
+            // 4. Create the navigation tree
+            UI.createNavigationTree(sections);
 
         } catch (error) {
             console.error('Failed to load style guide modules:', error);

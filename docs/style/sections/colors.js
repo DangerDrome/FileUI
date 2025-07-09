@@ -3,12 +3,22 @@
     if (!UI.sections) UI.sections = {};
 
     UI.sections.colors = function() {
+        const section = document.createElement('section');
+
+        const title = 'Colors';
+        const blurb = 'The color system is designed to be systematic and semantic. It includes a palette for semantic states (primary, success, warning, error), a background hierarchy for layering UI elements, and a set of text colors for readability.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.innerHTML = `
-            <div class="callout callout-info">
-                <i data-lucide="info" class="icon"></i>
-                <p>The color system is designed to be systematic and semantic. It includes a palette for semantic states (primary, success, warning, error), a background hierarchy for layering UI elements, and a set of text colors for readability.</p>
-            </div>
             <h5>Semantic Colors</h5>
             <div id="semantic-colors-container"></div>
             
@@ -156,10 +166,13 @@
         createChipRow(content.querySelector('#bg-hierarchy-container'), bgHierarchy);
         createChipRow(content.querySelector('#text-colors-container'), textColors);
 
-        return UI.panel('Colors', content, { 
+        const panel = UI.panel('', content, { 
             icon: 'palette',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
+        
+        section.appendChild(panel);
+
+        return section;
     };
 })(); 

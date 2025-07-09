@@ -54,13 +54,37 @@
     <script src="style/components/menu.js"></script>
     <script src="style/components/tooltip.js"></script>
     <script src="style/components/form.js"></script>
+
+    <!-- Layout scripts -->
+    <script src="style/layout.js"></script>
 </head>
 <body>
-    <div class="main-container">
-        <header>
-            <h1>Style Guide</h1>
-        </header>
-        <main id="sections-container"></main>
+    <div class="style-guide-layout">
+        <aside class="panel left-panel">
+            <div class="panel-header" id="left-panel-toggle">
+                <h2 class="panel-title">
+                    <i data-lucide="compass" class="icon"></i>
+                    <span class="panel-title-text">Navigation</span>
+                </h2>
+            </div>
+            <div class="panel-body">
+                <div id="navigation-tree-container">
+                    <!-- Navigation tree will be dynamically inserted here -->
+                </div>
+                <div id="collapsed-navigation-container">
+                    <!-- Collapsed icon list will be dynamically inserted here -->
+                </div>
+            </div>
+        </aside>
+        <div class="main-container">
+            <header>
+                <h1>FileUI Component Library</h1>
+                <p class="text-lg text-secondary">A comprehensive guide to the components, styles, and patterns that form the foundation of the FileUI design system.</p>
+                <p>FileUI is a lightweight, dependency-free component library built with vanilla JavaScript. It's designed for modularity and performance, allowing you to build modern, responsive interfaces without the overhead of a large framework. All components are self-contained and expose a simple, functional API.</p>
+                <p>To use a component, simply include the necessary CSS and JS files in your project. Components are available under the global <code>UI</code> object. For example, to create a button, you can call <code>UI.button('Click Me', { variant: 'primary' })</code>. Explore the sections in the navigation panel to see live examples and discover the full range of available components and their options.</p>
+            </header>
+            <main id="sections-container"></main>
+        </div>
     </div>
     <script src="style/sections/sections_loader.js"></script>
 </body>

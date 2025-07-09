@@ -2,15 +2,21 @@
     'use strict';
 
     const createTooltipsSection = () => {
-        const content = document.createElement('div');
+        const section = document.createElement('section');
+        
+        const title = 'Tooltips';
+        const blurb = 'Tooltips display informative text when users hover over, focus on, or tap an element.';
 
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Tooltips display informative text when users hover over, focus on, or tap an element.</p>
-        `;
-        content.appendChild(callout);
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
+        const content = document.createElement('div');
 
         const h5 = document.createElement('h5');
         h5.textContent = 'Tooltip Examples';
@@ -30,11 +36,12 @@
             demoRow.appendChild(button);
         });
         
-        const panel = UI.panel('Tooltips', content, {
+        const panel = UI.panel('', content, {
             icon: 'message-square',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
+
+        section.appendChild(panel);
 
         // Defer tooltip initialization until the DOM is fully loaded and ready
         document.addEventListener('DOMContentLoaded', () => {
@@ -47,7 +54,7 @@
             });
         });
 
-        return panel;
+        return section;
     };
 
     // Expose the function to the global scope

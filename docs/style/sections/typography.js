@@ -3,12 +3,22 @@
     if (!UI.sections) UI.sections = {};
 
     UI.sections.typography = function() {
+        const section = document.createElement('section');
+
+        const title = 'Typography';
+        const blurb = 'This section demonstrates the typographic elements used throughout the application. It includes the primary font, headings, paragraphs, lists, and other common text-based elements.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.innerHTML = `
-            <div class="callout callout-info">
-                <i data-lucide="info" class="icon"></i>
-                <p>This section demonstrates the typographic elements used throughout the application. It includes the primary font, headings, paragraphs, lists, and other common text-based elements.</p>
-            </div>
             <h5>Inter Font Specimen</h5>
             <div class="font-specimen">
                 <div class="font-specimen-header">
@@ -176,11 +186,12 @@ function greet(name) {
             </div>
         `;
 
-        const panel = UI.panel('Typography', content, { 
+        const panel = UI.panel('', content, { 
             icon: 'type',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
+        
+        section.appendChild(panel);
 
         // Add interactivity for the font slider
         const slider = panel.querySelector('#font-size-slider');
@@ -197,6 +208,6 @@ function greet(name) {
 
         UI.icons();
         
-        return panel;
+        return section;
     };
 })(); 

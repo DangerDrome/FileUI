@@ -2,16 +2,22 @@
     'use strict';
 
     const createProgressSection = () => {
+        const section = document.createElement('section');
+
+        const title = 'Progress Bars';
+        const blurb = 'Progress bars are used to show the status of a task or operation.';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+
         const content = document.createElement('div');
         content.className = 'grid-container';
-
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Progress bars are used to show the status of a task or operation.</p>
-        `;
-        content.appendChild(callout);
         
         const createProgressBar = (value, text = '', size = '', color = '', striped = false, animated = false) => {
             const progress = document.createElement('div');
@@ -71,13 +77,14 @@
         content.appendChild(createProgressBar(75, '', '', 'progress-bar-success', true));
         content.appendChild(createProgressBar(85, '', '', 'progress-bar-info', true, true));
 
-        const panel = UI.panel('Progress Bars', content, {
+        const panel = UI.panel('', content, {
             icon: 'minus',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
 
-        return panel;
+        section.appendChild(panel);
+
+        return section;
     };
 
     // Expose the function to the global scope

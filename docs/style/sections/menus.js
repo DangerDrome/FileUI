@@ -2,15 +2,21 @@
     'use strict';
 
     const createMenusSection = () => {
-        const content = document.createElement('div');
+        const section = document.createElement('section');
+        
+        const title = 'Menus';
+        const blurb = 'Menus provide a list of choices to the user. They can be triggered by buttons or other elements.';
 
-        const callout = document.createElement('div');
-        callout.className = 'callout callout-info';
-        callout.innerHTML = `
-            <i data-lucide="info" class="icon"></i>
-            <p>Menus provide a list of choices to the user. They can be triggered by buttons or other elements.</p>
-        `;
-        content.appendChild(callout);
+        const h2 = document.createElement('h2');
+        h2.textContent = title;
+        section.appendChild(h2);
+
+        const p = document.createElement('p');
+        p.className = 'text-lg text-secondary';
+        p.textContent = blurb;
+        section.appendChild(p);
+        
+        const content = document.createElement('div');
 
         const h5 = document.createElement('h5');
         h5.textContent = 'Menu Buttons';
@@ -242,13 +248,14 @@
 
         content.appendChild(contextTarget);
 
-        const panel = UI.panel('Menus', content, {
+        const panel = UI.panel('', content, {
             icon: 'list',
-            collapsible: true,
-            startCollapsed: false
+            collapsible: false
         });
+        
+        section.appendChild(panel);
 
-        return panel;
+        return section;
     };
 
     // Expose the function to the global scope

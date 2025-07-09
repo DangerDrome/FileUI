@@ -147,4 +147,22 @@
 .btn-info.active {
     background-color: var(--info);
     color: var(--info-dark);
+}
+
+/* Swatch Button */
+.btn-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.btn-swatch:hover {
+    transform: scale(1.1);
+    border-color: var(--border-strong);
+}
+
+.btn-swatch:focus {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
 } 

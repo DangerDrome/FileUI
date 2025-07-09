@@ -42,6 +42,21 @@
                 <sl-tooltip content="Save changes" placement="top"></sl-tooltip>
                 <sl-tooltip content="Delete item" placement="top"></sl-tooltip>
             </div>
+
+            <h5>Icon Text Buttons</h5>
+            <div class="demo-row" id="icon-text-demo">
+                <!-- Icon text buttons will be inserted here -->
+            </div>
+
+            <h5>Icon Toggle Buttons</h5>
+            <div class="demo-row" id="icon-toggle-demo">
+                <!-- Toggles will be inserted here -->
+            </div>
+
+            <h5>Swatch Buttons</h5>
+            <div class="demo-row" id="swatch-demo">
+                <!-- Swatches will be inserted here -->
+            </div>
         `;
 
         const tooltips = content.querySelectorAll('sl-tooltip');
@@ -60,6 +75,69 @@
         tooltips[9].appendChild(UI.button('', { icon: 'edit' }));
         tooltips[10].appendChild(UI.button('', { icon: 'save', variant: 'primary' }));
         tooltips[11].appendChild(UI.button('', { icon: 'trash-2', variant: 'error' }));
+
+        const iconTextContainer = content.querySelector('#icon-text-demo');
+        const semanticIconText = {
+            'primary': 'zap',
+            'success': 'check-circle',
+            'warning': 'alert-triangle',
+            'error': 'x-circle',
+            'info': 'info'
+        };
+        for (const [variant, icon] of Object.entries(semanticIconText)) {
+            iconTextContainer.appendChild(UI.button({
+                text: variant.charAt(0).toUpperCase() + variant.slice(1),
+                icon: icon,
+                variant: variant
+            }));
+        }
+
+        const toggleContainer = content.querySelector('#icon-toggle-demo');
+
+        // Dark Mode Toggle
+        toggleContainer.appendChild(UI.iconToggle({
+            iconOn: 'moon',
+            iconOff: 'sun',
+            tooltip: 'Toggle Dark Mode',
+            initialState: () => document.body.classList.contains('dark'),
+            onchange: (checked) => document.body.classList.toggle('dark', checked)
+        }));
+
+        // Font Toggle
+        toggleContainer.appendChild(UI.iconToggle({
+            iconOn: 'type',
+            iconOff: 'pilcrow',
+            tooltip: 'Toggle Monospace Font',
+            initialState: () => document.body.classList.contains('font-mono'),
+            onchange: (checked) => document.body.classList.toggle('font-mono', checked)
+        }));
+
+        // Language Toggle
+        toggleContainer.appendChild(UI.iconToggle({
+            iconOn: 'languages',
+            iconOff: 'text',
+            tooltip: 'Toggle Language',
+            initialState: () => document.documentElement.lang === 'zh-CN',
+            onchange: (checked) => document.documentElement.lang = checked ? 'zh-CN' : 'en'
+        }));
+        
+        // Spacing Toggle
+        toggleContainer.appendChild(UI.iconToggle({
+            iconOn: 'minimize-2',
+            iconOff: 'maximize-2',
+            tooltip: 'Toggle Compact Spacing',
+            initialState: () => document.body.classList.contains('spacing-compact'),
+            onchange: (checked) => document.body.classList.toggle('spacing-compact', checked)
+        }));
+
+        const swatchContainer = content.querySelector('#swatch-demo');
+        const semanticColors = ['primary', 'success', 'warning', 'error', 'info', 'accent'];
+        semanticColors.forEach(color => {
+            swatchContainer.appendChild(UI.swatch({
+                color: `var(--${color})`,
+                tooltip: color.charAt(0).toUpperCase() + color.slice(1)
+            }));
+        });
         
         const panel = UI.panel('', content, { 
             icon: 'mouse-pointer',

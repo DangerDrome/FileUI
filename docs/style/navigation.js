@@ -19,7 +19,7 @@
                 'buttons': 'mouse-pointer-click', 'cards': 'square', 'forms': 'text-cursor-input',
                 'icons': 'award', 'menus': 'list', 'modals': 'layout', 'progress': 'loader-2',
                 'spinners': 'loader', 'tags': 'tag', 'toasts': 'bell', 'tooltips': 'message-square',
-                'trees': 'file-tree', 'patterns': 'clone'
+                'trees': 'tree-pine', 'patterns': 'grip'
             };
             return iconMap[sectionName] || 'box';
         };

@@ -80,3 +80,7 @@
 .panel-collapsed .panel-toggle .lucide {
     transform: rotate(-90deg);
 } 
+
+.right-panel .panel-body, .left-panel .panel-body {
+    overflow-y: visible;
+} 

@@ -7,21 +7,35 @@
     #TYPOGRAPHY
 \*------------------------------------*/
 
-/* Standardize Lucide icon stroke width and color */
-.lucide {
-    stroke-width: 2;
-    stroke: currentColor;
-    fill: none;
+body {
+    font-family: var(--font-family-base);
+    color: var(--text-primary);
+    line-height: var(--line-height-normal);
 }
 
-/* Force all SVG icons to use consistent size */
-svg.lucide {
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
+body.font-mono {
+    --font-family-base: var(--font-mono);
+}
+
+/* Standardize Lucide icon stroke width and color */
+.lucide, [data-lucide] {
+    stroke-width: var(--icon-stroke-width, 1.5);
+    width: var(--icon-size, 20px);
+    height: var(--icon-size, 20px);
+    color: currentColor;
+    vertical-align: middle;
+}
+
+body.icons-large {
+    --icon-size: 24px;
+}
+
+body.icons-thick-stroke {
+    --icon-stroke-width: 2;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-weight: var(--font-bold);
+    font-weight: var(--font-semibold);
     line-height: 1.2;
     color: var(--text-primary);
     margin-bottom: var(--space-4);

@@ -7,20 +7,73 @@
         const container = document.createElement('div');
         container.className = 'setting-control-container';
 
-        const label = document.createElement('span');
-        label.className = 'setting-label';
-        label.textContent = controlData.label;
-        container.appendChild(label);
+        if (controlData.type !== 'icon-toggle' && controlData.type !== 'swatch-picker' && controlData.type !== 'cycle-button' && controlData.type !== 'cycle-swatch') {
+            const label = document.createElement('span');
+            label.className = 'setting-label';
+            label.textContent = controlData.label;
+            container.appendChild(label);
+        }
 
         switch (controlData.type) {
             case 'toggle':
                 const toggle = document.createElement('input');
                 toggle.type = 'checkbox';
                 toggle.className = 'toggle-switch';
-                toggle.checked = document.body.classList.contains('dark');
-                if (toggle.checked) document.body.classList.add('dark');
-                toggle.addEventListener('change', () => document.body.classList.toggle('dark', toggle.checked));
+                if (controlData.initialState) {
+                    toggle.checked = controlData.initialState();
+                }
+                if (controlData.action) {
+                    if (toggle.checked) {
+                         controlData.action(toggle.checked);
+                    }
+                    toggle.addEventListener('change', () => controlData.action(toggle.checked));
+                }
                 controlElement = toggle;
+                break;
+            case 'icon-toggle':
+                controlElement = UI.iconToggle({
+                    iconOn: controlData.iconOn,
+                    iconOff: controlData.iconOff,
+                    initialState: controlData.initialState,
+                    onchange: controlData.action,
+                    tooltip: controlData.label
+                });
+                break;
+            case 'cycle-swatch':
+                controlElement = UI.cycleSwatch({
+                    states: controlData.states,
+                    initialState: controlData.initialState,
+                    onchange: controlData.action,
+                    tooltip: controlData.label
+                });
+                break;
+            case 'swatch-picker':
+                const swatchBtn = document.createElement('button');
+                swatchBtn.className = 'btn btn-swatch';
+                const initialSwatchColor = getComputedStyle(document.documentElement).getPropertyValue(controlData.property).trim();
+                
+                new Picker({
+                    parent: swatchBtn,
+                    popup: 'right',
+                    color: initialSwatchColor,
+                    alpha: false,
+                    editor: false,
+                    onChange: color => {
+                        document.documentElement.style.setProperty(controlData.property, color.hex);
+                        swatchBtn.style.backgroundColor = color.hex;
+                    }
+                });
+                swatchBtn.style.backgroundColor = initialSwatchColor;
+                UI.tooltip(swatchBtn, controlData.label);
+                controlElement = swatchBtn;
+                break;
+            case 'cycle-button':
+                controlElement = UI.cycleButton({
+                    states: controlData.states,
+                    initialState: controlData.initialState,
+                    onchange: controlData.action,
+                    tooltip: controlData.label
+                });
                 break;
             case 'color':
                 const pickerContainer = document.createElement('div');
@@ -75,9 +128,49 @@
                 title: 'Appearance',
                 icon: 'palette',
                 controls: [
-                    { type: 'toggle', label: 'Dark Mode' },
-                    { type: 'color', label: 'Accent Color', property: '--accent' },
-                    { type: 'color', label: 'Tint Color', property: '--bg-layer-0' }
+                    { 
+                        type: 'icon-toggle',
+                        label: 'Theme',
+                        action: (checked) => document.body.classList.toggle('dark', checked),
+                        initialState: () => document.body.classList.contains('dark'),
+                        iconOn: 'moon',
+                        iconOff: 'sun'
+                    },
+                    {
+                        type: 'cycle-swatch',
+                        label: 'Accent Color',
+                        action: (state) => {
+                            const root = document.documentElement;
+                            root.style.setProperty('--accent', `var(${state.colorVar})`);
+                            root.style.setProperty('--accent-hover', `var(${state.colorVar}-hover)`);
+                            root.style.setProperty('--accent-text', `var(${state.colorVar}-dark)`);
+                        },
+                        initialState: () => localStorage.getItem('accent-color-name') || 'default-accent',
+                        states: [
+                            { value: 'Default', colorVar: '--default-accent' },
+                            { value: 'Primary', colorVar: '--primary' },
+                            { value: 'Success', colorVar: '--success' },
+                            { value: 'Warning', colorVar: '--warning' },
+                            { value: 'Error', colorVar: '--error' },
+                            { value: 'Info', colorVar: '--info' }
+                        ]
+                    },
+                    {
+                        type: 'cycle-button',
+                        label: 'Tint Color',
+                        action: (value) => {
+                            document.body.dataset.tint = value;
+                        },
+                        initialState: () => document.body.dataset.tint || 'none',
+                        states: [
+                            { value: 'none', icon: 'droplet' },
+                            { value: 'primary', icon: 'zap' },
+                            { value: 'success', icon: 'check-circle' },
+                            { value: 'warning', icon: 'alert-triangle' },
+                            { value: 'error', icon: 'x-circle' },
+                            { value: 'info', icon: 'info' }
+                        ]
+                    }
                 ]
             },
             {
@@ -85,11 +178,14 @@
                 title: 'Typography',
                 icon: 'type',
                 controls: [
-                    { type: 'select', label: 'Font Family', options: [
-                        { value: 'Inter, sans-serif', text: 'Inter (Default)' },
-                        { value: 'Roboto, sans-serif', text: 'Roboto' },
-                        { value: 'system-ui', text: 'System UI' }
-                    ]}
+                    {
+                        type: 'icon-toggle',
+                        label: 'Monospace Font',
+                        action: (checked) => document.body.classList.toggle('font-mono', checked),
+                        initialState: () => document.body.classList.contains('font-mono'),
+                        iconOn: 'code',
+                        iconOff: 'text'
+                    }
                 ]
             },
             {
@@ -97,11 +193,14 @@
                 title: 'Density',
                 icon: 'move-vertical',
                 controls: [
-                    { type: 'select', label: 'Spacing', options: [
-                        { value: 'compact', text: 'Compact' },
-                        { value: 'default', text: 'Default' },
-                        { value: 'comfortable', text: 'Comfortable' }
-                    ]}
+                    {
+                        type: 'icon-toggle',
+                        label: 'Spacing',
+                        action: (checked) => document.body.classList.toggle('spacing-compact', checked),
+                        initialState: () => document.body.classList.contains('spacing-compact'),
+                        iconOn: 'minimize-2',
+                        iconOff: 'maximize-2'
+                    }
                 ]
             },
             {
@@ -109,8 +208,22 @@
                 title: 'Icons',
                 icon: 'award',
                 controls: [
-                    { type: 'slider', label: 'Icon Size', min: 16, max: 32, step: 1, value: 20 },
-                    { type: 'slider', label: 'Stroke Width', min: 1, max: 3, step: 0.25, value: 1.5 }
+                    {
+                        type: 'icon-toggle',
+                        label: 'Icon Size',
+                        action: (checked) => document.body.classList.toggle('icons-large', checked),
+                        initialState: () => document.body.classList.contains('icons-large'),
+                        iconOn: 'zoom-in',
+                        iconOff: 'zoom-out'
+                    },
+                    {
+                        type: 'icon-toggle',
+                        label: 'Stroke Width',
+                        action: (checked) => document.body.classList.toggle('icons-thick-stroke', checked),
+                        initialState: () => document.body.classList.contains('icons-thick-stroke'),
+                        iconOn: 'bold',
+                        iconOff: 'minus'
+                    }
                 ]
             },
             {
@@ -118,11 +231,11 @@
                 title: 'Semantic Colors',
                 icon: 'swatch-book',
                 controls: [
-                    { type: 'color', label: 'Primary', property: '--primary' },
-                    { type: 'color', label: 'Success', property: '--success' },
-                    { type: 'color', label: 'Warning', property: '--warning' },
-                    { type: 'color', label: 'Error', property: '--error' },
-                    { type: 'color', label: 'Info', property: '--info' },
+                    { type: 'swatch-picker', label: 'Primary', property: '--primary' },
+                    { type: 'swatch-picker', label: 'Success', property: '--success' },
+                    { type: 'swatch-picker', label: 'Warning', property: '--warning' },
+                    { type: 'swatch-picker', label: 'Error', property: '--error' },
+                    { type: 'swatch-picker', label: 'Info', property: '--info' },
                 ]
             },
             {
@@ -130,21 +243,46 @@
                 title: 'Language',
                 icon: 'globe',
                 controls: [
-                    { type: 'select', label: 'Language', options: [
-                        { value: 'en', text: 'English' },
-                        { value: 'zh-CN', text: 'Simplified Chinese' }
-                    ]}
+                    {
+                        type: 'icon-toggle',
+                        label: 'Language',
+                        action: (checked) => document.documentElement.lang = checked ? 'zh-CN' : 'en',
+                        initialState: () => document.documentElement.lang === 'zh-CN',
+                        iconOn: 'languages',
+                        iconOff: 'text'
+                    }
                 ]
             }
         ];
 
         // --- Build Collapsed Icon Bar ---
         settingsSections.forEach(section => {
-            const button = UI.button({
-                icon: section.icon, variant: 'ghost',
+            section.controls.forEach(control => {
+                let icon;
+                // Specific icons for semantic colors
+                if (section.id === 'settings-colors' || section.id === 'settings-appearance') {
+                    switch (control.label) {
+                        case 'Primary': icon = 'zap'; break;
+                        case 'Success': icon = 'check-circle'; break;
+                        case 'Warning': icon = 'alert-triangle'; break;
+                        case 'Error': icon = 'x-circle'; break;
+                        case 'Info': icon = 'info'; break;
+                    }
+                }
+                if (!icon) {
+                    switch (control.type) {
+                        case 'toggle': icon = 'toggle-right'; break;
+                        case 'icon-toggle': icon = control.iconOff; break;
+                        case 'color': icon = 'pipette'; break;
+                        case 'select': icon = 'chevron-down'; break;
+                        case 'slider': icon = 'sliders-horizontal'; break;
+                        default: icon = 'circle';
+                    }
+                }
+                const button = UI.button({ icon: icon, variant: 'ghost' });
+                UI.tooltip(button, control.label, 'left');
+                collapsedContainer.appendChild(button);
             });
-            UI.tooltip(button, section.title, 'left');
-            collapsedContainer.appendChild(button);
         });
 
         // --- Transform Data for Tree View ---
@@ -152,10 +290,36 @@
             label: section.title,
             icon: section.icon,
             expanded: true, 
-            children: section.controls.map(controlData => ({
-                label: '', // Label is inside the element
-                element: createControl(controlData)
-            }))
+            children: section.controls.map(controlData => {
+                let icon;
+                if ((section.id === 'settings-colors' || section.id === 'settings-appearance') && controlData.type !== 'swatch-picker') {
+                    switch (controlData.label) {
+                        case 'Primary': icon = 'zap'; break;
+                        case 'Success': icon = 'check-circle'; break;
+                        case 'Warning': icon = 'alert-triangle'; break;
+                        case 'Error': icon = 'x-circle'; break;
+                        case 'Info': icon = 'info'; break;
+                    }
+                }
+                if (!icon) {
+                    switch (controlData.type) {
+                        case 'toggle': icon = 'toggle-right'; break;
+                        case 'icon-toggle': icon = null; break;
+                        case 'swatch-picker': icon = null; break;
+                        case 'cycle-button': icon = null; break;
+                        case 'cycle-swatch': icon = null; break;
+                        case 'color': icon = 'pipette'; break;
+                        case 'select': icon = 'chevron-down'; break;
+                        case 'slider': icon = 'sliders-horizontal'; break;
+                        default: icon = 'circle'; 
+                    }
+                }
+                return {
+                    label: '', // Label is inside the element
+                    icon: icon,
+                    element: createControl(controlData)
+                };
+            })
         }));
         
         // --- Create and Append Tree ---

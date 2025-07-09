@@ -5,11 +5,16 @@
         const content = document.createElement('div');
         content.classList.add('grid-demo');
 
-        const p = document.createElement('p');
-        p.textContent = 'A simple, 12-column responsive flexbox grid system. Columns will stack on screens smaller than 768px.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>A simple, 12-column responsive flexbox grid system. Columns will stack on screens smaller than 768px.</p>
+        `;
+        content.appendChild(callout);
 
-        content.innerHTML += `
+        const demoContent = document.createElement('div');
+        demoContent.innerHTML = `
             <h5>Equal-width Columns</h5>
             <div class="row">
                 <div class="col">1 of 2</div>
@@ -48,6 +53,7 @@
                 <div class="col-3">col-3</div>
             </div>
         `;
+        content.appendChild(demoContent);
         
         const panel = UI.panel('Grid System', content, {
             icon: 'layout-grid',

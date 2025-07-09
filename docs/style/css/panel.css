@@ -9,6 +9,7 @@
     overflow: visible;
     margin-bottom: var(--space-6);
     position: relative;
+    margin-top: var(--space-24);
     /* transition and transform are now handled by .interactive-lift */
 }
 

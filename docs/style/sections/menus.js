@@ -4,9 +4,17 @@
     const createMenusSection = () => {
         const content = document.createElement('div');
 
-        const p = document.createElement('p');
-        p.textContent = 'Menus provide a list of choices to the user. They can be triggered by buttons or other elements.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Menus provide a list of choices to the user. They can be triggered by buttons or other elements.</p>
+        `;
+        content.appendChild(callout);
+
+        const h5 = document.createElement('h5');
+        h5.textContent = 'Menu Buttons';
+        content.appendChild(h5);
 
         const demoRow = document.createElement('div');
         demoRow.className = 'demo-row';
@@ -77,10 +85,9 @@
         demoRow.appendChild(UI.menu(menuConfig3));
 
         // --- Menu Bar Example ---
-        const h5 = document.createElement('h5');
-        h5.textContent = 'Menu Bar';
-        h5.style.marginTop = 'var(--space-8)';
-        content.appendChild(h5);
+        const h5MenuBar = document.createElement('h5');
+        h5MenuBar.textContent = 'Menu Bar';
+        content.appendChild(h5MenuBar);
 
         const menuBar = document.createElement('div');
         menuBar.className = 'menu-bar';
@@ -156,7 +163,6 @@
         // --- Icon Menu Bars ---
         const h5Icon = document.createElement('h5');
         h5Icon.textContent = 'Icon Menu Bars';
-        h5Icon.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Icon);
 
         const iconMenuContainer = document.createElement('div');
@@ -206,7 +212,6 @@
         // --- Context Menu Example ---
         const h5Context = document.createElement('h5');
         h5Context.textContent = 'Context Menu';
-        h5Context.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Context);
 
         const contextTarget = document.createElement('div');

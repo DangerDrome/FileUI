@@ -5,9 +5,13 @@
         const content = document.createElement('div');
         content.className = 'grid-container';
 
-        const p = document.createElement('p');
-        p.textContent = 'Progress bars are used to show the status of a task or operation.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Progress bars are used to show the status of a task or operation.</p>
+        `;
+        content.appendChild(callout);
         
         const createProgressBar = (value, text = '', size = '', color = '', striped = false, animated = false) => {
             const progress = document.createElement('div');
@@ -45,7 +49,6 @@
         // --- Colors ---
         const h5Colors = document.createElement('h5');
         h5Colors.textContent = 'Colors';
-        h5Colors.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Colors);
         content.appendChild(createProgressBar(60, 'Primary', '', 'progress-bar-primary'));
         content.appendChild(createProgressBar(70, 'Success', '', 'progress-bar-success'));
@@ -56,7 +59,6 @@
         // --- Sizes ---
         const h5Sizes = document.createElement('h5');
         h5Sizes.textContent = 'Sizes';
-        h5Sizes.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Sizes);
         content.appendChild(createProgressBar(50, '', 'progress-sm'));
         content.appendChild(createProgressBar(50));
@@ -65,7 +67,6 @@
         // --- Striped & Animated ---
         const h5Striped = document.createElement('h5');
         h5Striped.textContent = 'Striped & Animated';
-        h5Striped.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Striped);
         content.appendChild(createProgressBar(75, '', '', 'progress-bar-success', true));
         content.appendChild(createProgressBar(85, '', '', 'progress-bar-info', true, true));

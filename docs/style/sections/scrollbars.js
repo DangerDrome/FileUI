@@ -5,17 +5,20 @@
         const content = document.createElement('div');
         content.className = 'grid-container';
 
-        const p = document.createElement('p');
-        p.textContent = 'Custom scrollbar styles are applied globally to maintain a consistent look and feel across the application.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Custom scrollbar styles are applied globally to maintain a consistent look and feel across the application.</p>
+        `;
+        content.appendChild(callout);
+
+        const h5 = document.createElement('h5');
+        h5.textContent = 'Custom Scrollbar Example';
+        content.appendChild(h5);
 
         const demoContainer = document.createElement('div');
-        demoContainer.style.height = '200px';
-        demoContainer.style.overflow = 'auto';
-        demoContainer.style.border = '1px solid var(--border-color)';
-        demoContainer.style.padding = 'var(--space-4)';
-        demoContainer.style.borderRadius = 'var(--radius-lg)';
-        demoContainer.style.backgroundColor = 'var(--bg-layer-3)';
+        demoContainer.className = 'scrollbar-demo-container';
 
         let demoContent = '<h5>Scrollable Content</h5>';
         for (let i = 1; i <= 20; i++) {

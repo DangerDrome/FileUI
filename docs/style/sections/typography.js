@@ -5,7 +5,11 @@
     UI.sections.typography = function() {
         const content = document.createElement('div');
         content.innerHTML = `
-            <h5><span class="tag tag-accent tag-lg">Inter Font Specimen</span></h5>
+            <div class="callout callout-info">
+                <i data-lucide="info" class="icon"></i>
+                <p>This section demonstrates the typographic elements used throughout the application. It includes the primary font, headings, paragraphs, lists, and other common text-based elements.</p>
+            </div>
+            <h5>Inter Font Specimen</h5>
             <div class="font-specimen">
                 <div class="font-specimen-header">
                     <h2 class="font-specimen-title">Inter</h2>
@@ -152,7 +156,7 @@ function greet(name) {
             <h5>Callouts</h5>
             <div class="callout callout-info">
                 <i data-lucide="info" class="icon"></i>
-                <p><strong>Heads up!</strong> This is an informational callout that you can use to highlight important information.</p>
+                <p><strong>Did you know?</strong> This is a neutral, informational callout that can be used to highlight tips or general information.</p>
             </div>
             <div class="callout callout-success">
                 <i data-lucide="check-circle" class="icon"></i>
@@ -165,6 +169,10 @@ function greet(name) {
             <div class="callout callout-error">
                 <i data-lucide="x-circle" class="icon"></i>
                 <p><strong>Danger!</strong> This is an error callout to inform users that something has gone wrong.</p>
+            </div>
+            <div class="callout callout-accent">
+                <i data-lucide="sparkles" class="icon"></i>
+                <p><strong>Heads up!</strong> This is an accent callout that can be used to highlight a new feature or important announcement.</p>
             </div>
         `;
 

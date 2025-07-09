@@ -5,9 +5,13 @@
         const content = document.createElement('div');
         content.className = 'grid-container';
 
-        const p = document.createElement('p');
-        p.textContent = 'Panels are versatile containers for organizing content. They can be simple, have icons, and be made collapsible.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Panels are versatile containers for organizing content. They can be simple, have icons, and be made collapsible.</p>
+        `;
+        content.appendChild(callout);
 
         // --- Basic Panel ---
         const h5Basic = document.createElement('h5');
@@ -22,7 +26,6 @@
         // --- Panel with Icon ---
         const h5Icon = document.createElement('h5');
         h5Icon.textContent = 'Panel with Icon';
-        h5Icon.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Icon);
         
         const iconPanelContent = document.createElement('p');
@@ -33,7 +36,6 @@
         // --- Collapsible Panels ---
         const h5Collapsible = document.createElement('h5');
         h5Collapsible.textContent = 'Collapsible Panels';
-        h5Collapsible.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Collapsible);
         
         const collapsiblePanelContent1 = document.createElement('p');
@@ -52,7 +54,6 @@
             collapsible: true,
             startCollapsed: true
         });
-        collapsiblePanel2.style.marginTop = 'var(--space-4)';
         content.appendChild(collapsiblePanel2);
 
 

@@ -4,7 +4,22 @@
 
     UI.sections.modals = function() {
         const content = document.createElement('div');
-        content.className = 'demo-row';
+
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Modals are used to display content in a layer above the app. They can be used for alerts, confirmations, or to display forms. The background is dimmed to draw attention to the modal.</p>
+        `;
+        content.appendChild(callout);
+
+        const h5 = document.createElement('h5');
+        h5.textContent = 'Modal Examples';
+        content.appendChild(h5);
+
+        const buttonWrapper = document.createElement('div');
+        buttonWrapper.className = 'demo-row';
+        content.appendChild(buttonWrapper);
 
         const showSimpleModal = () => {
             UI.modal('<p>This is a simple modal with just some text content.</p>', {
@@ -52,7 +67,7 @@
         const btn2 = UI.button('Confirm Modal', { onclick: showConfirmModal });
         const btn3 = UI.button('Form Modal', { onclick: showFormModal });
 
-        content.append(btn1, btn2, btn3);
+        buttonWrapper.append(btn1, btn2, btn3);
 
         const panel = UI.panel('Modals', content, {
             icon: 'layout-template',

@@ -4,6 +4,14 @@
     function createFormsSection() {
         const content = document.createElement('div');
         
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>This section demonstrates various form controls, including text inputs, selection inputs, checkboxes, and radio buttons. All components are styled for consistency and accessibility.</p>
+        `;
+        content.appendChild(callout);
+        
         const form = document.createElement('form');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -63,7 +71,6 @@
         // --- Selection Inputs ---
         const h5Select = document.createElement('h5');
         h5Select.textContent = 'Selection Inputs';
-        h5Select.style.marginTop = 'var(--space-6)';
         form.appendChild(h5Select);
 
         form.appendChild(UI.customSelectGroup({
@@ -89,7 +96,6 @@
         // --- Checkboxes & Radio Buttons ---
         const h5Check = document.createElement('h5');
         h5Check.textContent = 'Checkboxes & Radio Buttons';
-        h5Check.style.marginTop = 'var(--space-6)';
         form.appendChild(h5Check);
 
         const checkRow = document.createElement('div');

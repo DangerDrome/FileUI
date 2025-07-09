@@ -5,9 +5,13 @@
         const content = document.createElement('div');
         content.className = 'grid-container';
 
-        const p = document.createElement('p');
-        p.textContent = 'Spinners are used to indicate a loading state.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Spinners are used to indicate a loading state.</p>
+        `;
+        content.appendChild(callout);
 
         // --- Spinner Sizes ---
         const h5Sizes = document.createElement('h5');
@@ -26,7 +30,6 @@
         // --- Spinner Colors ---
         const h5Colors = document.createElement('h5');
         h5Colors.textContent = 'Colors';
-        h5Colors.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Colors);
 
         const colorsDemo = document.createElement('div');
@@ -44,7 +47,6 @@
         // --- Spinners in Buttons ---
         const h5Buttons = document.createElement('h5');
         h5Buttons.textContent = 'In Buttons';
-        h5Buttons.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Buttons);
 
         const buttonsDemo = document.createElement('div');

@@ -4,6 +4,14 @@
     function createIconsSection() {
         const content = document.createElement('div');
 
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>This project uses the Lucide icon set. The icons are displayed using the data-lucide attribute and are rendered by a script. Below is a categorized list of available icons.</p>
+        `;
+        content.appendChild(callout);
+
         const iconData = {
             'Common Icons': ['home', 'user', 'settings', 'search', 'bell', 'mail', 'calendar', 'file', 'folder', 'download', 'upload', 'trash-2'],
             'Action Icons': ['edit', 'save', 'copy', 'share-2', 'plus', 'minus', 'x', 'check', 'refresh-cw', 'more-horizontal', 'filter', 'sort-asc'],
@@ -45,7 +53,6 @@
         for (const category in iconData) {
             const h5 = document.createElement('h5');
             h5.textContent = category;
-            h5.style.marginTop = 'var(--space-6)';
             content.appendChild(h5);
 
             const grid = document.createElement('div');

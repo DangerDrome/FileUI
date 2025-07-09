@@ -5,9 +5,13 @@
         const content = document.createElement('div');
         content.className = 'grid-container';
 
-        const p = document.createElement('p');
-        p.textContent = 'Use these tileable CSS patterns to add subtle background textures to elements. The patterns are applied to a pseudo-element to not interfere with content.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Use these tileable CSS patterns to add subtle background textures to elements. The patterns are applied to a pseudo-element to not interfere with content.</p>
+        `;
+        content.appendChild(callout);
 
         const patterns = [
             { name: 'Dots', class: 'pattern-dots' },

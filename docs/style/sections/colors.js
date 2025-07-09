@@ -5,6 +5,10 @@
     UI.sections.colors = function() {
         const content = document.createElement('div');
         content.innerHTML = `
+            <div class="callout callout-info">
+                <i data-lucide="info" class="icon"></i>
+                <p>The color system is designed to be systematic and semantic. It includes a palette for semantic states (primary, success, warning, error), a background hierarchy for layering UI elements, and a set of text colors for readability.</p>
+            </div>
             <h5>Semantic Colors</h5>
             <div id="semantic-colors-container"></div>
             

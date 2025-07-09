@@ -6,6 +6,19 @@
         const content = document.createElement('div');
         content.className = 'row';
 
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info col-12';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Cards are used to group related content and actions. They can contain a header, body, and footer, and can be configured with icons, actions, and other custom elements. The cards below are arranged in a responsive grid.</p>
+        `;
+        content.appendChild(callout);
+
+        const h5 = document.createElement('h5');
+        h5.textContent = 'Card Examples';
+        h5.className = 'col-12';
+        content.appendChild(h5);
+
         // Example Card 1: Basic
         const card1Col = document.createElement('div');
         card1Col.className = 'col-4';

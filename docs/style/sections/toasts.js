@@ -5,6 +5,11 @@
     UI.sections.toasts = function() {
         const content = document.createElement('div');
         content.innerHTML = `
+            <div class="callout callout-info">
+                <i data-lucide="info" class="icon"></i>
+                <p>Toasts are used to display brief, temporary notifications. They can be used to provide feedback on an operation, or to display a system message. Toasts appear at the bottom of the screen and are automatically dismissed after a short period.</p>
+            </div>
+            <h5>Toast Examples</h5>
             <div class="demo-row">
                 <sl-tooltip content="Show success notification" placement="top"></sl-tooltip>
                 <sl-tooltip content="Show error notification" placement="top"></sl-tooltip>

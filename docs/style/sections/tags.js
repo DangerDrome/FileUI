@@ -4,9 +4,13 @@
     const createTagsSection = () => {
         const content = document.createElement('div');
 
-        const p = document.createElement('p');
-        p.textContent = 'Tags are used to label, categorize, or organize items using keywords that describe them.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Tags are used to label, categorize, or organize items using keywords that describe them.</p>
+        `;
+        content.appendChild(callout);
 
         // --- Color Variants ---
         const h5Colors = document.createElement('h5');
@@ -28,7 +32,6 @@
         // --- Size Variants ---
         const h5Sizes = document.createElement('h5');
         h5Sizes.textContent = 'Size Variants';
-        h5Sizes.style.marginTop = 'var(--space-8)';
         content.appendChild(h5Sizes);
 
         const sizeDemo = document.createElement('div');
@@ -49,7 +52,6 @@
         // --- Icon with Text ---
         const h5IconText = document.createElement('h5');
         h5IconText.textContent = 'Icon with Text';
-        h5IconText.style.marginTop = 'var(--space-8)';
         content.appendChild(h5IconText);
 
         const iconTextDemo = document.createElement('div');
@@ -77,7 +79,6 @@
         // --- Icon Only ---
         const h5IconOnly = document.createElement('h5');
         h5IconOnly.textContent = 'Icon Only';
-        h5IconOnly.style.marginTop = 'var(--space-8)';
         content.appendChild(h5IconOnly);
 
         const iconOnlyDemo = document.createElement('div');

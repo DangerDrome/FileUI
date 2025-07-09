@@ -3,21 +3,25 @@
 
     const createVariablesSection = () => {
         const content = document.createElement('div');
-        content.className = 'grid-container';
+        content.className = 'row';
 
-        const p = document.createElement('p');
-        p.textContent = 'This section documents all the global CSS variables (custom properties) used in the design system. These variables are the foundation of the UI\'s look and feel.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info col-12';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>This section documents all the global CSS variables (custom properties) used in the design system. These variables are the foundation of the UI's look and feel.</p>
+        `;
+        content.appendChild(callout);
 
-        const row = document.createElement('div');
-        row.className = 'row';
-        content.appendChild(row);
-
-        const createCardForVariables = (title, variables) => {
-            if (!variables || variables.length === 0) return;
+        const createCardAndHeader = (title, variables) => {
+            if (!variables || variables.length === 0) return null;
             
-            const col = document.createElement('div');
-            col.className = 'col-6';
+            const container = document.createElement('div');
+            container.className = 'col-6';
+
+            const h5 = document.createElement('h5');
+            h5.textContent = title;
+            container.appendChild(h5);
 
             const table = document.createElement('table');
             table.className = 'variables-table';
@@ -31,8 +35,10 @@
                     preview = `<span class="variable-color-swatch" style="background-color: ${v.value};"></span>`;
                 } else if (v.type === 'font') {
                     preview = `<span style="font-family: ${v.value};">Sample Text</span>`;
-                } else if (v.type === 'spacing' || v.type === 'radius') {
+                } else if (v.type === 'spacing') {
                     preview = `<div style="width: ${v.value}; height: 20px; background: var(--accent); border-radius: var(--radius-sm);"></div>`;
+                } else if (v.type === 'radius') {
+                    preview = `<div style="width: 80px; height: 30px; background: var(--accent); border-radius: ${v.value};"></div>`;
                 } else {
                     preview = `<code>${v.value}</code>`;
                 }
@@ -45,9 +51,8 @@
             });
             table.appendChild(tbody);
 
-            const card = UI.card({ header: title, content: table });
-            col.appendChild(card);
-            row.appendChild(col);
+            container.appendChild(table);
+            return container;
         };
 
         const varGroups = {
@@ -124,7 +129,10 @@
         };
 
         for (const groupName in varGroups) {
-            createCardForVariables(groupName, varGroups[groupName]);
+            const cardElement = createCardAndHeader(groupName, varGroups[groupName]);
+            if (cardElement) {
+                content.appendChild(cardElement);
+            }
         }
 
         const panel = UI.panel('CSS Variables', content, {

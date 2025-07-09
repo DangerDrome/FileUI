@@ -4,9 +4,17 @@
     const createTooltipsSection = () => {
         const content = document.createElement('div');
 
-        const p = document.createElement('p');
-        p.textContent = 'Tooltips display informative text when users hover over, focus on, or tap an element.';
-        content.appendChild(p);
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Tooltips display informative text when users hover over, focus on, or tap an element.</p>
+        `;
+        content.appendChild(callout);
+
+        const h5 = document.createElement('h5');
+        h5.textContent = 'Tooltip Examples';
+        content.appendChild(h5);
 
         const demoRow = document.createElement('div');
         demoRow.className = 'demo-row';

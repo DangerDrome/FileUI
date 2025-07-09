@@ -18,11 +18,18 @@
         // --- Main container for the section ---
         const content = document.createElement('div');
 
+        const callout = document.createElement('div');
+        callout.className = 'callout callout-info';
+        callout.innerHTML = `
+            <i data-lucide="info" class="icon"></i>
+            <p>Trees are used to display hierarchical data. They can be used to represent a file system, a set of nested categories, or any other data that has a parent-child relationship.</p>
+        `;
+        content.appendChild(callout);
+
         // --- Standard Tree ---
         const tree1Container = document.createElement('div');
-        const title1 = document.createElement('h6');
-        title1.textContent = 'Standard Tree';
-        title1.className = 'text-secondary';
+        const title1 = document.createElement('h5');
+        title1.textContent = 'Tree Examples';
         tree1Container.appendChild(title1);
         tree1Container.appendChild(UI.tree(treeData1));
 

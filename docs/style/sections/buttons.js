@@ -5,6 +5,11 @@
     UI.sections.buttons = function() {
         const content = document.createElement('div');
         content.innerHTML = `
+            <div class="callout callout-info">
+                <i data-lucide="info" class="icon"></i>
+                <p>Buttons are used for actions, such as submitting a form, opening a dialog, or canceling an operation. They come in various styles, sizes, and semantic colors to fit different contexts.</p>
+            </div>
+            <h5>Default Buttons</h5>
             <div class="demo-row">
                 <sl-tooltip content="Standard button for general actions" placement="top"></sl-tooltip>
                 <sl-tooltip content="Primary action button with emphasis" placement="top"></sl-tooltip>

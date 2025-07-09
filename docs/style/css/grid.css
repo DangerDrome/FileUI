@@ -51,7 +51,7 @@
 .col-12 { flex: 0 0 100%; max-width: 100%; }
 
 @media (max-width: 768px) {
-    [class^="col-"] {
+    .col, [class^="col-"] {
         flex-basis: 100%;
         max-width: 100%;
     }

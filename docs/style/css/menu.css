@@ -17,6 +17,9 @@
     top: calc(100% + var(--space-1));
     left: 0;
     min-width: 220px;
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: auto;
     background-color: var(--bg-layer-2);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-l);

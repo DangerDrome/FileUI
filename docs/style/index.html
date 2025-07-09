@@ -16,8 +16,30 @@
     <!-- Load styles -->
     <link rel="stylesheet" href="styles.css">
     
-    <!-- Load Lucide icons -->
+    <!-- Load Lucide icons with retry mechanism -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Retry loading Lucide if it fails
+        let lucideRetries = 0;
+        const maxRetries = 3;
+        
+        function checkLucide() {
+            if (typeof lucide === 'undefined' && lucideRetries < maxRetries) {
+                lucideRetries++;
+                console.log(`Lucide not loaded, retrying... (attempt ${lucideRetries}/${maxRetries})`);
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/lucide@latest';
+                script.onerror = () => setTimeout(checkLucide, 2000);
+                script.onload = () => {
+                    if (typeof UI !== 'undefined') UI.icons();
+                };
+                document.head.appendChild(script);
+            }
+        }
+        
+        // Check if Lucide loaded after 3 seconds
+        setTimeout(checkLucide, 3000);
+    </script>
     
     <!-- Load Shoelace -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/light.css" />
@@ -32,19 +54,6 @@
         <div class="padding-8">
             <h1>FileUI Component Library</h1>
             <p class="lead margin-bottom-24">All UI components with navigation panel and theme toggle</p>
-            
-            <!-- Web Components Notice -->
-            <div class="card margin-bottom-8" style="background: var(--accent); color: var(--grey-900);">
-                <div class="card-body" style="display: flex; align-items: center; justify-content: space-between;">
-                    <div>
-                        <h4 style="margin: 0; color: var(--grey-900);">🚀 New: Web Components Implementation</h4>
-                        <p style="margin: var(--space-2) 0 0 0; color: var(--grey-800);">Check out our modern Web Components with Shadow DOM encapsulation</p>
-                    </div>
-                    <a href="web-components-demo.html" class="btn btn-lg" style="background: var(--grey-900); color: var(--grey-50);">
-                        View Web Components Demo →
-                    </a>
-                </div>
-            </div>
             
             <!-- Colors Section -->
             <div class="section">
@@ -928,11 +937,46 @@ greetUser('Developer');</code></pre>
                         <div class="card-header-left"><i data-lucide="layout" class="card-icon"></i><h2 class="card-title">Panels</h2></div>
                     </div>
                     <div class="card-body">
+                        <h5>Navigation & Control Panels</h5>
+                        <p class="text-secondary margin-bottom-4">The FileUI style guide uses fixed left and right panels for navigation and controls. Click the panel headers to toggle them.</p>
+                        
                         <div class="demo-row">
-                            <button class="btn" onclick="addPanel()">Add Panel</button>
-                            <button class="btn" onclick="addCollapsiblePanel()">Add Collapsible Panel</button>
+                            <button class="btn" onclick="toggleNavPanel()"><i data-lucide="panel-left" class="lucide"></i> Toggle Nav Panel</button>
+                            <button class="btn" onclick="toggleControlPanel()"><i data-lucide="panel-right" class="lucide"></i> Toggle Control Panel</button>
+                        </div>
+                        
+                        <h5 class="margin-top-6">Panel Demos</h5>
+                        <div class="demo-row margin-bottom-4">
+                            <button class="btn" onclick="addPanel()">Add Nav-Style Panel</button>
+                            <button class="btn" onclick="addCollapsiblePanel()">Add Control-Style Panel</button>
                         </div>
                         <div id="panels-container"></div>
+                        
+                        <h5 class="margin-top-6">Panel Styles Reference</h5>
+                        <div class="demo-row">
+                            <div style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 250px;">
+                                    <h6>Navigation Panel (Left)</h6>
+                                    <ul class="text-secondary" style="margin: 0; padding-left: var(--space-5);">
+                                        <li>Fixed position left</li>
+                                        <li>400px width</li>
+                                        <li>Collapsible sections</li>
+                                        <li>Hover effects on items</li>
+                                        <li>Click header to toggle</li>
+                                    </ul>
+                                </div>
+                                <div style="flex: 1; min-width: 250px;">
+                                    <h6>Control Panel (Right)</h6>
+                                    <ul class="text-secondary" style="margin: 0; padding-left: var(--space-5);">
+                                        <li>Fixed position right</li>
+                                        <li>320px width</li>
+                                        <li>Theme & settings controls</li>
+                                        <li>Starts collapsed</li>
+                                        <li>Click header to toggle</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

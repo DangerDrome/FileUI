@@ -853,9 +853,6 @@ body.use-mono-font {
     min-width: 350px;
 }
 
-.card:hover {
-    transform: translateY(-2px);
-}
 
 .card-header {
     padding: var(--space-8);
@@ -4089,4 +4086,134 @@ textarea:focus-visible,
 }
 
 .control-panel:not(.collapsed) .color-label { font-size: var(--text-sm); }
+
+/* Demo Panel Styles - Mini versions of nav/control panels */
+#panels-container {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.demo-panel {
+    width: 300px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Nav-style demo panel */
+.nav-panel-style .nav-panel-header {
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.nav-panel-style .nav-panel-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 600;
+}
+
+.nav-panel-style .nav-panel-body {
+    padding: var(--space-2);
+}
+
+.nav-panel-style .nav-section {
+    margin-bottom: var(--space-2);
+}
+
+.nav-panel-style .nav-section-title {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.nav-panel-style .nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.nav-panel-style .nav-item:hover {
+    background: var(--bg-primary);
+}
+
+/* Control-style demo panel */
+.control-panel-style .control-panel-header {
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.control-panel-style .control-panel-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 600;
+}
+
+.control-panel-style .control-panel-body {
+    padding: var(--space-4);
+}
+
+.control-panel-style .control-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+}
+
+.control-panel-style .control-label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+/* Close button for demo panels */
+.demo-panel-close {
+    background: none;
+    border: none;
+    padding: var(--space-1);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: color 0.15s, background 0.15s;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.demo-panel-close:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Dark mode adjustments for demo panels */
+body[data-theme="dark"] .demo-panel {
+    background: var(--bg-secondary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .nav-panel-style .nav-panel-header,
+body[data-theme="dark"] .control-panel-style .control-panel-header {
+    background: var(--bg-tertiary);
+}
+
+body[data-theme="dark"] .nav-panel-style .nav-item:hover {
+    background: var(--bg-tertiary);
+}
 

@@ -64,6 +64,17 @@
                         icon.style.strokeWidth = savedStrokeWidth;
                     });
                 }
+            } else {
+                // Fallback: Display icon names when Lucide is not available
+                console.warn('Lucide icons not loaded. Displaying icon names as fallback.');
+                document.querySelectorAll('[data-lucide]').forEach(el => {
+                    if (!el.querySelector('svg') && !el.textContent.trim()) {
+                        const iconName = el.getAttribute('data-lucide');
+                        el.textContent = `[${iconName}]`;
+                        el.style.fontSize = '0.8em';
+                        el.style.opacity = '0.7';
+                    }
+                });
             }
         },
         
@@ -658,7 +669,7 @@
                 }
             }
             
-            """            // Font control group
+            // Font control group
             const fontGroup = document.createElement('div');
             fontGroup.className = 'control-group';
             fontGroup.innerHTML = '<span class="control-label" data-i18n="font">Font</span>';
@@ -2056,7 +2067,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const navPanel = UI.navPanel(navSections, {
         title: 'Components',
         icon: 'layers',
-        startCollapsed: true
+        startCollapsed: false
     });
     document.body.insertBefore(navPanel, document.body.firstChild);
     
@@ -2348,21 +2359,85 @@ function recreateNavPanel() {
 }
 
 // Panel functions
+function toggleNavPanel() {
+    const navPanel = document.getElementById('nav-panel');
+    if (navPanel) {
+        navPanel.classList.toggle('collapsed');
+    }
+}
+
+function toggleControlPanel() {
+    const controlPanel = document.getElementById('control-panel');
+    if (controlPanel) {
+        controlPanel.classList.toggle('collapsed');
+    }
+}
+
 function addPanel() {
     const container = document.getElementById('panels-container');
-    const panel = UI.panel('Sample Panel', 'This is a regular panel with some content.', {
-        icon: 'layout'
-    });
-    container.appendChild(panel);
+    
+    // Create a demo nav-style panel
+    const navStylePanel = document.createElement('div');
+    navStylePanel.className = 'demo-panel nav-panel-style';
+    navStylePanel.innerHTML = `
+        <div class="nav-panel-header">
+            <div class="nav-panel-title">
+                <i data-lucide="layers" class="lucide"></i>
+                <span>Nav-Style Panel</span>
+            </div>
+            <button class="demo-panel-close" onclick="this.closest('.demo-panel').remove()">
+                <i data-lucide="x" class="lucide"></i>
+            </button>
+        </div>
+        <div class="nav-panel-body">
+            <div class="nav-section">
+                <div class="nav-section-title">Section One</div>
+                <div class="nav-item">
+                    <i data-lucide="file" class="lucide"></i>
+                    <span>Item 1</span>
+                </div>
+                <div class="nav-item">
+                    <i data-lucide="folder" class="lucide"></i>
+                    <span>Item 2</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(navStylePanel);
+    UI.icons(); // Re-initialize icons
 }
 
 function addCollapsiblePanel() {
     const container = document.getElementById('panels-container');
-    const panel = UI.panel('Collapsible Panel', 'This panel can be collapsed and expanded.', {
-        icon: 'chevron-down',
-        collapsible: true
-    });
-    container.appendChild(panel);
+    
+    // Create a demo control-style panel
+    const controlStylePanel = document.createElement('div');
+    controlStylePanel.className = 'demo-panel control-panel-style';
+    controlStylePanel.innerHTML = `
+        <div class="control-panel-header">
+            <div class="control-panel-title">
+                <i data-lucide="settings" class="lucide"></i>
+                <span>Control-Style Panel</span>
+            </div>
+            <button class="demo-panel-close" onclick="this.closest('.demo-panel').remove()">
+                <i data-lucide="x" class="lucide"></i>
+            </button>
+        </div>
+        <div class="control-panel-body">
+            <div class="control-group">
+                <span class="control-label">Setting 1</span>
+                <button class="btn btn-sm">Toggle</button>
+            </div>
+            <div class="control-group">
+                <span class="control-label">Setting 2</span>
+                <button class="btn btn-sm btn-primary">Active</button>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(controlStylePanel);
+    UI.icons(); // Re-initialize icons
 }
 
 // Tag functions
@@ -2719,11 +2794,14 @@ function initFontSpecimen() {
 }
 
 // Observe DOM mutations to handle dynamic tooltips and translations
-const uiObserver = new MutationObserver(() => {
-    addMissingTooltips();
-    if (UI.language.get() === 'zh') {
-        UI.language.apply();
-    }
+let uiObserver;
+document.addEventListener('DOMContentLoaded', () => {
+    uiObserver = new MutationObserver(() => {
+        addMissingTooltips();
+        if (UI.language.get() === 'zh') {
+            UI.language.apply();
+        }
+    });
+    uiObserver.observe(document.body, { childList: true, subtree: true });
 });
-uiObserver.observe(document.body, { childList: true, subtree: true });
 // Remove earlier tooltipObserver to avoid duplicate observers

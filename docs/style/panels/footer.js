@@ -49,31 +49,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        const copyrightEl = document.getElementById('footer-copyright');
         const settingsContainer = document.getElementById('footer-settings-container');
-        const leftContainer = document.getElementById('footer-left-container');
 
-        if (!copyrightEl || !settingsContainer || !leftContainer) {
-            console.error("Footer containers not found");
+        if (!settingsContainer) {
+            console.error("Footer settings container not found");
             return;
         }
-        
-        // 1. Create Left-side controls
-        const settingsButton = UI.button({
-            icon: 'settings',
-            variant: 'ghost',
-            tooltip: 'Toggle Settings Panel'
-        });
-        settingsButton.addEventListener('click', () => {
-            document.querySelector('.style-guide-layout').classList.toggle('right-collapsed');
-        });
-        leftContainer.appendChild(settingsButton);
 
-        // 2. Set Copyright
-        const year = new Date().getFullYear();
-        copyrightEl.textContent = `© ${year} FileUI.`;
-
-        // 3. Create Settings Controls
+        // Create Settings Controls
         const settingsSections = [
             {
                 controls: [

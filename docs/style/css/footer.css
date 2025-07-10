@@ -1,35 +1,30 @@
 .footer-panel {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: var(--space-4);
+    left: calc(140px + 50vw);
+    transform: translateX(-50%) translateY(calc(100% + var(--space-4)));
     z-index: 15;
     height: var(--footer-height);
-    background-color: var(--bg-layer-0);
-    border-top: 1px solid var(--border-color);
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    background-color: var(--bg-layer-2);
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
     align-items: center;
     padding: 0 var(--space-4);
-    border-radius: 0;
-    box-shadow: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: left var(--transition-base), transform var(--transition-base), opacity var(--transition-base);
+    opacity: 0;
+    pointer-events: none;
 }
 
-#footer-left-container {
-    grid-column: 1;
-    justify-self: start;
-}
-
-#footer-copyright {
-    grid-column: 3;
-    justify-self: end;
-    margin: 0;
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
+.footer-panel.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: all;
 }
 
 #footer-settings-container {
-    grid-column: 2;
     display: flex;
     gap: var(--space-2);
     align-items: center;

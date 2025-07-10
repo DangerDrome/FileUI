@@ -68,6 +68,17 @@
         // Actions
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'panel-actions';
+
+        const settingsButton = UI.button({
+            icon: 'settings',
+            variant: 'ghost',
+            tooltip: 'Settings'
+        });
+        settingsButton.addEventListener('click', () => {
+            document.getElementById('footer-panel').classList.toggle('visible');
+        });
+        actionsDiv.appendChild(settingsButton);
+
         const githubButton = UI.button({
             icon: 'github',
             label: 'GitHub',

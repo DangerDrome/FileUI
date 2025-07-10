@@ -21,7 +21,7 @@
         const form = document.createElement('form');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            UI.toast.show('Form submitted! (Not really)', { variant: 'success' });
+            UI.toast('Form submitted! (Not really)', 'success');
         });
 
         // --- Text Inputs ---

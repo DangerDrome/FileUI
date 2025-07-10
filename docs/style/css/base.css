@@ -38,68 +38,7 @@ body {
     #SCROLLBAR
 \*------------------------------------*/
 
-/* WebKit browsers (Chrome, Safari, Edge) */
-::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--bg-quaternary);
-    border-radius: var(--radius-md);
-    border: 2px solid var(--bg-secondary);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
-}
-
-::-webkit-scrollbar-corner {
-    background: var(--bg-secondary);
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-    border: none;
-}
-
 /* Firefox */
-* {
-    scrollbar-width: auto;
-    scrollbar-color: var(--bg-quaternary) var(--bg-secondary);
-}
-
-.scrollbar-thin {
-    scrollbar-width: thin;
-}
-
-body.dark ::-webkit-scrollbar-track {
-    background: var(--bg-tertiary);
-}
-
-body.dark ::-webkit-scrollbar-thumb {
-    background: var(--bg-quaternary);
-    border: 2px solid var(--bg-tertiary);
-}
-
-body.dark ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
-}
-
-body.dark ::-webkit-scrollbar-corner {
-    background: var(--bg-tertiary);
-}
-
-
 /*------------------------------------*\
     #ACCESSIBILITY & DEFAULTS
 \*------------------------------------*/

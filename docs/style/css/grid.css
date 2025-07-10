@@ -53,8 +53,6 @@
 /* Demo styles for visualization */
 .grid-demo .row {
     gap: var(--space-4);
-    margin-left: calc(var(--space-2) * -1);
-    margin-right: calc(var(--space-2) * -1);
 }
 
 .grid-demo .col, .grid-demo [class^="col-"] {

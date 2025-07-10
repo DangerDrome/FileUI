@@ -32,14 +32,14 @@
                 icon: 'chevron-down'
             },
             items: [
-                { text: 'New File', icon: 'file-plus', shortcut: 'Ctrl+N', onClick: () => UI.toast.show('New File clicked') },
-                { text: 'New Window', icon: 'app-window', shortcut: 'Ctrl+Shift+N', onClick: () => UI.toast.show('New Window clicked') },
+                { text: 'New File', icon: 'file-plus', shortcut: 'Ctrl+N', onClick: () => UI.toast('New File clicked') },
+                { text: 'New Window', icon: 'app-window', shortcut: 'Ctrl+Shift+N', onClick: () => UI.toast('New Window clicked') },
                 { type: 'divider' },
-                { text: 'Open File...', icon: 'file', shortcut: 'Ctrl+O', onClick: () => UI.toast.show('Open File clicked') },
-                { text: 'Open Folder...', icon: 'folder', shortcut: 'Ctrl+K Ctrl+O', onClick: () => UI.toast.show('Open Folder clicked') },
+                { text: 'Open File...', icon: 'file', shortcut: 'Ctrl+O', onClick: () => UI.toast('Open File clicked') },
+                { text: 'Open Folder...', icon: 'folder', shortcut: 'Ctrl+K Ctrl+O', onClick: () => UI.toast('Open Folder clicked') },
                 { type: 'divider' },
-                { text: 'Save', icon: 'save', shortcut: 'Ctrl+S', onClick: () => UI.toast.show('Save clicked') },
-                { text: 'Save As...', icon: 'save', shortcut: 'Ctrl+Shift+S', onClick: () => UI.toast.show('Save As clicked') },
+                { text: 'Save', icon: 'save', shortcut: 'Ctrl+S', onClick: () => UI.toast('Save clicked') },
+                { text: 'Save As...', icon: 'save', shortcut: 'Ctrl+Shift+S', onClick: () => UI.toast('Save As clicked') },
             ]
         };
 
@@ -49,10 +49,10 @@
                 icon: 'settings-2'
             },
             items: [
-                { text: 'Settings', icon: 'settings', onClick: () => UI.toast.show('Settings clicked') },
-                { text: 'Extensions', icon: 'puzzle', onClick: () => UI.toast.show('Extensions clicked') },
+                { text: 'Settings', icon: 'settings', onClick: () => UI.toast('Settings clicked') },
+                { text: 'Extensions', icon: 'puzzle', onClick: () => UI.toast('Extensions clicked') },
                 { type: 'divider' },
-                { text: 'Command Palette...', icon: 'terminal', shortcut: 'Ctrl+Shift+P', onClick: () => UI.toast.show('Command Palette clicked') },
+                { text: 'Command Palette...', icon: 'terminal', shortcut: 'Ctrl+Shift+P', onClick: () => UI.toast('Command Palette clicked') },
             ]
         };
 
@@ -158,7 +158,7 @@
             // Add click handlers to show toast for demo purposes
             menuConfig.items.forEach(item => {
                 if (!item.type) {
-                    item.onClick = () => UI.toast.show(`${item.text} clicked`);
+                    item.onClick = () => UI.toast(`${item.text} clicked`);
                 }
             });
             menuBar.appendChild(UI.menu(menuConfig));
@@ -189,7 +189,7 @@
 
             iconMenuData.forEach(menuData => {
                 const config = { ...menuData, ...itemConfig };
-                config.items.forEach(item => { item.onClick = () => UI.toast.show(`${item.text} clicked`); });
+                config.items.forEach(item => { item.onClick = () => UI.toast(`${item.text} clicked`); });
                 bar.appendChild(UI.menu(config));
             });
             return bar;
@@ -230,8 +230,8 @@
         contextTarget.style.border = '2px dashed var(--border-color)';
         
         UI.contextMenu(contextTarget, [
-            { text: 'Copy', icon: 'copy', onClick: () => UI.toast.show('Copied!') },
-            { text: 'Paste', icon: 'clipboard-paste', onClick: () => UI.toast.show('Pasted!') },
+            { text: 'Copy', icon: 'copy', onClick: () => UI.toast('Copied!') },
+            { text: 'Paste', icon: 'clipboard-paste', onClick: () => UI.toast('Pasted!') },
             { type: 'divider' },
             { 
                 text: 'Organize', 
@@ -243,7 +243,7 @@
                     { text: 'Delete', icon: 'trash-2' }
                 ]
             },
-            { text: 'Change Theme', icon: 'paintbrush', onClick: () => UI.toast.show('Theme changed!') }
+            { text: 'Change Theme', icon: 'paintbrush', onClick: () => UI.toast('Theme changed!') }
         ]);
 
         content.appendChild(contextTarget);

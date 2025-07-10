@@ -306,3 +306,13 @@ textarea:focus-visible,
 header {
     margin-bottom: var(--space-8);
 } 
+
+/*------------------------------------*\
+    #IN-PAGE NAVIGATION OFFSET
+\*------------------------------------*/
+
+/* Ensure section headers are not hidden behind the fixed header when using anchor links */
+section[id^="section-"],
+.group-header {
+    scroll-margin-top: calc(var(--header-height) + var(--space-4));
+} 

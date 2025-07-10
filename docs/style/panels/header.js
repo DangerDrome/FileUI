@@ -62,6 +62,7 @@
                     }
                 }
             });
+            navButton.dataset.sectionTarget = `section-${sectionName}`; // For scroll spy mapping
             navContainer.appendChild(navButton);
         });
 
@@ -98,6 +99,52 @@
         headerPanel.appendChild(panelHeader);
 
         UI.icons();
+
+        // --- Scroll Spy: highlight header nav buttons based on scroll position ---
+        const initNavScrollSpy = () => {
+            const sectionElements = Array.from(document.querySelectorAll('section[id^="section-"]'));
+            if (!sectionElements.length) {
+                return setTimeout(initNavScrollSpy, 100);
+            }
+
+            const headerHeightValue = getComputedStyle(document.documentElement).getPropertyValue('--header-height') || '60px';
+            const headerHeight = parseInt(headerHeightValue, 10) || 60;
+            const threshold = headerHeight + 20; // consistent with left panel logic
+
+            let currentSectionId = null;
+
+            const onScroll = () => {
+                let activeSection = null;
+                let smallestOffset = Infinity;
+                sectionElements.forEach(sec => {
+                    const rect = sec.getBoundingClientRect();
+                    const offset = Math.abs(rect.top - threshold);
+                    if (rect.top - threshold <= 0 && offset < smallestOffset) {
+                        smallestOffset = offset;
+                        activeSection = sec;
+                    }
+                });
+
+                if (!activeSection) return;
+                const sectionId = activeSection.id;
+                if (sectionId === currentSectionId) return;
+                currentSectionId = sectionId;
+
+                const buttons = navContainer.querySelectorAll('.btn');
+                buttons.forEach(btn => {
+                    if (btn.dataset.sectionTarget === sectionId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            };
+
+            document.addEventListener('scroll', onScroll, { passive: true });
+            onScroll(); // initial highlight
+        };
+
+        initNavScrollSpy();
     });
 
 })(); 

@@ -86,6 +86,84 @@
 
         createNavigation(sections);
 
+        // --- Scroll Spy: highlight nav tree based on scroll position ---
+        function initScrollSpy() {
+            const sectionElements = Array.from(document.querySelectorAll('section[id^="section-"]'));
+            if (!sectionElements.length) {
+                // Sections may not be in the DOM yet; retry shortly.
+                return setTimeout(initScrollSpy, 100);
+            }
+
+            const headerHeightValue = getComputedStyle(document.documentElement).getPropertyValue('--header-height') || '60px';
+            const headerHeight = parseInt(headerHeightValue, 10) || 60;
+            const treeRoot = document.querySelector('#navigation-tree-container .tree');
+            if (!treeRoot) return;
+
+            let currentSectionId = null;
+
+            const highlightNav = (sectionId) => {
+                if (!sectionId || sectionId === currentSectionId) return;
+                currentSectionId = sectionId;
+
+                // Clear previous highlights
+                treeRoot.querySelectorAll('.selected, .ancestor, .path-sibling-connector').forEach(el => {
+                    el.classList.remove('selected', 'ancestor', 'path-sibling-connector');
+                });
+
+                const link = treeRoot.querySelector(`a[href="#${sectionId}"]`);
+                if (!link) return;
+
+                const contentEl = link.closest('.tree-item-content');
+                const itemEl = link.closest('.tree-item');
+                if (!contentEl || !itemEl) return;
+
+                contentEl.classList.add('selected');
+                itemEl.classList.add('selected');
+
+                // Mark ancestor path
+                let ancestor = itemEl.parentElement.closest('.tree-item');
+                while (ancestor) {
+                    ancestor.classList.add('ancestor');
+                    ancestor = ancestor.parentElement.closest('.tree-item');
+                }
+
+                // Draw connector lines for path
+                treeRoot.querySelectorAll('.tree-item.ancestor').forEach(ancestorLi => {
+                    let nextEl = ancestorLi.nextElementSibling;
+                    while (nextEl) {
+                        if (nextEl.classList.contains('selected') || nextEl.classList.contains('ancestor')) {
+                            ancestorLi.classList.add('path-sibling-connector');
+                            break;
+                        }
+                        nextEl = nextEl.nextElementSibling;
+                    }
+                });
+            };
+
+            const onScroll = () => {
+                let activeSection = null;
+                let smallestOffset = Infinity;
+                sectionElements.forEach(sec => {
+                    const rect = sec.getBoundingClientRect();
+                    const threshold = headerHeight + 20; // account for scroll-margin-top (header + spacing)
+                    const offset = Math.abs(rect.top - threshold);
+                    if (rect.top - threshold <= 0 && offset < smallestOffset) {
+                        smallestOffset = offset;
+                        activeSection = sec;
+                    }
+                });
+                if (activeSection) {
+                    highlightNav(activeSection.id);
+                }
+            };
+
+            document.addEventListener('scroll', onScroll, { passive: true });
+            // Initial highlight
+            onScroll();
+        }
+
+        initScrollSpy();
+
         // --- Add toggle logic from old layout.js ---
         const layoutContainer = document.querySelector('.style-guide-layout');
         const leftToggleTrigger = document.getElementById('left-panel-toggle');

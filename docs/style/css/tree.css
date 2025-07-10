@@ -49,6 +49,10 @@
     justify-content: flex-start; /* Override .btn centering */
     /* Base styles inherited from .btn */
     padding: var(--space-2) 0 !important; /* Override button padding */
+
+    /* Extend highlight background to full row width */
+    width: 100%;
+    padding-right: var(--space-3) !important;
 }
 
 /* Remove hover since it's handled by .btn-ghost */

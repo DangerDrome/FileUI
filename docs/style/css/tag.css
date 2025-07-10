@@ -55,6 +55,10 @@
     background-color: var(--accent);
     color: var(--bg-layer-0);
 }
+.tag-dim {
+    background-color: var(--bg-layer-3);
+    color: var(--text-secondary);
+}
 
 
 /* Size Variants */

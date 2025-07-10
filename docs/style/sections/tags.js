@@ -26,7 +26,7 @@
         const colorDemo = document.createElement('div');
         colorDemo.className = 'demo-row';
         
-        const colors = ['primary', 'success', 'warning', 'error', 'info', 'neutral', 'accent'];
+        const colors = ['primary', 'success', 'warning', 'error', 'info', 'neutral', 'accent', 'dim'];
         colors.forEach(color => {
             const tag = document.createElement('span');
             tag.className = `tag tag-${color}`;
@@ -70,7 +70,8 @@
             error: 'x-circle',
             info: 'info',
             neutral: 'tag',
-            accent: 'star'
+            accent: 'star',
+            dim: 'tag'
         };
 
         colors.forEach(color => {

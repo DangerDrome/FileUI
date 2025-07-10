@@ -23,40 +23,40 @@
         demoContent.innerHTML = `
             <h5>Equal-width Columns</h5>
             <div class="row">
-                <div class="col">1 of 2</div>
-                <div class="col">1 of 2</div>
+                <div class="col"><span class="tag tag-dim">1 of 2</span></div>
+                <div class="col"><span class="tag tag-dim">1 of 2</span></div>
             </div>
             <div class="row">
-                <div class="col">1 of 3</div>
-                <div class="col">1 of 3</div>
-                <div class="col">1 of 3</div>
+                <div class="col"><span class="tag tag-dim">1 of 3</span></div>
+                <div class="col"><span class="tag tag-dim">1 of 3</span></div>
+                <div class="col"><span class="tag tag-dim">1 of 3</span></div>
             </div>
 
             <h5>Sized Columns</h5>
             <div class="row">
-                <div class="col-8">col-8</div>
-                <div class="col-4">col-4</div>
+                <div class="col-8"><span class="tag tag-dim">col-8</span></div>
+                <div class="col-4"><span class="tag tag-dim">col-4</span></div>
             </div>
             <div class="row">
-                <div class="col-4">col-4</div>
-                <div class="col-4">col-4</div>
-                <div class="col-4">col-4</div>
+                <div class="col-4"><span class="tag tag-dim">col-4</span></div>
+                <div class="col-4"><span class="tag tag-dim">col-4</span></div>
+                <div class="col-4"><span class="tag tag-dim">col-4</span></div>
             </div>
             <div class="row">
-                <div class="col-6">col-6</div>
-                <div class="col-6">col-6</div>
+                <div class="col-6"><span class="tag tag-dim">col-6</span></div>
+                <div class="col-6"><span class="tag tag-dim">col-6</span></div>
             </div>
 
             <h5>Nested Grid</h5>
             <div class="row">
                 <div class="col-9">
-                    col-9
+                    <span class="tag tag-dim">col-9</span>
                     <div class="row" style="margin-top: 1rem;">
-                        <div class="col-6">Nested col-6</div>
-                        <div class="col-6">Nested col-6</div>
+                        <div class="col-6"><span class="tag tag-dim">Nested col-6</span></div>
+                        <div class="col-6"><span class="tag tag-dim">Nested col-6</span></div>
                     </div>
                 </div>
-                <div class="col-3">col-3</div>
+                <div class="col-3"><span class="tag tag-dim">col-3</span></div>
             </div>
         `;
         content.appendChild(demoContent);

@@ -116,6 +116,13 @@
                 <p class="text-lg text-secondary">A comprehensive guide to the components, styles, and patterns that form the foundation of the FileUI design system.</p>
                 <p>FileUI is a lightweight, dependency-free component library built with vanilla JavaScript. It's designed for modularity and performance, allowing you to build modern, responsive interfaces without the overhead of a large framework. All components are self-contained and expose a simple, functional API.</p>
                 <p>To use a component, simply include the necessary CSS and JS files in your project. Components are available under the global <code>UI</code> object. For example, to create a button, you can call <code>UI.button('Click Me', { variant: 'primary' })</code>. Explore the sections in the navigation panel to see live examples and discover the full range of available components and their options.</p>
+
+                <p>More quick examples:<br>
+                    • Show a success toast: <code>UI.toast('Saved!', 'success')</code><br>
+                    • Open a modal dialog: <code>UI.modal({ title: 'Hello', content: 'Welcome!' })</code><br>
+                    • Create a collapsible panel: <code>UI.panel('Details', 'Content', { collapsible: true })</code><br>
+                    • Display an icon toggle: <code>UI.iconToggle({ iconOn: 'moon', iconOff: 'sun' })</code>
+                </p>
             </header>
             <main id="sections-container"></main>
         </div>

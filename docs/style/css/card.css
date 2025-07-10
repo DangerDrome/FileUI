@@ -126,9 +126,3 @@
 .card .card .card-footer {
     background: var(--bg-layer-3);
 } 
-
-@media (max-width: var(--breakpoint-sm)) {
-    .card-header {
-        flex-wrap: wrap;
-    }
-} 

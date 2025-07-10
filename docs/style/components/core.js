@@ -25,6 +25,7 @@
         }
     };
 
+    // --- Main UI Object Definition ---
     const UI = {
         // Initialize icons after adding elements
         icons() {
@@ -81,10 +82,37 @@
             }
         },
         
-        // A slimmed-down init for the modular page
-        initModular() {
-            // Placeholder for any modular-specific initializations
-        },
+        // --- Sections Management ---
+        sections: {
+            // This will be populated by individual section scripts, e.g., UI.sections.buttons = ...
+            createAll(sectionData) {
+                const container = document.getElementById('sections-container');
+                if (!container) {
+                    console.error('Sections container not found.');
+                    return;
+                }
+
+                sectionData.forEach(group => {
+                    const groupHeader = document.createElement('h1');
+                    groupHeader.className = 'group-header';
+                    groupHeader.textContent = group.name;
+                    groupHeader.id = `group-${group.name.toLowerCase().replace(/\s+/g, '-')}`;
+                    container.appendChild(groupHeader);
+
+                    group.children.forEach(sectionName => {
+                        if (UI.sections[sectionName] && typeof UI.sections[sectionName] === 'function') {
+                            const sectionElement = UI.sections[sectionName]();
+                            if (sectionElement) {
+                                sectionElement.id = `section-${sectionName}`;
+                                container.appendChild(sectionElement);
+                            }
+                        } else {
+                            console.error(`UI.sections.${sectionName} is not defined or not a function.`);
+                        }
+                    });
+                });
+            }
+        }
     };
 
     // Expose to window

@@ -50,13 +50,6 @@
 .col-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
 .col-12 { flex: 0 0 100%; max-width: 100%; }
 
-@media (max-width: var(--breakpoint-sm)) {
-    .col, [class^="col-"] {
-        flex-basis: 100%;
-        max-width: 100%;
-    }
-}
-
 /* Demo styles for visualization */
 .grid-demo .row {
     /* Vertical gap is now handled by column margins */

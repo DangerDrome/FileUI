@@ -350,19 +350,7 @@ q {
     color: var(--info-dark);
 }
 .callout-accent .icon {
-    color: var(--text-secondary);
-}
-
-@media (max-width: var(--breakpoint-sm)) {
-    h1 { font-size: calc(var(--text-4xl) * 2); }
-    h2 { font-size: calc(var(--text-3xl) * 1.5); }
-    h3 { font-size: calc(var(--text-3xl) * 1.2); }
-    h4 { font-size: calc(var(--text-xl) * 1.2); }
-    h5 { font-size: calc(var(--text-lg) * 1.2); }
-
-    p {
-        max-width: 100%;
-    }
+    color: var(--accent-text);
 } 
 
 /*------------------------------------*\\
@@ -423,7 +411,7 @@ tbody tr:nth-of-type(odd) {
 }
 tbody tr:nth-of-type(odd):hover {
     background-color: var(--bg-layer-2);
-} 
+}
 
 .scrollbar-demo-container {
     height: 200px;

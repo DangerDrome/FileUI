@@ -114,50 +114,6 @@ textarea:focus-visible,
     outline-offset: 2px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation: none !important;
-        transition: none !important;
-        scroll-behavior: auto !important;
-    }
-}
-
-@media (forced-colors: active) {
-    body {
-        forced-color-adjust: none;
-        background: Canvas;
-        color: CanvasText;
-    }
-    .btn,
-    .card,
-    .nav-panel,
-    .control-panel,
-    .panel {
-        background: Canvas;
-        color: CanvasText;
-        border: 1px solid CanvasText;
-    }
-}
-
-@media print {
-    body {
-        background: #fff !important;
-        color: #000 !important;
-    }
-    .nav-panel,
-    .control-panel {
-        display: none !important;
-    }
-    .main-content {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    a {
-        color: #000 !important;
-        text-decoration: underline;
-    }
-}
-
 :dir(rtl) .nav-panel {
     left: auto;
     right: var(--space-4);
@@ -208,7 +164,6 @@ textarea:focus-visible,
     position: fixed;
     top: var(--space-4);
     left: var(--space-4);
-    margin: 0;
     border-radius: var(--radius-lg);
     border-right: 1px solid var(--border-color);
     background-color: var(--bg-layer-0);
@@ -232,7 +187,8 @@ textarea:focus-visible,
     cursor: pointer;
 }
 
-.left-panel .panel-body {
+.left-panel .panel-body,
+.right-panel .panel-body {
     height: calc(100% - 60px); /* Adjust based on header height */
     overflow-y: auto;
 }
@@ -339,74 +295,4 @@ textarea:focus-visible,
 
 header {
     margin-bottom: var(--space-8);
-}
-
-@media (max-width: var(--breakpoint-lg)) {
-    .right-panel {
-        display: none;
-    }
-    .main-container {
-        margin-right: 0;
-    }
-}
-
-@media (max-width: var(--breakpoint-md)) {
-    .style-guide-layout {
-        flex-direction: column;
-    }
-
-    .left-panel {
-        width: 100%;
-        height: auto;
-        position: static;
-        border-bottom: 1px solid var(--border-color);
-        border-radius: 0;
-        margin: 0;
-    }
-
-    .main-container {
-        margin-left: 0;
-    }
-
-    /* Override collapsed states for mobile */
-    .style-guide-layout.collapsed .left-panel {
-        width: 100%;
-    }
-    
-    .style-guide-layout.collapsed .main-container {
-        margin-left: 0;
-    }
-
-    .style-guide-layout.collapsed #navigation-tree-container {
-        display: block;
-    }
-
-    .style-guide-layout.collapsed #collapsed-navigation-container {
-        display: none;
-    }
-
-    .style-guide-layout.collapsed .left-panel .panel-title-text {
-        display: inline-block;
-    }
-
-    .style-guide-layout.collapsed .left-panel .panel-header {
-        justify-content: space-between;
-    }
-
-    /* On medium screens, the right panel should stack if it were visible, but it's hidden by the LG breakpoint. 
-       This ensures if we decide to show it, it behaves correctly. */
-    .right-panel {
-        position: static;
-        width: 100%;
-        height: auto;
-        border-radius: 0;
-        border-bottom: 1px solid var(--border-color);
-        /* The display property is handled by the larger breakpoint */
-    }
-}
-
-@media (max-width: var(--breakpoint-sm)) {
-    .main-container {
-        padding: var(--space-4) var(--space-4);
-    }
 } 

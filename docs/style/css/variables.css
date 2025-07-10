@@ -8,6 +8,8 @@
     --sl-tooltip-background-color: #1a1a1a;
     --sl-tooltip-color: #ffffff;
     --accent-rgb: 181, 211, 182;
+    --header-height: 60px;
+    --footer-height: 60px;
 }
 
 /* CSS Custom Properties */

@@ -1,0 +1,1219 @@
+/* FileUI v005 - Panel System Styles */
+/* Works with StyleUI design system */
+
+/* Override StyleUI variables with FileUI colors */
+:root {
+  /* Override StyleUI default accent with FileUI brand color */
+  --default-accent: #00cc8b;
+  --default-accent-hover: #00e6a0;
+  --default-accent-dark: #00a872;
+  --accent: var(--default-accent);
+  --accent-hover: var(--default-accent-hover);
+  --accent-dark: var(--default-accent-dark);
+  
+  /* VFX File Type Colors */
+  --file-3d: #f7b2ad;
+  --file-comp: #7ec4cf;
+  --file-image: #ffe066;
+  --file-video: #c3aed6;
+  --file-project: #b5ead7;
+  
+  /* Panel System Colors */
+  --panel-resizer: var(--accent);
+  --panel-resizer-hover: var(--accent-hover);
+  --panel-header-height: 30px;
+  --panel-min-size: 150px;
+  --panel-collapsed-size: 30px;
+  --resizer-thickness: 5px;
+}
+
+/* Panel Container */
+.panel-container {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+  background: var(--bg-base);
+  overflow: hidden;
+  padding: 0; /* Ensure no padding */
+  margin: 0; /* Ensure no margin */
+}
+
+/* FileUI Panel Extensions */
+/* Work WITH StyleUI panels, not against them */
+.fileui-panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  /* Let StyleUI handle ALL the styling */
+}
+
+.panel.panel-grow-in {
+  animation: panelGrowIn 0.3s ease-out;
+}
+
+@keyframes panelGrowIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Panel States */
+.panel.is-pinned {
+  border-color: var(--accent);
+}
+
+/* Fixed toolbar panels - non-draggable */
+.fileui-panel[data-toolbar="true"] .panel-header {
+  cursor: default !important; /* Can't drag toolbar panels */
+}
+
+/* Don't override StyleUI's collapse behavior - it handles this with max-height animation */
+
+.panel.is-dragging {
+  opacity: 0.8;
+  z-index: 1000;
+  position: relative;
+  cursor: grabbing;
+  pointer-events: auto;
+}
+
+/* Panel Header Extensions for FileUI */
+.fileui-panel .panel-header {
+  cursor: move; /* For dragging */
+  user-select: none;
+  /* Let StyleUI handle the rest */
+}
+
+.fileui-panel.is-pinned .panel-header {
+  cursor: default;
+}
+
+/* Panel title needs flex layout for pin button */
+.fileui-panel .panel-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+/* Pin button styling */
+.panel-pin {
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.panel-pin:hover {
+  opacity: 1;
+}
+
+.panel.is-pinned .panel-pin {
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* Rotate pin icon when pinned */
+.panel.is-pinned .panel-pin .lucide {
+  transform: rotate(45deg);
+}
+
+/* StyleUI already handles panel-actions styling */
+
+/* Remove old pin button styles - now using single icon with rotation */
+
+/* Panel body needs to fill available space in flex container */
+.fileui-panel .panel-body {
+  flex: 1;
+  overflow: auto;
+  min-height: 0; /* Important for Firefox flex children */
+}
+
+/* Prevent clipping of panel content */
+.panel-content {
+  height: 100%;
+}
+
+/* Markdown Content - StyleUI handles typography */
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  margin-top: 0;
+  margin-bottom: var(--space-6);
+}
+
+.markdown-content p {
+  margin-bottom: var(--space-6);
+}
+
+/* Panel Editor - only override what's needed for full-height editing */
+.panel-editor {
+  resize: none;
+  border: none;
+  /* StyleUI form-control handles everything else */
+}
+
+/* Panel Resizers */
+.panel-resizer {
+  position: absolute;
+  background: transparent;
+  z-index: 10;
+  /* NO transitions on resizers - they need instant feedback */
+}
+
+.panel-resizer-horizontal {
+  height: var(--resizer-thickness);
+  cursor: ns-resize;
+  left: 0;
+  right: 0;
+}
+
+.panel-resizer-vertical {
+  width: var(--resizer-thickness);
+  cursor: ew-resize;
+  top: 0;
+  bottom: 0;
+}
+
+.panel-resizer:hover {
+  background: var(--panel-resizer-hover);
+}
+
+.panel-resizer:active {
+  background: var(--panel-resizer);
+}
+
+/* Disable ALL transitions when resizing */
+body.no-transition,
+body.no-transition * {
+  transition: none !important;
+}
+
+/* Toolbar Panels - use StyleUI panel but remove some styling */
+
+.fileui-panel[data-toolbar="true"] {
+  /* Fixed toolbar panels can't be dragged */
+  border-radius: 0 !important; /* No rounded corners for edge panels */
+}
+
+/* Header panel should hide its title bar - it's just a menu bar */
+.header-panel .panel-header {
+  display: none;
+}
+
+/* Left toolbar panel should hide its title bar - it's just icon buttons */
+.action-bar-panel .panel-header {
+  display: none;
+}
+
+/* Left toolbar vertical menu bar styling */
+.action-bar-panel .menu-bar-vertical {
+  background: var(--bg-layer-2); /* Same as horizontal menu bar */
+  border-radius: 0; /* No rounded corners for edge panels */
+  margin: 0; /* Remove default margin */
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; /* Separate main actions from settings */
+  padding-bottom: var(--space-3); /* Ensure space from bottom edge */
+  box-sizing: border-box;
+}
+
+/* Main actions group at top */
+.action-bar-panel .main-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+}
+
+/* Bottom actions group (reload and settings) */
+.action-bar-panel .bottom-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding-bottom: var(--space-4); /* Padding to offset from footer */
+}
+
+/* Unified button styling for all toolbar buttons */
+.action-bar-panel .btn {
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.action-bar-panel .btn:hover {
+  opacity: 1;
+  background: var(--bg-layer-3);
+  color: var(--text-primary);
+}
+
+.action-bar-panel .lucide {
+  stroke-width: 1.5;
+  width: 20px;
+  height: 20px;
+}
+
+.fileui-panel[data-toolbar="true"] .panel-body {
+  padding: 0 !important;
+  display: flex;
+  align-items: stretch;
+  height: 100%; /* Use full panel height */
+  overflow: visible;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Specific styling for left toolbar panel body */
+.action-bar-panel .panel-body {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Header panel uses StyleUI panel styling */
+
+.header-panel .panel-body {
+  padding: 0 !important;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: var(--bg-layer-2) !important; /* Same dark background as menu bar */
+}
+
+.header-panel .header-content {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 0 var(--space-2);
+  background: var(--bg-layer-2);
+}
+
+.header-panel .menu-bar {
+  background: var(--bg-layer-2); /* Same as StyleUI default */
+  padding: 0 var(--space-2); /* Reduced vertical padding */
+  height: 100%;
+  margin-bottom: 0; /* Remove default margin for toolbar */
+  border-radius: 0; /* No rounded corners for edge panels */
+}
+
+/* Unified button styling for header menu */
+.header-panel .btn {
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.header-panel .btn:hover {
+  opacity: 1;
+  background: var(--bg-layer-3);
+  color: var(--text-primary);
+}
+
+/* Header panel menu bar styling handled by StyleUI */
+
+/* Remove custom menu-item styles - StyleUI handles this */
+
+.header-panel .header-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+  padding: 0; /* No padding */
+  background: var(--bg-layer-2); /* Same dark background as menu bar */
+  height: 100%;
+}
+
+
+.header-panel .header-toolbar svg {
+  stroke-width: 1.5; /* Reduce stroke weight for toolbar icons */
+  width: 18px; /* Larger header toolbar icons */
+  height: 18px;
+}
+
+.header-panel .toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background: var(--border-color);
+  margin: 0 var(--space-3);
+}
+
+/* StyleUI handles all button styles - removed custom .btn styles */
+
+/* Action Bar Panel */
+.action-bar-panel {
+  min-width: var(--panel-collapsed-size);
+  min-height: 200px; /* Ensure bottom buttons are always visible */
+  overflow-y: auto;
+}
+
+.action-bar-panel .panel-content {
+  padding: 0;
+}
+
+.action-bar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  gap: var(--space-2);
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+/* Toolbar button styling */
+.action-bar-panel .btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.action-bar-panel .btn .lucide {
+  width: 22px;
+  height: 22px;
+}
+
+/* Active state for toolbar buttons */
+.action-bar-panel .btn.active {
+  background: var(--bg-layer-2);
+  color: var(--accent);
+}
+
+/* Footer - minimal styles for positioning */
+.main-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: var(--bg-layer-1);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-6);
+  z-index: 100;
+  /* Use StyleUI text utilities for font size and color */
+}
+
+/* Drag Preview */
+.drop-preview {
+  position: absolute;
+  background: var(--accent);
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 1000;
+  /* No transition - causes lag during drag */
+}
+
+/* Drop Target Indicators */
+.drop-target {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.drop-target-left::before,
+.drop-target-right::after,
+.drop-target-top::before,
+.drop-target-bottom::after {
+  content: '';
+  position: absolute;
+  background: var(--accent);
+  opacity: 0.3;
+}
+
+.drop-target-left::before {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+}
+
+.drop-target-right::after {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+}
+
+.drop-target-top::before {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 50%;
+}
+
+.drop-target-bottom::after {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50%;
+}
+
+/* StyleUI handles transitions - removed custom utility */
+
+/* Preview Mode */
+.preview-mode .panel {
+  opacity: 0.7;
+}
+
+/* File Explorer Styles */
+.file-explorer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.file-explorer-header {
+  flex-shrink: 0;
+}
+
+.file-tree {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.1s ease;
+  user-select: none;
+}
+
+.file-item:hover {
+  background: var(--bg-layer-1);
+}
+
+.file-item.selected {
+  background: var(--bg-layer-2);
+  color: var(--accent);
+}
+
+.file-item .lucide {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.file-item.folder {
+  font-weight: 500;
+}
+
+/* File type colors */
+.file-item .file-3d {
+  color: var(--file-3d);
+}
+
+.file-item .file-comp {
+  color: var(--file-comp);
+}
+
+.file-item .file-image {
+  color: var(--file-image);
+}
+
+.file-item .file-video {
+  color: var(--file-video);
+}
+
+.file-item .file-project {
+  color: var(--file-project);
+}
+
+/* Footer Panel - Terminal */
+.footer-panel {
+  min-height: 120px;
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-panel.footer-collapsed {
+  min-height: 48px;
+}
+
+.terminal-content {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.footer-panel.footer-collapsed .terminal-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.footer-panel.footer-collapsed .terminal-tabs {
+  margin-bottom: -8px;
+}
+
+.footer-panel.footer-collapsed .terminal-actions [data-action="toggle-terminal"] .lucide {
+  transform: rotate(180deg);
+}
+
+.footer-panel .panel-header {
+  display: none; /* Hide header for terminal panel */
+}
+
+.footer-panel .panel-body {
+  padding: 0 !important;
+  height: 100%;
+  background: var(--bg-layer-1) !important;
+}
+
+/* Terminal Container */
+.terminal-container {
+  height: 100%;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: #0f0f0f;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+}
+
+/* Terminal Header */
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-layer-2);
+  flex-shrink: 0;
+  min-height: 48px;
+}
+
+.terminal-tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: -24px;
+  margin-left: 80px;
+}
+
+button.terminal-tab {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3) var(--space-4) var(--space-6);
+  background: #0f0f0f;
+  border: none;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+  color: var(--text-primary);
+  border-bottom: 2px solid transparent;
+  outline: none;
+}
+
+.terminal-tab:hover {
+  background: #1a1a1a;
+}
+
+.terminal-tab.active {
+  background: #0f0f0f;
+  border-bottom: none;
+}
+
+.terminal-tab-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.terminal-tab-close:hover {
+  background: var(--bg-layer-4);
+  color: var(--text-primary);
+}
+
+.terminal-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.terminal-actions .btn {
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.terminal-actions .btn:hover {
+  opacity: 1;
+  background: var(--bg-layer-3);
+  color: var(--text-primary);
+}
+
+.terminal-actions .lucide {
+  stroke-width: 1.5;
+  width: 22px;
+  height: 22px;
+}
+
+/* Terminal Content */
+.terminal-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-output {
+  flex: 1;
+  padding: var(--space-2);
+  padding-left: 90px;
+  padding-top: var(--space-8);
+  overflow-y: auto;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  background: #0f0f0f;
+}
+
+.terminal-line {
+  margin-bottom: var(--space-1);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.terminal-prompt {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.terminal-command {
+  color: var(--text-primary);
+  margin-left: var(--space-2);
+}
+
+.terminal-cursor {
+  color: var(--accent);
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Terminal Input */
+.terminal-input-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.terminal-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: inherit;
+  flex: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.terminal-input:focus {
+  outline: none;
+}
+
+/* Footer Resize Handle */
+.footer-resize-handle {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 6px;
+  cursor: ns-resize;
+  z-index: 400;
+  background: transparent;
+}
+
+.resize-handle-bar {
+  display: none; /* Make completely invisible */
+}
+
+/* Disable transitions during resize */
+body.no-transition,
+body.no-transition * {
+  transition: none !important;
+}
+
+/* Properties Panel */
+.properties-panel {
+  min-width: 300px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  right: 0 !important;
+}
+
+.properties-panel.properties-collapsed {
+  min-width: 48px;
+}
+
+.properties-content {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.properties-panel.properties-collapsed .properties-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+.properties-panel.properties-collapsed .properties-actions-vertical [data-action="toggle-properties"] .lucide {
+  transform: rotate(180deg);
+}
+
+.properties-panel .panel-header {
+  display: none; /* Hide header for properties panel */
+}
+
+.properties-panel .panel-body {
+  padding: 0 !important;
+  height: 100%;
+  background: var(--bg-layer-1) !important;
+}
+
+.properties-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  background: #0f0f0f;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+}
+
+/* Vertical Properties Header */
+.properties-header-vertical {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 48px;
+  background: var(--bg-layer-2);
+  flex-shrink: 0;
+  min-width: 48px;
+}
+
+.properties-tabs-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+}
+
+button.properties-tab-vertical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  height: 40px;
+  width: 40px;
+  outline: none;
+  opacity: 0.6;
+}
+
+.properties-tab-vertical:hover {
+  opacity: 1;
+  background: var(--bg-layer-3);
+  color: var(--text-primary);
+}
+
+.properties-tab-vertical.active {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.properties-tab-vertical .lucide {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.5;
+}
+
+.properties-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  background: #0f0f0f;
+}
+
+.properties-content .property-section {
+  padding: 0 var(--space-3);
+  margin-left: var(--space-3);
+}
+
+.properties-content .property-section:first-child {
+  padding-top: var(--space-8);
+}
+
+.property-section {
+  margin-bottom: var(--space-4);
+}
+
+.property-section-title {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  margin: 0 0 var(--space-3) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.property-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: var(--text-sm);
+}
+
+.property-item:last-child {
+  border-bottom: none;
+}
+
+.property-label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.property-value {
+  color: var(--text-primary);
+  text-align: right;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Properties Content Header */
+.properties-content-header {
+  padding: var(--space-6) var(--space-4) var(--space-6) var(--space-6);
+  background: #0f0f0f;
+  margin-bottom: var(--space-4);
+}
+
+.properties-title {
+  font-size: var(--text-2xl);
+  font-weight: 200;
+  color: var(--text-tertiary);
+  opacity: 0.3;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.properties-actions-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+}
+
+.properties-actions-vertical .btn {
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.properties-actions-vertical .btn:hover {
+  opacity: 1;
+  background: var(--bg-layer-3);
+  color: var(--text-primary);
+}
+
+.properties-actions-vertical .lucide {
+  stroke-width: 1.5;
+  width: 22px;
+  height: 22px;
+}
+
+/* Properties Resize Handle */
+.properties-resize-handle {
+  position: absolute;
+  left: -3px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 400;
+  background: transparent;
+}
+
+/* File Explorer Resize Handle */
+.file-explorer-resize-handle {
+  position: absolute;
+  right: -3px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 400;
+  background: transparent;
+}
+
+/* File Explorer Panel */
+.file-explorer-panel {
+  background: var(--bg-base);
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  border-right: 1px solid var(--border-color);
+}
+
+.file-explorer-panel .panel-header {
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  background: #0f0f0f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+}
+
+.file-explorer-panel .panel-title {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.file-explorer-panel .panel-body {
+  padding: 0 !important;
+  height: calc(100% - 40px);
+  background: #0f0f0f !important;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Custom scrollbar for file explorer - ultra thin */
+.file-explorer-panel .panel-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.file-explorer-panel .panel-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.file-explorer-panel .panel-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.file-explorer-panel .panel-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.file-explorer-content {
+  height: 100%;
+  padding: var(--space-2);
+  background: #0f0f0f;
+}
+
+/* Override tree styles for file explorer */
+.file-explorer-panel .tree {
+  background: transparent;
+  border: none;
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+}
+
+.file-explorer-panel .tree-item-content {
+  padding: var(--space-1) var(--space-2);
+  gap: var(--space-2);
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  position: relative;
+}
+
+.file-explorer-panel .tree-item-content:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.file-explorer-panel .tree-item-content.selected {
+  background: rgba(var(--accent-rgb), 0.15);
+  color: var(--text-primary);
+}
+
+.file-explorer-panel .tree-item-content.selected .tree-item-label {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.file-explorer-panel .tree-item-icon {
+  color: var(--text-secondary);
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  flex-shrink: 0;
+  stroke-width: 1.5;
+}
+
+.file-explorer-panel .tree-item-spacer {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.file-explorer-panel .tree-item-label {
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.file-explorer-panel .tree-item-toggle {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.1s ease;
+}
+
+.file-explorer-panel .tree-item-toggle:hover {
+  opacity: 0.8;
+}
+
+.file-explorer-panel .tree-item-toggle .lucide {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+}
+
+/* Hide/show tree children based on expanded state */
+.file-explorer-panel .tree-item[aria-expanded="false"] .tree-item-children {
+  display: none;
+}
+
+.file-explorer-panel .tree-item[aria-expanded="true"] .tree-item-children {
+  display: block;
+  margin-left: var(--space-3);
+  position: relative;
+}
+
+
+/* File type specific colors - subtle */
+.file-explorer-panel .tree-item-icon[data-file-type="folder"] {
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.file-explorer-panel .tree-item-icon[data-file-type="typescript"] {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.file-explorer-panel .tree-item-icon[data-file-type="json"] {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* Selected state brightens icons */
+.file-explorer-panel .tree-item-content.selected .tree-item-icon {
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* Main Panel - Ultra-thin styling */
+.main-panel {
+  background: var(--bg-base);
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.main-panel .panel-header {
+  display: none; /* Hide header for ultra-thin appearance */
+}
+
+.main-panel .panel-body {
+  padding: 0 !important; /* No padding for ultra-thin */
+  height: 100%;
+  background: var(--bg-layer-1) !important;
+  overflow: auto;
+}
+
+.main-panel .panel-content {
+  padding: var(--space-1); /* Minimal padding */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  opacity: 0.5;
+}

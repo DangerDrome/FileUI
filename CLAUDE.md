@@ -163,3 +163,6 @@ When developing ANY part of FileUI, you MUST use these styles:
 - **Images**: .exr, .dpx, .tiff, .png, .jpg, .psd
 - **Video**: .mov, .mp4, .mxf, .r3d, .ari
 - **Projects**: .prproj, .drp, .fcp
+
+## Panel Development Guidelines
+- Never add a panel without permission

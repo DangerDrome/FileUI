@@ -24,7 +24,24 @@
       "Bash(awk:*)",
       "WebFetch(domain:shoelace.style)",
       "Bash(node:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(export NODE_ENV=development)",
+      "Bash(npx:*)",
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:unpkg.com)",
+      "WebFetch(domain:app.unpkg.com)",
+      "WebFetch(domain:cdn.jsdelivr.net)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "Bash(/usr/bin/xvfb-run:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run build:*)",
+      "Bash(curl:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }

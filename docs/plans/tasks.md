@@ -360,3 +360,105 @@ This modernization plan will bring the FileUI style guide up to current industry
 - Phase 1 is nearly complete - just need to update main index.html to use Web Components
 - Ready to proceed with Phase 2 (TypeScript integration)
 - All components tested and working with existing design system
+
+---
+
+# FileUI v005 Development Tasks
+
+## Task: Create v005 with TypeScript and Vite
+
+### Plan
+1. Create v005 directory structure with Vite and TypeScript setup
+2. Copy core files from v003 (panels3.html, panels3.js, panels3.css)
+3. Convert JavaScript to TypeScript modules
+4. Update styles with colors from CLAUDE.md
+5. Add basic file management capabilities
+6. Create Python server for API
+
+### Implementation
+
+#### 1. Project Setup ✓
+- Created v005 directory
+- Initialized package.json with Vite and TypeScript dependencies
+- Created tsconfig.json with strict TypeScript configuration
+- Created vite.config.ts for development server
+
+#### 2. File Migration ✓
+- Copied panels3.html → index.html (updated for Vite)
+- Copied panels3.css → src/style.css
+- Copied panels3.js → src/panels.ts (for conversion)
+
+#### 3. TypeScript Conversion ✓
+Created modular TypeScript architecture:
+- `src/types.ts` - All TypeScript interfaces and types
+- `src/bsp-tree.ts` - BSP tree implementation
+- `src/history.ts` - Undo/redo functionality
+- `src/panel-manager.ts` - Core panel management
+- `src/main.ts` - Entry point
+- `src/default-layout.ts` - Default layout configuration
+- `src/filemanager.ts` - File operations interface
+
+#### 4. Style Updates ✓
+Updated CSS with CLAUDE.md color palette:
+- Bright teal accent: #00cc8b
+- VFX file type colors
+- Dark theme optimized for media work
+
+#### 5. Server Implementation ✓
+Created `server.py` with RESTful API:
+- `/api/files` - List directory contents
+- `/api/file` - Read/write file operations
+- `/api/metadata` - File metadata extraction
+- CORS support for Vite dev server
+
+### Key Decisions
+- Used v003 as base (not v004) per CLAUDE.md recommendation
+- Kept architecture simple - no over-engineering
+- Modular TypeScript structure for maintainability
+- Minimal dependencies (just Vite, TypeScript, Showdown)
+
+### Next Steps
+- Install dependencies and test the build
+- Implement file browser UI components
+- Add VFX-specific metadata extraction
+- Integrate file manager with panel system
+
+### Fixes Applied
+After initial implementation issues:
+
+1. **Fixed Default Layout** ✓
+   - Copied the exact DEFAULT_LAYOUT from v003 with all panels
+   - Added DEFAULT_MARKDOWN_CONTENT for panel content
+   - Now creates the full 11-panel layout on startup
+
+2. **Fixed Panel Manager** ✓
+   - Implemented loadLayout() to properly create panel elements
+   - Added createPanelElement() with proper HTML structure
+   - Set up toolbar panels (header panel and action bar)
+   - Handles pinned/collapsed states correctly
+   - Implements all panel interactions (drag, resize, split, etc.)
+
+3. **Integrated StyleUI** ✓
+   - Added StyleUI CSS modules via CDN
+   - Added StyleUI JavaScript components
+   - Kept only FileUI-specific panel styles
+   - Maintains bright teal accent (#00cc8b)
+
+### To Run v005:
+```bash
+cd v005
+npm install
+npm run dev
+# In another terminal:
+python server.py
+```
+
+## Review
+
+The v005 implementation now properly replicates v003's functionality with:
+- Full BSP panel system with drag/drop/resize
+- TypeScript for better development experience
+- StyleUI for consistent, modern styling
+- Proper toolbar panels (header and action bar)
+- All markdown content and editing features
+- Maintains the exact layout and behavior of v003

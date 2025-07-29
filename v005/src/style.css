@@ -1018,6 +1018,30 @@ button.properties-tab-vertical {
   border-right: 1px solid var(--border-color);
 }
 
+/* File Explorer Split Container */
+.file-explorer-split-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.file-explorer-tree-section {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: height 0.2s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.file-explorer-detail-section {
+  flex-direction: column;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0a0a0a;
+  overflow: hidden;
+  transition: height 0.2s ease;
+}
+
 .file-explorer-panel .panel-header {
   min-height: 40px;
   padding: var(--space-2) var(--space-3);
@@ -1040,26 +1064,32 @@ button.properties-tab-vertical {
   padding: 0 !important;
   height: calc(100% - 40px);
   background: #0f0f0f !important;
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  overflow: hidden;
 }
 
 /* Custom scrollbar for file explorer - ultra thin */
-.file-explorer-panel .panel-body::-webkit-scrollbar {
+.file-explorer-panel .panel-body::-webkit-scrollbar,
+.file-explorer-tree-section::-webkit-scrollbar,
+.explorer-detail-content::-webkit-scrollbar {
   width: 4px;
 }
 
-.file-explorer-panel .panel-body::-webkit-scrollbar-track {
+.file-explorer-panel .panel-body::-webkit-scrollbar-track,
+.file-explorer-tree-section::-webkit-scrollbar-track,
+.explorer-detail-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.file-explorer-panel .panel-body::-webkit-scrollbar-thumb {
+.file-explorer-panel .panel-body::-webkit-scrollbar-thumb,
+.file-explorer-tree-section::-webkit-scrollbar-thumb,
+.explorer-detail-content::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
 }
 
-.file-explorer-panel .panel-body::-webkit-scrollbar-thumb:hover {
+.file-explorer-panel .panel-body::-webkit-scrollbar-thumb:hover,
+.file-explorer-tree-section::-webkit-scrollbar-thumb:hover,
+.explorer-detail-content::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
@@ -1095,6 +1125,8 @@ button.properties-tab-vertical {
 .file-explorer-panel .tree-item-content.selected {
   background: rgba(var(--accent-rgb), 0.15);
   color: var(--text-primary);
+  border-left: 2px solid var(--accent);
+  padding-left: calc(var(--space-2) - 2px);
 }
 
 .file-explorer-panel .tree-item-content.selected .tree-item-label {
@@ -1188,6 +1220,120 @@ button.properties-tab-vertical {
   opacity: 1;
 }
 
+/* Explorer Detail Panel */
+.explorer-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
+  min-height: 28px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.explorer-detail-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  opacity: 0.9;
+}
+
+.explorer-detail-close {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.1s ease;
+}
+
+.explorer-detail-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.explorer-detail-close .lucide {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.explorer-detail-content {
+  flex: 1;
+  padding: var(--space-2);
+  overflow: auto;
+}
+
+.explorer-detail-empty {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.explorer-detail-info {
+  font-size: 11px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 400;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  font-size: 10px;
+}
+
+.detail-value {
+  color: var(--text-secondary);
+  opacity: 0.9;
+  font-size: 11px;
+  font-family: var(--font-mono);
+}
+
+/* Explorer Detail Resizer */
+.explorer-detail-resizer {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: ns-resize;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.explorer-detail-resizer:hover {
+  background: rgba(var(--accent-rgb), 0.3);
+}
+
+.explorer-detail-resizer::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 1px;
+}
+
 /* Main Panel - Ultra-thin styling */
 .main-panel {
   background: var(--bg-base);
@@ -1202,18 +1348,390 @@ button.properties-tab-vertical {
 
 .main-panel .panel-body {
   padding: 0 !important; /* No padding for ultra-thin */
+  position: relative !important;
   height: 100%;
-  background: var(--bg-layer-1) !important;
-  overflow: auto;
+  background: #0f0f0f !important;
+  overflow: hidden; /* Changed to hidden for BSP container */
 }
 
-.main-panel .panel-content {
-  padding: var(--space-1); /* Minimal padding */
+/* BSP Container */
+.bsp-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: #0f0f0f !important;
+  overflow: hidden !important;
+}
+
+/* BSP Panels - Ultra-thin but functional */
+.bsp-panel {
+  position: absolute !important;
+  background: #0f0f0f !important;
+  border: none !important; /* Remove border for cleaner look */
+  border-radius: 0 !important; /* No rounded corners to show gap clearly */
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.bsp-panel .panel-header {
+  height: 48px !important; /* 2x height */
+  min-height: 48px !important;
+  background: #0f0f0f !important; /* Same as panel background */
+  border-bottom: none !important; /* Remove border */
+  padding: 0 12px !important; /* Added padding */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-shrink: 0 !important;
+}
+
+.bsp-panel .panel-title {
+  font-size: 11px !important; /* Standard ultra-thin size */
+  color: #808080 !important;
+  line-height: 48px !important;
+  flex: 1 !important;
+  font-weight: 500 !important;
+}
+
+.bsp-panel .panel-actions {
+  display: flex !important;
+  gap: 2px !important; /* Ultra-thin gap */
+  align-items: center !important;
+}
+
+.bsp-panel .panel-action-btn {
+  width: 32px !important; /* Increased for padding */
+  height: 32px !important; /* Increased for padding */
+  padding: 6px !important; /* Added padding */
+  background: transparent !important;
+  border: none !important;
+  color: #666 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 2px !important;
+  transition: all 0.1s ease !important;
+}
+
+.bsp-panel .panel-action-btn:hover {
+  background: #1a1a1a !important;
+  color: #999 !important;
+}
+
+.bsp-panel .panel-action-btn .lucide {
+  width: 20px !important; /* UNIVERSAL icon size */
+  height: 20px !important; /* UNIVERSAL icon size */
+  stroke-width: 1.5 !important; /* Matching other icons */
+}
+
+.bsp-panel .panel-body {
+  flex: 1 !important;
+  padding: 8px !important; /* Ultra-thin padding */
+  overflow: auto !important;
+  background: #0f0f0f !important;
+}
+
+.bsp-panel .panel-content {
+  font-size: 11px !important; /* UNIVERSAL text size */
+  color: #808080 !important;
+  line-height: 1.4 !important;
+}
+
+/* BSP Resizers - Transparent for gap */
+.bsp-resizer {
+  background: #1a1a1a !important; /* Visible gap color */
+  z-index: 10;
+  position: absolute;
+}
+
+.bsp-resizer-horizontal {
+  cursor: ns-resize;
+  height: 12px; /* Gap between panels */
+  background: #0f0f0f; /* Match main background to show gap */
+}
+
+.bsp-resizer-vertical {
+  cursor: ew-resize;
+  width: 12px; /* Gap between panels */
+  background: #0f0f0f; /* Match main background to show gap */
+}
+
+.bsp-resizer:hover {
+  background: rgba(0, 204, 139, 0.1) !important;
+}
+
+.bsp-resizer-handle {
+  width: 100%;
   height: 100%;
+  /* Make hit area larger than visual size */
+  position: relative;
+}
+
+.bsp-resizer-horizontal .bsp-resizer-handle::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 7px;
+  cursor: ns-resize;
+}
+
+.bsp-resizer-vertical .bsp-resizer-handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  width: 7px;
+  cursor: ew-resize;
+}
+
+/* BSP Panel Focus State */
+.bsp-panel:focus-within {
+  border-color: #2a2a2a;
+}
+
+/* Focused/active panel highlight - subtle accent border */
+.bsp-panel.focused {
+  border: 1px solid var(--accent) !important;
+  box-shadow: 0 0 0 1px rgba(0, 204, 139, 0.1) !important;
+}
+
+.bsp-panel.focused .panel-header {
+  background: rgba(0, 204, 139, 0.05) !important;
+}
+
+/* BSP Panel Drag and Drop - v003 style */
+.bsp-container.preview-mode .bsp-resizer {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+
+.bsp-container.preview-mode .bsp-panel {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), 
+              left 200ms cubic-bezier(0.4, 0, 0.2, 1), 
+              top 200ms cubic-bezier(0.4, 0, 0.2, 1), 
+              width 200ms cubic-bezier(0.4, 0, 0.2, 1), 
+              height 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.bsp-panel.is-dragging {
+  z-index: 10000;
+  transition: none !important; /* Dragged panel should not animate */
+}
+
+.bsp-panel.is-dragging::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 204, 139, 0.2);
+  pointer-events: none;
+}
+
+.bsp-panel .panel-header {
+  cursor: grab;
+  position: relative;
+  transition: background-color 0.1s ease;
+}
+
+.bsp-panel .panel-header:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.bsp-panel .panel-header:active {
+  cursor: grabbing;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Alignment guides - show exact drop position */
+.alignment-guide {
+  position: absolute;
+  z-index: 9999;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.alignment-guide.horizontal {
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 4px rgba(0, 204, 139, 0.8);
+  animation: guide-pulse 1s infinite alternate;
+}
+
+.alignment-guide.vertical {
+  width: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 4px rgba(0, 204, 139, 0.8);
+  animation: guide-pulse 1s infinite alternate;
+}
+
+@keyframes guide-pulse {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+/* Drop Preview Rectangle - shows where dragged panel will land */
+.drop-preview-rectangle {
+  background: rgba(0, 204, 139, 0.2);
+  border: 2px dashed var(--accent);
+  border-radius: 4px;
+  animation: drop-preview-pulse 1s infinite alternate;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: scale(0.9);
+  animation-delay: 0.1s;
+}
+
+.drop-preview-rectangle.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Inner preview showing the dragged panel inside the drop zone */
+.drag-preview-inside-drop {
+  position: absolute;
+  background: rgba(0, 204, 139, 0.15);
+  border: 1px solid rgba(0, 204, 139, 0.8);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-panel-header {
+  background: rgba(0, 204, 139, 0.2);
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(0, 204, 139, 0.3);
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.preview-panel-title {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-panel-body {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  opacity: 0.5;
+  min-height: 0;
+}
+
+.preview-content {
+  font-size: 10px;
+  color: rgba(0, 204, 139, 0.8);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* File Viewer Styles */
+.file-viewer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.file-header {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.file-name {
+  font-size: 11px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.file-extension {
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.code-content {
+  flex: 1;
+  margin: 0;
+  padding: 12px;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.text-content {
+  flex: 1;
+  padding: 12px;
+  background: #0f0f0f;
+  color: #d0d0d0;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+@keyframes drop-preview-pulse {
+  0% { 
+    background: rgba(0, 204, 139, 0.15);
+    border-color: rgba(0, 204, 139, 0.6);
+  }
+  100% { 
+    background: rgba(0, 204, 139, 0.25);
+    border-color: rgba(0, 204, 139, 1);
+  }
+}
+
+/* Dragging state */
+body.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* BSP Panel Content Scrollbar */
+.bsp-panel-body::-webkit-scrollbar {
+  width: 6px; /* Ultra-thin scrollbar */
+  height: 6px;
+}
+
+.bsp-panel-body::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.bsp-panel-body::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 2px;
+}
+
+.bsp-panel-body::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
 }

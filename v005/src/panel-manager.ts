@@ -1,5 +1,6 @@
 // Panel Manager - Simple fixed layout system
 import { FIXED_PANELS, DEFAULT_MARKDOWN_CONTENT } from './default-layout';
+import { BSPPanelManager } from './bsp-manager';
 import Showdown from 'showdown';
 
 interface Panel {
@@ -19,8 +20,11 @@ export class PanelManager {
   private isPropertiesCollapsed: boolean = false;
   private propertiesWidth: number = 300;
   private isResizingProperties: boolean = false;
-  private fileExplorerWidth: number = 200;
+  private fileExplorerWidth: number = 280;
   private isResizingFileExplorer: boolean = false;
+  private showExplorerDetail: boolean = false;
+  private explorerDetailHeight: number = 120;
+  private bspManager: BSPPanelManager | null = null;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -194,17 +198,23 @@ export class PanelManager {
       this.addFileExplorerResizeHandle(fileExplorerPanel.element);
     }
 
-    // Position main panel - center area between file explorer and properties
+    // Position main panel - center area between file explorer and properties with gap
+    const gap = 8; // Gap between explorer and main content
     const mainPanel = this.panels.get('main-panel');
     if (mainPanel) {
       Object.assign(mainPanel.element.style, {
         position: 'fixed',
-        left: `${toolbarWidth + this.fileExplorerWidth}px`,
+        left: `${toolbarWidth + this.fileExplorerWidth + gap}px`,
         top: `${headerHeight}px`,
-        width: `${viewportWidth - toolbarWidth - this.fileExplorerWidth - propertiesWidth}px`,
+        width: `${viewportWidth - toolbarWidth - this.fileExplorerWidth - propertiesWidth - gap}px`,
         height: `${viewportHeight - headerHeight - footerHeight}px`,
         zIndex: '100'
       });
+      
+      // Update BSP layout when main panel resizes
+      if (this.bspManager) {
+        this.bspManager.layout();
+      }
     }
   }
 
@@ -215,7 +225,11 @@ export class PanelManager {
     this.container.addEventListener('click', (e) => {
       const button = (e.target as HTMLElement).closest('button[data-action]') as HTMLButtonElement;
       if (button) {
-        this.handleToolbarButtonClick(button);
+        // Only handle if it's not inside a BSP panel
+        const bspPanel = button.closest('.bsp-panel');
+        if (!bspPanel) {
+          this.handleToolbarButtonClick(button);
+        }
       }
     });
 
@@ -264,6 +278,9 @@ export class PanelManager {
       this.toggleFooterCollapse();
     } else if (action === 'toggle-properties') {
       this.togglePropertiesCollapse();
+    } else if (action === 'add-panel' && this.bspManager) {
+      // Add a new panel to the BSP tree
+      this.bspManager.addPanel();
     }
   }
 
@@ -424,10 +441,17 @@ export class PanelManager {
     }
 
     // Update main panel dimensions immediately
+    const gap = 8; // Gap between explorer and main content
     const mainPanel = this.panels.get('main-panel');
     if (mainPanel) {
-      mainPanel.element.style.width = `${viewportWidth - toolbarWidth - this.fileExplorerWidth - propertiesWidth}px`;
+      mainPanel.element.style.left = `${toolbarWidth + this.fileExplorerWidth + gap}px`;
+      mainPanel.element.style.width = `${viewportWidth - toolbarWidth - this.fileExplorerWidth - propertiesWidth - gap}px`;
       mainPanel.element.style.height = `${viewportHeight - headerHeight - footerHeight}px`;
+      
+      // Update BSP layout
+      if (this.bspManager) {
+        this.bspManager.layout();
+      }
     }
   }
 
@@ -530,50 +554,66 @@ export class PanelManager {
     const body = panel.element.querySelector('.panel-body');
     if (body) {
       body.innerHTML = `
-        <div class="file-explorer-content">
-          <div class="tree" aria-label="File Explorer">
-            <div class="tree-item" role="treeitem" aria-expanded="true">
-              <div class="tree-item-content">
-                <button class="tree-item-toggle" aria-label="Toggle node">
-                  <i data-lucide="chevron-down" class="lucide"></i>
-                </button>
-                <i data-lucide="folder-open" class="lucide tree-item-icon" data-file-type="folder"></i>
-                <span class="tree-item-label">FileUI</span>
-              </div>
-              <div class="tree-item-children" role="group">
-                <div class="tree-item" role="treeitem" aria-expanded="false">
-                  <div class="tree-item-content">
+        <div class="file-explorer-split-container">
+          <div class="file-explorer-tree-section">
+            <div class="file-explorer-content">
+              <div class="tree" aria-label="File Explorer">
+                <div class="tree-item" role="treeitem" aria-expanded="true">
+                  <div class="tree-item-content" data-is-folder="true">
                     <button class="tree-item-toggle" aria-label="Toggle node">
-                      <i data-lucide="chevron-right" class="lucide"></i>
+                      <i data-lucide="chevron-down" class="lucide"></i>
                     </button>
-                    <i data-lucide="folder" class="lucide tree-item-icon" data-file-type="folder"></i>
-                    <span class="tree-item-label">src</span>
+                    <i data-lucide="folder-open" class="lucide tree-item-icon" data-file-type="folder"></i>
+                    <span class="tree-item-label">FileUI</span>
                   </div>
-                </div>
-                <div class="tree-item" role="treeitem" aria-expanded="false">
-                  <div class="tree-item-content">
-                    <button class="tree-item-toggle" aria-label="Toggle node">
-                      <i data-lucide="chevron-right" class="lucide"></i>
-                    </button>
-                    <i data-lucide="folder" class="lucide tree-item-icon" data-file-type="folder"></i>
-                    <span class="tree-item-label">public</span>
-                  </div>
-                </div>
-                <div class="tree-item" role="treeitem">
-                  <div class="tree-item-content">
-                    <div class="tree-item-spacer"></div>
-                    <i data-lucide="file-text" class="lucide tree-item-icon" data-file-type="json"></i>
-                    <span class="tree-item-label">package.json</span>
-                  </div>
-                </div>
-                <div class="tree-item" role="treeitem">
-                  <div class="tree-item-content">
-                    <div class="tree-item-spacer"></div>
-                    <i data-lucide="file-code" class="lucide tree-item-icon" data-file-type="typescript"></i>
-                    <span class="tree-item-label">vite.config.ts</span>
+                  <div class="tree-item-children" role="group">
+                    <div class="tree-item" role="treeitem" aria-expanded="false">
+                      <div class="tree-item-content" data-is-folder="true">
+                        <button class="tree-item-toggle" aria-label="Toggle node">
+                          <i data-lucide="chevron-right" class="lucide"></i>
+                        </button>
+                        <i data-lucide="folder" class="lucide tree-item-icon" data-file-type="folder"></i>
+                        <span class="tree-item-label">src</span>
+                      </div>
+                    </div>
+                    <div class="tree-item" role="treeitem" aria-expanded="false">
+                      <div class="tree-item-content" data-is-folder="true">
+                        <button class="tree-item-toggle" aria-label="Toggle node">
+                          <i data-lucide="chevron-right" class="lucide"></i>
+                        </button>
+                        <i data-lucide="folder" class="lucide tree-item-icon" data-file-type="folder"></i>
+                        <span class="tree-item-label">public</span>
+                      </div>
+                    </div>
+                    <div class="tree-item" role="treeitem">
+                      <div class="tree-item-content" data-file-name="package.json">
+                        <div class="tree-item-spacer"></div>
+                        <i data-lucide="file-text" class="lucide tree-item-icon" data-file-type="json"></i>
+                        <span class="tree-item-label">package.json</span>
+                      </div>
+                    </div>
+                    <div class="tree-item" role="treeitem">
+                      <div class="tree-item-content" data-file-name="vite.config.ts">
+                        <div class="tree-item-spacer"></div>
+                        <i data-lucide="file-code" class="lucide tree-item-icon" data-file-type="typescript"></i>
+                        <span class="tree-item-label">vite.config.ts</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          <div class="explorer-detail-resizer" style="display: none;"></div>
+          <div class="file-explorer-detail-section" style="display: none;">
+            <div class="explorer-detail-header">
+              <span class="explorer-detail-title"></span>
+              <button class="explorer-detail-close" aria-label="Close detail">
+                <i data-lucide="x" class="lucide"></i>
+              </button>
+            </div>
+            <div class="explorer-detail-content">
+              <div class="explorer-detail-empty">Select a file to view details</div>
             </div>
           </div>
         </div>
@@ -581,6 +621,13 @@ export class PanelManager {
       
       // Setup tree interactions
       this.setupFileExplorerInteractions();
+      
+      // Re-initialize Lucide icons for new elements
+      setTimeout(() => {
+        if ((window as any).lucide) {
+          (window as any).lucide.createIcons();
+        }
+      }, 50);
     }
   }
   
@@ -624,8 +671,78 @@ export class PanelManager {
         treeItemContent.classList.add('selected');
         treeItemContent.setAttribute('tabindex', '0');
         treeItemContent.focus();
+        
+        // Show detail panel for files
+        const fileName = treeItemContent.getAttribute('data-file-name');
+        if (fileName) {
+          this.showFileDetail(fileName);
+          // Open file in focused BSP panel
+          this.openFileInFocusedPanel(fileName);
+        }
       }
     });
+    
+    // Handle detail close button
+    const closeBtn = fileExplorer.querySelector('.explorer-detail-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        this.hideFileDetail();
+      });
+    }
+  }
+  
+  private showFileDetail(fileName: string): void {
+    const detailSection = document.querySelector('.file-explorer-detail-section') as HTMLElement;
+    const treeSection = document.querySelector('.file-explorer-tree-section') as HTMLElement;
+    const detailTitle = document.querySelector('.explorer-detail-title') as HTMLElement;
+    const detailContent = document.querySelector('.explorer-detail-content') as HTMLElement;
+    const resizer = document.querySelector('.explorer-detail-resizer') as HTMLElement;
+    
+    if (!detailSection || !treeSection || !detailTitle || !detailContent || !resizer) return;
+    
+    // Update detail content
+    detailTitle.textContent = fileName;
+    detailContent.innerHTML = `
+      <div class="explorer-detail-info">
+        <div class="detail-row">
+          <span class="detail-label">Name:</span>
+          <span class="detail-value">${fileName}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Type:</span>
+          <span class="detail-value">${fileName.split('.').pop()?.toUpperCase() || 'File'}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Size:</span>
+          <span class="detail-value">12.5 KB</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Modified:</span>
+          <span class="detail-value">2 hours ago</span>
+        </div>
+      </div>
+    `;
+    
+    // Show detail panel - ultra thin
+    treeSection.style.height = '70%';
+    resizer.style.display = 'block';
+    detailSection.style.display = 'flex';
+    detailSection.style.height = 'calc(30% - 3px)';
+    this.showExplorerDetail = true;
+  }
+  
+  private hideFileDetail(): void {
+    const detailSection = document.querySelector('.file-explorer-detail-section') as HTMLElement;
+    const treeSection = document.querySelector('.file-explorer-tree-section') as HTMLElement;
+    const resizer = document.querySelector('.explorer-detail-resizer') as HTMLElement;
+    
+    if (!detailSection || !treeSection || !resizer) return;
+    
+    // Hide detail panel
+    treeSection.style.height = '100%';
+    resizer.style.display = 'none';
+    detailSection.style.display = 'none';
+    this.showExplorerDetail = false;
   }
 
   private setupFooterPanel(panel: Panel): void {
@@ -831,10 +948,18 @@ export class PanelManager {
     const body = panel.element.querySelector('.panel-body');
     if (body) {
       body.innerHTML = `
-        <div class="panel-content">
-          <div>Main content area - Drop files here</div>
-        </div>
+        <div class="bsp-container"></div>
       `;
+      
+      // Initialize BSP panel manager for the main content area
+      const bspContainer = body.querySelector('.bsp-container') as HTMLElement;
+      if (bspContainer) {
+        this.bspManager = new BSPPanelManager(bspContainer);
+        // Delay initialization to ensure container has dimensions
+        requestAnimationFrame(() => {
+          this.bspManager!.init();
+        });
+      }
     }
   }
 
@@ -877,5 +1002,43 @@ export class PanelManager {
     this.isResizingFileExplorer = false;
     document.body.style.cursor = '';
     document.body.classList.remove('no-transition');
+  }
+
+  private async openFileInFocusedPanel(fileName: string): Promise<void> {
+    if (!this.bspManager) return;
+    
+    try {
+      // For now, simulate reading a file by creating content based on file type
+      const extension = fileName.split('.').pop()?.toLowerCase() || '';
+      let content = '';
+      
+      if (['js', 'ts', 'tsx', 'jsx', 'py', 'cpp', 'c', 'h', 'java', 'cs'].includes(extension)) {
+        content = `// ${fileName}\n// This is a code file preview\n\nfunction example() {\n  console.log('File: ${fileName}');\n  return true;\n}`;
+      } else if (['json'].includes(extension)) {
+        content = `{\n  "name": "${fileName}",\n  "type": "configuration",\n  "description": "File content preview"\n}`;
+      } else if (['md', 'txt'].includes(extension)) {
+        content = `# ${fileName}\n\nThis is a preview of the file content.\n\n- File name: ${fileName}\n- Type: ${extension}\n- Status: Preview mode`;
+      } else if (['html', 'htm'].includes(extension)) {
+        content = `<!DOCTYPE html>\n<html>\n<head>\n  <title>${fileName}</title>\n</head>\n<body>\n  <h1>File: ${fileName}</h1>\n  <p>HTML file preview</p>\n</body>\n</html>`;
+      } else if (['css', 'scss', 'sass'].includes(extension)) {
+        content = `/* ${fileName} */\n\n.preview {\n  display: block;\n  content: "${fileName}";\n  color: #00cc8b;\n}`;
+      } else {
+        content = `File: ${fileName}\nType: ${extension}\n\nThis is a preview of the file content.\nIntegration with actual file reading will be implemented next.`;
+      }
+      
+      // Update the focused panel content
+      this.bspManager.updateFocusedPanelContent(fileName, content);
+      
+    } catch (error) {
+      console.error('Failed to open file:', error);
+      
+      // Show error in focused panel
+      if (this.bspManager) {
+        this.bspManager.updateFocusedPanelContent(
+          `Error: ${fileName}`, 
+          `Failed to load file: ${fileName}\n\nError: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      }
+    }
   }
 }

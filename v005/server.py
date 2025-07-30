@@ -14,12 +14,12 @@ from urllib.parse import urlparse, parse_qs
 import argparse
 
 class FileAPIHandler(BaseHTTPRequestHandler):
+    # Class variable to store root directory
+    root_dir = Path('.')
+    
     def do_GET(self):
         """Handle GET requests"""
         parsed_path = urlparse(self.path)
-        
-        # Enable CORS
-        self.send_cors_headers()
         
         if parsed_path.path == '/api/files':
             self.handle_list_files(parsed_path)
@@ -32,8 +32,6 @@ class FileAPIHandler(BaseHTTPRequestHandler):
     
     def do_PUT(self):
         """Handle PUT requests"""
-        self.send_cors_headers()
-        
         parsed_path = urlparse(self.path)
         if parsed_path.path == '/api/file':
             self.handle_write_file()
@@ -42,6 +40,7 @@ class FileAPIHandler(BaseHTTPRequestHandler):
     
     def do_OPTIONS(self):
         """Handle preflight CORS requests"""
+        self.send_response(200)
         self.send_cors_headers()
         self.end_headers()
     
@@ -57,19 +56,28 @@ class FileAPIHandler(BaseHTTPRequestHandler):
         path = query_params.get('path', ['.'])[0]
         
         try:
-            # Ensure path is safe
-            safe_path = Path(path).resolve()
-            base_path = Path('.').resolve()
+            # Resolve path relative to root directory
+            if path == '.':
+                safe_path = self.root_dir.resolve()
+            else:
+                safe_path = (self.root_dir / path).resolve()
             
-            if not str(safe_path).startswith(str(base_path)):
-                self.send_error(403, "Access Denied")
+            # Ensure path is within root directory
+            if not str(safe_path).startswith(str(self.root_dir.resolve())):
+                self.send_response(403)
+                self.send_header('Content-Type', 'text/plain')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(b"Access Denied")
                 return
             
             files = []
             for item in safe_path.iterdir():
+                # Get path relative to root directory
+                relative_path = str(item.relative_to(self.root_dir.resolve()))
                 file_info = {
                     'name': item.name,
-                    'path': str(item),
+                    'path': relative_path,
                     'type': 'directory' if item.is_dir() else 'file'
                 }
                 
@@ -83,6 +91,7 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(files).encode())
             
@@ -99,11 +108,16 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             return
         
         try:
-            safe_path = Path(path).resolve()
-            base_path = Path('.').resolve()
+            # Resolve path relative to root directory
+            safe_path = (self.root_dir / path).resolve()
             
-            if not str(safe_path).startswith(str(base_path)):
-                self.send_error(403, "Access Denied")
+            # Ensure path is within root directory
+            if not str(safe_path).startswith(str(self.root_dir.resolve())):
+                self.send_response(403)
+                self.send_header('Content-Type', 'text/plain')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(b"Access Denied")
                 return
             
             if not safe_path.exists() or not safe_path.is_file():
@@ -114,6 +128,7 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             
             self.send_response(200)
             self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.send_cors_headers()
             self.end_headers()
             self.wfile.write(content.encode())
             
@@ -148,6 +163,7 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps({'success': True}).encode())
             
@@ -164,11 +180,16 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             return
         
         try:
-            safe_path = Path(path).resolve()
-            base_path = Path('.').resolve()
+            # Resolve path relative to root directory
+            safe_path = (self.root_dir / path).resolve()
             
-            if not str(safe_path).startswith(str(base_path)):
-                self.send_error(403, "Access Denied")
+            # Ensure path is within root directory
+            if not str(safe_path).startswith(str(self.root_dir.resolve())):
+                self.send_response(403)
+                self.send_header('Content-Type', 'text/plain')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(b"Access Denied")
                 return
             
             if not safe_path.exists():
@@ -192,6 +213,7 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(metadata).encode())
             
@@ -206,12 +228,17 @@ def main():
     parser = argparse.ArgumentParser(description='FileUI v005 Server')
     parser.add_argument('--port', type=int, default=8000, help='Port to run server on')
     parser.add_argument('--host', default='localhost', help='Host to bind to')
+    parser.add_argument('--root', default='.', help='Root directory to serve files from')
     args = parser.parse_args()
+    
+    # Set root directory for the handler
+    FileAPIHandler.root_dir = Path(args.root).resolve()
     
     server_address = (args.host, args.port)
     httpd = HTTPServer(server_address, FileAPIHandler)
     
     print(f"FileUI Server running on http://{args.host}:{args.port}")
+    print(f"Serving files from: {FileAPIHandler.root_dir}")
     print("API endpoints:")
     print("  GET  /api/files     - List files in directory")
     print("  GET  /api/file      - Read file contents")

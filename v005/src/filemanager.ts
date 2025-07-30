@@ -26,11 +26,17 @@ export class ServerFileSystem implements FileSystemAPI {
   }
 
   async listFiles(path: string): Promise<FileItem[]> {
-    const response = await fetch(`${this.baseUrl}/files?path=${encodeURIComponent(path)}`);
-    if (!response.ok) {
-      throw new Error(`Failed to list files: ${response.statusText}`);
+    try {
+      const response = await fetch(`${this.baseUrl}/files?path=${encodeURIComponent(path)}`);
+      if (!response.ok) {
+        throw new Error(`Failed to list files: ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      // Fallback to demo data if server is not available
+      console.warn('Server not available, using demo data');
+      return this.getDemoFiles(path);
     }
-    return response.json();
   }
 
   async readFile(path: string): Promise<string> {
@@ -60,6 +66,40 @@ export class ServerFileSystem implements FileSystemAPI {
       throw new Error(`Failed to get metadata: ${response.statusText}`);
     }
     return response.json();
+  }
+
+  private getDemoFiles(path: string): FileItem[] {
+    // Demo file structure for Cloudflare Pages
+    if (path === '.' || path === '/') {
+      return [
+        { name: 'project.blend', path: 'project.blend', type: 'file', size: 1024000 },
+        { name: 'scenes', path: 'scenes', type: 'directory', size: 0 },
+        { name: 'renders', path: 'renders', type: 'directory', size: 0 },
+        { name: 'textures', path: 'textures', type: 'directory', size: 0 },
+        { name: 'README.md', path: 'README.md', type: 'file', size: 2048 },
+        { name: 'shot_001.nk', path: 'shot_001.nk', type: 'file', size: 512000 },
+        { name: 'animation.ma', path: 'animation.ma', type: 'file', size: 768000 },
+      ];
+    } else if (path === 'scenes') {
+      return [
+        { name: 'scene_001.blend', path: 'scenes/scene_001.blend', type: 'file', size: 2048000 },
+        { name: 'scene_002.blend', path: 'scenes/scene_002.blend', type: 'file', size: 1536000 },
+        { name: 'layout.hip', path: 'scenes/layout.hip', type: 'file', size: 1024000 },
+      ];
+    } else if (path === 'renders') {
+      return [
+        { name: 'frame_0001.exr', path: 'renders/frame_0001.exr', type: 'file', size: 8192000 },
+        { name: 'frame_0002.exr', path: 'renders/frame_0002.exr', type: 'file', size: 8192000 },
+        { name: 'preview.mov', path: 'renders/preview.mov', type: 'file', size: 20480000 },
+      ];
+    } else if (path === 'textures') {
+      return [
+        { name: 'metal_diffuse.png', path: 'textures/metal_diffuse.png', type: 'file', size: 4096000 },
+        { name: 'metal_normal.png', path: 'textures/metal_normal.png', type: 'file', size: 4096000 },
+        { name: 'wood_albedo.tiff', path: 'textures/wood_albedo.tiff', type: 'file', size: 16384000 },
+      ];
+    }
+    return [];
   }
 }
 

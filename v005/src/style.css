@@ -1,6 +1,45 @@
 /* FileUI v005 - Panel System Styles */
 /* Works with StyleUI design system */
 
+/* Global Scrollbar Styles - Minimal and only on hover */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Webkit Scrollbars - Minimal and hover-only */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Hide scrollbars during drag operations */
+body.is-dragging *::-webkit-scrollbar-thumb {
+  background: transparent !important;
+}
+
 /* Override StyleUI variables with FileUI colors */
 :root {
   /* Override StyleUI default accent with FileUI brand color */
@@ -767,9 +806,7 @@ button.terminal-tab {
   background: transparent;
 }
 
-.resize-handle-bar {
-  display: none; /* Make completely invisible */
-}
+/* Removed generic resize-handle-bar style that was conflicting */
 
 /* Disable transitions during resize */
 body.no-transition,
@@ -999,23 +1036,71 @@ button.properties-tab-vertical {
 /* File Explorer Resize Handle */
 .file-explorer-resize-handle {
   position: absolute;
-  right: -3px;
+  right: 0;  /* Changed from -4px to 0 to keep within bounds */
   top: 0;
   bottom: 0;
-  width: 6px;
+  width: 8px;
   height: 100%;
   cursor: ew-resize;
-  z-index: 400;
+  z-index: 1000;  /* Higher z-index to ensure it's clickable */
   background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.file-explorer-resize-handle:hover {
+  background-color: var(--accent);
+}
+
+.file-explorer-resize-handle .resize-handle-bar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 30px;
+  background: var(--border-color);
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.file-explorer-resize-handle:hover .resize-handle-bar {
+  opacity: 1;
+  background: var(--accent);
 }
 
 /* File Explorer Panel */
 .file-explorer-panel {
-  background: var(--bg-base);
+  background: #0f0f0f;  /* Same dark background */
   margin: 0 !important;
   border: none !important;
   border-radius: 0 !important;
-  border-right: 1px solid var(--border-color);
+  border-right: none !important;  /* No border - seamless connection */
+  overflow: hidden !important;
+  contain: strict;  /* Strictest containment */
+  box-sizing: border-box !important;
+  max-width: 40vw !important;  /* Enforce maximum width */
+  /* Position and dimensions are controlled by JavaScript */
+}
+
+/* Ensure no border radius on file explorer at any level */
+.file-explorer-panel,
+.file-explorer-panel *,
+.file-explorer-panel .panel,
+.file-explorer-panel .panel-header,
+.file-explorer-panel .panel-body {
+  border-radius: 0 !important;
+}
+
+/* File Explorer Content Container */
+.file-explorer-content {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  contain: strict;
+  box-sizing: border-box;
 }
 
 /* File Explorer Split Container */
@@ -1023,6 +1108,8 @@ button.properties-tab-vertical {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  contain: layout style paint;
 }
 
 .file-explorer-tree-section {
@@ -1064,39 +1151,56 @@ button.properties-tab-vertical {
   padding: 0 !important;
   height: calc(100% - 40px);
   background: #0f0f0f !important;
-  overflow: hidden;
+  overflow: hidden !important;
+  position: relative !important;
+  contain: strict;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
-/* Custom scrollbar for file explorer - ultra thin */
-.file-explorer-panel .panel-body::-webkit-scrollbar,
-.file-explorer-tree-section::-webkit-scrollbar,
-.explorer-detail-content::-webkit-scrollbar {
-  width: 4px;
-}
+/* File explorer uses global scrollbar styles */
 
-.file-explorer-panel .panel-body::-webkit-scrollbar-track,
-.file-explorer-tree-section::-webkit-scrollbar-track,
-.explorer-detail-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.file-explorer-panel .panel-body::-webkit-scrollbar-thumb,
-.file-explorer-tree-section::-webkit-scrollbar-thumb,
-.explorer-detail-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-
-.file-explorer-panel .panel-body::-webkit-scrollbar-thumb:hover,
-.file-explorer-tree-section::-webkit-scrollbar-thumb:hover,
-.explorer-detail-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
 
 .file-explorer-content {
   height: 100%;
-  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
   background: #0f0f0f;
+  overflow: hidden;
+  position: relative;
+}
+
+.file-explorer-header {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-explorer-path {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: monospace;
+  opacity: 0.7;
+  flex: 1;
+}
+
+.loading-indicator {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.error-message {
+  padding: 20px;
+  color: var(--color-danger, #ff5656);
+  text-align: center;
 }
 
 /* Override tree styles for file explorer */
@@ -1105,6 +1209,10 @@ button.properties-tab-vertical {
   border: none;
   font-size: var(--text-sm);
   font-family: var(--font-sans);
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-2);
 }
 
 .file-explorer-panel .tree-item-content {
@@ -1186,15 +1294,33 @@ button.properties-tab-vertical {
   stroke-width: 1.5;
 }
 
-/* Hide/show tree children based on expanded state */
-.file-explorer-panel .tree-item[aria-expanded="false"] .tree-item-children {
-  display: none;
+/* Tree children container */
+.file-explorer-panel .tree-item-children {
+  overflow: hidden;
 }
 
-.file-explorer-panel .tree-item[aria-expanded="true"] .tree-item-children {
-  display: block;
-  margin-left: var(--space-3);
-  position: relative;
+.file-explorer-panel .tree-item-children .loading-indicator {
+  padding: 4px 40px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.file-explorer-panel .tree-item-children .error-message {
+  padding: 4px 40px;
+  font-size: 12px;
+  color: var(--error);
+}
+
+/* Toggle button chevron animation */
+.file-explorer-panel .tree-item-toggle[data-expanded="false"] .chevron-icon {
+  transform: rotate(0deg);
+  transition: transform 0.15s ease;
+}
+
+.file-explorer-panel .tree-item-toggle[data-expanded="true"] .chevron-icon {
+  transform: rotate(90deg);
+  transition: transform 0.15s ease;
 }
 
 
@@ -1214,9 +1340,160 @@ button.properties-tab-vertical {
   opacity: 0.7;
 }
 
+/* VFX File type specific colors */
+.file-explorer-panel .tree-item-icon[data-file-type="file-3d"] {
+  color: var(--file-3d);
+  opacity: 0.9;
+}
+
+.file-explorer-panel .tree-item-icon[data-file-type="file-comp"] {
+  color: var(--file-comp);
+  opacity: 0.9;
+}
+
+.file-explorer-panel .tree-item-icon[data-file-type="file-image"] {
+  color: var(--file-image);
+  opacity: 0.9;
+}
+
+.file-explorer-panel .tree-item-icon[data-file-type="file-video"] {
+  color: var(--file-video);
+  opacity: 0.9;
+}
+
+.file-explorer-panel .tree-item-icon[data-file-type="file-project"] {
+  color: var(--file-project);
+  opacity: 0.9;
+}
+
 /* Selected state brightens icons */
 .file-explorer-panel .tree-item-content.selected .tree-item-icon {
-  color: var(--accent);
+  opacity: 1;
+  filter: brightness(1.2);
+}
+
+/* VFX file labels - subtle color on hover */
+.file-explorer-panel .tree-item-content[data-file-type="file-3d"]:hover .tree-item-label {
+  color: var(--file-3d);
+}
+
+.file-explorer-panel .tree-item-content[data-file-type="file-comp"]:hover .tree-item-label {
+  color: var(--file-comp);
+}
+
+.file-explorer-panel .tree-item-content[data-file-type="file-image"]:hover .tree-item-label {
+  color: var(--file-image);
+}
+
+.file-explorer-panel .tree-item-content[data-file-type="file-video"]:hover .tree-item-label {
+  color: var(--file-video);
+}
+
+.file-explorer-panel .tree-item-content[data-file-type="file-project"]:hover .tree-item-label {
+  color: var(--file-project);
+}
+
+/* Directory Chooser Modal */
+.directory-chooser-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.directory-chooser-modal .modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.directory-chooser-modal .modal-content {
+  position: relative;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  min-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.directory-chooser-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.directory-chooser-modal .modal-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.directory-chooser-modal .modal-body {
+  padding: 20px;
+}
+
+.directory-chooser-modal .form-group {
+  margin-bottom: 0;
+}
+
+.directory-chooser-modal .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.directory-chooser-modal .form-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+
+.directory-chooser-modal .form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 204, 139, 0.1);
+}
+
+.directory-chooser-modal .form-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.directory-chooser-modal .modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.directory-chooser-modal .modal-close {
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.directory-chooser-modal .modal-close:hover {
   opacity: 1;
 }
 
@@ -1336,7 +1613,7 @@ button.properties-tab-vertical {
 
 /* Main Panel - Ultra-thin styling */
 .main-panel {
-  background: var(--bg-base);
+  background: #0f0f0f;  /* Same as file explorer */
   margin: 0 !important;
   border: none !important;
   border-radius: 0 !important;
@@ -1365,6 +1642,61 @@ button.properties-tab-vertical {
   height: 100% !important;
   background: #0f0f0f !important;
   overflow: hidden !important;
+  border-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* Ensure main panel fills height properly */
+#main-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 0 !important;
+}
+
+#main-panel,
+#main-panel .panel,
+#main-panel .panel-header,
+#main-panel .panel-body {
+  border-radius: 0 !important;
+}
+
+/* Force all panel elements to have no border radius */
+.panel {
+  border-radius: 0 !important;
+}
+
+/* Specifically target the main panel to ensure no border radius on any corner */
+#main-panel {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  overflow: visible !important;
+}
+
+/* Aggressive override for any element that might have border radius */
+#main-panel,
+#main-panel *,
+.main-panel,
+.main-panel *,
+[id*="main-panel"],
+[id*="main-panel"] *,
+.bsp-container,
+.bsp-container *,
+.bsp-panel,
+.bsp-panel * {
+  border-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+#main-panel .panel-body {
+  flex: 1 !important;
+  overflow: hidden !important;
+  position: relative !important;
 }
 
 /* BSP Panels - Ultra-thin but functional */
@@ -1393,11 +1725,12 @@ button.properties-tab-vertical {
 }
 
 .bsp-panel .panel-title {
-  font-size: 11px !important; /* Standard ultra-thin size */
+  font-size: 13px !important; /* Slightly larger for better readability */
   color: #808080 !important;
   line-height: 48px !important;
   flex: 1 !important;
   font-weight: 500 !important;
+  transition: all 0.2s ease !important;
 }
 
 .bsp-panel .panel-actions {
@@ -1500,22 +1833,42 @@ button.properties-tab-vertical {
   border-color: #2a2a2a;
 }
 
-/* Focused/active panel highlight - subtle accent border */
+/* Focused/active panel highlight - no visual changes except text */
 .bsp-panel.focused {
-  border: 1px solid var(--accent) !important;
-  box-shadow: 0 0 0 1px rgba(0, 204, 139, 0.1) !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-.bsp-panel.focused .panel-header {
-  background: rgba(0, 204, 139, 0.05) !important;
+/* Bold text for focused panel */
+.bsp-panel.focused .panel-title {
+  font-weight: 700 !important;
+  color: var(--accent) !important;
+}
+
+/* Pinned panel styles */
+.bsp-panel.is-pinned .panel-header {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.bsp-panel.is-pinned [data-action="pin"] {
+  color: var(--accent) !important;
+}
+
+/* Show/hide pin icons based on state */
+.bsp-panel:not(.is-pinned) .icon-pin-off {
+  display: none !important;
+}
+
+.bsp-panel.is-pinned .icon-pin {
+  display: none !important;
+}
+
+.bsp-panel.is-pinned .icon-pin-off {
+  display: block !important;
 }
 
 /* BSP Panel Drag and Drop - v003 style */
-.bsp-container.preview-mode .bsp-resizer {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 150ms ease-out;
-}
+/* Keep resizers visible during drag */
 
 .bsp-container.preview-mode .bsp-panel {
   transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), 
@@ -1600,6 +1953,18 @@ button.properties-tab-vertical {
   transform: scale(1);
 }
 
+/* Full container drop preview */
+.drop-preview-rectangle.drop-preview-full {
+  background: rgba(0, 204, 139, 0.1);
+  border: none;
+  animation: none;
+}
+
+.drop-preview-rectangle.drop-preview-full .drag-preview-inside-drop {
+  width: 100%;
+  height: 100%;
+}
+
 /* Inner preview showing the dragged panel inside the drop zone */
 .drag-preview-inside-drop {
   position: absolute;
@@ -1650,6 +2015,179 @@ button.properties-tab-vertical {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* BSP Panel File Explorer Styles */
+.bsp-panel .file-explorer-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.bsp-panel .file-explorer-header {
+  padding: var(--space-2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  gap: var(--space-2);
+}
+
+.bsp-panel .file-explorer-path {
+  font-size: var(--text-sm);
+  opacity: 0.7;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bsp-panel .tree {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-2);
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+}
+
+/* Tree item styles for BSP explorer */
+.bsp-panel .tree-item-content {
+  padding: var(--space-1) var(--space-2);
+  gap: var(--space-2);
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  position: relative;
+}
+
+.bsp-panel .tree-item-content:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bsp-panel .tree-item-content.selected {
+  background: rgba(var(--accent-rgb), 0.15);
+  color: var(--text-primary);
+  border-left: 2px solid var(--accent);
+  padding-left: calc(var(--space-2) - 2px);
+}
+
+.bsp-panel .tree-item-toggle {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.bsp-panel .tree-item-toggle:hover {
+  opacity: 0.8;
+}
+
+.bsp-panel .tree-item-toggle[data-expanded="false"] .chevron-icon {
+  transform: rotate(0deg);
+  transition: transform 0.15s ease;
+}
+
+.bsp-panel .tree-item-toggle[data-expanded="true"] .chevron-icon {
+  transform: rotate(90deg);
+  transition: transform 0.15s ease;
+}
+
+.bsp-panel .tree-item-icon {
+  color: var(--text-secondary);
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  flex-shrink: 0;
+  stroke-width: 1.5;
+}
+
+.bsp-panel .tree-item-label {
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.bsp-panel .tree-item-spacer {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.bsp-panel .loading-indicator,
+.bsp-panel .error-message {
+  padding: var(--space-3);
+  text-align: center;
+  color: var(--text-tertiary);
+  font-style: italic;
+  font-size: var(--text-sm);
+}
+
+.bsp-panel .error-message {
+  color: var(--error);
+}
+
+/* VFX File type colors for BSP explorer */
+.bsp-panel .tree-item-icon[data-file-type="file-3d"] {
+  color: var(--file-3d);
+  opacity: 0.9;
+}
+
+.bsp-panel .tree-item-icon[data-file-type="file-comp"] {
+  color: var(--file-comp);
+  opacity: 0.9;
+}
+
+.bsp-panel .tree-item-icon[data-file-type="file-image"] {
+  color: var(--file-image);
+  opacity: 0.9;
+}
+
+.bsp-panel .tree-item-icon[data-file-type="file-video"] {
+  color: var(--file-video);
+  opacity: 0.9;
+}
+
+.bsp-panel .tree-item-icon[data-file-type="file-project"] {
+  color: var(--file-project);
+  opacity: 0.9;
+}
+
+/* Hover states for VFX files */
+.bsp-panel .tree-item-content[data-file-type="file-3d"]:hover .tree-item-label {
+  color: var(--file-3d);
+}
+
+.bsp-panel .tree-item-content[data-file-type="file-comp"]:hover .tree-item-label {
+  color: var(--file-comp);
+}
+
+.bsp-panel .tree-item-content[data-file-type="file-image"]:hover .tree-item-label {
+  color: var(--file-image);
+}
+
+.bsp-panel .tree-item-content[data-file-type="file-video"]:hover .tree-item-label {
+  color: var(--file-video);
+}
+
+.bsp-panel .tree-item-content[data-file-type="file-project"]:hover .tree-item-label {
+  color: var(--file-project);
 }
 
 .file-header {
@@ -1717,21 +2255,96 @@ body.is-dragging {
   user-select: none;
 }
 
-/* BSP Panel Content Scrollbar */
-.bsp-panel-body::-webkit-scrollbar {
-  width: 6px; /* Ultra-thin scrollbar */
-  height: 6px;
+/* BSP panels use global scrollbar styles */
+
+/* File Content Display */
+.bsp-panel .file-loading,
+.bsp-panel .file-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
 }
 
-.bsp-panel-body::-webkit-scrollbar-track {
-  background: #0a0a0a;
+.bsp-panel .file-error {
+  color: var(--error);
 }
 
-.bsp-panel-body::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
-  border-radius: 2px;
+.bsp-panel .file-error .error-message {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.8;
 }
 
-.bsp-panel-body::-webkit-scrollbar-thumb:hover {
-  background: #3a3a3a;
+.bsp-panel .file-content {
+  height: 100%;
+  overflow: auto;
+}
+
+.bsp-panel .file-text {
+  margin: 0;
+  padding: 16px;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: #d4d4d4;
+}
+
+.bsp-panel .file-preview {
+  padding: 20px;
+  text-align: center;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bsp-panel .file-preview.image-preview {
+  padding: 0;
+  background: #1a1a1a;
+}
+
+.bsp-panel .file-preview.image-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.bsp-panel .file-preview p {
+  margin: 10px 0;
+}
+
+.bsp-panel .file-preview .file-path {
+  font-size: 12px;
+  color: #666;
+  font-family: monospace;
+}
+
+/* ULTRA AGGRESSIVE BORDER RADIUS REMOVAL - MUST BE LAST IN FILE */
+* {
+  border-radius: 0 !important;
+}
+
+#main-panel,
+#main-panel.panel,
+#main-panel .panel,
+.bsp-panel,
+.bsp-panel.focused,
+.bsp-container,
+div[id="main-panel"],
+div.panel {
+  border-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+  -moz-border-radius: 0 !important;
 }

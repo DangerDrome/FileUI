@@ -288,6 +288,9 @@ export class BSPPanelManager {
 
   private handlePanelAction(action: string, panelId: string): void {
     switch(action) {
+      case 'pin':
+        this.togglePinPanel(panelId);
+        break;
       case 'split-v':
         this.splitPanel(panelId, 'vertical');
         break;
@@ -311,12 +314,12 @@ export class BSPPanelManager {
     panel.classList.add('focused');
   }
 
-  splitPanel(targetId: string, direction: 'horizontal' | 'vertical'): void {
-    console.log(`Splitting panel ${targetId} ${direction}`);
+  splitPanel(targetId: string, direction: 'horizontal' | 'vertical', position: 'left' | 'right' | 'top' | 'bottom' = 'right'): string {
+    console.log(`Splitting panel ${targetId} ${direction} at ${position}`);
     const target = this.panels.get(targetId);
     if (!target) {
       console.error(`Panel ${targetId} not found`);
-      return;
+      return '';
     }
     
     const { node: targetNode } = target;
@@ -330,11 +333,15 @@ export class BSPPanelManager {
     const newNode = new BSPNode({ id: newPanel.id, element: newPanel.element });
     this.panels.set(newPanel.id, { node: newNode, element: newPanel.element });
     
+    // Order children based on position
+    const shouldNewPanelBeFirst = position === 'left' || position === 'top';
+    const children = shouldNewPanelBeFirst ? [newNode, targetNode] : [targetNode, newNode];
+    
     // Create parent node
     const newParent = new BSPNode({
       parent: originalParent,
       direction,
-      children: [targetNode, newNode],
+      children,
       split: 0.5
     });
 
@@ -356,6 +363,7 @@ export class BSPPanelManager {
     this.setFocusedPanel(newPanel.element);
     
     this.layout();
+    return newPanel.id;
   }
 
   closePanel(panelId: string): void {
@@ -408,6 +416,10 @@ export class BSPPanelManager {
           <span>${title}</span>
         </div>
         <div class="panel-actions">
+          <button class="panel-action-btn" data-action="pin" title="Pin Panel">
+            <i data-lucide="pin" class="lucide icon-pin"></i>
+            <i data-lucide="pin-off" class="lucide icon-pin-off" style="display: none;"></i>
+          </button>
           <button class="panel-action-btn" data-action="split-v" title="Split Vertical">
             <i data-lucide="columns-2" class="lucide"></i>
           </button>
@@ -671,14 +683,87 @@ export class BSPPanelManager {
       
       // Update preview immediately (no requestAnimationFrame delay)
       this.updatePreviewLayout();
-    } else if (!targetPanel && this.activeDrag.currentTargetPanel) {
-      // Keep the current preview when dragging over empty space
-      // Don't clear the target or update the preview
+    } else if (!targetPanel) {
+      // Show full container preview when dragging over empty space
+      if (this.lastDragOverTarget.panelId !== null) {
+        this.lastDragOverTarget = { panelId: null, zone: null };
+        this.activeDrag.currentTargetPanel = null;
+        this.activeDrag.currentDropZone = null;
+        
+        // Show full container preview
+        this.updateDropPreviewForEmptySpace();
+        this.updatePreviewLayout();
+      }
     }
 
     this.layout(true); // Call with preview mode during drag
   }
 
+
+  private updateDropPreviewForEmptySpace(): void {
+    const containerRect = this.container.getBoundingClientRect();
+    
+    // Remove existing preview
+    if (this.dropPreview) {
+      this.dropPreview.remove();
+    }
+    
+    // Create drop preview container that fills the entire BSP container
+    this.dropPreview = document.createElement('div');
+    this.dropPreview.className = 'drop-preview-rectangle drop-preview-full';
+    
+    // Create inner preview showing the dragged panel
+    const innerPreview = document.createElement('div');
+    innerPreview.className = 'drag-preview-inside-drop';
+    
+    // Copy the dragged panel's content for preview
+    if (this.activeDrag.target?.element) {
+      const draggedPanel = this.activeDrag.target.element;
+      const panelTitle = draggedPanel.querySelector('.panel-title span')?.textContent || 'Panel';
+      innerPreview.innerHTML = `
+        <div class="preview-panel-header">
+          <span class="preview-panel-title">${panelTitle}</span>
+        </div>
+        <div class="preview-panel-body">
+          <div class="preview-content">Drop to fill container</div>
+        </div>
+      `;
+    }
+    
+    this.dropPreview.appendChild(innerPreview);
+    
+    // Fill the entire container
+    Object.assign(this.dropPreview.style, {
+      position: 'absolute',
+      left: '0',
+      top: '0',
+      width: '100%',
+      height: '100%',
+      pointerEvents: 'none',
+      zIndex: '9999'
+    });
+    
+    // Make inner preview fill the drop area with padding
+    Object.assign(innerPreview.style, {
+      position: 'absolute',
+      top: '8px',
+      left: '8px',
+      right: '8px',
+      bottom: '8px',
+      background: 'rgba(0, 204, 139, 0.1)',
+      border: '2px solid rgba(0, 204, 139, 0.6)',
+      borderRadius: '4px'
+    });
+    
+    this.container.appendChild(this.dropPreview);
+    
+    // Trigger animation
+    requestAnimationFrame(() => {
+      if (this.dropPreview) {
+        this.dropPreview.classList.add('active');
+      }
+    });
+  }
 
   private updateDropPreview(targetPanel: HTMLElement, dropZone: string): void {
     const rect = targetPanel.getBoundingClientRect();
@@ -787,6 +872,18 @@ export class BSPPanelManager {
     if (currentTargetPanel && currentDropZone && target) {
       console.log('Updating preview: moving', target.node.id, 'to', currentTargetPanel.dataset.panelId, currentDropZone);
       this.previewRoot = this.performMove(this.previewRoot, target.node.id, currentTargetPanel.dataset.panelId!, currentDropZone);
+    } else if (!currentTargetPanel && target) {
+      // When dragging over empty space, show the dragged panel filling the entire container
+      // Simply set the preview root to a single node (the dragged panel)
+      const draggedNode = this.findLeafNodeById(this.previewRoot, target.node.id);
+      if (draggedNode) {
+        this.previewRoot = new BSPNode({
+          id: draggedNode.id,
+          element: draggedNode.element,
+          isPinned: draggedNode.isPinned,
+          isCollapsed: draggedNode.isCollapsed
+        });
+      }
     }
     
     this.layout(true); // Call with preview mode
@@ -922,9 +1019,10 @@ export class BSPPanelManager {
   }
 
   private handleDrop(): void {
-    const { currentTargetPanel, currentDropZone } = this.activeDrag;
+    const { currentTargetPanel, currentDropZone, target } = this.activeDrag;
     
-    if (currentTargetPanel && currentDropZone) {
+    if ((currentTargetPanel && currentDropZone) || (!currentTargetPanel && target)) {
+      // Accept the preview as the new layout
       this.root = this.previewRoot;
 
       this.panels.clear();
@@ -969,7 +1067,7 @@ export class BSPPanelManager {
     this.layout();
   }
 
-  addPanel(): void {
+  addPanel(position: 'left' | 'right' | 'top' | 'bottom' = 'right'): string | null {
     // Find largest leaf node
     let largestLeaf: BSPNode | null = null;
     let maxArea = 0;
@@ -989,24 +1087,62 @@ export class BSPPanelManager {
     if (this.root) {
       findLargestLeaf(this.root);
       if (largestLeaf) {
-        // Prefer vertical split for wider panels
-        const direction = largestLeaf.rect!.width > largestLeaf.rect!.height ? 'vertical' : 'horizontal';
-        this.splitPanel(largestLeaf.id, direction);
+        // Determine split direction based on position
+        const isHorizontal = position === 'left' || position === 'right';
+        const direction = isHorizontal ? 'vertical' : 'horizontal';
+        return this.splitPanel(largestLeaf.id, direction, position);
       }
+    }
+    return null;
+  }
+
+  private togglePinPanel(panelId: string): void {
+    const panel = this.panels.get(panelId);
+    if (!panel) return;
+    
+    const { node, element } = panel;
+    node.isPinned = !node.isPinned;
+    
+    // Update visual state
+    const pinBtn = element.querySelector('[data-action="pin"]');
+    const pinIcon = pinBtn?.querySelector('.icon-pin') as HTMLElement;
+    const pinOffIcon = pinBtn?.querySelector('.icon-pin-off') as HTMLElement;
+    
+    if (node.isPinned) {
+      element.classList.add('is-pinned');
+      if (pinIcon) pinIcon.style.display = 'none';
+      if (pinOffIcon) pinOffIcon.style.display = 'block';
+      if (pinBtn) pinBtn.setAttribute('title', 'Unpin Panel');
+    } else {
+      element.classList.remove('is-pinned');
+      if (pinIcon) pinIcon.style.display = 'block';
+      if (pinOffIcon) pinOffIcon.style.display = 'none';
+      if (pinBtn) pinBtn.setAttribute('title', 'Pin Panel');
     }
   }
 
   updateFocusedPanelContent(title: string, content: string): void {
-    if (!this.focusedPanel) return;
+    let targetPanel = this.focusedPanel;
+    
+    // If no focused panel or focused panel is pinned, find an unpinned panel
+    if (!targetPanel || this.isPanelPinned(targetPanel)) {
+      targetPanel = this.findUnpinnedPanel();
+      if (!targetPanel) {
+        // All panels are pinned, nothing to update
+        return;
+      }
+      // Focus the unpinned panel we found
+      this.setFocusedPanel(targetPanel);
+    }
     
     // Update panel title
-    const panelTitle = this.focusedPanel.querySelector('.panel-title span');
+    const panelTitle = targetPanel.querySelector('.panel-title span');
     if (panelTitle) {
       panelTitle.textContent = title;
     }
     
     // Update panel content
-    const panelContent = this.focusedPanel.querySelector('.panel-content');
+    const panelContent = targetPanel.querySelector('.panel-content');
     if (panelContent) {
       // Create a code/text display
       const extension = title.split('.').pop()?.toLowerCase() || '';
@@ -1039,5 +1175,23 @@ export class BSPPanelManager {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  private isPanelPinned(panel: HTMLElement): boolean {
+    const panelId = panel.dataset.panelId;
+    if (!panelId) return false;
+    
+    const panelData = this.panels.get(panelId);
+    return panelData ? panelData.node.isPinned : false;
+  }
+
+  private findUnpinnedPanel(): HTMLElement | null {
+    // Find the first unpinned panel
+    for (const [id, panelData] of this.panels) {
+      if (!panelData.node.isPinned) {
+        return panelData.element;
+      }
+    }
+    return null;
   }
 }

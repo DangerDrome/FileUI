@@ -13,11 +13,6 @@ export const FIXED_PANELS = [
     isToolbar: true
   },
   {
-    id: "file-explorer-panel",
-    title: "Explorer",
-    isToolbar: false
-  },
-  {
     id: "footer-panel",
     title: "Terminal", 
     isToolbar: true

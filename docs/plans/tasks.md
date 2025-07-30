@@ -363,6 +363,86 @@ This modernization plan will bring the FileUI style guide up to current industry
 
 ---
 
+# FileUI v005 - Local Directory Reading Implementation
+
+## Task: Add Local Directory Reading to FileUI v005
+
+### Objective
+Integrate real file system browsing into the FileUI v005 file explorer panel, replacing the static HTML tree with dynamic directory contents from the Python server API.
+
+### Implementation Summary
+
+#### 1. Frontend Integration (panel-manager.ts) ✓
+- Imported `ServerFileSystem`, `FileItem`, `sortFiles`, and `getFileType` from filemanager.ts
+- Added `fileSystem` property initialized with server API endpoint
+- Added `currentPath` property to track navigation state
+- Replaced static HTML in `setupFileExplorerPanel` with dynamic content loading
+- Created `loadDirectoryContents` method to fetch and display files
+- Created `createTreeItem` method to generate file/folder HTML elements
+- Updated `setupFileExplorerInteractions` to handle directory navigation
+
+#### 2. Directory Navigation Features ✓
+- Implemented click-to-navigate for folders
+- Added parent directory button with up arrow icon
+- Display current path in header
+- Maintain selected state for clicked items
+- Update path display on navigation
+
+#### 3. File Type Detection ✓
+- Use existing `getFileType` function for VFX file categorization
+- Map file types to appropriate Lucide icons:
+  - Folders: folder icon
+  - 3D files: box icon
+  - Comp files: layers icon
+  - Image files: image icon
+  - Video files: film icon
+  - Project files: briefcase icon
+  - Code files: file-code icon
+  - JSON files: file-text icon
+
+#### 4. UI Enhancements ✓
+- Added loading indicator while fetching directory contents
+- Added error handling with user-friendly messages
+- Added file explorer header with path display
+- Styled header with flex layout for button and path
+- Made tree scrollable with overflow handling
+
+#### 5. Server Configuration ✓
+- Added `--root` command line argument to server.py
+- Store root directory as class variable in FileAPIHandler
+- Updated all file operations to use configurable root directory
+- Return relative paths instead of absolute paths in API responses
+- Maintain security with path validation
+
+### Key Technical Decisions
+- Used async/await for API calls
+- Clone and replace file explorer element to prevent duplicate event listeners
+- Lucide icons re-initialization after DOM updates
+- Maintained existing panel system integration
+
+### Usage
+```bash
+# Start server with custom root directory
+python server.py --root /path/to/project
+
+# Or use current directory (default)
+python server.py
+```
+
+### Files Modified
+1. `src/panel-manager.ts` - Added dynamic file loading
+2. `src/style.css` - Added styles for header, loading, and error states
+3. `server.py` - Added configurable root directory support
+
+### Next Steps
+- Add file preview in main panel when files are clicked
+- Implement file metadata display in properties panel
+- Add refresh button to reload current directory
+- Consider adding file search functionality
+- Add support for hidden files toggle
+
+---
+
 # FileUI v005 Development Tasks
 
 ## Task: Create v005 with TypeScript and Vite
@@ -462,3 +542,125 @@ The v005 implementation now properly replicates v003's functionality with:
 - Proper toolbar panels (header and action bar)
 - All markdown content and editing features
 - Maintains the exact layout and behavior of v003
+
+---
+
+## 2025-01-29 - Local Directory Reading Enhancement
+
+### Task Summary
+Enhanced the file explorer to properly read and display local directories with VFX-specific file type colors and metadata display.
+
+### Completed Enhancements
+
+1. **File Explorer Already Connected** ✓
+   - Discovery: File explorer was already using ServerFileSystem
+   - Already loading directories from Python server
+   - Navigation and parent directory features already implemented
+
+2. **VFX File Type Colors** ✓
+   - Added color styling for VFX file icons:
+     - 3D files (#f7b2ad) - Pink for .blend, .ma, .mb, .hip
+     - Comp files (#7ec4cf) - Light blue for .nk, .aep
+     - Image files (#ffe066) - Yellow for .exr, .dpx, .png
+     - Video files (#c3aed6) - Purple for .mov, .mp4
+     - Project files (#b5ead7) - Mint for project files
+   - Icons change color on hover for better visual feedback
+   - Selected files have brightened icons
+
+3. **Enhanced Properties Panel** ✓
+   - Shows real file metadata instead of placeholders
+   - File size with human-readable formatting (KB, MB, GB)
+   - Modified date with relative time ("2 hours ago", "3 days ago")
+   - Fetches additional metadata for VFX files via API
+   - Formats metadata keys nicely (snake_case → Title Case)
+
+4. **Server Configuration** ✓
+   - Server already supported `--root` parameter
+   - Usage: `python server.py --root ~/Projects/VFX --port 8000`
+   - Security checks prevent path traversal
+   - Shows serving directory on startup
+
+### Technical Implementation
+
+- **No over-engineering**: Used existing infrastructure
+- **Minimal changes**: Only added styling and metadata fetching
+- **Clean separation**: Frontend UI, Python file operations
+- **Ultra-thin philosophy**: Simple, focused enhancements
+
+### How to Use
+
+1. Start the Python server with your project directory:
+   ```bash
+   cd v005
+   python server.py --root /path/to/your/vfx/project
+   ```
+
+2. Start the Vite dev server:
+   ```bash
+   npm run dev
+   ```
+
+3. Browse files with VFX-specific colors and real metadata
+
+### Files Modified
+- `src/style.css` - Added VFX file type colors
+- `src/panel-manager.ts` - Enhanced metadata display
+- No server changes needed (already fully functional)
+
+---
+
+## 2025-01-29 - File Explorer Panel Resize Fix
+
+### Problem Analysis
+The file explorer panel extends beyond its boundaries when resizing. After examining the code, I've identified the following issues:
+
+1. **No Maximum Width Constraint During Active Resizing**: In `handleFileExplorerResize()` (line 1117), the panel width is only constrained by `maxWidth` when setting `this.fileExplorerWidth`, but the actual panel element isn't updated with this constraint during the resize operation.
+
+2. **Layout Method Timing**: The `layout()` method is called during resize, which recalculates all panel positions. However, during active resizing (`isResizingFileExplorer = true`), the file explorer panel's width is not being set (line 203-204 in layout() method).
+
+3. **Missing Real-time Width Update**: Unlike the footer resize which has `updatePanelsDuringResize()`, the file explorer resize relies solely on `layout()`, which skips width updates during active resizing.
+
+### Root Cause
+The main issue is in the `layout()` method at lines 202-205:
+```typescript
+// Set width only if not currently resizing
+if (!this.isResizingFileExplorer) {
+    fileExplorerPanel.element.style.width = `${this.fileExplorerWidth}px`;
+}
+```
+
+This prevents the width from being updated during resize, causing the panel to extend beyond its boundaries.
+
+### Solution Plan
+
+- [x] Remove the conditional check that prevents width updates during resize
+- [x] Add proper width constraint directly in the resize handler
+- [x] Ensure the main panel adjusts immediately during file explorer resize
+- [x] Test the resize behavior to confirm panels stay within boundaries
+
+### Implementation Steps
+
+1. Fix the `layout()` method to always set the file explorer width ✓
+2. Update `handleFileExplorerResize()` to directly update panel widths ✓
+3. Add immediate visual feedback during resize (similar to footer resize) ✓
+4. Ensure smooth transitions after resize completes ✓
+
+### Implementation Details
+
+1. **Removed Conditional Check in layout()**: The conditional `if (!this.isResizingFileExplorer)` was preventing width updates during resize. Now the file explorer width is always set.
+
+2. **Created updateFileExplorerResize()**: Added a dedicated method that immediately updates both the file explorer and main panel widths during resize operations, ensuring panels stay within their boundaries.
+
+3. **Modified handleFileExplorerResize()**: Instead of calling `layout()` which was skipping the width update, it now calls the new `updateFileExplorerResize()` method for immediate visual feedback.
+
+4. **Consistent with Footer Resize**: The file explorer resize now follows the same pattern as the footer resize, providing smooth real-time updates without gaps or overlaps.
+
+### Files Modified
+- `src/panel-manager.ts`: 
+  - Removed conditional width update in `layout()` method
+  - Added `updateFileExplorerResize()` method
+  - Updated `handleFileExplorerResize()` to use the new method
+  - Cleaned up `updatePanelsDuringResize()` to only update height for file explorer
+
+### Result
+The file explorer panel now properly respects its boundaries during resize operations. The panel width is constrained between 150px and 40% of the viewport width, and both the file explorer and main panel update smoothly in real-time during drag operations.

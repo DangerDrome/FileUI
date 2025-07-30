@@ -22,6 +22,8 @@ export class PanelManager {
   private propertiesWidth: number = 300;
   private isResizingProperties: boolean = false;
   private bspManager: BSPPanelManager | null = null;
+  private directoryHandles: Map<string, any> = new Map();
+  private fileHandles: Map<string, any> = new Map();
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -1164,8 +1166,37 @@ export class PanelManager {
     // No need for individual event listeners as they conflict with delegation
   }
 
-  private showDirectoryChooser(panelId: string): void {
-    // Create modal for directory selection
+  private async showDirectoryChooser(panelId: string): Promise<void> {
+    // Check if File System Access API is available
+    if (!('showDirectoryPicker' in window)) {
+      // Fallback to manual input modal
+      this.showManualDirectoryChooser(panelId);
+      return;
+    }
+
+    try {
+      // Use native file system picker
+      const dirHandle = await (window as any).showDirectoryPicker({
+        mode: 'read'
+      });
+
+      // Store the directory handle for later use
+      if (!this.directoryHandles) {
+        this.directoryHandles = new Map();
+      }
+      this.directoryHandles.set(panelId, dirHandle);
+
+      // Load the directory contents using the File System Access API
+      await this.loadDirectoryFromHandle(dirHandle, panelId);
+
+    } catch (error) {
+      // User cancelled or error occurred
+      console.log('Directory picker cancelled or error:', error);
+    }
+  }
+
+  private showManualDirectoryChooser(panelId: string): void {
+    // Fallback modal for browsers without File System Access API
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.innerHTML = `
@@ -1177,6 +1208,7 @@ export class PanelManager {
           </button>
         </div>
         <div class="modal-body">
+          <p class="text-sm mb-4">Your browser doesn't support native folder selection. Please use the server-based file browser or enter a path manually.</p>
           <div class="directory-input-group">
             <input type="text" class="directory-input" placeholder="Enter directory path" value="${this.currentPath}">
             <button class="btn btn-primary btn-sm">Open</button>
@@ -1251,5 +1283,337 @@ export class PanelManager {
 
   // Add a property to store current path
   private currentPath: string = '.';
+
+  private async loadDirectoryFromHandle(dirHandle: any, panelId: string): Promise<void> {
+    const treeElement = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"] .tree`) as HTMLElement;
+    if (!treeElement) return;
+
+    try {
+      // Show loading state
+      treeElement.innerHTML = '<div class="loading-indicator">Loading files...</div>';
+
+      // Get files from directory handle
+      const files: FileItem[] = [];
+      
+      for await (const entry of dirHandle.values()) {
+        const item: FileItem = {
+          name: entry.name,
+          path: entry.name, // For File System API, we use name as path
+          type: entry.kind === 'directory' ? 'directory' : 'file',
+          size: 0 // Size not available without reading file
+        };
+        
+        // Store handle for later use
+        if (!this.fileHandles) {
+          this.fileHandles = new Map();
+        }
+        this.fileHandles.set(`${panelId}:${entry.name}`, entry);
+        
+        files.push(item);
+      }
+
+      // Clear loading indicator
+      treeElement.innerHTML = '';
+
+      // Sort files (folders first, then by name)
+      const sortedFiles = sortFiles(files);
+
+      // Create tree items
+      sortedFiles.forEach(file => {
+        const treeItem = this.createNativeTreeItem(file, panelId, dirHandle);
+        treeElement.appendChild(treeItem);
+      });
+
+      // Update path display with directory name
+      const pathElement = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"] .file-explorer-path`);
+      if (pathElement) {
+        pathElement.textContent = dirHandle.name || 'Local Folder';
+      }
+
+      // Re-initialize Lucide icons after loading content
+      setTimeout(() => {
+        if ((window as any).lucide) {
+          (window as any).lucide.createIcons();
+        }
+      }, 10);
+
+    } catch (error) {
+      console.error('Error loading directory from handle:', error);
+      treeElement.innerHTML = `
+        <div class="error-message">
+          <i data-lucide="alert-circle" class="lucide"></i>
+          <span>Failed to load directory contents</span>
+        </div>
+      `;
+      
+      // Re-initialize Lucide icons for error state
+      setTimeout(() => {
+        if ((window as any).lucide) {
+          (window as any).lucide.createIcons();
+        }
+      }, 10);
+    }
+  }
+
+  private createNativeTreeItem(file: FileItem, panelId: string, parentHandle: any, level: number = 0): HTMLElement {
+    const treeItem = document.createElement('div');
+    treeItem.className = 'tree-item';
+    treeItem.setAttribute('role', 'treeitem');
+    treeItem.setAttribute('data-level', level.toString());
+    
+    const isDirectory = file.type === 'directory';
+    const fileType = isDirectory ? 'folder' : getFileType(file.name);
+    
+    // Get appropriate icon
+    let iconName = 'file';
+    if (isDirectory) {
+      iconName = 'folder';
+    } else if (fileType === 'file-3d') {
+      iconName = 'box';
+    } else if (fileType === 'file-comp') {
+      iconName = 'layers';
+    } else if (fileType === 'file-image') {
+      iconName = 'image';
+    } else if (fileType === 'file-video') {
+      iconName = 'film';
+    } else if (fileType === 'file-project') {
+      iconName = 'briefcase';
+    }
+    
+    treeItem.innerHTML = `
+      <div class="tree-item-content native-file" data-is-folder="${isDirectory}" data-file-name="${file.name}" data-file-type="${fileType}" data-panel-id="${panelId}" style="padding-left: ${20 + level * 20}px">
+        ${isDirectory ? `
+          <button class="tree-item-toggle" aria-label="Toggle node" data-expanded="false">
+            <i data-lucide="chevron-right" class="lucide chevron-icon"></i>
+          </button>
+        ` : '<div class="tree-item-spacer"></div>'}
+        <i data-lucide="${iconName}" class="lucide tree-item-icon" data-file-type="${fileType}"></i>
+        <span class="tree-item-label">${file.name}</span>
+      </div>
+      ${isDirectory ? '<div class="tree-item-children" style="display: none;"></div>' : ''}
+    `;
+
+    // Add event handlers for native file system
+    const treeItemContent = treeItem.querySelector('.tree-item-content') as HTMLElement;
+    if (treeItemContent) {
+      // Handle clicks
+      treeItemContent.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        
+        // Handle toggle button clicks
+        if ((e.target as HTMLElement).closest('.tree-item-toggle')) {
+          if (isDirectory) {
+            await this.toggleNativeFolder(treeItem, file.name, panelId);
+          }
+          return;
+        }
+
+        if (!isDirectory) {
+          // Handle file selection
+          this.selectFile(treeItem, panelId);
+        }
+      });
+
+      // Handle double clicks for opening files
+      treeItemContent.addEventListener('dblclick', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!isDirectory) {
+          const fileHandle = this.fileHandles?.get(`${panelId}:${file.name}`);
+          if (fileHandle) {
+            await this.openNativeFileInBSPPanel(fileHandle, file.name);
+          }
+        }
+      });
+    }
+    
+    return treeItem;
+  }
+
+  private async toggleNativeFolder(treeItem: HTMLElement, folderName: string, panelId: string): Promise<void> {
+    const toggleBtn = treeItem.querySelector('.tree-item-toggle') as HTMLButtonElement;
+    const childrenContainer = treeItem.querySelector('.tree-item-children') as HTMLElement;
+
+    if (!childrenContainer || !toggleBtn) return;
+
+    const isExpanded = toggleBtn.getAttribute('data-expanded') === 'true';
+
+    if (isExpanded) {
+      // Collapse folder
+      toggleBtn.setAttribute('data-expanded', 'false');
+      childrenContainer.style.display = 'none';
+    } else {
+      // Expand folder
+      toggleBtn.setAttribute('data-expanded', 'true');
+      childrenContainer.style.display = 'block';
+
+      // Load children if not already loaded
+      if (childrenContainer.children.length === 0) {
+        childrenContainer.innerHTML = '<div class="loading-indicator">Loading...</div>';
+
+        try {
+          const folderHandle = this.fileHandles?.get(`${panelId}:${folderName}`);
+          if (!folderHandle) {
+            throw new Error('Folder handle not found');
+          }
+
+          const files: FileItem[] = [];
+          
+          for await (const entry of folderHandle.values()) {
+            const item: FileItem = {
+              name: entry.name,
+              path: `${folderName}/${entry.name}`,
+              type: entry.kind === 'directory' ? 'directory' : 'file',
+              size: 0
+            };
+            
+            // Store handle for later use
+            this.fileHandles?.set(`${panelId}:${folderName}/${entry.name}`, entry);
+            
+            files.push(item);
+          }
+
+          childrenContainer.innerHTML = '';
+          const currentLevel = parseInt(treeItem.getAttribute('data-level') || '0');
+          const sortedFiles = sortFiles(files);
+          
+          sortedFiles.forEach(file => {
+            const childItem = this.createNativeTreeItem(file, panelId, folderHandle, currentLevel + 1);
+            childrenContainer.appendChild(childItem);
+          });
+          
+          // Re-initialize Lucide icons for newly loaded items
+          setTimeout(() => {
+            if ((window as any).lucide) {
+              (window as any).lucide.createIcons();
+            }
+          }, 10);
+
+        } catch (error) {
+          console.error('Error loading folder contents:', error);
+          childrenContainer.innerHTML = '<div class="error-message">Failed to load</div>';
+        }
+      }
+    }
+
+    // Re-initialize Lucide icons
+    setTimeout(() => {
+      if ((window as any).lucide) {
+        (window as any).lucide.createIcons();
+      }
+    }, 10);
+  }
+
+  private async openNativeFileInBSPPanel(fileHandle: any, fileName: string): Promise<void> {
+    if (!this.bspManager) return;
+
+    let targetPanelId: string | null = null;
+    
+    // Find an unpinned panel to use (excluding explorer panels)
+    const allPanels = document.querySelectorAll('.bsp-panel:not(.explorer-panel)');
+    
+    // First, try the focused panel if it's unpinned
+    const focusedPanel = document.querySelector('.bsp-panel.focused:not(.explorer-panel)');
+    if (focusedPanel) {
+      const isPinned = focusedPanel.classList.contains('is-pinned');
+      if (!isPinned) {
+        targetPanelId = focusedPanel.getAttribute('data-panel-id');
+      }
+    }
+    
+    // If focused panel is pinned or doesn't exist, find ANY unpinned panel
+    if (!targetPanelId) {
+      for (const panel of allPanels) {
+        const isPinned = panel.classList.contains('is-pinned');
+        if (!isPinned) {
+          targetPanelId = panel.getAttribute('data-panel-id');
+          break;
+        }
+      }
+    }
+
+    // Only create a new panel if all existing panels are pinned
+    if (!targetPanelId) {
+      targetPanelId = this.bspManager.addPanel('right');
+      if (!targetPanelId) return;
+    }
+
+    // Update panel content with file
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
+    if (!panel) {
+      console.error('Panel not found with ID:', targetPanelId);
+      return;
+    }
+
+    const header = panel.querySelector('.bsp-panel-header .panel-title span') as HTMLElement;
+    const content = panel.querySelector('.panel-content') as HTMLElement;
+    
+    if (header) {
+      header.textContent = fileName;
+    }
+
+    if (content) {
+      // Show loading state
+      content.innerHTML = '<div class="file-loading">Loading file...</div>';
+
+      try {
+        const fileType = getFileType(fileName);
+
+        // Read file content
+        const file = await fileHandle.getFile();
+
+        // Display file content based on type
+        if (fileType === 'file-image') {
+          // For images, create object URL
+          const url = URL.createObjectURL(file);
+          content.innerHTML = `<div class="file-preview image-preview">
+            <img src="${url}" alt="${fileName}" onload="URL.revokeObjectURL(this.src)" />
+          </div>`;
+        } else if (file.type.startsWith('text/') || fileType === 'file-code' || file.size < 1024 * 1024) {
+          // For text files or small files, read as text
+          const text = await file.text();
+          content.innerHTML = `<div class="file-content">
+            <pre class="file-text">${this.escapeHtml(text)}</pre>
+          </div>`;
+        } else {
+          // For other files, show info
+          content.innerHTML = `<div class="file-info">
+            <p>File: ${fileName}</p>
+            <p>Type: ${file.type || 'Unknown'}</p>
+            <p>Size: ${this.formatFileSize(file.size)}</p>
+            <p>Last Modified: ${new Date(file.lastModified).toLocaleString()}</p>
+          </div>`;
+        }
+
+        // Store file info in panel
+        panel.setAttribute('data-file-name', fileName);
+        panel.setAttribute('data-file-handle', 'native');
+        
+        // Focus the panel that now contains the file
+        this.focusPanel(panel);
+
+      } catch (error) {
+        console.error('Error loading file:', error);
+        content.innerHTML = `<div class="file-error">
+          <p>Failed to load file: ${fileName}</p>
+          <p class="error-message">${error}</p>
+        </div>`;
+      }
+    }
+  }
+
+  private formatFileSize(bytes: number): string {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let size = bytes;
+    let unitIndex = 0;
+    
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    
+    return `${size.toFixed(2)} ${units[unitIndex]}`;
+  }
 
 }

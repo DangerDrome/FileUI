@@ -1497,6 +1497,115 @@ button.properties-tab-vertical {
   opacity: 1;
 }
 
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 500;
+}
+
+.modal-body {
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+.directory-input-group {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.directory-input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  transition: all 0.2s ease;
+}
+
+.directory-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(0, 204, 139, 0.05);
+}
+
+.common-directories {
+  margin-top: var(--space-4);
+}
+
+.common-directories h4 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.directory-shortcut {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-bottom: var(--space-1);
+}
+
+/* File Info Display */
+.file-info {
+  padding: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.file-info p {
+  margin: 0 0 var(--space-2) 0;
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.file-info p:last-child {
+  border-bottom: none;
+}
+
+.choose-dir-btn {
+  padding: var(--space-1) var(--space-2);
+  min-width: auto;
+}
+
 /* Explorer Detail Panel */
 .explorer-detail-header {
   display: flex;

@@ -215,6 +215,7 @@
   --file-image: #ffe066;
   --file-video: #c3aed6;
   --file-project: #b5ead7;
+  --file-document: #ff9999;
   
   /* Error color */
   --color-danger: #ff5656;
@@ -1242,6 +1243,7 @@ button.properties-tab-vertical {
   overflow: hidden !important;
   contain: strict;  /* Strictest containment */
   box-sizing: border-box !important;
+  min-width: 240px !important; /* Minimum width for explorer panels */
   max-width: var(--vw-40) !important;  /* Enforce maximum width */
   /* Position and dimensions are controlled by JavaScript */
 }
@@ -1529,6 +1531,11 @@ button.properties-tab-vertical {
   opacity: var(--opacity-9);
 }
 
+.file-explorer-panel .tree-item-icon[data-file-type="file-pdf"] {
+  color: var(--file-document);
+  opacity: var(--opacity-9);
+}
+
 /* Selected state brightens icons */
 .file-explorer-panel .tree-item-content.selected .tree-item-icon {
   opacity: var(--opacity-full);
@@ -1554,6 +1561,10 @@ button.properties-tab-vertical {
 
 .file-explorer-panel .tree-item-content[data-file-type="file-project"]:hover .tree-item-label {
   color: var(--file-project);
+}
+
+.file-explorer-panel .tree-item-content[data-file-type="file-pdf"]:hover .tree-item-label {
+  color: var(--file-document);
 }
 
 /* Directory Chooser Modal */
@@ -1991,6 +2002,63 @@ button.properties-tab-vertical {
   flex-shrink: 0 !important;
 }
 
+/* Panel breadcrumb sub-header - only for file panels */
+.panel-breadcrumb {
+  height: var(--size-24);
+  min-height: var(--size-24);
+  padding: var(--spacing-4) var(--spacing-12);
+  padding-left: var(--spacing-24);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: var(--opacity-3) !important;
+  transition: opacity var(--transition-fast);
+}
+
+/* Brighten breadcrumbs when panel is focused */
+.bsp-panel.focused .panel-breadcrumb {
+  opacity: var(--opacity-6) !important;
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.breadcrumb-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.breadcrumb-link {
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.breadcrumb-link:hover {
+  color: var(--text-primary);
+}
+
+.breadcrumb-current {
+  color: var(--text-primary);
+}
+
+.breadcrumb-separator {
+  opacity: var(--opacity-5);
+  flex-shrink: 0;
+  margin: 0 var(--spacing-2);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
 .bsp-panel .panel-title {
   font-size: var(--font-size-13) !important; /* Slightly larger for better readability */
   color: var(--color-gray-light) !important;
@@ -2198,10 +2266,19 @@ button.properties-tab-vertical {
   height: 16px !important;
   min-width: 16px !important;
   min-height: 16px !important;
+  opacity: var(--opacity-full) !important; /* Keep icons bright when collapsed */
+  color: var(--text-primary) !important;
 }
 
-/* Center panel title content when collapsed */
-.bsp-panel.is-collapsed .panel-title {
+/* For horizontally collapsed panels (parent splits horizontally), align icon to the left */
+.bsp-panel.is-collapsed[data-parent-direction="horizontal"] .panel-title {
+  justify-content: flex-start !important;
+  text-align: left !important;
+  padding-left: var(--spacing-8) !important;
+}
+
+/* For vertically collapsed panels (parent splits vertically), center the icon */
+.bsp-panel.is-collapsed[data-parent-direction="vertical"] .panel-title {
   justify-content: center !important;
   text-align: center !important;
 }
@@ -2268,6 +2345,11 @@ button.properties-tab-vertical {
   display: none !important;
 }
 
+/* Hide breadcrumb when collapsed */
+.is-collapsed .panel-breadcrumb {
+  display: none !important;
+}
+
 /* Ensure the main icon is centered and visible */
 .is-collapsed .panel-title {
   display: flex !important;
@@ -2277,10 +2359,19 @@ button.properties-tab-vertical {
   height: 100% !important;
 }
 
+/* Ensure terminal icon is visible when collapsed */
+.bsp-panel[data-panel-type="terminal"].is-collapsed .panel-title .lucide[data-lucide="terminal"] {
+  display: block !important;
+  opacity: var(--opacity-full) !important;
+  color: var(--text-primary) !important;
+}
+
 .is-collapsed .panel-title .lucide:first-child,
 .is-collapsed .panel-title i:first-child {
   display: block !important;
   margin: 0 !important;
+  opacity: var(--opacity-full) !important; /* Keep icons bright when collapsed */
+  color: var(--text-primary) !important;
 }
 
 /* Pinned panel styles - no background color change */
@@ -2604,6 +2695,11 @@ button.properties-tab-vertical {
   opacity: var(--opacity-9);
 }
 
+.bsp-panel .tree-item-icon[data-file-type="file-pdf"] {
+  color: var(--file-document);
+  opacity: var(--opacity-9);
+}
+
 /* Hover states for VFX files */
 .bsp-panel .tree-item-content[data-file-type="file-3d"]:hover .tree-item-label {
   color: var(--file-3d);
@@ -2623,6 +2719,10 @@ button.properties-tab-vertical {
 
 .bsp-panel .tree-item-content[data-file-type="file-project"]:hover .tree-item-label {
   color: var(--file-project);
+}
+
+.bsp-panel .tree-item-content[data-file-type="file-pdf"]:hover .tree-item-label {
+  color: var(--file-document);
 }
 
 .file-header {
@@ -2743,6 +2843,18 @@ body.is-dragging {
 
 .bsp-panel .file-preview.image-preview {
   padding: var(--spacing-0);
+}
+
+.bsp-panel .file-preview.pdf-preview {
+  padding: var(--spacing-0);
+  height: var(--percent-100);
+}
+
+.bsp-panel .file-preview.pdf-preview iframe {
+  width: var(--percent-100);
+  height: var(--percent-100);
+  border: none;
+  background: var(--bg-primary);
 }
 
 .bsp-panel .file-preview.image-preview img {

@@ -134,6 +134,14 @@ export class PanelManager {
           content.innerHTML = `<div class="file-content markdown-content">
             ${renderedHtml}
           </div>`;
+        } else if (fileType === 'file-pdf') {
+          content.innerHTML = `<div class="file-preview pdf-preview">
+            <iframe src="http://localhost:8001/api/file?path=${encodeURIComponent(source)}" 
+                    width="100%" 
+                    height="100%" 
+                    frameborder="0">
+            </iframe>
+          </div>`;
         } else {
           const fs = new ServerFileSystem('http://localhost:8001/api');
           const fileContent = await fs.readFile(source);
@@ -160,6 +168,16 @@ export class PanelManager {
           const renderedHtml = this.md.render(text);
           content.innerHTML = `<div class="file-content markdown-content">
             ${renderedHtml}
+          </div>`;
+        } else if (fileType === 'file-pdf') {
+          const url = URL.createObjectURL(file);
+          content.innerHTML = `<div class="file-preview pdf-preview">
+            <iframe src="${url}" 
+                    width="100%" 
+                    height="100%" 
+                    frameborder="0"
+                    onload="URL.revokeObjectURL('${url}')">
+            </iframe>
           </div>`;
         } else if (file.type.startsWith('text/') || fileType === 'file-code' || file.size < 1024 * 1024) {
           const text = await file.text();
@@ -267,7 +285,7 @@ export class PanelManager {
   }
 
   private layout(): void {
-    const headerHeight = 48;
+    const headerHeight = 64; // Further increased header height
     const toolbarWidth = 48; // Both left and right toolbars
 
     // Use viewport dimensions for full width
@@ -867,17 +885,27 @@ export class PanelManager {
       // Set the split ratio - root should now be the parent containing main and terminal
       const newRoot = this.bspManager.getRoot();
       if (newRoot && newRoot.direction === 'horizontal') {
-        console.log('Setting terminal split ratio to 0.8');
-        newRoot.split = 0.8; // 80% for main content, 20% for terminal
+        console.log('Setting terminal split ratio for collapsed state');
+        // Calculate ratio for collapsed terminal (48px height)
+        const viewportHeight = window.innerHeight - 64; // minus header
+        const collapsedRatio = (viewportHeight - 48) / viewportHeight;
+        newRoot.split = collapsedRatio; // Most space for content, 48px for collapsed terminal
       } else {
         console.log('Root direction not horizontal or root not found:', newRoot);
       }
       
-      // Add terminal content to the bottom panel and pin it
+      // Add terminal content to the bottom panel, pin it, and collapse it
       setTimeout(() => {
         console.log('Setting up terminal content...');
         this.setupTerminalContent(terminalPanelId);
         this.pinPanel(terminalPanelId);
+        
+        // Mark the terminal as collapsed immediately
+        const panel = this.bspManager.panels.get(terminalPanelId);
+        if (panel) {
+          panel.node.isCollapsed = true;
+          this.bspManager.updateCollapseVisualState(terminalPanelId, true);
+        }
       }, 100);
     }
 
@@ -890,13 +918,13 @@ export class PanelManager {
       console.log('Main content panel ID after terminal split:', mainContentPanelId);
     }
 
-    // Split the main content vertically to add properties on right (75% content, 25% properties)  
+    // Split the main content vertically to add properties on right (95% content, 5% for collapsed properties)  
     console.log('Splitting main content vertically for properties...');
     const propertiesPanelId = this.bspManager.splitPanel(mainContentPanelId, 'vertical', 'right');
     console.log('Properties panel creation result:', propertiesPanelId);
     
     if (propertiesPanelId) {
-      // Find the vertical split node and set its ratio
+      // Find the vertical split node and set its ratio for collapsed state
       const currentRoot = this.bspManager.getRoot();
       console.log('Root after properties split:', currentRoot);
       if (currentRoot && currentRoot.children.length > 0) {
@@ -904,8 +932,11 @@ export class PanelManager {
         const verticalSplit = currentRoot.children[0];
         console.log('First child (should be vertical split):', verticalSplit);
         if (verticalSplit && verticalSplit.direction === 'vertical') {
-          console.log('Setting properties split ratio to 0.75');
-          verticalSplit.split = 0.75; // 75% for content, 25% for properties
+          console.log('Setting properties split ratio for collapsed state');
+          // Set ratio so properties panel starts at collapsed width
+          const viewportWidth = window.innerWidth - 48 - 48; // minus both toolbars
+          const collapsedRatio = (viewportWidth - 48) / viewportWidth; // 48px for collapsed panel
+          verticalSplit.split = collapsedRatio;
         } else {
           console.log('First child not a vertical split or not found');
         }
@@ -913,11 +944,18 @@ export class PanelManager {
         console.log('No children found in current root');
       }
       
-      // Add properties content to the right panel and pin it
+      // Add properties content to the right panel, pin it, and mark as collapsed
       setTimeout(() => {
         console.log('Setting up properties content...');
         this.setupPropertiesContent(propertiesPanelId);
         this.pinPanel(propertiesPanelId);
+        
+        // Mark the panel as collapsed immediately
+        const panel = this.bspManager.panels.get(propertiesPanelId);
+        if (panel) {
+          panel.node.isCollapsed = true;
+          this.bspManager.updateCollapseVisualState(propertiesPanelId, true);
+        }
       }, 100);
     }
 
@@ -937,6 +975,12 @@ export class PanelManager {
       });
     }, 200);
     
+    // Create an explorer panel on startup
+    setTimeout(() => {
+      console.log('Creating default explorer panel...');
+      this.createExplorerBSPPanel();
+    }, 600);
+    
     console.log('=== BSP Layout Complete ===');
   }
 
@@ -947,6 +991,33 @@ export class PanelManager {
     // Add a new panel on the left side
     const newPanelId = this.bspManager.addPanel('left');
     if (!newPanelId) return;
+    
+    // Set the explorer panel to 15vw on initialization
+    // This is the default initialization - saved layouts will override this
+    // Future: Check for saved layout preferences before setting default
+    const panelInfo = this.bspManager.panels.get(newPanelId);
+    if (panelInfo && panelInfo.node.parent && panelInfo.node.parent.direction === 'vertical') {
+      // For left panel, we want 15% for explorer, 85% for content
+      // Check if this is the first (left) child
+      const parent = panelInfo.node.parent;
+      const isFirstChild = parent.children[0].id === newPanelId;
+      
+      // Default layout configuration - can be overridden by saved layouts
+      const explorerDefaultRatio = 0.15; // 15% width
+      
+      if (isFirstChild) {
+        parent.split = explorerDefaultRatio; // 15% for explorer panel
+      } else {
+        parent.split = 1 - explorerDefaultRatio; // 85% if it's the second child
+      }
+      
+      // Mark this as a user-resizable split (for future layout saving)
+      parent.userResizable = true;
+      parent.defaultSplit = parent.split; // Store default for reset functionality
+      
+      // Re-layout to apply the new split ratio
+      this.bspManager.layout();
+    }
     
     // Wait for the panel to be created and then update its content
     setTimeout(() => {
@@ -1074,6 +1145,8 @@ export class PanelManager {
       iconName = 'film';
     } else if (fileType === 'file-project') {
       iconName = 'briefcase';
+    } else if (fileType === 'file-pdf') {
+      iconName = 'file-text';
     }
     
     treeItem.innerHTML = `
@@ -1264,6 +1337,9 @@ export class PanelManager {
       panel.setAttribute('data-file-path', path);
       panel.setAttribute('data-file-name', fileName);
       
+      // Add or update breadcrumb for file panels
+      this.addOrUpdateFileBreadcrumb(panel as HTMLElement, path);
+      
       // Focus the panel that now contains the file
       this.focusPanel(panel);
       
@@ -1279,6 +1355,7 @@ export class PanelManager {
       case 'file-image': return 'image';
       case 'file-video': return 'film';
       case 'file-project': return 'folder-open';
+      case 'file-pdf': return 'file-text';
       case 'javascript':
       case 'typescript': return 'file-code';
       case 'json': return 'file-json';
@@ -1294,6 +1371,7 @@ export class PanelManager {
       case 'file-image': return 'var(--file-image)';
       case 'file-video': return 'var(--file-video)';
       case 'file-project': return 'var(--file-project)';
+      case 'file-pdf': return 'var(--file-document)';
       default: return 'var(--color-white-rgba-70)';
     }
   }
@@ -1525,6 +1603,8 @@ export class PanelManager {
       iconName = 'film';
     } else if (fileType === 'file-project') {
       iconName = 'briefcase';
+    } else if (fileType === 'file-pdf') {
+      iconName = 'file-text';
     }
     
     treeItem.innerHTML = `
@@ -1680,6 +1760,9 @@ export class PanelManager {
       panel.setAttribute('data-file-name', fileName);
       panel.setAttribute('data-file-handle', 'native');
       
+      // Add or update breadcrumb for file panels - for native files, just show the filename
+      this.addOrUpdateFileBreadcrumb(panel as HTMLElement, fileName);
+      
       // Focus the panel that now contains the file
       this.focusPanel(panel);
       
@@ -1701,11 +1784,77 @@ export class PanelManager {
     return `${size.toFixed(2)} ${units[unitIndex]}`;
   }
 
+  private addOrUpdateFileBreadcrumb(panel: HTMLElement, path: string): void {
+    // First check if breadcrumb exists, if not add it
+    let breadcrumbContainer = panel.querySelector('.panel-breadcrumb');
+    if (!breadcrumbContainer) {
+      // Insert breadcrumb after panel header
+      const panelHeader = panel.querySelector('.panel-header');
+      if (panelHeader) {
+        const breadcrumbHTML = `
+          <div class="panel-breadcrumb">
+            <nav class="breadcrumb-nav"></nav>
+          </div>
+        `;
+        panelHeader.insertAdjacentHTML('afterend', breadcrumbHTML);
+        breadcrumbContainer = panel.querySelector('.panel-breadcrumb');
+      }
+    }
+    
+    const breadcrumbNav = breadcrumbContainer?.querySelector('.breadcrumb-nav');
+    if (!breadcrumbNav) return;
+    
+    // Split path into segments, keeping the full hierarchy
+    const segments = path.split('/').filter(s => s);
+    
+    // Create breadcrumb HTML with full hierarchy
+    let breadcrumbHTML = '';
+    let currentPath = '';
+    
+    // Always start with a forward slash
+    breadcrumbHTML += '<span class="breadcrumb-separator">/</span>';
+    
+    // If path is absolute, set currentPath to root
+    if (path.startsWith('/')) {
+      currentPath = '/';
+    }
+    
+    segments.forEach((segment, index) => {
+      currentPath += (currentPath === '/' ? '' : '/') + segment;
+      const isLast = index === segments.length - 1;
+      
+      if (isLast) {
+        breadcrumbHTML += `<span class="breadcrumb-item breadcrumb-current">${segment}</span>`;
+      } else {
+        breadcrumbHTML += `
+          <span class="breadcrumb-item breadcrumb-link" data-path="${currentPath}">${segment}</span>
+          <span class="breadcrumb-separator">/</span>
+        `;
+      }
+    });
+    
+    breadcrumbNav.innerHTML = breadcrumbHTML;
+    
+    // Add click handlers for breadcrumb navigation
+    breadcrumbNav.querySelectorAll('.breadcrumb-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const targetPath = (e.target as HTMLElement).dataset.path;
+        if (targetPath) {
+          // TODO: Navigate to the clicked path in the file explorer
+          console.log('Navigate to:', targetPath);
+        }
+      });
+    });
+    
+    // Re-initialize Lucide icons for separators
+    this.initializeLucideIcons(10);
+  }
+
   private addHeaderToPanel(panel: HTMLElement, title: string): void {
     const panelBody = panel.querySelector('.panel-body');
     if (!panelBody) return;
 
-    // Create header HTML
+    // Create header HTML with breadcrumb sub-header
     const headerHTML = `
       <div class="panel-header">
         <div class="panel-title">
@@ -1739,6 +1888,9 @@ export class PanelManager {
   private setupTerminalContent(panelId: string): void {
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
     if (!panel) return;
+
+    // Mark this as a terminal panel
+    panel.setAttribute('data-panel-type', 'terminal');
 
     // Update panel title with icon
     const panelTitle = panel.querySelector('.panel-title span');
@@ -1796,6 +1948,9 @@ export class PanelManager {
   private setupPropertiesContent(panelId: string): void {
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
     if (!panel) return;
+
+    // Mark this as a properties panel
+    panel.setAttribute('data-panel-type', 'properties');
 
     // Update panel title with icon
     const panelTitle = panel.querySelector('.panel-title span');

@@ -14,11 +14,11 @@ export interface BSPConfig {
 
 export const BSP_CONFIG: BSPConfig = {
   DEFAULT_SPLIT: 0.5,
-  PANEL_MIN_WIDTH: 120,
+  PANEL_MIN_WIDTH: 240, // Increased to match explorer minimum width
   PANEL_MIN_HEIGHT: 80,
-  RESIZER_THICKNESS: 2, // Gap between panels - visual size
+  RESIZER_THICKNESS: 1, // Reduced gap between panels - visual size
   COLLAPSED_SIZE: 48, // Panel header height for snap collapse
-  HEADER_HEIGHT: 48
+  HEADER_HEIGHT: 64 // Further increased to match app header
 };
 
 // BSP Node class for panel tree structure
@@ -34,6 +34,8 @@ export class BSPNode {
   isCollapsed: boolean;
   isMainContent: boolean;
   isToolbar: boolean;
+  userResizable?: boolean; // For layout saving - tracks if user can resize
+  defaultSplit?: number; // For layout reset - stores initial split ratio
 
   constructor(options: Partial<BSPNode> = {}) {
     this.id = options.id || crypto.randomUUID();
@@ -46,6 +48,8 @@ export class BSPNode {
     this.isCollapsed = options.isCollapsed || false;
     this.isMainContent = options.isMainContent || false;
     this.isToolbar = options.isToolbar || false;
+    this.userResizable = options.userResizable;
+    this.defaultSplit = options.defaultSplit;
   }
 
   isLeaf(): boolean {
@@ -725,6 +729,11 @@ export class BSPPanelManager {
     if (node.isLeaf()) {
       // Position panel element
       if (node.element) {
+        // Set parent direction attribute for collapsed state styling
+        if (node.parent) {
+          node.element.dataset.parentDirection = node.parent.direction || '';
+        }
+        
         // Don't reposition the dragged element during preview mode (it follows mouse)
         const isDraggedElement = isPreview && this.activeDrag?.target?.element === node.element;
         
@@ -895,6 +904,7 @@ export class BSPPanelManager {
     const resizer = document.createElement('div');
     resizer.className = `bsp-resizer bsp-resizer-${direction}`;
     resizer.dataset.nodeId = nodeId;
+    resizer.dataset.direction = direction;
     
     Object.assign(resizer.style, {
       position: 'absolute',
@@ -1390,10 +1400,15 @@ export class BSPPanelManager {
     const panel = this.panels.get(panelId);
     if (!panel) return;
     
-    const { node } = panel;
+    const { node, element } = panel;
     node.isCollapsed = !node.isCollapsed;
     
     console.log(`Panel ${panelId} collapsed state: ${node.isCollapsed}, isBottomPanel: ${node.isBottomPanel()}`);
+    
+    // Add data attribute for parent's split direction
+    if (node.parent) {
+      element.dataset.parentDirection = node.parent.direction || '';
+    }
     
     // Update visual state using helper method
     this.updateCollapseVisualState(panelId, node.isCollapsed);

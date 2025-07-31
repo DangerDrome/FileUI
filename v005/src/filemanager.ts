@@ -79,6 +79,7 @@ export class ServerFileSystem implements FileSystemAPI {
         { name: 'README.md', path: 'README.md', type: 'file', size: 2048 },
         { name: 'shot_001.nk', path: 'shot_001.nk', type: 'file', size: 512000 },
         { name: 'animation.ma', path: 'animation.ma', type: 'file', size: 768000 },
+        { name: 'project_brief.pdf', path: 'project_brief.pdf', type: 'file', size: 1024000 },
       ];
     } else if (path === 'scenes') {
       return [
@@ -135,6 +136,11 @@ export function getFileType(filename: string): string {
   // Audio files
   if (['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg', 'wma', 'aiff', 'ape', 'opus'].includes(ext)) {
     return 'file-audio';
+  }
+  
+  // PDF files
+  if (ext === 'pdf') {
+    return 'file-pdf';
   }
   
   // Code files

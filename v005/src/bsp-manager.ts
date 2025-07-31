@@ -16,7 +16,7 @@ export const BSP_CONFIG: BSPConfig = {
   DEFAULT_SPLIT: 0.5,
   PANEL_MIN_WIDTH: 120,
   PANEL_MIN_HEIGHT: 80,
-  RESIZER_THICKNESS: 12, // Gap between panels
+  RESIZER_THICKNESS: 4, // Gap between panels
   COLLAPSED_SIZE: 24,
   HEADER_HEIGHT: 24
 };
@@ -211,7 +211,7 @@ export class BSPPanelManager {
     // Handle panel dragging for reordering (v003 style)
     this.container.addEventListener('mousedown', (e) => {
       const header = (e.target as HTMLElement).closest('.panel-header');
-      if (header && !((e.target as HTMLElement).closest('.panel-action-btn'))) {
+      if (header && !((e.target as HTMLElement).closest('.panel-action-btn')) && !((e.target as HTMLElement).closest('.folder-icon-btn'))) {
         const panel = header.closest('.bsp-panel') as HTMLElement;
         if (panel) {
           const panelId = panel.dataset.panelId;
@@ -415,6 +415,14 @@ export class BSPPanelManager {
     this.setFocusedPanel(newPanel.element);
     
     this.layout();
+    
+    // Initialize lucide icons for the new panel
+    setTimeout(() => {
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+      }
+    }, 10);
+    
     return newPanel.id;
   }
 
@@ -491,8 +499,8 @@ export class BSPPanelManager {
         </div>
       </div>
       <div class="panel-body">
-        <div class="panel-content">
-          <p>Panel ${panelNumber} content</p>
+        <div class="panel-content" style="display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
+          <i data-lucide="library" class="lucide" style="width: 64px; height: 64px;"></i>
         </div>
       </div>
     `;

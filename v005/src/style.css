@@ -247,9 +247,9 @@ html, body {
   padding: var(--spacing-0);
 }
 
-/* Global Scrollbar Styles - Minimal and only on hover */
+/* Global Scrollbar Styles - Ultra minimal */
 * {
-  scrollbar-width: var(--scrollbar-width);
+  scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }
 
@@ -257,10 +257,16 @@ html, body {
   scrollbar-color: var(--color-white-opacity-10) transparent;
 }
 
-/* Webkit Scrollbars - Minimal and hover-only */
+
+/* Webkit Scrollbars - Ultra thin and hover-only */
+::-webkit-scrollbar {
+  width: 2px !important;
+  height: 2px !important;
+}
+
 *::-webkit-scrollbar {
-  width: var(--size-6);
-  height: var(--size-6);
+  width: 2px !important;
+  height: 2px !important;
 }
 
 *::-webkit-scrollbar-track {
@@ -279,6 +285,41 @@ html, body {
 
 *::-webkit-scrollbar-thumb:hover {
   background: var(--color-white-opacity-20);
+}
+
+/* NUKE ALL SCROLLBAR BUTTONS FROM ORBIT */
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:single-button,
+::-webkit-scrollbar-button:double-button,
+::-webkit-scrollbar-button:horizontal,
+::-webkit-scrollbar-button:vertical,
+::-webkit-scrollbar-button:decrement,
+::-webkit-scrollbar-button:increment,
+::-webkit-scrollbar-button:start,
+::-webkit-scrollbar-button:end,
+::-webkit-scrollbar-button:horizontal:decrement,
+::-webkit-scrollbar-button:horizontal:increment,
+::-webkit-scrollbar-button:vertical:decrement,
+::-webkit-scrollbar-button:vertical:increment,
+::-webkit-scrollbar-button:horizontal:decrement:start,
+::-webkit-scrollbar-button:horizontal:decrement:end,
+::-webkit-scrollbar-button:horizontal:increment:start,
+::-webkit-scrollbar-button:horizontal:increment:end,
+::-webkit-scrollbar-button:vertical:decrement:start,
+::-webkit-scrollbar-button:vertical:decrement:end,
+::-webkit-scrollbar-button:vertical:increment:start,
+::-webkit-scrollbar-button:vertical:increment:end {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: none !important;
+  border: none !important;
+}
+
+/* Also hide corners and track pieces */
+::-webkit-scrollbar-corner,
+::-webkit-scrollbar-track-piece {
+  display: none !important;
 }
 
 /* Hide scrollbars during drag operations */
@@ -2070,9 +2111,9 @@ button.properties-tab-vertical {
 }
 
 .bsp-panel .panel-action-btn {
-  width: var(--size-32) !important; /* Increased for padding */
-  height: var(--size-32) !important; /* Increased for padding */
-  padding: var(--spacing-6) !important; /* Added padding */
+  width: var(--size-24) !important; /* Reduced size */
+  height: var(--size-24) !important; /* Reduced size */
+  padding: var(--spacing-4) !important; /* Reduced padding */
   background: transparent !important;
   border: none !important;
   color: var(--color-gray-medium) !important;
@@ -2090,8 +2131,8 @@ button.properties-tab-vertical {
 }
 
 .bsp-panel .panel-action-btn .lucide {
-  width: var(--size-20) !important; /* UNIVERSAL icon size */
-  height: var(--size-20) !important; /* UNIVERSAL icon size */
+  width: var(--size-16) !important; /* Smaller icon size */
+  height: var(--size-16) !important; /* Smaller icon size */
   stroke-width: var(--stroke-width-15) !important; /* Matching other icons */
 }
 
@@ -2117,13 +2158,13 @@ button.properties-tab-vertical {
 
 .bsp-resizer-horizontal {
   cursor: ns-resize;
-  height: var(--spacing-12); /* Gap between panels */
+  height: var(--spacing-4); /* Gap between panels */
   background: var(--color-black-main); /* Match main background to show gap */
 }
 
 .bsp-resizer-vertical {
   cursor: ew-resize;
-  width: var(--spacing-12); /* Gap between panels */
+  width: var(--spacing-4); /* Gap between panels */
   background: var(--color-black-main); /* Match main background to show gap */
 }
 
@@ -2169,16 +2210,44 @@ button.properties-tab-vertical {
   box-shadow: none !important;
 }
 
-/* Bold text for focused panel */
-.bsp-panel.focused .panel-title {
-  font-weight: var(--font-weight-700) !important;
-  color: var(--accent) !important;
+/* Normal text for focused panel, dim text for unfocused */
+.bsp-panel .panel-title {
+  opacity: var(--opacity-2);
+  transition: opacity var(--transition-fast);
 }
 
-/* Pinned panel styles */
-.bsp-panel.is-pinned .panel-header {
-  background: var(--color-white-opacity-2) !important;
+.bsp-panel.focused .panel-title {
+  opacity: var(--opacity-10);
 }
+
+/* Panel content is NEVER dimmed, regardless of focus state (except empty panels) */
+.bsp-panel .panel-content:not(:has(.lucide-library)),
+.bsp-panel .panel-content:not(:has(.lucide-library)) * {
+  opacity: 1 !important;
+}
+
+/* Explorer panels are never dimmed */
+.bsp-panel[data-panel-type="explorer"] .panel-title,
+.bsp-panel[data-panel-type="explorer"] .tree-item-icon,
+.bsp-panel[data-panel-type="explorer"] .tree-item-label,
+.bsp-panel[data-panel-type="explorer"] .tree-item-toggle,
+.bsp-panel[data-panel-type="explorer"] .file-explorer-path,
+.bsp-panel[data-panel-type="explorer"] .tree-item-content,
+.bsp-panel[data-panel-type="explorer"] * {
+  opacity: 1 !important;
+}
+
+/* Folder icon button in panel header */
+.folder-icon-btn {
+  opacity: var(--opacity-8);
+  transition: opacity var(--transition-fast);
+}
+
+.folder-icon-btn:hover {
+  opacity: var(--opacity-full);
+}
+
+/* Pinned panel styles - no background color change */
 
 .bsp-panel.is-pinned [data-action="pin"] {
   color: var(--accent) !important;
@@ -2415,7 +2484,7 @@ button.properties-tab-vertical {
   background: none;
   border: none;
   color: var(--text-secondary);
-  opacity: var(--opacity-5);
+  opacity: var(--opacity-7);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -2438,7 +2507,7 @@ button.properties-tab-vertical {
   color: var(--text-secondary);
   width: var(--size-20);
   height: var(--size-20);
-  opacity: var(--opacity-7);
+  opacity: var(--opacity-8);
   flex-shrink: 0;
   stroke-width: var(--stroke-width-15);
 }

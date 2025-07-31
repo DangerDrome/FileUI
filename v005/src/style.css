@@ -593,7 +593,7 @@ body.no-transition * {
 
 /* Left toolbar vertical menu bar styling */
 .action-bar-panel .menu-bar-vertical {
-  background: var(--bg-layer-2); /* Same as horizontal menu bar */
+  background: var(--color-black-main); /* Darker background */
   border-radius: var(--border-radius-0); /* No rounded corners for edge panels */
   margin: var(--spacing-0); /* Remove default margin */
   height: var(--percent-100);
@@ -667,7 +667,7 @@ body.no-transition * {
   height: var(--percent-100);
   display: flex;
   align-items: center;
-  background: var(--bg-layer-2) !important; /* Same dark background as menu bar */
+  background: var(--color-black-main) !important; /* Darker background */
 }
 
 .header-panel .header-content {
@@ -676,11 +676,11 @@ body.no-transition * {
   height: var(--percent-100);
   width: var(--percent-100);
   padding: var(--spacing-0) var(--space-2);
-  background: var(--bg-layer-2);
+  background: var(--color-black-main);
 }
 
 .header-panel .menu-bar {
-  background: var(--bg-layer-2); /* Same as StyleUI default */
+  background: var(--color-black-main); /* Darker background */
   padding: var(--spacing-0) var(--space-2); /* Reduced vertical padding */
   height: var(--percent-100);
   margin-bottom: var(--spacing-0); /* Remove default margin for toolbar */
@@ -709,7 +709,7 @@ body.no-transition * {
   gap: var(--space-3);
   margin-left: auto;
   padding: var(--spacing-0); /* No padding */
-  background: var(--bg-layer-2); /* Same dark background as menu bar */
+  background: var(--color-black-main); /* Same dark background as menu bar */
   height: var(--percent-100);
 }
 
@@ -775,7 +775,7 @@ body.no-transition * {
 
 /* Active state for toolbar buttons */
 .action-bar-panel .btn.active {
-  background: var(--bg-layer-2);
+  background: var(--color-black-main);
   color: var(--accent);
 }
 
@@ -890,7 +890,7 @@ body.no-transition * {
 }
 
 .file-item.selected {
-  background: var(--bg-layer-2);
+  background: var(--color-black-main);
   color: var(--accent);
 }
 
@@ -925,42 +925,13 @@ body.no-transition * {
   color: var(--file-project);
 }
 
-/* Footer Panel - Terminal */
-.footer-panel {
-  min-height: var(--size-120);
-  transition: height var(--transition-cubic-out);
+/* BSP Terminal Panel Styles */
+.bsp-panel[data-panel-type="terminal"] .terminal-container {
+  height: 100%;
 }
 
-.footer-panel.footer-collapsed {
-  min-height: var(--size-48);
-}
-
-.terminal-content {
-  opacity: var(--opacity-full);
-  transition: opacity var(--transition-medium);
-}
-
-.footer-panel.footer-collapsed .terminal-content {
-  opacity: var(--opacity-0);
-  pointer-events: none;
-}
-
-.footer-panel.footer-collapsed .terminal-tabs {
-  margin-bottom: var(--spacing-neg-8);
-}
-
-.footer-panel.footer-collapsed .terminal-actions [data-action="toggle-terminal"] .lucide {
-  transform: var(--transform-rotate-180);
-}
-
-.footer-panel .panel-header {
-  display: none; /* Hide header for terminal panel */
-}
-
-.footer-panel .panel-body {
-  padding: var(--spacing-0) !important;
-  height: var(--percent-100);
-  background: var(--bg-layer-1) !important;
+.bsp-panel[data-panel-type="terminal"] .panel-content {
+  padding: 0;
 }
 
 /* Terminal Container */
@@ -974,99 +945,6 @@ body.no-transition * {
   font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
 }
 
-/* Terminal Header */
-.terminal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-1) var(--space-2);
-  background: var(--bg-layer-2);
-  flex-shrink: 0;
-  min-height: var(--size-48);
-}
-
-.terminal-tabs {
-  display: flex;
-  gap: var(--space-1);
-  margin-bottom: var(--spacing-neg-24);
-  margin-left: var(--spacing-80);
-}
-
-button.terminal-tab {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3) var(--space-4) var(--space-6);
-  background: var(--color-black-main);
-  border: none;
-  border-top-left-radius: var(--radius-md);
-  border-top-right-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: background-color var(--transition-medium);
-  position: relative;
-  color: var(--text-primary);
-  border-bottom: var(--border-width-2) solid transparent;
-  outline: none;
-}
-
-.terminal-tab:hover {
-  background: var(--color-black-raised);
-}
-
-.terminal-tab.active {
-  background: var(--color-black-main);
-  border-bottom: none;
-}
-
-.terminal-tab-close {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: var(--spacing-0);
-  width: var(--size-24);
-  height: var(--size-24);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-18);
-  line-height: var(--line-height-1);
-}
-
-.terminal-tab-close:hover {
-  background: var(--bg-layer-4);
-  color: var(--text-primary);
-}
-
-.terminal-actions {
-  display: flex;
-  gap: var(--space-1);
-}
-
-.terminal-actions .btn {
-  opacity: var(--opacity-6);
-  transition: all var(--transition-medium);
-  width: var(--size-40);
-  height: var(--size-40);
-  padding: var(--spacing-0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.terminal-actions .btn:hover {
-  opacity: var(--opacity-full);
-  background: var(--bg-layer-3);
-  color: var(--text-primary);
-}
-
-.terminal-actions .lucide {
-  stroke-width: var(--stroke-width-15);
-  width: var(--size-22);
-  height: var(--size-22);
-}
 
 /* Terminal Content */
 .terminal-content {
@@ -1136,18 +1014,6 @@ button.terminal-tab {
   outline: none;
 }
 
-/* Footer Resize Handle */
-.footer-resize-handle {
-  position: absolute;
-  top: var(--spacing-neg-3);
-  left: var(--spacing-0);
-  right: var(--spacing-0);
-  width: var(--percent-100);
-  height: var(--size-6);
-  cursor: ns-resize;
-  z-index: var(--z-resize-handle);
-  background: transparent;
-}
 
 /* Removed generic resize-handle-bar style that was conflicting */
 
@@ -1157,43 +1023,9 @@ body.no-transition * {
   transition: none !important;
 }
 
-/* Properties Panel */
-.properties-panel {
-  min-width: var(--size-300);
-  transition: width var(--transition-cubic-out);
-  margin: var(--spacing-0) !important;
-  border: none !important;
-  border-radius: var(--border-radius-0) !important;
-  right: var(--spacing-0) !important;
-}
-
-.properties-panel.properties-collapsed {
-  min-width: var(--size-48);
-}
-
-.properties-content {
-  opacity: var(--opacity-full);
-  transition: opacity var(--transition-medium);
-}
-
-.properties-panel.properties-collapsed .properties-content {
-  opacity: var(--opacity-0);
-  pointer-events: none;
-}
-
-
-.properties-panel.properties-collapsed .properties-actions-vertical [data-action="toggle-properties"] .lucide {
-  transform: var(--transform-rotate-180);
-}
-
-.properties-panel .panel-header {
-  display: none; /* Hide header for properties panel */
-}
-
-.properties-panel .panel-body {
-  padding: var(--spacing-0) !important;
-  height: var(--percent-100);
-  background: var(--bg-layer-1) !important;
+/* BSP Properties Panel Styles */
+.bsp-panel[data-panel-type="properties"] .panel-content {
+  padding: var(--spacing-12);
 }
 
 .properties-container {
@@ -1212,7 +1044,7 @@ body.no-transition * {
   flex-direction: column;
   justify-content: space-between;
   width: var(--size-48);
-  background: var(--bg-layer-2);
+  background: var(--color-black-main);
   flex-shrink: 0;
   min-width: var(--size-48);
 }
@@ -1363,18 +1195,6 @@ button.properties-tab-vertical {
   height: var(--size-22);
 }
 
-/* Properties Resize Handle */
-.properties-resize-handle {
-  position: absolute;
-  left: var(--spacing-neg-3);
-  top: var(--spacing-0);
-  bottom: var(--spacing-0);
-  width: var(--size-6);
-  height: var(--percent-100);
-  cursor: ew-resize;
-  z-index: var(--z-resize-handle);
-  background: transparent;
-}
 
 /* File Explorer Resize Handle */
 .file-explorer-resize-handle {
@@ -2085,14 +1905,8 @@ button.properties-tab-vertical {
 
 /* BSP Container */
 .bsp-container {
-  position: absolute !important;
-  top: var(--spacing-0) !important;
-  left: var(--spacing-0) !important;
-  right: var(--spacing-0) !important;
-  bottom: var(--spacing-0) !important;
-  width: var(--percent-100) !important;
-  height: var(--percent-100) !important;
-  background: var(--color-black-main) !important;
+  /* Position and dimensions are set by JavaScript in panel-manager.ts */
+  background: var(--color-black-main) !important; /* Match darker header background for the 4px gap */
   overflow: hidden !important;
   border-radius: var(--border-radius-0) !important;
   border-bottom-left-radius: var(--border-radius-0) !important;
@@ -2162,6 +1976,7 @@ button.properties-tab-vertical {
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
+  box-sizing: border-box !important; /* Ensure consistent box model */
 }
 
 .bsp-panel .panel-header {
@@ -2837,6 +2652,70 @@ body.is-dragging {
   font-size: var(--font-size-12);
   color: var(--color-gray-medium);
   font-family: monospace;
+}
+
+/* ============ CONTEXT MENU STYLES ============ */
+.context-menu {
+  position: fixed;
+  background: var(--color-black-raised);
+  border: var(--border-width-1) solid var(--color-gray-dark);
+  border-radius: var(--border-radius-4);
+  padding: var(--spacing-4) var(--spacing-0);
+  min-width: 180px;
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-modal);
+  font-family: inherit;
+  user-select: none;
+  opacity: 0;
+  transform: translateY(-5px);
+  animation: contextMenuFadeIn 0.15s ease forwards;
+}
+
+@keyframes contextMenuFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.context-menu-item {
+  padding: var(--spacing-6) var(--spacing-12);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  cursor: pointer;
+  color: var(--color-gray-code);
+  font-size: var(--font-size-12);
+  line-height: var(--line-height-14);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.context-menu-item:hover:not(.disabled) {
+  background: var(--color-accent-opacity-15);
+  color: var(--color-white-pure);
+}
+
+.context-menu-item.selected:not(.disabled) {
+  background: var(--color-accent-opacity-10);
+  color: var(--color-white-pure);
+}
+
+.context-menu-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.context-menu-item .lucide {
+  width: var(--size-14);
+  height: var(--size-14);
+  flex-shrink: 0;
+  stroke-width: 2;
+}
+
+.context-menu-separator {
+  height: var(--spacing-1);
+  background: var(--color-gray-dark);
+  margin: var(--spacing-4) var(--spacing-0);
 }
 
 /* ULTRA AGGRESSIVE BORDER RADIUS REMOVAL - MUST BE LAST IN FILE */

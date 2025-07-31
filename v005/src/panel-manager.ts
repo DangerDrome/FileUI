@@ -2,8 +2,9 @@
 import { BSPPanelManager } from './bsp-manager';
 import { ServerFileSystem, FileItem, sortFiles, getFileType } from './filemanager';
 import MarkdownIt from 'markdown-it';
+import { ContextMenuManager, ContextMenuItem } from './context-menu';
 
-// Fixed panel configuration
+// Fixed panel configuration - only header and left toolbar remain fixed
 const FIXED_PANELS = [
   {
     id: "header-panel",
@@ -14,21 +15,6 @@ const FIXED_PANELS = [
     id: "left-toolbar", 
     title: "Left Toolbar",
     isToolbar: true
-  },
-  {
-    id: "footer-panel",
-    title: "Terminal", 
-    isToolbar: true
-  },
-  {
-    id: "properties-panel",
-    title: "Properties", 
-    isToolbar: true
-  },
-  {
-    id: "main-panel",
-    title: "Main",
-    isToolbar: false
   }
 ];
 
@@ -42,16 +28,11 @@ interface Panel {
 export class PanelManager {
   private container: HTMLElement;
   private panels: Map<string, Panel> = new Map();
-  private isFooterCollapsed: boolean = false;
-  private footerHeight: number = 200;
-  private isResizing: boolean = false;
-  private isPropertiesCollapsed: boolean = false;
-  private propertiesWidth: number = 300;
-  private isResizingProperties: boolean = false;
   private bspManager: BSPPanelManager | null = null;
   private directoryHandles: Map<string, any> = new Map();
   private fileHandles: Map<string, any> = new Map();
   private md: MarkdownIt;
+  private contextMenu: ContextMenuManager;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -61,6 +42,8 @@ export class PanelManager {
       linkify: true,
       breaks: true
     });
+    // Initialize context menu manager
+    this.contextMenu = new ContextMenuManager();
     this.init();
   }
 
@@ -228,8 +211,22 @@ export class PanelManager {
       this.setupPanelContent(panel);
     });
 
+    // Create BSP container for the main content area
+    const bspContainer = document.createElement('div');
+    bspContainer.id = 'bsp-container';
+    bspContainer.className = 'bsp-container';
+    this.container.appendChild(bspContainer);
+
+    // Initialize BSP panel manager
+    this.bspManager = new BSPPanelManager(bspContainer);
+
     // Initialize Lucide icons
     this.initializeLucideIcons(50);
+    
+    // Initialize BSP manager after DOM is ready with longer delay
+    setTimeout(() => {
+      this.initializeBSPLayout();
+    }, 500);
   }
 
   private createPanelElement(config: typeof FIXED_PANELS[0]): HTMLElement {
@@ -272,14 +269,12 @@ export class PanelManager {
   private layout(): void {
     const headerHeight = 48;
     const toolbarWidth = 48;
-    const propertiesWidth = this.isPropertiesCollapsed ? 48 : this.propertiesWidth; // Collapsed width matches toolbar
-    const footerHeight = this.isFooterCollapsed ? 48 : this.footerHeight; // Match terminal header height
 
     // Use viewport dimensions for full width
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    // Position header panel - full viewport width at top (unchanged)
+    // Position header panel - full viewport width at top
     const headerPanel = this.panels.get('header-panel');
     if (headerPanel) {
       Object.assign(headerPanel.element.style, {
@@ -292,7 +287,7 @@ export class PanelManager {
       });
     }
 
-    // Position left toolbar - compensate for footer panel
+    // Position left toolbar - full height minus header
     const leftToolbar = this.panels.get('left-toolbar');
     if (leftToolbar) {
       Object.assign(leftToolbar.element.style, {
@@ -300,66 +295,47 @@ export class PanelManager {
         left: '0px',
         top: `${headerHeight}px`,
         width: `${toolbarWidth}px`,
-        height: `${viewportHeight - headerHeight - footerHeight}px`,
+        height: `${viewportHeight - headerHeight}px`,
         zIndex: '200'
       });
     }
 
-    // Position footer panel - full viewport width at bottom
-    const footerPanel = this.panels.get('footer-panel');
-    if (footerPanel) {
-      Object.assign(footerPanel.element.style, {
-        position: 'fixed',
-        left: '0px',
-        bottom: '0px',
-        width: `${viewportWidth}px`,
-        height: `${footerHeight}px`,
-        zIndex: '300'  // Higher than other panels
+    // Position BSP container - fills remaining space
+    const bspContainer = document.getElementById('bsp-container');
+    if (bspContainer) {
+      // Account for BSP panel gaps (resizers)
+      // We have 1 vertical split (properties) + 1 horizontal split (terminal)
+      // Each split adds a 4px gap, but we need to ensure the container is wide enough
+      // to contain panels + gaps, so we subtract the gap from available space
+      const bspGapCompensation = 2; // One vertical gap for properties panel
+      const bspWidth = viewportWidth - toolbarWidth - bspGapCompensation;
+      const bspHeight = viewportHeight - headerHeight;
+      
+      console.log('BSP Container sizing:', {
+        viewportWidth,
+        viewportHeight,
+        toolbarWidth,
+        headerHeight,
+        bspGapCompensation,
+        bspWidth,
+        bspHeight,
+        left: toolbarWidth,
+        top: headerHeight,
+        'original width': viewportWidth - toolbarWidth,
+        'compensated width': bspWidth
       });
       
-      // Toggle collapsed class
-      footerPanel.element.classList.toggle('footer-collapsed', this.isFooterCollapsed);
-      
-      // Add resize handle if not collapsed
-      if (!this.isFooterCollapsed) {
-        this.addResizeHandle(footerPanel.element, 'footer-resize-handle');
-      }
-    }
-
-    // Position properties panel - right side, compensate for header and footer
-    const propertiesPanel = this.panels.get('properties-panel');
-    if (propertiesPanel) {
-      Object.assign(propertiesPanel.element.style, {
+      Object.assign(bspContainer.style, {
         position: 'fixed',
-        right: '0px',
+        left: `${toolbarWidth}px`,
         top: `${headerHeight}px`,
-        width: `${propertiesWidth}px`,
-        height: `${viewportHeight - headerHeight - footerHeight}px`,
-        zIndex: '200'
+        width: `${bspWidth}px`,
+        height: `${bspHeight}px`,
+        zIndex: '100',
+        boxSizing: 'border-box'  // Ensure box-sizing is explicit
       });
       
-      // Toggle collapsed class
-      propertiesPanel.element.classList.toggle('properties-collapsed', this.isPropertiesCollapsed);
-      
-      // Add resize handle if not collapsed
-      if (!this.isPropertiesCollapsed) {
-        this.addResizeHandle(propertiesPanel.element, 'properties-resize-handle');
-      }
-    }
-
-    // Position main panel - directly adjacent to left toolbar
-    const mainPanel = this.panels.get('main-panel');
-    if (mainPanel) {
-      Object.assign(mainPanel.element.style, {
-        position: 'fixed',
-        left: `${toolbarWidth}px`,  // Start right after toolbar
-        top: `${headerHeight}px`,
-        width: `${viewportWidth - toolbarWidth - propertiesWidth}px`,
-        height: `${viewportHeight - headerHeight - footerHeight}px`,
-        zIndex: '100'
-      });
-      
-      // Update BSP layout when main panel resizes
+      // Update BSP layout
       if (this.bspManager) {
         this.bspManager.layout();
       }
@@ -395,32 +371,276 @@ export class PanelManager {
       }
     });
 
-    // Handle resize events
-    this.container.addEventListener('mousedown', (e) => {
-      const footerResizeHandle = (e.target as HTMLElement).closest('.footer-resize-handle');
-      const propertiesResizeHandle = (e.target as HTMLElement).closest('.properties-resize-handle');
-      
-      if (footerResizeHandle) {
-        this.startResize(e);
-      } else if (propertiesResizeHandle) {
-        this.startPropertiesResize(e);
-      }
+    // Register context menu handlers
+    this.registerContextMenuHandlers();
+  }
+
+  private registerContextMenuHandlers(): void {
+    // File context menu
+    this.contextMenu.registerHandler('.tree-item-content[data-is-folder="false"]', (e) => {
+      const target = e.target as HTMLElement;
+      const itemElement = target.closest('.tree-item-content') as HTMLElement;
+      if (!itemElement) return null;
+
+      const fileName = itemElement.dataset.fileName || 'Unknown';
+      const path = itemElement.dataset.path;
+      const isNative = itemElement.classList.contains('native-file');
+
+      const items: ContextMenuItem[] = [
+        {
+          label: 'Open',
+          icon: 'file-text',
+          action: () => {
+            if (isNative && itemElement.dataset.panelId) {
+              const handle = this.fileHandles.get(`${itemElement.dataset.panelId}-${fileName}`);
+              if (handle) {
+                this.openNativeFileInBSPPanel(handle, fileName);
+              }
+            } else if (path) {
+              this.openFileInBSPPanel(path, fileName);
+            }
+          }
+        },
+        {
+          label: 'Open in New Panel',
+          icon: 'panel-left',
+          action: () => {
+            if (this.bspManager) {
+              const newPanelId = this.bspManager.addPanel('right');
+              if (newPanelId) {
+                setTimeout(() => {
+                  if (isNative && itemElement.dataset.panelId) {
+                    const handle = this.fileHandles.get(`${itemElement.dataset.panelId}-${fileName}`);
+                    if (handle) {
+                      this.openNativeFileInBSPPanel(handle, fileName);
+                    }
+                  } else if (path) {
+                    this.openFileInBSPPanel(path, fileName);
+                  }
+                }, 100);
+              }
+            }
+          }
+        },
+        { separator: true },
+        {
+          label: 'Copy Path',
+          icon: 'copy',
+          action: () => {
+            if (path) {
+              navigator.clipboard.writeText(path);
+            }
+          }
+        },
+        { separator: true },
+        {
+          label: 'Rename',
+          icon: 'edit',
+          disabled: true
+        },
+        {
+          label: 'Delete',
+          icon: 'trash',
+          disabled: true
+        }
+      ];
+
+      return items;
     });
 
-    document.addEventListener('mousemove', (e) => {
-      if (this.isResizing) {
-        this.handleResize(e);
-      } else if (this.isResizingProperties) {
-        this.handlePropertiesResize(e);
-      }
+    // Folder context menu
+    this.contextMenu.registerHandler('.tree-item-content[data-is-folder="true"]', (e) => {
+      const target = e.target as HTMLElement;
+      const itemElement = target.closest('.tree-item-content') as HTMLElement;
+      if (!itemElement) return null;
+
+      const folderName = itemElement.dataset.fileName || 'Unknown';
+      const path = itemElement.dataset.path;
+      const isExpanded = itemElement.querySelector('.tree-item-toggle')?.getAttribute('data-expanded') === 'true';
+
+      const items: ContextMenuItem[] = [
+        {
+          label: isExpanded ? 'Collapse' : 'Expand',
+          icon: isExpanded ? 'chevron-up' : 'chevron-down',
+          action: () => {
+            const toggleBtn = itemElement.querySelector('.tree-item-toggle') as HTMLElement;
+            if (toggleBtn) {
+              toggleBtn.click();
+            }
+          }
+        },
+        {
+          label: 'Open in New Panel',
+          icon: 'panel-left',
+          action: () => {
+            if (this.bspManager) {
+              const newPanelId = this.bspManager.addPanel('right');
+              if (newPanelId) {
+                setTimeout(() => {
+                  const newPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`);
+                  if (newPanel) {
+                    // Create file explorer in the new panel
+                    const content = newPanel.querySelector('.panel-content');
+                    if (content) {
+                      content.innerHTML = '<div class="file-explorer"></div>';
+                      // TODO: Load folder content
+                    }
+                  }
+                }, 100);
+              }
+            }
+          }
+        },
+        { separator: true },
+        {
+          label: 'New File',
+          icon: 'file-plus',
+          disabled: true
+        },
+        {
+          label: 'New Folder',
+          icon: 'folder-plus',
+          disabled: true
+        },
+        { separator: true },
+        {
+          label: 'Copy Path',
+          icon: 'copy',
+          action: () => {
+            if (path) {
+              navigator.clipboard.writeText(path);
+            }
+          }
+        }
+      ];
+
+      return items;
     });
 
-    document.addEventListener('mouseup', () => {
-      if (this.isResizing) {
-        this.stopResize();
-      } else if (this.isResizingProperties) {
-        this.stopPropertiesResize();
+    // Panel context menu
+    this.contextMenu.registerHandler('.bsp-panel', (e) => {
+      const target = e.target as HTMLElement;
+      const panel = target.closest('.bsp-panel') as HTMLElement;
+      if (!panel) return null;
+
+      const isPinned = panel.classList.contains('is-pinned');
+      const panelId = panel.dataset.panelId;
+
+      const items: ContextMenuItem[] = [
+        {
+          label: 'Split Horizontal',
+          icon: 'rows-2',
+          action: () => {
+            if (this.bspManager && panelId) {
+              this.bspManager.splitPanel(panelId, 'horizontal');
+            }
+          }
+        },
+        {
+          label: 'Split Vertical',
+          icon: 'columns-2',
+          action: () => {
+            if (this.bspManager && panelId) {
+              this.bspManager.splitPanel(panelId, 'vertical');
+            }
+          }
+        },
+        { separator: true },
+        {
+          label: isPinned ? 'Unpin Panel' : 'Pin Panel',
+          icon: isPinned ? 'pin-off' : 'pin',
+          action: () => {
+            const pinBtn = panel.querySelector('[data-action="pin"]') as HTMLElement;
+            if (pinBtn) {
+              pinBtn.click();
+            }
+          }
+        },
+        {
+          label: 'Close Panel',
+          icon: 'x',
+          action: () => {
+            if (this.bspManager && panelId) {
+              this.bspManager.removePanel(panelId);
+            }
+          }
+        }
+      ];
+
+      return items;
+    });
+
+    // Empty panel content context menu
+    this.contextMenu.registerHandler('.panel-content', (e) => {
+      const target = e.target as HTMLElement;
+      // Only show if clicking on empty panel content
+      if (target.closest('.tree-item-content') || target.closest('.file-preview')) {
+        return null;
       }
+
+      const items: ContextMenuItem[] = [
+        {
+          label: 'Open File',
+          icon: 'file',
+          action: async () => {
+            if ('showOpenFilePicker' in window) {
+              try {
+                const [handle] = await (window as any).showOpenFilePicker();
+                this.openNativeFileInBSPPanel(handle, handle.name);
+              } catch (err) {
+                console.log('User cancelled file selection');
+              }
+            }
+          }
+        },
+        {
+          label: 'Open Folder',
+          icon: 'folder',
+          action: () => {
+            const panel = target.closest('.bsp-panel');
+            if (panel) {
+              const panelId = panel.getAttribute('data-panel-id');
+              if (panelId) {
+                this.showDirectoryChooser(panelId);
+              }
+            }
+          }
+        }
+      ];
+
+      return items;
+    });
+
+    // Default context menu (empty areas)
+    this.contextMenu.registerHandler('*', (e) => {
+      const target = e.target as HTMLElement;
+      // Don't show default menu if clicking on specific elements
+      if (target.closest('.tree-item-content') || 
+          target.closest('.bsp-panel') ||
+          target.closest('.panel-content')) {
+        return null;
+      }
+
+      const items: ContextMenuItem[] = [
+        {
+          label: 'New Panel',
+          icon: 'panel-left',
+          action: () => {
+            if (this.bspManager) {
+              this.bspManager.addPanel('right');
+            }
+          }
+        },
+        {
+          label: 'Refresh',
+          icon: 'refresh-cw',
+          action: () => {
+            window.location.reload();
+          }
+        }
+      ];
+
+      return items;
     });
   }
 
@@ -428,12 +648,7 @@ export class PanelManager {
     const action = btn.dataset.action;
     console.log('Toolbar button clicked:', action);
     
-    // Handle footer collapse toggle
-    if (action === 'toggle-terminal') {
-      this.toggleFooterCollapse();
-    } else if (action === 'toggle-properties') {
-      this.togglePropertiesCollapse();
-    } else if (action === 'add-panel' && this.bspManager) {
+    if (action === 'add-panel' && this.bspManager) {
       // Add a new panel to the BSP tree
       this.bspManager.addPanel('right');
     } else if (action === 'explorer' && this.bspManager) {
@@ -442,169 +657,12 @@ export class PanelManager {
     }
   }
 
-  private toggleFooterCollapse(): void {
-    this.isFooterCollapsed = !this.isFooterCollapsed;
-    // Allow transition to happen
-    requestAnimationFrame(() => {
-      this.layout();
-    });
-  }
-
-  private addResizeHandle(element: HTMLElement, className: string): void {
-    // Remove existing resize handle
-    const existingHandle = element.querySelector(`.${className}`);
-    if (existingHandle) {
-      existingHandle.remove();
-    }
-
-    // Create new resize handle
-    const resizeHandle = document.createElement('div');
-    resizeHandle.className = className;
-    resizeHandle.innerHTML = '<div class="resize-handle-bar"></div>';
-    
-    element.appendChild(resizeHandle);
-  }
-
-  private startResize(e: MouseEvent): void {
-    this.isResizing = true;
-    document.body.style.cursor = 'ns-resize';
-    document.body.classList.add('no-transition');
-    e.preventDefault();
-  }
-
-  private handleResize(e: MouseEvent): void {
-    if (!this.isResizing) return;
-
-    const viewportHeight = window.innerHeight;
-    const newFooterHeight = viewportHeight - e.clientY;
-    
-    // Snap zone - if dragged within 70px of bottom, snap to collapsed
-    const snapZone = 70;
-    const minHeight = 120; // Minimum height to ensure left toolbar buttons visible
-    const maxHeight = viewportHeight * 0.6;
-    
-    // Calculate the actual footer height to use
-    let actualFooterHeight: number;
-    
-    if (newFooterHeight < snapZone) {
-      // Snap to collapsed state
-      this.isFooterCollapsed = true;
-      actualFooterHeight = 48; // Collapsed height
-    } else {
-      // Normal resizing
-      this.isFooterCollapsed = false;
-      actualFooterHeight = Math.max(minHeight, Math.min(maxHeight, newFooterHeight));
-      this.footerHeight = actualFooterHeight;
-    }
-    
-    // Update panels immediately during drag
-    this.updatePanelsDuringResize(actualFooterHeight);
-  }
-
-  private stopResize(): void {
-    this.isResizing = false;
-    document.body.style.cursor = '';
-    document.body.classList.remove('no-transition');
-  }
-
-  private togglePropertiesCollapse(): void {
-    this.isPropertiesCollapsed = !this.isPropertiesCollapsed;
-    // Allow transition to happen
-    requestAnimationFrame(() => {
-      this.layout();
-    });
-  }
-
-  // Removed - using generic addResizeHandle instead
-
-  private startPropertiesResize(e: MouseEvent): void {
-    this.isResizingProperties = true;
-    document.body.style.cursor = 'ew-resize';
-    document.body.classList.add('no-transition');
-    e.preventDefault();
-  }
-
-  private handlePropertiesResize(e: MouseEvent): void {
-    if (!this.isResizingProperties) return;
-
-    const viewportWidth = window.innerWidth;
-    const newPropertiesWidth = viewportWidth - e.clientX;
-    
-    // Snap zone - if dragged within 70px of right edge, snap to collapsed
-    const snapZone = 70;
-    const minWidth = 200;
-    const maxWidth = viewportWidth * 0.4;
-    
-    if (newPropertiesWidth < snapZone) {
-      // Snap to collapsed state
-      this.isPropertiesCollapsed = true;
-      this.layout();
-    } else {
-      // Normal resizing
-      this.isPropertiesCollapsed = false;
-      this.propertiesWidth = Math.max(minWidth, Math.min(maxWidth, newPropertiesWidth));
-      this.layout();
-    }
-  }
-
-  private stopPropertiesResize(): void {
-    this.isResizingProperties = false;
-    document.body.style.cursor = '';
-    document.body.classList.remove('no-transition');
-  }
-
-  private updatePanelsDuringResize(footerHeight: number): void {
-    const headerHeight = 48;
-    const toolbarWidth = 48;
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-    const propertiesWidth = this.isPropertiesCollapsed ? 48 : this.propertiesWidth;
-
-    // Update left toolbar height immediately
-    const leftToolbar = this.panels.get('left-toolbar');
-    if (leftToolbar) {
-      leftToolbar.element.style.height = `${viewportHeight - headerHeight - footerHeight}px`;
-    }
-
-    // Update properties panel height immediately
-    const propertiesPanel = this.panels.get('properties-panel');
-    if (propertiesPanel) {
-      propertiesPanel.element.style.height = `${viewportHeight - headerHeight - footerHeight}px`;
-    }
-
-    // Update footer height immediately
-    const footerPanel = this.panels.get('footer-panel');
-    if (footerPanel) {
-      footerPanel.element.style.height = `${footerHeight}px`;
-      footerPanel.element.classList.toggle('footer-collapsed', this.isFooterCollapsed);
-    }
-
-
-    // Update main panel dimensions immediately (no gap)
-    const mainPanel = this.panels.get('main-panel');
-    if (mainPanel) {
-      mainPanel.element.style.left = `${toolbarWidth}px`;
-      mainPanel.element.style.width = `${viewportWidth - toolbarWidth - propertiesWidth}px`;
-      mainPanel.element.style.height = `${viewportHeight - headerHeight - footerHeight}px`;
-      
-      // Update BSP layout
-      if (this.bspManager) {
-        this.bspManager.layout();
-      }
-    }
-  }
 
   private setupPanelContent(panel: Panel): void {
     if (panel.id === 'header-panel') {
       this.setupHeaderPanel(panel);
     } else if (panel.id === 'left-toolbar') {
       this.setupLeftToolbar(panel);
-    } else if (panel.id === 'footer-panel') {
-      this.setupFooterPanel(panel);
-    } else if (panel.id === 'properties-panel') {
-      this.setupPropertiesPanel(panel);
-    } else if (panel.id === 'main-panel') {
-      this.setupMainPanel(panel);
     }
   }
 
@@ -686,224 +744,122 @@ export class PanelManager {
     }
   }
 
-
-  private setupFooterPanel(panel: Panel): void {
-    panel.element.classList.add('footer-panel');
-    const body = panel.element.querySelector('.panel-body');
-    if (body) {
-      body.innerHTML = `
-        <div class="terminal-container">
-          <div class="terminal-header">
-            <div class="terminal-tabs">
-              <button class="terminal-tab active" data-action="toggle-terminal">
-                <i data-lucide="terminal" class="lucide"></i>
-                <span>Terminal</span>
-                <span class="terminal-tab-close" title="Close Terminal">×</span>
-              </button>
-            </div>
-            <div class="terminal-actions">
-              <button class="btn btn-ghost btn-sm" title="Collapse Terminal" data-action="toggle-terminal">
-                <i data-lucide="chevron-down" class="lucide"></i>
-              </button>
-              <button class="btn btn-ghost btn-sm" title="New Terminal" data-action="new-terminal">
-                <i data-lucide="plus" class="lucide"></i>
-              </button>
-              <button class="btn btn-ghost btn-sm" title="Clear Terminal" data-action="clear-terminal">
-                <i data-lucide="trash-2" class="lucide"></i>
-              </button>
-              <button class="btn btn-ghost btn-sm" title="Settings" data-action="terminal-settings">
-                <i data-lucide="settings" class="lucide"></i>
-              </button>
-            </div>
-          </div>
-          <div class="terminal-content">
-            <div class="terminal-output" id="terminal-output">
-              <div class="terminal-line">Terminal ready...</div>
-              <div class="terminal-input-line">
-                <span class="terminal-prompt">user@fileui:~$</span>
-                <input id="terminal-input" type="text" class="terminal-input" autofocus />
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      // Setup terminal functionality
-      this.setupTerminal();
-    }
-  }
-
-  private setupTerminal(): void {
-    const terminalInput = document.getElementById('terminal-input') as HTMLInputElement;
-    const terminalOutput = document.getElementById('terminal-output');
+  private initializeBSPLayout(): void {
+    console.log('=== Initializing BSP Layout ===');
     
-    if (!terminalInput || !terminalOutput) return;
+    // Also show status in the main content area for debugging
+    const bspContainer = document.getElementById('bsp-container');
+    if (bspContainer) {
+      const debugDiv = document.createElement('div');
+      debugDiv.style.cssText = 'position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; z-index: 1000; font-family: monospace; font-size: 12px;';
+      debugDiv.innerHTML = 'Initializing BSP Layout...';
+      bspContainer.appendChild(debugDiv);
+      
+      setTimeout(() => {
+        debugDiv.remove();
+      }, 3000);
+    }
+    if (!this.bspManager) {
+      console.error('BSP Manager not available');
+      return;
+    }
 
-    terminalInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const command = terminalInput.value.trim();
-        if (command) {
-          this.executeCommand(command);
-          terminalInput.value = '';
+    // Initialize the BSP manager
+    console.log('Initializing BSP manager...');
+    this.bspManager.init();
+    
+    // Get the initial main panel
+    const rootNode = this.bspManager.getRoot();
+    console.log('Root node after init:', rootNode);
+    if (!rootNode) {
+      console.error('No root node found after BSP init');
+      return;
+    }
+
+    // Split horizontally to add terminal at bottom (80% main, 20% terminal)
+    console.log('Splitting root panel horizontally for terminal...');
+    const terminalPanelId = this.bspManager.splitPanel(rootNode.id, 'horizontal', 'bottom');
+    console.log('Terminal panel creation result:', terminalPanelId);
+    
+    // Get the new root after first split
+    const rootAfterTerminal = this.bspManager.getRoot();
+    console.log('Root after terminal split:', rootAfterTerminal);
+    
+    if (terminalPanelId) {
+      // Set the split ratio - root should now be the parent containing main and terminal
+      const newRoot = this.bspManager.getRoot();
+      if (newRoot && newRoot.direction === 'horizontal') {
+        console.log('Setting terminal split ratio to 0.8');
+        newRoot.split = 0.8; // 80% for main content, 20% for terminal
+      } else {
+        console.log('Root direction not horizontal or root not found:', newRoot);
+      }
+      
+      // Add terminal content to the bottom panel
+      setTimeout(() => {
+        console.log('Setting up terminal content...');
+        this.setupTerminalContent(terminalPanelId);
+      }, 100);
+    }
+
+    // Now find the main content panel ID (should be the first child of the root)
+    let mainContentPanelId = rootNode.id;
+    const currentRoot = this.bspManager.getRoot();
+    if (currentRoot && currentRoot.children.length > 0) {
+      // The main content should be the first child (top/left in the split)
+      mainContentPanelId = currentRoot.children[0].id;
+      console.log('Main content panel ID after terminal split:', mainContentPanelId);
+    }
+
+    // Split the main content vertically to add properties on right (75% content, 25% properties)  
+    console.log('Splitting main content vertically for properties...');
+    const propertiesPanelId = this.bspManager.splitPanel(mainContentPanelId, 'vertical', 'right');
+    console.log('Properties panel creation result:', propertiesPanelId);
+    
+    if (propertiesPanelId) {
+      // Find the vertical split node and set its ratio
+      const currentRoot = this.bspManager.getRoot();
+      console.log('Root after properties split:', currentRoot);
+      if (currentRoot && currentRoot.children.length > 0) {
+        // The first child should be the vertical split containing main content and properties
+        const verticalSplit = currentRoot.children[0];
+        console.log('First child (should be vertical split):', verticalSplit);
+        if (verticalSplit && verticalSplit.direction === 'vertical') {
+          console.log('Setting properties split ratio to 0.75');
+          verticalSplit.split = 0.75; // 75% for content, 25% for properties
+        } else {
+          console.log('First child not a vertical split or not found');
         }
+      } else {
+        console.log('No children found in current root');
       }
-    });
-
-    // Focus terminal when clicked
-    terminalOutput.addEventListener('click', () => {
-      terminalInput.focus();
-    });
-  }
-
-  private executeCommand(command: string): void {
-    const terminalOutput = document.getElementById('terminal-output');
-    if (!terminalOutput) return;
-
-    // Add command to output
-    const commandLine = document.createElement('div');
-    commandLine.className = 'terminal-line';
-    commandLine.innerHTML = `<span class="terminal-prompt">user@fileui:~$</span> ${command}`;
-    
-    // Remove input line temporarily
-    const inputLine = terminalOutput.querySelector('.terminal-input-line');
-    if (inputLine) inputLine.remove();
-    
-    terminalOutput.appendChild(commandLine);
-
-    // Process command
-    const [cmd, ...args] = command.split(' ');
-    let response = '';
-
-    switch (cmd.toLowerCase()) {
-      case 'help':
-        response = 'Available commands: help, clear, echo, date';
-        break;
-      case 'clear':
-        terminalOutput.innerHTML = '';
-        this.addInputLine();
-        return;
-      case 'echo':
-        response = args.join(' ');
-        break;
-      case 'date':
-        response = new Date().toLocaleString();
-        break;
-      default:
-        response = `Command not found: ${cmd}`;
-        break;
-    }
-
-    // Add response
-    if (response) {
-      const responseLine = document.createElement('div');
-      responseLine.className = 'terminal-line';
-      responseLine.textContent = response;
-      terminalOutput.appendChild(responseLine);
-    }
-
-    // Add new input line
-    this.addInputLine();
-  }
-
-  private addInputLine(): void {
-    const terminalOutput = document.getElementById('terminal-output');
-    if (!terminalOutput) return;
-
-    const inputLine = document.createElement('div');
-    inputLine.className = 'terminal-input-line';
-    inputLine.innerHTML = `
-      <span class="terminal-prompt">user@fileui:~$</span>
-      <input id="terminal-input" type="text" class="terminal-input" autofocus />
-    `;
-    
-    terminalOutput.appendChild(inputLine);
-    
-    // Re-setup event listeners for new input
-    this.setupTerminal();
-  }
-
-  private setupPropertiesPanel(panel: Panel): void {
-    panel.element.classList.add('properties-panel');
-    const body = panel.element.querySelector('.panel-body');
-    if (body) {
-      body.innerHTML = `
-        <div class="properties-container">
-          <div class="properties-header-vertical">
-            <div class="properties-tabs-container">
-              <button class="properties-tab-vertical active" title="Properties" data-action="toggle-properties">
-                <i data-lucide="info" class="lucide"></i>
-              </button>
-            </div>
-            <div class="properties-actions-vertical">
-            </div>
-          </div>
-          <div class="properties-content">
-            <div class="properties-content-header">
-              <h3 class="properties-title">Properties</h3>
-            </div>
-            <div class="property-section">
-              <h4 class="property-section-title">Metadata</h4>
-              <div class="property-item">
-                <span class="property-label">Format:</span>
-                <span class="property-value">-</span>
-              </div>
-              <div class="property-item">
-                <span class="property-label">Resolution:</span>
-                <span class="property-value">-</span>
-              </div>
-              <div class="property-item">
-                <span class="property-label">Color Space:</span>
-                <span class="property-value">-</span>
-              </div>
-              <div class="property-item">
-                <span class="property-label">Codec:</span>
-                <span class="property-value">-</span>
-              </div>
-            </div>
-            <div class="property-section">
-              <h4 class="property-section-title">File Info</h4>
-              <div class="property-item">
-                <span class="property-label">Name:</span>
-                <span class="property-value">No file selected</span>
-              </div>
-              <div class="property-item">
-                <span class="property-label">Type:</span>
-                <span class="property-value">-</span>
-              </div>
-              <div class="property-item">
-                <span class="property-label">Size:</span>
-                <span class="property-value">-</span>
-              </div>
-              <div class="property-item">
-                <span class="property-label">Modified:</span>
-                <span class="property-value">-</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-  }
-
-  private setupMainPanel(panel: Panel): void {
-    panel.element.classList.add('main-panel');
-    const body = panel.element.querySelector('.panel-body');
-    if (body) {
-      body.innerHTML = `
-        <div class="bsp-container"></div>
-      `;
       
-      // Initialize BSP panel manager for the main content area
-      const bspContainer = body.querySelector('.bsp-container') as HTMLElement;
-      if (bspContainer) {
-        this.bspManager = new BSPPanelManager(bspContainer);
-        // Delay initialization to ensure container has dimensions
-        requestAnimationFrame(() => {
-          this.bspManager!.init();
-        });
-      }
+      // Add properties content to the right panel
+      setTimeout(() => {
+        console.log('Setting up properties content...');
+        this.setupPropertiesContent(propertiesPanelId);
+      }, 100);
     }
+
+    // Layout the BSP tree
+    console.log('Running BSP layout...');
+    this.bspManager.layout();
+    
+    // Debug: Check how many BSP panels exist
+    setTimeout(() => {
+      const bspPanels = document.querySelectorAll('.bsp-panel');
+      console.log(`Total BSP panels found: ${bspPanels.length}`);
+      bspPanels.forEach((panel, index) => {
+        const panelId = panel.getAttribute('data-panel-id');
+        const panelType = panel.getAttribute('data-panel-type');
+        const title = panel.querySelector('.panel-title span')?.textContent;
+        console.log(`Panel ${index + 1}: ID=${panelId}, Type=${panelType}, Title=${title}`);
+      });
+    }, 200);
+    
+    console.log('=== BSP Layout Complete ===');
   }
+
 
   private createExplorerBSPPanel(): void {
     if (!this.bspManager) return;
@@ -1076,7 +1032,6 @@ export class PanelManager {
       const treeItemContent = target.closest('.tree-item-content') as HTMLElement;
       if (treeItemContent) {
         const isFolder = treeItemContent.dataset.isFolder === 'true';
-        const _path = treeItemContent.dataset.path;
         const treeItem = treeItemContent.closest('.tree-item') as HTMLElement;
 
         // Handle toggle button clicks
@@ -1108,7 +1063,6 @@ export class PanelManager {
     const treeItemContent = treeItem.querySelector('.tree-item-content') as HTMLElement;
     const toggleBtn = treeItem.querySelector('.tree-item-toggle') as HTMLButtonElement;
     const childrenContainer = treeItem.querySelector('.tree-item-children') as HTMLElement;
-    const _chevron = toggleBtn?.querySelector('.chevron-icon');
     const path = treeItemContent?.dataset.path;
 
     if (!childrenContainer || !path || !toggleBtn) return;
@@ -1707,6 +1661,206 @@ export class PanelManager {
 
     // Re-initialize lucide icons for the new header
     this.initializeLucideIcons(10);
+  }
+
+  private setupTerminalContent(panelId: string): void {
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    // Update panel title
+    const panelTitle = panel.querySelector('.panel-title span');
+    if (panelTitle) {
+      panelTitle.textContent = 'Terminal';
+    }
+
+    // Update panel content
+    const content = panel.querySelector('.panel-content') as HTMLElement;
+    if (content) {
+      content.innerHTML = `
+        <div class="terminal-container">
+          <div class="terminal-output" id="terminal-output-${panelId}">
+            <div class="terminal-line">Terminal ready...</div>
+            <div class="terminal-input-line">
+              <span class="terminal-prompt">user@fileui:~$</span>
+              <input id="terminal-input-${panelId}" type="text" class="terminal-input" autofocus />
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Setup terminal functionality for this panel
+      const terminalInput = document.getElementById(`terminal-input-${panelId}`) as HTMLInputElement;
+      const terminalOutput = document.getElementById(`terminal-output-${panelId}`);
+      
+      if (terminalInput && terminalOutput) {
+        terminalInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const command = terminalInput.value.trim();
+            if (command) {
+              this.executeTerminalCommand(command, panelId);
+              terminalInput.value = '';
+            }
+          }
+        });
+
+        // Focus terminal when clicked
+        terminalOutput.addEventListener('click', () => {
+          terminalInput.focus();
+        });
+      }
+
+      // Mark this panel as a terminal
+      panel.setAttribute('data-panel-type', 'terminal');
+    }
+
+    // Re-initialize Lucide icons
+    this.initializeLucideIcons(10);
+  }
+
+  private setupPropertiesContent(panelId: string): void {
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    // Update panel title
+    const panelTitle = panel.querySelector('.panel-title span');
+    if (panelTitle) {
+      panelTitle.textContent = 'Properties';
+    }
+
+    // Update panel content
+    const content = panel.querySelector('.panel-content') as HTMLElement;
+    if (content) {
+      content.innerHTML = `
+        <div class="properties-container">
+          <div class="properties-content">
+            <div class="property-section">
+              <h4 class="property-section-title">Metadata</h4>
+              <div class="property-item">
+                <span class="property-label">Format:</span>
+                <span class="property-value">-</span>
+              </div>
+              <div class="property-item">
+                <span class="property-label">Resolution:</span>
+                <span class="property-value">-</span>
+              </div>
+              <div class="property-item">
+                <span class="property-label">Color Space:</span>
+                <span class="property-value">-</span>
+              </div>
+              <div class="property-item">
+                <span class="property-label">Codec:</span>
+                <span class="property-value">-</span>
+              </div>
+            </div>
+            <div class="property-section">
+              <h4 class="property-section-title">File Info</h4>
+              <div class="property-item">
+                <span class="property-label">Name:</span>
+                <span class="property-value">No file selected</span>
+              </div>
+              <div class="property-item">
+                <span class="property-label">Type:</span>
+                <span class="property-value">-</span>
+              </div>
+              <div class="property-item">
+                <span class="property-label">Size:</span>
+                <span class="property-value">-</span>
+              </div>
+              <div class="property-item">
+                <span class="property-label">Modified:</span>
+                <span class="property-value">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Mark this panel as properties
+      panel.setAttribute('data-panel-type', 'properties');
+    }
+
+    // Re-initialize Lucide icons
+    this.initializeLucideIcons(10);
+  }
+
+  private executeTerminalCommand(command: string, panelId: string): void {
+    const terminalOutput = document.getElementById(`terminal-output-${panelId}`);
+    if (!terminalOutput) return;
+
+    // Remove the input line temporarily
+    const inputLine = terminalOutput.querySelector('.terminal-input-line');
+    if (inputLine) {
+      inputLine.remove();
+    }
+
+    // Add command to history
+    const commandLine = document.createElement('div');
+    commandLine.className = 'terminal-line terminal-command';
+    commandLine.innerHTML = `<span class="terminal-prompt">user@fileui:~$</span> ${command}`;
+    terminalOutput.appendChild(commandLine);
+
+    // Simulate command execution
+    let response = '';
+    const lowerCommand = command.toLowerCase();
+    
+    if (lowerCommand === 'help') {
+      response = `Available commands:
+  help    - Show this help message
+  clear   - Clear terminal output
+  ls      - List files
+  pwd     - Print working directory
+  echo    - Echo text
+  date    - Show current date and time`;
+    } else if (lowerCommand === 'clear') {
+      terminalOutput.innerHTML = '';
+      response = '';
+    } else if (lowerCommand === 'ls') {
+      response = 'project.blend  scenes/  renders/  textures/  README.md';
+    } else if (lowerCommand === 'pwd') {
+      response = '/home/user/projects/fileui';
+    } else if (lowerCommand.startsWith('echo ')) {
+      response = command.substring(5);
+    } else if (lowerCommand === 'date') {
+      response = new Date().toLocaleString();
+    } else {
+      response = `Command not found: ${command}`;
+    }
+
+    // Add response
+    if (response) {
+      const responseLine = document.createElement('div');
+      responseLine.className = 'terminal-line terminal-response';
+      responseLine.textContent = response;
+      terminalOutput.appendChild(responseLine);
+    }
+
+    // Add new input line
+    const newInputLine = document.createElement('div');
+    newInputLine.className = 'terminal-input-line';
+    newInputLine.innerHTML = `
+      <span class="terminal-prompt">user@fileui:~$</span>
+      <input id="terminal-input-${panelId}" type="text" class="terminal-input" autofocus />
+    `;
+    
+    terminalOutput.appendChild(newInputLine);
+    
+    // Re-setup event listeners for new input
+    const newInput = document.getElementById(`terminal-input-${panelId}`) as HTMLInputElement;
+    if (newInput) {
+      newInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const cmd = newInput.value.trim();
+          if (cmd) {
+            this.executeTerminalCommand(cmd, panelId);
+            newInput.value = '';
+          }
+        }
+      });
+      newInput.focus();
+    }
+
+    // Scroll to bottom
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
   }
 
 }

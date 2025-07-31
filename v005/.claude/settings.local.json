@@ -21,7 +21,8 @@
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(find:*)",
       "WebFetch(domain:github.com)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(xdg-open:*)"
     ],
     "deny": []
   }

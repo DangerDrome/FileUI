@@ -16,7 +16,7 @@ export const BSP_CONFIG: BSPConfig = {
   DEFAULT_SPLIT: 0.5,
   PANEL_MIN_WIDTH: 120,
   PANEL_MIN_HEIGHT: 80,
-  RESIZER_THICKNESS: 4, // Gap between panels
+  RESIZER_THICKNESS: 2, // Gap between panels
   COLLAPSED_SIZE: 24,
   HEADER_HEIGHT: 24
 };
@@ -366,6 +366,10 @@ export class BSPPanelManager {
     panel.classList.add('focused');
   }
 
+  getRoot(): BSPNode | null {
+    return this.root;
+  }
+
   splitPanel(targetId: string, direction: 'horizontal' | 'vertical', position: 'left' | 'right' | 'top' | 'bottom' = 'right'): string {
     console.log(`Splitting panel ${targetId} ${direction} at ${position}`);
     const target = this.panels.get(targetId);
@@ -548,6 +552,9 @@ export class BSPPanelManager {
       height: containerRect.height
     };
     
+    console.log('BSP Layout - Container rect:', containerRect);
+    console.log('BSP Layout - Root rect:', rootRect);
+    
     // Layout tree
     this.layoutNode(layoutRoot, rootRect, isPreview);
     
@@ -571,6 +578,14 @@ export class BSPPanelManager {
         const isDraggedElement = isPreview && this.activeDrag?.target?.element === node.element;
         
         if (!isDraggedElement) {
+          console.log(`Positioning BSP panel ${node.id}:`, {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+            'right edge': rect.x + rect.width
+          });
+          
           Object.assign(node.element.style, {
             position: 'absolute',
             left: `${rect.x}px`,

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for:*)",
+      "Bash(do fuser -k $port/tcp)",
+      "Bash(echo:*)",
+      "Bash(true)",
+      "Bash(done)",
+      "Bash(curl:*)",
+      "Bash(sudo fuser:*)",
+      "Bash(fuser:*)",
+      "Bash(pkill:*)",
+      "Bash(chmod:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}

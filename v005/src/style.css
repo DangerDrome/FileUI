@@ -1,6 +1,22 @@
 /* FileUI v005 - Panel System Styles */
 /* Works with StyleUI design system */
 
+/* Required overrides for BSP layout */
+html, body {
+  height: 100%;
+  overflow: hidden; /* Required for panel system */
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure main container takes full space */
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 /* Global Scrollbar Styles - Minimal and only on hover */
 * {
   scrollbar-width: thin;

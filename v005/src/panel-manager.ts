@@ -1378,8 +1378,83 @@ export class PanelManager {
       });
     };
 
-    // Setup drop zones on all existing panels
+    // Setup drop zone for the main BSP container
+    const setupMainContainerDropZone = () => {
+      const bspContainer = document.getElementById('bsp-container');
+      if (!bspContainer) return;
+
+      // Check if already set up
+      if ((bspContainer as any)._dropZoneSetup) return;
+      (bspContainer as any)._dropZoneSetup = true;
+
+      bspContainer.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Only show indicator if no panels exist
+        if (!bspContainer.querySelector('.bsp-panel')) {
+          console.log('Drag enter empty BSP container');
+          bspContainer.classList.add('drag-over');
+        }
+      });
+
+      bspContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.dataTransfer) {
+          e.dataTransfer.dropEffect = 'copy';
+        }
+        // Only show indicator if no panels exist
+        if (!bspContainer.querySelector('.bsp-panel')) {
+          if (!bspContainer.classList.contains('drag-over')) {
+            bspContainer.classList.add('drag-over');
+          }
+        }
+      });
+
+      bspContainer.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const rect = bspContainer.getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        
+        if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+          console.log('Drag leave BSP container');
+          bspContainer.classList.remove('drag-over');
+        }
+      });
+
+      bspContainer.addEventListener('drop', async (e) => {
+        // Only handle if no panels exist
+        if (!bspContainer.querySelector('.bsp-panel')) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Drop on empty BSP container, creating panel');
+          bspContainer.classList.remove('drag-over');
+          
+          if (e.dataTransfer?.files.length) {
+            const files = Array.from(e.dataTransfer.files);
+            
+            // Create a new panel for the dropped file
+            if (this.bspManager) {
+              const newPanelId = this.bspManager.addPanel('center');
+              
+              // Wait for panel to be created
+              setTimeout(async () => {
+                for (const file of files) {
+                  await this.openDroppedFileInPanel(file, newPanelId);
+                }
+              }, 50);
+            }
+          }
+        }
+      });
+    };
+
+    // Setup drop zones on all existing panels and main container
     setTimeout(() => {
+      setupMainContainerDropZone();
+      
       document.querySelectorAll('.bsp-panel').forEach(panel => {
         console.log('Setting up drop zone for panel:', panel.getAttribute('data-panel-id'));
         setupPanelDropZone(panel);

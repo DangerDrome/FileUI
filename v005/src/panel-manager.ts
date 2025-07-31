@@ -4,7 +4,7 @@ import { ServerFileSystem, FileItem, sortFiles, getFileType } from './filemanage
 import MarkdownIt from 'markdown-it';
 import { ContextMenuManager, ContextMenuItem } from './context-menu';
 
-// Fixed panel configuration - only header and left toolbar remain fixed
+// Fixed panel configuration - header, left toolbar, and right toolbar remain fixed
 const FIXED_PANELS = [
   {
     id: "header-panel",
@@ -14,6 +14,11 @@ const FIXED_PANELS = [
   {
     id: "left-toolbar", 
     title: "Left Toolbar",
+    isToolbar: true
+  },
+  {
+    id: "right-toolbar",
+    title: "Right Toolbar", 
     isToolbar: true
   }
 ];
@@ -268,7 +273,7 @@ export class PanelManager {
 
   private layout(): void {
     const headerHeight = 48;
-    const toolbarWidth = 48;
+    const toolbarWidth = 48; // Both left and right toolbars
 
     // Use viewport dimensions for full width
     const viewportWidth = window.innerWidth;
@@ -300,15 +305,25 @@ export class PanelManager {
       });
     }
 
+    // Position right toolbar - full height minus header
+    const rightToolbar = this.panels.get('right-toolbar');
+    if (rightToolbar) {
+      Object.assign(rightToolbar.element.style, {
+        position: 'fixed',
+        right: '0px',
+        top: `${headerHeight}px`,
+        width: `${toolbarWidth}px`,
+        height: `${viewportHeight - headerHeight}px`,
+        zIndex: '200'
+      });
+    }
+
     // Position BSP container - fills remaining space
     const bspContainer = document.getElementById('bsp-container');
     if (bspContainer) {
-      // Account for BSP panel gaps (resizers)
-      // We have 1 vertical split (properties) + 1 horizontal split (terminal)
-      // Each split adds a 4px gap, but we need to ensure the container is wide enough
-      // to contain panels + gaps, so we subtract the gap from available space
-      const bspGapCompensation = 2; // One vertical gap for properties panel
-      const bspWidth = viewportWidth - toolbarWidth - bspGapCompensation;
+      // Account for both left and right toolbars
+      // No gap compensation needed since right toolbar fills the space
+      const bspWidth = viewportWidth - (toolbarWidth * 2); // Account for both left and right toolbars
       const bspHeight = viewportHeight - headerHeight;
       
       console.log('BSP Container sizing:', {
@@ -316,13 +331,11 @@ export class PanelManager {
         viewportHeight,
         toolbarWidth,
         headerHeight,
-        bspGapCompensation,
         bspWidth,
         bspHeight,
         left: toolbarWidth,
         top: headerHeight,
-        'original width': viewportWidth - toolbarWidth,
-        'compensated width': bspWidth
+        'available width after toolbars': bspWidth
       });
       
       Object.assign(bspContainer.style, {
@@ -654,6 +667,12 @@ export class PanelManager {
     } else if (action === 'explorer' && this.bspManager) {
       // Create a new BSP panel with file explorer
       this.createExplorerBSPPanel();
+    } else if (action === 'properties' && this.bspManager) {
+      // Create or focus properties panel - only allow one
+      this.createOrFocusPropertiesPanel();
+    } else if (action === 'terminal' && this.bspManager) {
+      // Create a new terminal panel
+      this.createTerminalBSPPanel();
     }
   }
 
@@ -663,6 +682,8 @@ export class PanelManager {
       this.setupHeaderPanel(panel);
     } else if (panel.id === 'left-toolbar') {
       this.setupLeftToolbar(panel);
+    } else if (panel.id === 'right-toolbar') {
+      this.setupRightToolbar(panel);
     }
   }
 
@@ -721,6 +742,16 @@ export class PanelManager {
                 <i data-lucide="library" class="lucide"></i>
               </button>
             </div>
+            <div class="menu">
+              <button class="menu-trigger btn btn-ghost btn-sm" data-action="properties" title="Properties">
+                <i data-lucide="sliders-horizontal" class="lucide"></i>
+              </button>
+            </div>
+            <div class="menu">
+              <button class="menu-trigger btn btn-ghost btn-sm" data-action="terminal" title="Terminal">
+                <i data-lucide="terminal" class="lucide"></i>
+              </button>
+            </div>
           </div>
           <div class="bottom-actions">
             <div class="menu">
@@ -742,6 +773,71 @@ export class PanelManager {
         </div>
       `;
     }
+  }
+
+  private setupRightToolbar(panel: Panel): void {
+    panel.element.classList.add('action-bar-panel', 'right-toolbar');
+    const body = panel.element.querySelector('.panel-body');
+    if (body) {
+      body.innerHTML = `
+        <div class="menu-bar-vertical">
+          <div class="main-actions">
+            <!-- Empty for now -->
+          </div>
+          <div class="bottom-actions">
+            <!-- Empty for now -->
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  private createOrFocusPropertiesPanel(): void {
+    if (!this.bspManager) return;
+    
+    // Check if a properties panel already exists
+    const existingPropertiesPanel = document.querySelector('.bsp-panel[data-panel-type="properties"]') as HTMLElement;
+    if (existingPropertiesPanel) {
+      // Focus existing properties panel
+      const panelId = existingPropertiesPanel.getAttribute('data-panel-id');
+      if (panelId && this.bspManager) {
+        this.bspManager.focusPanel(panelId);
+      }
+      return;
+    }
+    
+    // Create new properties panel
+    const newPanelId = this.bspManager.addPanel('right');
+    if (!newPanelId) return;
+    
+    // Wait for the panel to be created and then update its content
+    setTimeout(() => {
+      const focusedPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`) as HTMLElement;
+      if (focusedPanel) {
+        // Mark this as a properties panel
+        focusedPanel.setAttribute('data-panel-type', 'properties');
+        this.setupPropertiesContent(newPanelId);
+        this.pinPanel(newPanelId);
+      }
+    }, 100);
+  }
+
+  private createTerminalBSPPanel(): void {
+    if (!this.bspManager) return;
+    
+    // Add a new terminal panel at the bottom
+    const newPanelId = this.bspManager.addPanel('bottom');
+    if (!newPanelId) return;
+    
+    // Wait for the panel to be created and then update its content
+    setTimeout(() => {
+      const focusedPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`) as HTMLElement;
+      if (focusedPanel) {
+        // Mark this as a terminal panel
+        focusedPanel.setAttribute('data-panel-type', 'terminal');
+        this.setupTerminalContent(newPanelId);
+      }
+    }, 100);
   }
 
   private initializeBSPLayout(): void {
@@ -795,10 +891,11 @@ export class PanelManager {
         console.log('Root direction not horizontal or root not found:', newRoot);
       }
       
-      // Add terminal content to the bottom panel
+      // Add terminal content to the bottom panel and pin it
       setTimeout(() => {
         console.log('Setting up terminal content...');
         this.setupTerminalContent(terminalPanelId);
+        this.pinPanel(terminalPanelId);
       }, 100);
     }
 
@@ -834,10 +931,11 @@ export class PanelManager {
         console.log('No children found in current root');
       }
       
-      // Add properties content to the right panel
+      // Add properties content to the right panel and pin it
       setTimeout(() => {
         console.log('Setting up properties content...');
         this.setupPropertiesContent(propertiesPanelId);
+        this.pinPanel(propertiesPanelId);
       }, 100);
     }
 
@@ -1667,10 +1765,13 @@ export class PanelManager {
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
     if (!panel) return;
 
-    // Update panel title
+    // Update panel title with icon
     const panelTitle = panel.querySelector('.panel-title span');
-    if (panelTitle) {
-      panelTitle.textContent = 'Terminal';
+    if (panelTitle && panelTitle.parentElement) {
+      panelTitle.parentElement.innerHTML = `
+        <i data-lucide="terminal" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+        <span>Terminal</span>
+      `;
     }
 
     // Update panel content
@@ -1721,10 +1822,13 @@ export class PanelManager {
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
     if (!panel) return;
 
-    // Update panel title
+    // Update panel title with icon
     const panelTitle = panel.querySelector('.panel-title span');
-    if (panelTitle) {
-      panelTitle.textContent = 'Properties';
+    if (panelTitle && panelTitle.parentElement) {
+      panelTitle.parentElement.innerHTML = `
+        <i data-lucide="sliders-horizontal" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+        <span>Properties</span>
+      `;
     }
 
     // Update panel content
@@ -1781,6 +1885,17 @@ export class PanelManager {
 
     // Re-initialize Lucide icons
     this.initializeLucideIcons(10);
+  }
+
+  private pinPanel(panelId: string): void {
+    if (this.bspManager) {
+      // Get the panel to check if it's already pinned
+      const panelElement = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+      if (panelElement && !panelElement.classList.contains('is-pinned')) {
+        this.bspManager.togglePinPanel(panelId);
+        console.log(`Pinned panel: ${panelId}`);
+      }
+    }
   }
 
   private executeTerminalCommand(command: string, panelId: string): void {

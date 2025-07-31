@@ -16,9 +16,9 @@ export const BSP_CONFIG: BSPConfig = {
   DEFAULT_SPLIT: 0.5,
   PANEL_MIN_WIDTH: 120,
   PANEL_MIN_HEIGHT: 80,
-  RESIZER_THICKNESS: 2, // Gap between panels
-  COLLAPSED_SIZE: 24,
-  HEADER_HEIGHT: 24
+  RESIZER_THICKNESS: 2, // Gap between panels - visual size
+  COLLAPSED_SIZE: 48, // Panel header height for snap collapse
+  HEADER_HEIGHT: 48
 };
 
 // BSP Node class for panel tree structure
@@ -65,6 +65,18 @@ export class BSPNode {
       node = node.parent;
     }
     return depth;
+  }
+
+  isBottomPanel(): boolean {
+    if (!this.parent) return false;
+    
+    // Check if parent is horizontal split and this node is the second child (bottom)
+    if (this.parent.direction === 'horizontal') {
+      return this.parent.children.indexOf(this) === 1;
+    }
+    
+    // If parent is vertical, check if parent itself is a bottom panel
+    return this.parent.isBottomPanel();
   }
 
   findDeepestUnpinnedNode(): BSPNode | null {
@@ -282,11 +294,46 @@ export class BSPPanelManager {
           const newSplit = Math.max(0.1, Math.min(0.9, firstChildWidth / availableWidth));
           node.split = newSplit;
         } else {
+          // Horizontal resize with snap collapse detection
           const relativeY = e.clientY - containerRect.top;
           const availableHeight = node.rect!.height - BSP_CONFIG.RESIZER_THICKNESS;
           const firstChildHeight = relativeY - node.rect!.y;
-          const newSplit = Math.max(0.1, Math.min(0.9, firstChildHeight / availableHeight));
-          node.split = newSplit;
+          const secondChildHeight = availableHeight - firstChildHeight;
+          
+          const [firstChild, secondChild] = node.children;
+          const snapThreshold = BSP_CONFIG.COLLAPSED_SIZE + 20; // 20px threshold for snapping
+          
+          // Check for snap collapse on bottom panel (second child)
+          if (secondChild.isLeaf() && secondChildHeight <= snapThreshold && secondChild.isBottomPanel()) {
+            console.log(`Snap collapsing bottom panel ${secondChild.id}`);
+            secondChild.isCollapsed = true;
+            this.updateCollapseVisualState(secondChild.id, true);
+          } 
+          // Check for snap collapse on top panel (first child)
+          else if (firstChild.isLeaf() && firstChildHeight <= snapThreshold) {
+            console.log(`Snap collapsing top panel ${firstChild.id}`);
+            firstChild.isCollapsed = true;
+            this.updateCollapseVisualState(firstChild.id, true);
+          }
+          // Check for snap expand from collapsed state
+          else {
+            if (secondChild.isLeaf() && secondChild.isCollapsed && secondChildHeight > snapThreshold) {
+              console.log(`Snap expanding bottom panel ${secondChild.id}`);
+              secondChild.isCollapsed = false;
+              this.updateCollapseVisualState(secondChild.id, false);
+            }
+            if (firstChild.isLeaf() && firstChild.isCollapsed && firstChildHeight > snapThreshold) {
+              console.log(`Snap expanding top panel ${firstChild.id}`);
+              firstChild.isCollapsed = false;
+              this.updateCollapseVisualState(firstChild.id, false);
+            }
+            
+            // Normal resize when not snapping
+            if (!firstChild.isCollapsed && !secondChild.isCollapsed) {
+              const newSplit = Math.max(0.1, Math.min(0.9, firstChildHeight / availableHeight));
+              node.split = newSplit;
+            }
+          }
         }
         
         this.layout();
@@ -340,6 +387,9 @@ export class BSPPanelManager {
 
   private handlePanelAction(action: string, panelId: string): void {
     switch(action) {
+      case 'collapse':
+        this.toggleCollapsePanel(panelId);
+        break;
       case 'pin':
         this.togglePinPanel(panelId);
         break;
@@ -496,6 +546,10 @@ export class BSPPanelManager {
             <span>${title}</span>
           </div>
           <div class="panel-actions">
+            <button class="panel-action-btn" data-action="collapse" title="Collapse Panel">
+              <i data-lucide="chevron-down" class="lucide icon-collapse"></i>
+              <i data-lucide="chevron-up" class="lucide icon-expand" style="display: none;"></i>
+            </button>
             <button class="panel-action-btn" data-action="pin" title="Pin Panel">
               <i data-lucide="pin" class="lucide icon-pin"></i>
               <i data-lucide="pin-off" class="lucide icon-pin-off" style="display: none;"></i>
@@ -636,8 +690,23 @@ export class BSPPanelManager {
           this.resizers.push(resizer);
         }
       } else {
+        // Horizontal split layout with collapse handling
         const availableHeight = rect.height - BSP_CONFIG.RESIZER_THICKNESS;
-        const firstHeight = availableHeight * node.split;
+        let firstHeight = availableHeight * node.split;
+        let secondHeight = availableHeight - firstHeight;
+        
+        // Handle collapsed bottom panel (second child)
+        if (second.isLeaf() && second.isCollapsed && second.isBottomPanel()) {
+          console.log(`Bottom panel ${second.id} is collapsed, using header height`);
+          secondHeight = BSP_CONFIG.COLLAPSED_SIZE;
+          firstHeight = availableHeight - secondHeight;
+        }
+        // Handle collapsed top panel (first child)  
+        else if (first.isLeaf() && first.isCollapsed) {
+          console.log(`Top panel ${first.id} is collapsed, using header height`);
+          firstHeight = BSP_CONFIG.COLLAPSED_SIZE;
+          secondHeight = availableHeight - firstHeight;
+        }
         
         this.layoutNode(first, {
           x: rect.x,
@@ -650,7 +719,7 @@ export class BSPPanelManager {
           x: rect.x,
           y: rect.y + firstHeight + BSP_CONFIG.RESIZER_THICKNESS,
           width: rect.width,
-          height: availableHeight - firstHeight
+          height: secondHeight
         }, isPreview);
         
         // Only create resizers when not in preview mode
@@ -1134,7 +1203,43 @@ export class BSPPanelManager {
     return null;
   }
 
-  private togglePinPanel(panelId: string): void {
+  private updateCollapseVisualState(panelId: string, isCollapsed: boolean): void {
+    const panel = this.panels.get(panelId);
+    if (!panel) return;
+    
+    const { element } = panel;
+    const collapseBtn = element.querySelector('[data-action="collapse"]');
+    const collapseIcon = collapseBtn?.querySelector('.icon-collapse') as HTMLElement;
+    const expandIcon = collapseBtn?.querySelector('.icon-expand') as HTMLElement;
+    
+    if (isCollapsed) {
+      element.classList.add('is-collapsed');
+      if (collapseIcon) collapseIcon.style.display = 'none';
+      if (expandIcon) expandIcon.style.display = 'block';
+    } else {
+      element.classList.remove('is-collapsed');
+      if (collapseIcon) collapseIcon.style.display = 'block';
+      if (expandIcon) expandIcon.style.display = 'none';
+    }
+  }
+
+  toggleCollapsePanel(panelId: string): void {
+    const panel = this.panels.get(panelId);
+    if (!panel) return;
+    
+    const { node } = panel;
+    node.isCollapsed = !node.isCollapsed;
+    
+    console.log(`Panel ${panelId} collapsed state: ${node.isCollapsed}, isBottomPanel: ${node.isBottomPanel()}`);
+    
+    // Update visual state using helper method
+    this.updateCollapseVisualState(panelId, node.isCollapsed);
+    
+    // Re-layout to apply collapse changes
+    this.layout();
+  }
+
+  togglePinPanel(panelId: string): void {
     const panel = this.panels.get(panelId);
     if (!panel) return;
     

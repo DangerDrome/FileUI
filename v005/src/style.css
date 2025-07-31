@@ -2066,13 +2066,13 @@ button.properties-tab-vertical {
 
 .bsp-resizer-horizontal {
   cursor: ns-resize;
-  height: var(--spacing-4); /* Gap between panels */
+  height: var(--spacing-2); /* Keep visual gap small */
   background: var(--color-black-main); /* Match main background to show gap */
 }
 
 .bsp-resizer-vertical {
   cursor: ew-resize;
-  width: var(--spacing-4); /* Gap between panels */
+  width: var(--spacing-2); /* Keep visual gap small */
   background: var(--color-black-main); /* Match main background to show gap */
 }
 
@@ -2090,10 +2090,10 @@ button.properties-tab-vertical {
 .bsp-resizer-horizontal .bsp-resizer-handle::before {
   content: '';
   position: absolute;
-  top: var(--spacing-neg-3);
+  top: var(--spacing-neg-4); /* Larger hit area */
   left: var(--spacing-0);
   right: var(--spacing-0);
-  height: var(--spacing-7);
+  height: var(--spacing-10); /* Much larger hit area */
   cursor: ns-resize;
 }
 
@@ -2102,8 +2102,8 @@ button.properties-tab-vertical {
   position: absolute;
   top: var(--spacing-0);
   bottom: var(--spacing-0);
-  left: var(--spacing-neg-3);
-  width: var(--spacing-7);
+  left: var(--spacing-neg-4); /* Larger hit area */
+  width: var(--spacing-10); /* Much larger hit area */
   cursor: ew-resize;
 }
 
@@ -2658,11 +2658,16 @@ body.is-dragging {
 .context-menu {
   position: fixed;
   background: var(--color-black-raised);
-  border: var(--border-width-1) solid var(--color-gray-dark);
-  border-radius: var(--border-radius-4);
+  border: none !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  outline: none !important;
+  border-radius: 4px !important;
   padding: var(--spacing-4) var(--spacing-0);
   min-width: 180px;
-  box-shadow: var(--shadow-md);
+  box-shadow: none !important;
   z-index: var(--z-modal);
   font-family: inherit;
   user-select: none;
@@ -2731,11 +2736,5 @@ body.is-dragging {
 .bsp-container,
 div[id="main-panel"],
 div.panel {
-  border-radius: var(--border-radius-0) !important;
-  border-top-left-radius: var(--border-radius-0) !important;
-  border-top-right-radius: var(--border-radius-0) !important;
-  border-bottom-left-radius: var(--border-radius-0) !important;
-  border-bottom-right-radius: var(--border-radius-0) !important;
-  -webkit-border-radius: var(--border-radius-0) !important;
-  -moz-border-radius: var(--border-radius-0) !important;
+  border-radius: 6px !important;
 }

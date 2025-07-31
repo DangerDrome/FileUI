@@ -2000,6 +2000,8 @@ button.properties-tab-vertical {
   transition: all var(--transition-medium) !important;
   overflow: hidden !important;
   min-width: 0 !important; /* Required for text-overflow to work in flexbox */
+  display: flex !important;
+  align-items: center !important;
 }
 
 /* Ensure text in panel title never wraps */
@@ -2077,7 +2079,7 @@ button.properties-tab-vertical {
 }
 
 .bsp-resizer:hover {
-  background: var(--color-accent-opacity-10) !important;
+  background: var(--color-white-opacity-10) !important;
 }
 
 .bsp-resizer-handle {
@@ -2151,7 +2153,9 @@ button.properties-tab-vertical {
   transition: opacity var(--transition-fast);
   display: flex !important;
   align-items: center !important;
+  flex-wrap: nowrap !important;
   max-width: 100% !important;
+  min-width: 0 !important;
   overflow: hidden !important;
 }
 
@@ -2164,6 +2168,119 @@ button.properties-tab-vertical {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+  flex-shrink: 1 !important;
+}
+
+/* Ensure folder icon doesn't shrink */
+.folder-icon-btn .lucide {
+  flex-shrink: 0 !important;
+}
+
+/* Collapsed panel styles - hide all action buttons including collapse */
+.bsp-panel.is-collapsed .panel-action-btn {
+  display: none !important;
+}
+
+/* Hide panel body/content when collapsed */
+.bsp-panel.is-collapsed .panel-body {
+  display: none !important;
+}
+
+/* Hide panel title text when collapsed, show only icon */
+.bsp-panel.is-collapsed .panel-title span {
+  display: none !important;
+}
+
+/* Remove icon margin when collapsed for better centering */
+.bsp-panel.is-collapsed .panel-title .lucide {
+  margin-right: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+}
+
+/* Center panel title content when collapsed */
+.bsp-panel.is-collapsed .panel-title {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* Ensure panel header adapts when collapsed */
+.bsp-panel.is-collapsed .panel-header,
+.fileui-panel.is-collapsed .panel-header,
+.is-collapsed .panel-header {
+  flex-wrap: nowrap !important;
+  flex-direction: column !important;
+  padding: var(--spacing-4) !important;
+  height: auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Let JavaScript handle collapsed panel sizing - removed width constraints */
+
+/* Hide panel actions entirely when collapsed */
+.bsp-panel.is-collapsed .panel-actions {
+  display: none !important;
+}
+
+/* Ensure panel title icon is visible and centered when collapsed */
+.bsp-panel.is-collapsed .panel-title {
+  width: 100% !important;
+  min-height: auto !important;
+  line-height: normal !important;
+  flex-shrink: 0 !important;
+  min-width: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Additional collapsed panel rules for better specificity */
+.is-collapsed .panel-body,
+.is-collapsed .fileui-panel-body,
+[class*="panel"].is-collapsed .panel-body {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Also hide panel content inside body */
+.is-collapsed .panel-content,
+.is-collapsed .file-explorer-content,
+.is-collapsed .tree {
+  display: none !important;
+}
+
+/* Hide everything in header except panel title */
+.is-collapsed .panel-header > *:not(.panel-title),
+.is-collapsed .panel-actions,
+.is-collapsed .panel-action-btn {
+  display: none !important;
+}
+
+/* In panel title, only show the first icon (main panel type icon) */
+.is-collapsed .panel-title > span,
+.is-collapsed .panel-title > *:not(.lucide):not(i) {
+  display: none !important;
+}
+
+/* Ensure the main icon is centered and visible */
+.is-collapsed .panel-title {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.is-collapsed .panel-title .lucide:first-child,
+.is-collapsed .panel-title i:first-child {
+  display: block !important;
+  margin: 0 !important;
 }
 
 /* Pinned panel styles - no background color change */

@@ -82,25 +82,20 @@ export class PanelManager {
     
     // If there's a focused panel and it's not an explorer panel
     if (focusedPanel && !focusedPanel.classList.contains('explorer-panel')) {
-      const isPinned = focusedPanel.classList.contains('is-pinned');
-      if (!isPinned) {
-        // Use the focused panel
-        return focusedPanel.getAttribute('data-panel-id');
-      }
+      // Always use the focused panel, even if it's pinned
+      // This ensures files open in the current panel when explicitly selected
+      return focusedPanel.getAttribute('data-panel-id');
     }
     
-    // If focused panel is pinned or is an explorer, find the next unpinned non-explorer panel
+    // If no focused panel or focused panel is an explorer, find the first non-explorer panel
     const allPanels = document.querySelectorAll('.bsp-panel:not(.explorer-panel)');
     for (const panel of allPanels) {
-      const isPinned = panel.classList.contains('is-pinned');
-      if (!isPinned) {
-        // Focus this panel before returning it
-        this.focusPanel(panel);
-        return panel.getAttribute('data-panel-id');
-      }
+      // Use the first available non-explorer panel
+      this.focusPanel(panel);
+      return panel.getAttribute('data-panel-id');
     }
 
-    // Only create a new panel if all existing panels are pinned
+    // Only create a new panel if no non-explorer panels exist
     const newPanelId = this.bspManager.addPanel('right');
     
     // Focus the newly created panel
@@ -358,19 +353,6 @@ export class PanelManager {
   private setupEventListeners(): void {
     window.addEventListener('resize', () => this.layout());
     
-    // Handle global click events
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      
-      // Handle folder icon button clicks in panel headers
-      const folderBtn = target.closest('.folder-icon-btn') as HTMLElement;
-      if (folderBtn) {
-        const panelId = folderBtn.getAttribute('data-panel-id');
-        if (panelId) {
-          this.showDirectoryChooser(panelId);
-        }
-      }
-    });
     
     // Handle toolbar button clicks
     this.container.addEventListener('click', (e) => {
@@ -739,7 +721,7 @@ export class PanelManager {
           <div class="main-actions">
             <div class="menu">
               <button class="menu-trigger btn btn-ghost btn-sm" data-action="explorer" title="Explorer">
-                <i data-lucide="library" class="lucide"></i>
+                <i data-lucide="folder" class="lucide"></i>
               </button>
             </div>
             <div class="menu">
@@ -977,13 +959,9 @@ export class PanelManager {
         const panelContent = focusedPanel.querySelector('.panel-content');
         
         if (panelTitle && panelTitle.parentElement) {
-          // Replace the title with folder icon and path
-          const folderName = this.currentPath.split('/').pop() || this.currentPath;
           panelTitle.parentElement.innerHTML = `
-            <button class="folder-icon-btn" data-panel-id="${newPanelId}" title="Choose directory" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; color: inherit;">
-              <i data-lucide="folder" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
-              <span>${folderName}</span>
-            </button>
+            <i data-lucide="folder" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+            <span>Explorer</span>
           `;
         }
         
@@ -1044,17 +1022,14 @@ export class PanelManager {
       // Store current path
       this.currentPath = path;
       
-      // Update panel header with new folder name
+      // Keep Explorer title with icon
       const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`) as HTMLElement;
       if (panel) {
-        const panelTitle = panel.querySelector('.panel-title');
-        if (panelTitle) {
-          const folderName = path.split('/').pop() || path;
-          panelTitle.innerHTML = `
-            <button class="folder-icon-btn" data-panel-id="${panelId}" title="Choose directory" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; color: inherit;">
-              <i data-lucide="folder" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
-              <span>${folderName}</span>
-            </button>
+        const panelTitle = panel.querySelector('.panel-title span');
+        if (panelTitle && panelTitle.parentElement) {
+          panelTitle.parentElement.innerHTML = `
+            <i data-lucide="folder" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+            <span>Explorer</span>
           `;
         }
       }

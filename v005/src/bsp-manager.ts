@@ -79,6 +79,30 @@ export class BSPNode {
     return this.parent.isBottomPanel();
   }
 
+  isLeftPanel(): boolean {
+    if (!this.parent) return false;
+    
+    // Check if parent is vertical split and this node is the first child (left)
+    if (this.parent.direction === 'vertical') {
+      return this.parent.children.indexOf(this) === 0;
+    }
+    
+    // If parent is horizontal, check if parent itself is a left panel
+    return this.parent.isLeftPanel();
+  }
+
+  isRightPanel(): boolean {
+    if (!this.parent) return false;
+    
+    // Check if parent is vertical split and this node is the second child (right)
+    if (this.parent.direction === 'vertical') {
+      return this.parent.children.indexOf(this) === 1;
+    }
+    
+    // If parent is horizontal, check if parent itself is a right panel
+    return this.parent.isRightPanel();
+  }
+
   findDeepestUnpinnedNode(): BSPNode | null {
     if (this.isLeaf()) {
       return this.isPinned ? null : this;
@@ -160,6 +184,44 @@ export class BSPNode {
       );
     }
     return node;
+  }
+
+  // Check if all children are collapsed (for parent nodes)
+  areAllChildrenCollapsed(): boolean {
+    if (this.isLeaf()) return this.isCollapsed;
+    return this.children.every(child => child.areAllChildrenCollapsed());
+  }
+  
+  // Get effective width considering collapsed state
+  getEffectiveWidth(): number {
+    if (this.isLeaf()) {
+      return this.isCollapsed ? BSP_CONFIG.COLLAPSED_SIZE : (this.rect?.width || 0);
+    }
+    
+    // For parent nodes with vertical split
+    if (this.direction === 'vertical') {
+      // Width is sum of children plus resizer
+      return this.children.reduce((sum, child) => sum + child.getEffectiveWidth(), 0) + BSP_CONFIG.RESIZER_THICKNESS;
+    } else {
+      // For horizontal split, width is max of children
+      return Math.max(...this.children.map(child => child.getEffectiveWidth()));
+    }
+  }
+  
+  // Get effective height considering collapsed state
+  getEffectiveHeight(): number {
+    if (this.isLeaf()) {
+      return this.isCollapsed ? BSP_CONFIG.COLLAPSED_SIZE : (this.rect?.height || 0);
+    }
+    
+    // For parent nodes with horizontal split
+    if (this.direction === 'horizontal') {
+      // Height is sum of children plus resizer
+      return this.children.reduce((sum, child) => sum + child.getEffectiveHeight(), 0) + BSP_CONFIG.RESIZER_THICKNESS;
+    } else {
+      // For vertical split, height is max of children
+      return Math.max(...this.children.map(child => child.getEffectiveHeight()));
+    }
   }
 }
 
@@ -288,11 +350,46 @@ export class BSPPanelManager {
         const containerRect = this.container.getBoundingClientRect();
         
         if (node.direction === 'vertical') {
+          // Vertical resize with snap collapse detection
           const relativeX = e.clientX - containerRect.left;
           const availableWidth = node.rect!.width - BSP_CONFIG.RESIZER_THICKNESS;
           const firstChildWidth = relativeX - node.rect!.x;
-          const newSplit = Math.max(0.1, Math.min(0.9, firstChildWidth / availableWidth));
-          node.split = newSplit;
+          const secondChildWidth = availableWidth - firstChildWidth;
+          
+          const [firstChild, secondChild] = node.children;
+          const snapThreshold = BSP_CONFIG.COLLAPSED_SIZE + 20; // 20px threshold for snapping
+          
+          // Check for snap collapse on right panel (second child)
+          if (secondChildWidth <= snapThreshold) {
+            console.log(`Snap collapsing right panel ${secondChild.id}`);
+            secondChild.isCollapsed = true;
+            this.updateCollapseVisualState(secondChild.id, true);
+          } 
+          // Check for snap collapse on left panel (first child)
+          else if (firstChildWidth <= snapThreshold) {
+            console.log(`Snap collapsing left panel ${firstChild.id}`);
+            firstChild.isCollapsed = true;
+            this.updateCollapseVisualState(firstChild.id, true);
+          }
+          // Check for snap expand from collapsed state
+          else {
+            if (secondChild.isCollapsed && secondChildWidth > snapThreshold) {
+              console.log(`Snap expanding right panel ${secondChild.id}`);
+              secondChild.isCollapsed = false;
+              this.updateCollapseVisualState(secondChild.id, false);
+            }
+            if (firstChild.isCollapsed && firstChildWidth > snapThreshold) {
+              console.log(`Snap expanding left panel ${firstChild.id}`);
+              firstChild.isCollapsed = false;
+              this.updateCollapseVisualState(firstChild.id, false);
+            }
+            
+            // Normal resize when not snapping
+            if (!firstChild.isCollapsed && !secondChild.isCollapsed) {
+              const newSplit = Math.max(0.1, Math.min(0.9, firstChildWidth / availableWidth));
+              node.split = newSplit;
+            }
+          }
         } else {
           // Horizontal resize with snap collapse detection
           const relativeY = e.clientY - containerRect.top;
@@ -304,25 +401,25 @@ export class BSPPanelManager {
           const snapThreshold = BSP_CONFIG.COLLAPSED_SIZE + 20; // 20px threshold for snapping
           
           // Check for snap collapse on bottom panel (second child)
-          if (secondChild.isLeaf() && secondChildHeight <= snapThreshold && secondChild.isBottomPanel()) {
+          if (secondChildHeight <= snapThreshold) {
             console.log(`Snap collapsing bottom panel ${secondChild.id}`);
             secondChild.isCollapsed = true;
             this.updateCollapseVisualState(secondChild.id, true);
           } 
           // Check for snap collapse on top panel (first child)
-          else if (firstChild.isLeaf() && firstChildHeight <= snapThreshold) {
+          else if (firstChildHeight <= snapThreshold) {
             console.log(`Snap collapsing top panel ${firstChild.id}`);
             firstChild.isCollapsed = true;
             this.updateCollapseVisualState(firstChild.id, true);
           }
           // Check for snap expand from collapsed state
           else {
-            if (secondChild.isLeaf() && secondChild.isCollapsed && secondChildHeight > snapThreshold) {
+            if (secondChild.isCollapsed && secondChildHeight > snapThreshold) {
               console.log(`Snap expanding bottom panel ${secondChild.id}`);
               secondChild.isCollapsed = false;
               this.updateCollapseVisualState(secondChild.id, false);
             }
-            if (firstChild.isLeaf() && firstChild.isCollapsed && firstChildHeight > snapThreshold) {
+            if (firstChild.isCollapsed && firstChildHeight > snapThreshold) {
               console.log(`Snap expanding top panel ${firstChild.id}`);
               firstChild.isCollapsed = false;
               this.updateCollapseVisualState(firstChild.id, false);
@@ -535,7 +632,7 @@ export class BSPPanelManager {
       element.innerHTML = `
         <div class="panel-body" style="height: 100%;">
           <div class="panel-content" style="display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
-            <i data-lucide="library" class="lucide" style="width: 64px; height: 64px;"></i>
+            <i data-lucide="library" class="lucide" style="width: 96px; height: 96px;"></i>
           </div>
         </div>
       `;
@@ -567,7 +664,7 @@ export class BSPPanelManager {
         </div>
         <div class="panel-body">
           <div class="panel-content" style="display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
-            <i data-lucide="library" class="lucide" style="width: 64px; height: 64px;"></i>
+            <i data-lucide="library" class="lucide" style="width: 96px; height: 96px;"></i>
           </div>
         </div>
       `;
@@ -632,13 +729,14 @@ export class BSPPanelManager {
         const isDraggedElement = isPreview && this.activeDrag?.target?.element === node.element;
         
         if (!isDraggedElement) {
-          console.log(`Positioning BSP panel ${node.id}:`, {
-            x: rect.x,
-            y: rect.y,
-            width: rect.width,
-            height: rect.height,
-            'right edge': rect.x + rect.width
-          });
+          if (node.isCollapsed) {
+            console.log(`Positioning collapsed panel ${node.id}:`, {
+              width: rect.width,
+              height: rect.height,
+              expectedWidth: node.isLeftPanel() || node.isRightPanel() ? BSP_CONFIG.COLLAPSED_SIZE : rect.width,
+              expectedHeight: node.isBottomPanel() ? BSP_CONFIG.COLLAPSED_SIZE : rect.height
+            });
+          }
           
           Object.assign(node.element.style, {
             position: 'absolute',
@@ -661,8 +759,44 @@ export class BSPPanelManager {
       const [first, second] = node.children;
       
       if (node.direction === 'vertical') {
-        const availableWidth = rect.width - BSP_CONFIG.RESIZER_THICKNESS;
-        const firstWidth = availableWidth * node.split;
+        // Vertical split layout with collapse handling
+        const totalWidth = rect.width - BSP_CONFIG.RESIZER_THICKNESS;
+        let firstWidth: number;
+        let secondWidth: number;
+        
+        // Handle collapse states
+        if (first.isCollapsed && second.isCollapsed) {
+          // Both panels collapsed - special handling
+          console.log(`Both panels collapsed: ${first.id} and ${second.id}`);
+          console.log(`Available rect width: ${rect.width}, total width: ${totalWidth}`);
+          // When both are collapsed, we need to fit both collapsed panels
+          // Each gets minimum size, but we need to ensure they fit
+          const totalCollapsedWidth = BSP_CONFIG.COLLAPSED_SIZE * 2 + BSP_CONFIG.RESIZER_THICKNESS;
+          if (rect.width < totalCollapsedWidth) {
+            // Not enough space for both collapsed panels
+            firstWidth = Math.floor((rect.width - BSP_CONFIG.RESIZER_THICKNESS) / 2);
+            secondWidth = rect.width - BSP_CONFIG.RESIZER_THICKNESS - firstWidth;
+            console.log(`Not enough space, splitting: first=${firstWidth}, second=${secondWidth}`);
+          } else {
+            firstWidth = BSP_CONFIG.COLLAPSED_SIZE;
+            secondWidth = BSP_CONFIG.COLLAPSED_SIZE;
+            console.log(`Using collapsed sizes: first=${firstWidth}, second=${secondWidth}`);
+          }
+        } else if (first.isCollapsed) {
+          // Only first panel collapsed
+          console.log(`Left panel ${first.id} is collapsed, using header width`);
+          firstWidth = BSP_CONFIG.COLLAPSED_SIZE;
+          secondWidth = totalWidth - firstWidth;
+        } else if (second.isCollapsed) {
+          // Only second panel collapsed
+          console.log(`Right panel ${second.id} is collapsed, using header width`);
+          secondWidth = BSP_CONFIG.COLLAPSED_SIZE;
+          firstWidth = totalWidth - secondWidth;
+        } else {
+          // Neither panel collapsed - use normal split
+          firstWidth = totalWidth * node.split;
+          secondWidth = totalWidth - firstWidth;
+        }
         
         this.layoutNode(first, {
           x: rect.x,
@@ -674,14 +808,16 @@ export class BSPPanelManager {
         this.layoutNode(second, {
           x: rect.x + firstWidth + BSP_CONFIG.RESIZER_THICKNESS,
           y: rect.y,
-          width: availableWidth - firstWidth,
+          width: secondWidth,
           height: rect.height
         }, isPreview);
         
         // Only create resizers when not in preview mode
         if (!isPreview) {
+          const resizerX = rect.x + firstWidth;
+          console.log(`Vertical resizer position: x=${resizerX}, firstWidth=${firstWidth}, secondStart=${resizerX + BSP_CONFIG.RESIZER_THICKNESS}`);
           const resizer = this.createResizer('vertical', {
-            x: rect.x + firstWidth,
+            x: resizerX,
             y: rect.y,
             width: BSP_CONFIG.RESIZER_THICKNESS,
             height: rect.height
@@ -691,21 +827,39 @@ export class BSPPanelManager {
         }
       } else {
         // Horizontal split layout with collapse handling
-        const availableHeight = rect.height - BSP_CONFIG.RESIZER_THICKNESS;
-        let firstHeight = availableHeight * node.split;
-        let secondHeight = availableHeight - firstHeight;
+        const totalHeight = rect.height - BSP_CONFIG.RESIZER_THICKNESS;
+        let firstHeight: number;
+        let secondHeight: number;
         
-        // Handle collapsed bottom panel (second child)
-        if (second.isLeaf() && second.isCollapsed && second.isBottomPanel()) {
-          console.log(`Bottom panel ${second.id} is collapsed, using header height`);
-          secondHeight = BSP_CONFIG.COLLAPSED_SIZE;
-          firstHeight = availableHeight - secondHeight;
-        }
-        // Handle collapsed top panel (first child)  
-        else if (first.isLeaf() && first.isCollapsed) {
+        // Handle collapse states
+        if (first.isCollapsed && second.isCollapsed) {
+          // Both panels collapsed - special handling
+          console.log(`Both panels collapsed: ${first.id} and ${second.id}`);
+          // When both are collapsed, we need to fit both collapsed panels
+          // Each gets minimum size, but we need to ensure they fit
+          const totalCollapsedHeight = BSP_CONFIG.COLLAPSED_SIZE * 2 + BSP_CONFIG.RESIZER_THICKNESS;
+          if (rect.height < totalCollapsedHeight) {
+            // Not enough space for both collapsed panels
+            firstHeight = Math.floor((rect.height - BSP_CONFIG.RESIZER_THICKNESS) / 2);
+            secondHeight = rect.height - BSP_CONFIG.RESIZER_THICKNESS - firstHeight;
+          } else {
+            firstHeight = BSP_CONFIG.COLLAPSED_SIZE;
+            secondHeight = BSP_CONFIG.COLLAPSED_SIZE;
+          }
+        } else if (first.isCollapsed) {
+          // Only first panel collapsed
           console.log(`Top panel ${first.id} is collapsed, using header height`);
           firstHeight = BSP_CONFIG.COLLAPSED_SIZE;
-          secondHeight = availableHeight - firstHeight;
+          secondHeight = totalHeight - firstHeight;
+        } else if (second.isCollapsed) {
+          // Only second panel collapsed
+          console.log(`Bottom panel ${second.id} is collapsed, using header height`);
+          secondHeight = BSP_CONFIG.COLLAPSED_SIZE;
+          firstHeight = totalHeight - secondHeight;
+        } else {
+          // Neither panel collapsed - use normal split
+          firstHeight = totalHeight * node.split;
+          secondHeight = totalHeight - firstHeight;
         }
         
         this.layoutNode(first, {
@@ -1207,7 +1361,16 @@ export class BSPPanelManager {
     const panel = this.panels.get(panelId);
     if (!panel) return;
     
-    const { element } = panel;
+    const { node, element } = panel;
+    
+    // If this is a parent node, recursively update all children
+    if (!node.isLeaf()) {
+      node.children.forEach(child => {
+        this.updateCollapseVisualState(child.id, isCollapsed);
+      });
+    }
+    
+    // Update this panel's visual state
     const collapseBtn = element.querySelector('[data-action="collapse"]');
     const collapseIcon = collapseBtn?.querySelector('.icon-collapse') as HTMLElement;
     const expandIcon = collapseBtn?.querySelector('.icon-expand') as HTMLElement;

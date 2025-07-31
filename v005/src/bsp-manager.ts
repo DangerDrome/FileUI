@@ -1,6 +1,8 @@
 // BSP Panel Manager for FileUI v005 - Ultra-thin design
 // Based on v003 but adapted for the main content area only
 
+import { BSPNodeData, Rect } from './types';
+
 export interface BSPConfig {
   DEFAULT_SPLIT: number;
   PANEL_MIN_WIDTH: number;
@@ -19,33 +21,31 @@ export const BSP_CONFIG: BSPConfig = {
   HEADER_HEIGHT: 24
 };
 
-interface Rect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
+// BSP Node class for panel tree structure
 export class BSPNode {
   id: string;
   parent: BSPNode | null;
   children: BSPNode[];
   direction: 'horizontal' | 'vertical' | null;
   split: number;
-  element: HTMLElement | null;
+  element?: HTMLElement;
+  rect?: Rect;
   isPinned: boolean;
   isCollapsed: boolean;
-  rect?: Rect;
+  isMainContent: boolean;
+  isToolbar: boolean;
 
   constructor(options: Partial<BSPNode> = {}) {
     this.id = options.id || crypto.randomUUID();
     this.parent = options.parent || null;
     this.children = options.children || [];
     this.direction = options.direction || null;
-    this.split = options.split || BSP_CONFIG.DEFAULT_SPLIT;
-    this.element = options.element || null;
+    this.split = options.split ?? BSP_CONFIG.DEFAULT_SPLIT;
+    this.element = options.element;
     this.isPinned = options.isPinned || false;
     this.isCollapsed = options.isCollapsed || false;
+    this.isMainContent = options.isMainContent || false;
+    this.isToolbar = options.isToolbar || false;
   }
 
   isLeaf(): boolean {
@@ -57,6 +57,39 @@ export class BSPNode {
     return this.parent.children.find(child => child !== this) || null;
   }
 
+  getDepth(): number {
+    let depth = 0;
+    let node: BSPNode | null = this.parent;
+    while (node) {
+      depth++;
+      node = node.parent;
+    }
+    return depth;
+  }
+
+  findDeepestUnpinnedNode(): BSPNode | null {
+    if (this.isLeaf()) {
+      return this.isPinned ? null : this;
+    }
+
+    let deepestNode: BSPNode | null = null;
+    let maxDepth = -1;
+
+    const traverse = (node: BSPNode, depth: number): void => {
+      if (node.isLeaf() && !node.isPinned) {
+        if (depth > maxDepth) {
+          maxDepth = depth;
+          deepestNode = node;
+        }
+      } else {
+        node.children.forEach(child => traverse(child, depth + 1));
+      }
+    };
+
+    traverse(this, 0);
+    return deepestNode;
+  }
+
   clone(parent: BSPNode | null = null): BSPNode {
     const newChildren: BSPNode[] = [];
     const newInstance = new BSPNode({
@@ -66,32 +99,51 @@ export class BSPNode {
       split: this.split,
       isPinned: this.isPinned,
       isCollapsed: this.isCollapsed,
+      isMainContent: this.isMainContent,
+      isToolbar: this.isToolbar,
       children: newChildren,
-      element: this.element
+      element: this.element // Keep reference to original element
     });
     newChildren.push(...this.children.map(c => c.clone(newInstance)));
     return newInstance;
   }
 
-  toJSON(): any {
-    const obj: any = {
+  toJSON(): BSPNodeData {
+    const obj: BSPNodeData = {
       id: this.id,
       direction: this.direction,
       split: this.split,
       isPinned: this.isPinned,
       isCollapsed: this.isCollapsed,
+      isMainContent: this.isMainContent,
+      isToolbar: this.isToolbar,
       children: this.children.map(c => c.toJSON())
     };
-    if (this.isLeaf()) obj.leaf = true;
+    if (this.isLeaf()) {
+      obj.leaf = true;
+    }
     return obj;
   }
 
-  static fromJSON(json: any, parent: BSPNode | null, panelElementsMap: Map<string, HTMLElement>): BSPNode {
-    const node = new BSPNode({ ...json, parent });
+  static fromJSON(
+    json: BSPNodeData, 
+    parent: BSPNode | null, 
+    panelElementsMap: Map<string, HTMLElement>
+  ): BSPNode {
+    const node = new BSPNode({ 
+      id: json.id,
+      parent,
+      direction: json.direction,
+      split: json.split,
+      isPinned: json.isPinned,
+      isCollapsed: json.isCollapsed,
+      isMainContent: json.isMainContent,
+      isToolbar: json.isToolbar
+    });
     if (json.leaf) {
-      node.element = panelElementsMap.get(json.id) || null;
+      node.element = panelElementsMap.get(json.id);
     } else {
-      node.children = json.children.map((childJson: any) => 
+      node.children = json.children.map(childJson => 
         BSPNode.fromJSON(childJson, node, panelElementsMap)
       );
     }
@@ -371,11 +423,18 @@ export class BSPPanelManager {
     if (!panel || this.panels.size === 1) return; // Don't close last panel
     
     // Clean up any active drag operation involving this panel
-    if (this.draggedPanel && this.draggedPanel.node.id === panelId) {
-      this.cleanupDrag();
-    }
-    if (this.dropTarget && this.dropTarget.node.id === panelId) {
-      this.clearDropTarget();
+    if (this.activeDrag.target && this.activeDrag.target.node.id === panelId) {
+      this.activeDrag = {
+        type: null,
+        target: null,
+        startX: 0,
+        startY: 0,
+        isDragging: false,
+        currentTargetPanel: null,
+        currentDropZone: null,
+        offsetX: 0,
+        offsetY: 0
+      };
     }
     
     const { node: targetNode } = panel;
@@ -674,7 +733,7 @@ export class BSPPanelManager {
     const hasChangedTarget = this.lastDragOverTarget.panelId !== (targetPanel?.dataset.panelId || null) || this.lastDragOverTarget.zone !== dropZone;
 
     if (targetPanel && dropZone && hasChangedTarget) {
-      this.lastDragOverTarget = { panelId: targetPanel.dataset.panelId!, zone: dropZone };
+      this.lastDragOverTarget = { panelId: targetPanel.dataset.panelId || '', zone: dropZone };
       this.activeDrag.currentTargetPanel = targetPanel;
       this.activeDrag.currentDropZone = dropZone;
       
@@ -701,7 +760,6 @@ export class BSPPanelManager {
 
 
   private updateDropPreviewForEmptySpace(): void {
-    const containerRect = this.container.getBoundingClientRect();
     
     // Remove existing preview
     if (this.dropPreview) {
@@ -946,33 +1004,6 @@ export class BSPPanelManager {
     return null;
   }
   
-  private removeNode(tree: BSPNode, nodeId: string): BSPNode {
-    if (tree.id === nodeId) {
-      // Can't remove root if it's the only node
-      return tree;
-    }
-    
-    const node = this.findNodeById(tree, nodeId);
-    if (!node || !node.parent) return tree;
-    
-    const parent = node.parent;
-    const sibling = node.getSibling();
-    
-    if (!sibling) return tree;
-    
-    // Replace parent with sibling
-    if (parent.parent) {
-      const index = parent.parent.children.indexOf(parent);
-      parent.parent.children[index] = sibling;
-      sibling.parent = parent.parent;
-    } else {
-      // Parent was root
-      tree = sibling;
-      sibling.parent = null;
-    }
-    
-    return tree;
-  }
 
   private enterPreviewMode(draggedElement: HTMLElement): void {
     this.isPreviewMode = true;
@@ -1040,39 +1071,13 @@ export class BSPPanelManager {
     this.layout();
   }
   
-  private swapPanels(node1: BSPNode, node2: BSPNode): void {
-    if (!node1.isLeaf() || !node2.isLeaf()) return;
-    
-    // Swap the elements
-    const tempElement = node1.element;
-    node1.element = node2.element;
-    node2.element = tempElement;
-    
-    // Swap the IDs
-    const tempId = node1.id;
-    node1.id = node2.id;
-    node2.id = tempId;
-    
-    // Update the panels map
-    const panel1 = this.panels.get(node1.id)!;
-    const panel2 = this.panels.get(node2.id)!;
-    panel1.node = node1;
-    panel2.node = node2;
-    
-    // Update panel data attributes
-    if (node1.element) node1.element.dataset.panelId = node1.id;
-    if (node2.element) node2.element.dataset.panelId = node2.id;
-    
-    // Re-layout
-    this.layout();
-  }
 
   addPanel(position: 'left' | 'right' | 'top' | 'bottom' = 'right'): string | null {
     // Find largest leaf node
     let largestLeaf: BSPNode | null = null;
     let maxArea = 0;
     
-    const findLargestLeaf = (node: BSPNode) => {
+    const findLargestLeaf = (node: BSPNode): void => {
       if (node.isLeaf() && node.rect) {
         const area = node.rect.width * node.rect.height;
         if (area > maxArea) {
@@ -1187,7 +1192,7 @@ export class BSPPanelManager {
 
   private findUnpinnedPanel(): HTMLElement | null {
     // Find the first unpinned panel
-    for (const [id, panelData] of this.panels) {
+    for (const [_id, panelData] of this.panels) {
       if (!panelData.node.isPinned) {
         return panelData.element;
       }

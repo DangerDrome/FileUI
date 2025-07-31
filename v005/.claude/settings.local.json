@@ -13,7 +13,11 @@
       "Bash(chmod:*)",
       "Bash(ls:*)",
       "Bash(mkdir:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(./devserver.sh:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }

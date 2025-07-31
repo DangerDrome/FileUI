@@ -1,8 +1,35 @@
 // Panel Manager - Simple fixed layout system
-import { FIXED_PANELS, DEFAULT_MARKDOWN_CONTENT } from './default-layout';
 import { BSPPanelManager } from './bsp-manager';
 import { ServerFileSystem, FileItem, sortFiles, getFileType } from './filemanager';
-import Showdown from 'showdown';
+
+// Fixed panel configuration
+const FIXED_PANELS = [
+  {
+    id: "header-panel",
+    title: "Header",
+    isToolbar: true
+  },
+  {
+    id: "left-toolbar", 
+    title: "Left Toolbar",
+    isToolbar: true
+  },
+  {
+    id: "footer-panel",
+    title: "Terminal", 
+    isToolbar: true
+  },
+  {
+    id: "properties-panel",
+    title: "Properties", 
+    isToolbar: true
+  },
+  {
+    id: "main-panel",
+    title: "Main",
+    isToolbar: false
+  }
+];
 
 interface Panel {
   id: string;
@@ -14,7 +41,6 @@ interface Panel {
 export class PanelManager {
   private container: HTMLElement;
   private panels: Map<string, Panel> = new Map();
-  private markdownConverter: Showdown.Converter;
   private isFooterCollapsed: boolean = false;
   private footerHeight: number = 200;
   private isResizing: boolean = false;
@@ -27,8 +53,107 @@ export class PanelManager {
 
   constructor(container: HTMLElement) {
     this.container = container;
-    this.markdownConverter = new Showdown.Converter();
     this.init();
+  }
+
+  private initializeLucideIcons(delay: number = 0): void {
+    if (delay > 0) {
+      setTimeout(() => {
+        if ((window as any).lucide) {
+          (window as any).lucide.createIcons();
+        }
+      }, delay);
+    } else {
+      if ((window as any).lucide) {
+        (window as any).lucide.createIcons();
+      }
+    }
+  }
+
+  private showErrorMessage(container: HTMLElement, message: string): void {
+    container.innerHTML = `<div class="error-message">${message}</div>`;
+  }
+
+  private showLoadingState(container: HTMLElement, message: string = 'Loading...'): void {
+    container.innerHTML = `<div class="loading-indicator">${message}</div>`;
+  }
+
+  private findOrCreateTargetPanel(): string | null {
+    if (!this.bspManager) return null;
+
+    // Find an unpinned panel to use (excluding explorer panels)
+    const allPanels = document.querySelectorAll('.bsp-panel:not(.explorer-panel)');
+    
+    // First, try the focused panel if it's unpinned
+    const focusedPanel = document.querySelector('.bsp-panel.focused:not(.explorer-panel)');
+    if (focusedPanel) {
+      const isPinned = focusedPanel.classList.contains('is-pinned');
+      if (!isPinned) {
+        return focusedPanel.getAttribute('data-panel-id');
+      }
+    }
+    
+    // If focused panel is pinned or doesn't exist, find ANY unpinned panel
+    for (const panel of allPanels) {
+      const isPinned = panel.classList.contains('is-pinned');
+      if (!isPinned) {
+        return panel.getAttribute('data-panel-id');
+      }
+    }
+
+    // Only create a new panel if all existing panels are pinned
+    return this.bspManager.addPanel('right');
+  }
+
+  private async loadFileContent(content: HTMLElement, source: string | any, fileName: string, sourceType: 'server' | 'native'): Promise<void> {
+    content.innerHTML = '<div class="file-loading">Loading file...</div>';
+
+    try {
+      const fileType = getFileType(fileName);
+
+      if (sourceType === 'server') {
+        // Server-based file loading
+        if (fileType === 'file-image') {
+          content.innerHTML = `<div class="file-preview image-preview">
+            <img src="http://localhost:8001/api/file?path=${encodeURIComponent(source)}" alt="${fileName}" />
+          </div>`;
+        } else {
+          const fs = new ServerFileSystem('http://localhost:8001/api');
+          const fileContent = await fs.readFile(source);
+          content.innerHTML = `<div class="file-content">
+            <pre class="file-text">${this.escapeHtml(fileContent)}</pre>
+          </div>`;
+        }
+      } else {
+        // Native file handle loading
+        const file = await source.getFile();
+        
+        if (fileType === 'file-image') {
+          const url = URL.createObjectURL(file);
+          content.innerHTML = `<div class="file-preview image-preview">
+            <img src="${url}" alt="${fileName}" onload="URL.revokeObjectURL(this.src)" />
+          </div>`;
+        } else if (file.type.startsWith('text/') || fileType === 'file-code' || file.size < 1024 * 1024) {
+          const text = await file.text();
+          content.innerHTML = `<div class="file-content">
+            <pre class="file-text">${this.escapeHtml(text)}</pre>
+          </div>`;
+        } else {
+          content.innerHTML = `<div class="file-info">
+            <p>File: ${fileName}</p>
+            <p>Type: ${file.type || 'Unknown'}</p>
+            <p>Size: ${this.formatFileSize(file.size)}</p>
+            <p>Last Modified: ${new Date(file.lastModified).toLocaleString()}</p>
+          </div>`;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading file:', error);
+      content.innerHTML = `<div class="file-error">
+        <p>Failed to load file: ${fileName}</p>
+        <p class="error-message">${error}</p>
+      </div>`;
+    }
   }
 
   private init(): void {
@@ -59,14 +184,10 @@ export class PanelManager {
     });
 
     // Initialize Lucide icons
-    setTimeout(() => {
-      if ((window as any).lucide) {
-        (window as any).lucide.createIcons();
-      }
-    }, 50);
+    this.initializeLucideIcons(50);
   }
 
-  private createPanelElement(config: { id: string; title: string; isToolbar: boolean }): HTMLElement {
+  private createPanelElement(config: typeof FIXED_PANELS[0]): HTMLElement {
     const element = document.createElement('div');
     element.className = 'panel fileui-panel';
     element.dataset.panelId = config.id;
@@ -156,7 +277,7 @@ export class PanelManager {
       
       // Add resize handle if not collapsed
       if (!this.isFooterCollapsed) {
-        this.addResizeHandle(footerPanel.element);
+        this.addResizeHandle(footerPanel.element, 'footer-resize-handle');
       }
     }
 
@@ -177,7 +298,7 @@ export class PanelManager {
       
       // Add resize handle if not collapsed
       if (!this.isPropertiesCollapsed) {
-        this.addPropertiesResizeHandle(propertiesPanel.element);
+        this.addResizeHandle(propertiesPanel.element, 'properties-resize-handle');
       }
     }
 
@@ -270,19 +391,19 @@ export class PanelManager {
     });
   }
 
-  private addResizeHandle(footerElement: HTMLElement): void {
+  private addResizeHandle(element: HTMLElement, className: string): void {
     // Remove existing resize handle
-    const existingHandle = footerElement.querySelector('.footer-resize-handle');
+    const existingHandle = element.querySelector(`.${className}`);
     if (existingHandle) {
       existingHandle.remove();
     }
 
     // Create new resize handle
     const resizeHandle = document.createElement('div');
-    resizeHandle.className = 'footer-resize-handle';
+    resizeHandle.className = className;
     resizeHandle.innerHTML = '<div class="resize-handle-bar"></div>';
     
-    footerElement.appendChild(resizeHandle);
+    element.appendChild(resizeHandle);
   }
 
   private startResize(e: MouseEvent): void {
@@ -335,20 +456,7 @@ export class PanelManager {
     });
   }
 
-  private addPropertiesResizeHandle(propertiesElement: HTMLElement): void {
-    // Remove existing resize handle
-    const existingHandle = propertiesElement.querySelector('.properties-resize-handle');
-    if (existingHandle) {
-      existingHandle.remove();
-    }
-
-    // Create new resize handle
-    const resizeHandle = document.createElement('div');
-    resizeHandle.className = 'properties-resize-handle';
-    resizeHandle.innerHTML = '<div class="resize-handle-bar"></div>';
-    
-    propertiesElement.appendChild(resizeHandle);
-  }
+  // Removed - using generic addResizeHandle instead
 
   private startPropertiesResize(e: MouseEvent): void {
     this.isResizingProperties = true;
@@ -492,17 +600,17 @@ export class PanelManager {
         <div class="menu-bar-vertical">
           <div class="main-actions">
             <div class="menu">
-              <button class="menu-trigger btn btn-ghost btn-sm active" data-action="explorer" title="Explorer">
-                <i data-lucide="files" class="lucide"></i>
+              <button class="menu-trigger btn btn-ghost btn-sm" data-action="explorer" title="Explorer">
+                <i data-lucide="library" class="lucide"></i>
               </button>
             </div>
+          </div>
+          <div class="bottom-actions">
             <div class="menu">
               <button class="menu-trigger btn btn-ghost btn-sm" data-action="source-control" title="Source Control">
                 <i data-lucide="git-branch" class="lucide"></i>
               </button>
             </div>
-          </div>
-          <div class="bottom-actions">
             <div class="menu">
               <button class="menu-trigger btn btn-ghost btn-sm" data-action="reload" title="Reload">
                 <i data-lucide="refresh-cw" class="lucide"></i>
@@ -781,11 +889,7 @@ export class PanelManager {
           this.setupExplorerInteractions(newPanelId);
           
           // Re-initialize Lucide icons
-          setTimeout(() => {
-            if ((window as any).lucide) {
-              (window as any).lucide.createIcons();
-            }
-          }, 10);
+          this.initializeLucideIcons(10);
         }
       }
     }, 100);
@@ -797,7 +901,7 @@ export class PanelManager {
 
     try {
       // Show loading state
-      treeElement.innerHTML = '<div class="loading-indicator">Loading files...</div>';
+      this.showLoadingState(treeElement, 'Loading files...');
 
       // Fetch files from server
       const fs = new ServerFileSystem('http://localhost:8001/api');
@@ -825,11 +929,7 @@ export class PanelManager {
       this.currentPath = path;
 
       // Re-initialize Lucide icons after loading content
-      setTimeout(() => {
-        if ((window as any).lucide) {
-          (window as any).lucide.createIcons();
-        }
-      }, 10);
+      this.initializeLucideIcons(10);
 
     } catch (error) {
       console.error('Error loading directory contents:', error);
@@ -841,15 +941,11 @@ export class PanelManager {
       `;
       
       // Re-initialize Lucide icons for error state
-      setTimeout(() => {
-        if ((window as any).lucide) {
-          (window as any).lucide.createIcons();
-        }
-      }, 10);
+      this.initializeLucideIcons(10);
     }
   }
 
-  private createTreeItem(file: FileItem, panelId: string, level: number = 0): HTMLElement {
+  private createTreeItem(file: FileItem, _panelId: string, level: number = 0): HTMLElement {
     const treeItem = document.createElement('div');
     treeItem.className = 'tree-item';
     treeItem.setAttribute('role', 'treeitem');
@@ -908,7 +1004,7 @@ export class PanelManager {
       const treeItemContent = target.closest('.tree-item-content') as HTMLElement;
       if (treeItemContent) {
         const isFolder = treeItemContent.dataset.isFolder === 'true';
-        const path = treeItemContent.dataset.path;
+        const _path = treeItemContent.dataset.path;
         const treeItem = treeItemContent.closest('.tree-item') as HTMLElement;
 
         // Handle toggle button clicks
@@ -956,7 +1052,7 @@ export class PanelManager {
     const treeItemContent = treeItem.querySelector('.tree-item-content') as HTMLElement;
     const toggleBtn = treeItem.querySelector('.tree-item-toggle') as HTMLButtonElement;
     const childrenContainer = treeItem.querySelector('.tree-item-children') as HTMLElement;
-    const chevron = toggleBtn?.querySelector('.chevron-icon');
+    const _chevron = toggleBtn?.querySelector('.chevron-icon');
     const path = treeItemContent?.dataset.path;
 
     if (!childrenContainer || !path || !toggleBtn) return;
@@ -974,7 +1070,7 @@ export class PanelManager {
 
       // Load children if not already loaded
       if (childrenContainer.children.length === 0) {
-        childrenContainer.innerHTML = '<div class="loading-indicator">Loading...</div>';
+        this.showLoadingState(childrenContainer, 'Loading...');
 
         try {
           const fs = new ServerFileSystem('http://localhost:8001/api');
@@ -992,25 +1088,17 @@ export class PanelManager {
           this.setupTreeItemInteractions(childrenContainer, panelId);
           
           // Re-initialize Lucide icons for newly loaded items
-          setTimeout(() => {
-            if ((window as any).lucide) {
-              (window as any).lucide.createIcons();
-            }
-          }, 10);
+          this.initializeLucideIcons(10);
 
         } catch (error) {
           console.error('Error loading folder contents:', error);
-          childrenContainer.innerHTML = '<div class="error-message">Failed to load</div>';
+          this.showErrorMessage(childrenContainer, 'Failed to load');
         }
       }
     }
 
     // Re-initialize Lucide icons
-    setTimeout(() => {
-      if ((window as any).lucide) {
-        (window as any).lucide.createIcons();
-      }
-    }, 10);
+    this.initializeLucideIcons(10);
   }
 
   private selectFile(treeItem: HTMLElement, panelId: string): void {
@@ -1058,38 +1146,8 @@ export class PanelManager {
   }
 
   private async openFileInBSPPanel(path: string, fileName: string): Promise<void> {
-    if (!this.bspManager) return;
-
-    let targetPanelId: string | null = null;
-    
-    // Find an unpinned panel to use (excluding explorer panels)
-    const allPanels = document.querySelectorAll('.bsp-panel:not(.explorer-panel)');
-    
-    // First, try the focused panel if it's unpinned
-    const focusedPanel = document.querySelector('.bsp-panel.focused:not(.explorer-panel)');
-    if (focusedPanel) {
-      const isPinned = focusedPanel.classList.contains('is-pinned');
-      if (!isPinned) {
-        targetPanelId = focusedPanel.getAttribute('data-panel-id');
-      }
-    }
-    
-    // If focused panel is pinned or doesn't exist, find ANY unpinned panel
-    if (!targetPanelId) {
-      for (const panel of allPanels) {
-        const isPinned = panel.classList.contains('is-pinned');
-        if (!isPinned) {
-          targetPanelId = panel.getAttribute('data-panel-id');
-          break;
-        }
-      }
-    }
-
-    // Only create a new panel if all existing panels are pinned
-    if (!targetPanelId) {
-      targetPanelId = this.bspManager.addPanel('right');
-      if (!targetPanelId) return;
-    }
+    const targetPanelId = this.findOrCreateTargetPanel();
+    if (!targetPanelId) return;
 
     // Update panel content with file
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
@@ -1106,41 +1164,14 @@ export class PanelManager {
     }
 
     if (content) {
-      // Show loading state
-      content.innerHTML = '<div class="file-loading">Loading file...</div>';
-
-      try {
-        const fileType = getFileType(fileName);
-
-        // Display file content based on type
-        if (fileType === 'file-image') {
-          // For images, display them directly without reading content
-          content.innerHTML = `<div class="file-preview image-preview">
-            <img src="http://localhost:8001/api/file?path=${encodeURIComponent(path)}" alt="${fileName}" />
-          </div>`;
-        } else {
-          // For text files, read and show content
-          const fs = new ServerFileSystem('http://localhost:8001/api');
-          const fileContent = await fs.readFile(path);
-          content.innerHTML = `<div class="file-content">
-            <pre class="file-text">${this.escapeHtml(fileContent)}</pre>
-          </div>`;
-        }
-
-        // Store file info in panel
-        panel.setAttribute('data-file-path', path);
-        panel.setAttribute('data-file-name', fileName);
-        
-        // Focus the panel that now contains the file
-        this.focusPanel(panel);
-
-      } catch (error) {
-        console.error('Error loading file:', error);
-        content.innerHTML = `<div class="file-error">
-          <p>Failed to load file: ${fileName}</p>
-          <p class="error-message">${error}</p>
-        </div>`;
-      }
+      await this.loadFileContent(content, path, fileName, 'server');
+      
+      // Store file info in panel
+      panel.setAttribute('data-file-path', path);
+      panel.setAttribute('data-file-name', fileName);
+      
+      // Focus the panel that now contains the file
+      this.focusPanel(panel);
     }
   }
   
@@ -1160,7 +1191,7 @@ export class PanelManager {
     return div.innerHTML;
   }
 
-  private setupTreeItemInteractions(container: HTMLElement, panelId: string): void {
+  private setupTreeItemInteractions(_container: HTMLElement, _panelId: string): void {
     // Event delegation is already handled in setupExplorerInteractions
     // This method is now only used to ensure proper initialization
     // No need for individual event listeners as they conflict with delegation
@@ -1227,9 +1258,7 @@ export class PanelManager {
 
     // Initialize Lucide icons in modal
     setTimeout(() => {
-      if ((window as any).lucide) {
-        (window as any).lucide.createIcons();
-      }
+      this.initializeLucideIcons();
     }, 10);
 
     // Handle modal interactions
@@ -1290,7 +1319,7 @@ export class PanelManager {
 
     try {
       // Show loading state
-      treeElement.innerHTML = '<div class="loading-indicator">Loading files...</div>';
+      this.showLoadingState(treeElement, 'Loading files...');
 
       // Get files from directory handle
       const files: FileItem[] = [];
@@ -1331,11 +1360,7 @@ export class PanelManager {
       }
 
       // Re-initialize Lucide icons after loading content
-      setTimeout(() => {
-        if ((window as any).lucide) {
-          (window as any).lucide.createIcons();
-        }
-      }, 10);
+      this.initializeLucideIcons(10);
 
     } catch (error) {
       console.error('Error loading directory from handle:', error);
@@ -1347,15 +1372,11 @@ export class PanelManager {
       `;
       
       // Re-initialize Lucide icons for error state
-      setTimeout(() => {
-        if ((window as any).lucide) {
-          (window as any).lucide.createIcons();
-        }
-      }, 10);
+      this.initializeLucideIcons(10);
     }
   }
 
-  private createNativeTreeItem(file: FileItem, panelId: string, parentHandle: any, level: number = 0): HTMLElement {
+  private createNativeTreeItem(file: FileItem, panelId: string, _parentHandle: any, level: number = 0): HTMLElement {
     const treeItem = document.createElement('div');
     treeItem.className = 'tree-item';
     treeItem.setAttribute('role', 'treeitem');
@@ -1450,7 +1471,7 @@ export class PanelManager {
 
       // Load children if not already loaded
       if (childrenContainer.children.length === 0) {
-        childrenContainer.innerHTML = '<div class="loading-indicator">Loading...</div>';
+        this.showLoadingState(childrenContainer, 'Loading...');
 
         try {
           const folderHandle = this.fileHandles?.get(`${panelId}:${folderName}`);
@@ -1484,60 +1505,22 @@ export class PanelManager {
           });
           
           // Re-initialize Lucide icons for newly loaded items
-          setTimeout(() => {
-            if ((window as any).lucide) {
-              (window as any).lucide.createIcons();
-            }
-          }, 10);
+          this.initializeLucideIcons(10);
 
         } catch (error) {
           console.error('Error loading folder contents:', error);
-          childrenContainer.innerHTML = '<div class="error-message">Failed to load</div>';
+          this.showErrorMessage(childrenContainer, 'Failed to load');
         }
       }
     }
 
     // Re-initialize Lucide icons
-    setTimeout(() => {
-      if ((window as any).lucide) {
-        (window as any).lucide.createIcons();
-      }
-    }, 10);
+    this.initializeLucideIcons(10);
   }
 
   private async openNativeFileInBSPPanel(fileHandle: any, fileName: string): Promise<void> {
-    if (!this.bspManager) return;
-
-    let targetPanelId: string | null = null;
-    
-    // Find an unpinned panel to use (excluding explorer panels)
-    const allPanels = document.querySelectorAll('.bsp-panel:not(.explorer-panel)');
-    
-    // First, try the focused panel if it's unpinned
-    const focusedPanel = document.querySelector('.bsp-panel.focused:not(.explorer-panel)');
-    if (focusedPanel) {
-      const isPinned = focusedPanel.classList.contains('is-pinned');
-      if (!isPinned) {
-        targetPanelId = focusedPanel.getAttribute('data-panel-id');
-      }
-    }
-    
-    // If focused panel is pinned or doesn't exist, find ANY unpinned panel
-    if (!targetPanelId) {
-      for (const panel of allPanels) {
-        const isPinned = panel.classList.contains('is-pinned');
-        if (!isPinned) {
-          targetPanelId = panel.getAttribute('data-panel-id');
-          break;
-        }
-      }
-    }
-
-    // Only create a new panel if all existing panels are pinned
-    if (!targetPanelId) {
-      targetPanelId = this.bspManager.addPanel('right');
-      if (!targetPanelId) return;
-    }
+    const targetPanelId = this.findOrCreateTargetPanel();
+    if (!targetPanelId) return;
 
     // Update panel content with file
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
@@ -1554,52 +1537,14 @@ export class PanelManager {
     }
 
     if (content) {
-      // Show loading state
-      content.innerHTML = '<div class="file-loading">Loading file...</div>';
-
-      try {
-        const fileType = getFileType(fileName);
-
-        // Read file content
-        const file = await fileHandle.getFile();
-
-        // Display file content based on type
-        if (fileType === 'file-image') {
-          // For images, create object URL
-          const url = URL.createObjectURL(file);
-          content.innerHTML = `<div class="file-preview image-preview">
-            <img src="${url}" alt="${fileName}" onload="URL.revokeObjectURL(this.src)" />
-          </div>`;
-        } else if (file.type.startsWith('text/') || fileType === 'file-code' || file.size < 1024 * 1024) {
-          // For text files or small files, read as text
-          const text = await file.text();
-          content.innerHTML = `<div class="file-content">
-            <pre class="file-text">${this.escapeHtml(text)}</pre>
-          </div>`;
-        } else {
-          // For other files, show info
-          content.innerHTML = `<div class="file-info">
-            <p>File: ${fileName}</p>
-            <p>Type: ${file.type || 'Unknown'}</p>
-            <p>Size: ${this.formatFileSize(file.size)}</p>
-            <p>Last Modified: ${new Date(file.lastModified).toLocaleString()}</p>
-          </div>`;
-        }
-
-        // Store file info in panel
-        panel.setAttribute('data-file-name', fileName);
-        panel.setAttribute('data-file-handle', 'native');
-        
-        // Focus the panel that now contains the file
-        this.focusPanel(panel);
-
-      } catch (error) {
-        console.error('Error loading file:', error);
-        content.innerHTML = `<div class="file-error">
-          <p>Failed to load file: ${fileName}</p>
-          <p class="error-message">${error}</p>
-        </div>`;
-      }
+      await this.loadFileContent(content, fileHandle, fileName, 'native');
+      
+      // Store file info in panel
+      panel.setAttribute('data-file-name', fileName);
+      panel.setAttribute('data-file-handle', 'native');
+      
+      // Focus the panel that now contains the file
+      this.focusPanel(panel);
     }
   }
 

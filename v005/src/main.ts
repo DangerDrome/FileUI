@@ -15,13 +15,6 @@ function initApp() {
   
   // Make panel manager available globally for debugging
   (window as any).panelManager = panelManager;
-  
-  // Initialize Lucide icons after panels are created
-  setTimeout(() => {
-    if ((window as any).lucide) {
-      (window as any).lucide.createIcons();
-    }
-  }, 50);
 }
 
 // Wait for DOM to be ready

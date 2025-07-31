@@ -3048,6 +3048,45 @@ body.is-dragging {
   pointer-events: none;
 }
 
+/* BSP resizer drag over styles */
+.bsp-resizer.drag-over-divider {
+  background: #00cc8b !important;
+  opacity: 0.8 !important;
+  z-index: 100 !important;
+}
+
+.bsp-resizer-horizontal.drag-over-divider::after {
+  content: 'Drop to split horizontally';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 101;
+}
+
+.bsp-resizer-vertical.drag-over-divider::after {
+  content: 'Drop to split vertically';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 101;
+}
+
 .panel-content.drag-over::before {
   content: '';
   position: absolute;

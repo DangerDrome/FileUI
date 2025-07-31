@@ -278,7 +278,10 @@ export class PanelManager {
     this.layout();
     this.setupEventListeners();
     // Setup global drag and drop after layout is created
-    setTimeout(() => this.setupGlobalDragAndDrop(), 200);
+    setTimeout(() => {
+      this.setupGlobalDragAndDrop();
+      this.setupDividerDragAndDrop();
+    }, 500); // Increased timeout to ensure resizers are created
   }
 
   private createPanels(): void {
@@ -442,7 +445,10 @@ export class PanelManager {
   }
 
   private setupEventListeners(): void {
-    window.addEventListener('resize', () => this.layout());
+    window.addEventListener('resize', () => {
+      this.layout();
+      this.refreshDividerDragAndDrop();
+    });
     
     
     // Handle toolbar button clicks
@@ -619,6 +625,7 @@ export class PanelManager {
           action: () => {
             if (this.bspManager && panelId) {
               this.bspManager.splitPanel(panelId, 'horizontal');
+              this.refreshDividerDragAndDrop();
             }
           }
         },
@@ -628,6 +635,7 @@ export class PanelManager {
           action: () => {
             if (this.bspManager && panelId) {
               this.bspManager.splitPanel(panelId, 'vertical');
+              this.refreshDividerDragAndDrop();
             }
           }
         },
@@ -714,6 +722,7 @@ export class PanelManager {
           action: () => {
             if (this.bspManager) {
               this.bspManager.addPanel('right');
+              this.refreshDividerDragAndDrop();
             }
           }
         },
@@ -1035,6 +1044,11 @@ export class PanelManager {
     // Layout the BSP tree
     console.log('Running BSP layout...');
     this.bspManager.layout();
+    
+    // Setup drag and drop for resizers after initial layout
+    setTimeout(() => {
+      this.refreshDividerDragAndDrop();
+    }, 300);
     
     // Debug: Check how many BSP panels exist
     setTimeout(() => {
@@ -2417,6 +2431,132 @@ export class PanelManager {
     this.initializeLucideIcons();
   }
 
+  private setupDividerDragAndDrop(): void {
+    // Remove existing listeners first to avoid duplicates
+    document.querySelectorAll('.bsp-resizer').forEach(resizer => {
+      const clone = resizer.cloneNode(true);
+      resizer.parentNode?.replaceChild(clone, resizer);
+    });
+    
+    // Setup drag and drop for BSP resizers/dividers 
+    const resizers = document.querySelectorAll('.bsp-resizer');
+    console.log('Setting up drag and drop for', resizers.length, 'resizers');
+    
+    resizers.forEach(resizer => {
+      // Add drag over events to resizers
+      resizer.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Drag enter resizer');
+        resizer.classList.add('drag-over-divider');
+      });
+      
+      resizer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      resizer.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const rect = (resizer as HTMLElement).getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        
+        if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+          console.log('Drag leave resizer');
+          resizer.classList.remove('drag-over-divider');
+        }
+      });
+      
+      resizer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Drop on resizer');
+        resizer.classList.remove('drag-over-divider');
+        
+        if (e.dataTransfer?.files.length) {
+          const files = Array.from(e.dataTransfer.files);
+          this.handleDividerDrop(resizer as HTMLElement, files[0]);
+        }
+      });
+    });
+  }
+  
+  public refreshDividerDragAndDrop(): void {
+    // Public method to refresh drag and drop after layout changes
+    setTimeout(() => {
+      this.setupDividerDragAndDrop();
+    }, 100);
+  }
+
+  private handleDividerDrop(resizer: HTMLElement, file: File): void {
+    console.log('=== DIVIDER DROP DEBUG ===');
+    console.log('Resizer element:', resizer);
+    console.log('Resizer classes:', resizer.className);
+    console.log('Resizer dataset:', resizer.dataset);
+    
+    // Get the node ID from the resizer
+    const nodeId = resizer.dataset.nodeId;
+    if (!nodeId || !this.bspManager) {
+      console.log('❌ No nodeId or bspManager');
+      return;
+    }
+    
+    // Get the direction from the resizer
+    const direction = resizer.dataset.direction;
+    const isHorizontal = direction === 'horizontal';
+    
+    console.log('🎯 Attempting split - Node ID:', nodeId, 'Direction:', direction);
+    
+    // Find the largest panel to split instead of trying to match resizer position
+    const allPanels = document.querySelectorAll('.bsp-panel');
+    let largestPanel: HTMLElement | null = null;
+    let largestArea = 0;
+    
+    console.log('📊 Available panels:', allPanels.length);
+    
+    for (const panel of allPanels) {
+      const rect = panel.getBoundingClientRect();
+      const area = rect.width * rect.height;
+      const panelId = panel.getAttribute('data-panel-id');
+      
+      console.log(`Panel ${panelId}: ${rect.width}x${rect.height} = ${area}px²`);
+      
+      if (area > largestArea) {
+        largestArea = area;
+        largestPanel = panel as HTMLElement;
+      }
+    }
+    
+    if (largestPanel) {
+      const targetPanelId = largestPanel.getAttribute('data-panel-id');
+      console.log('🎯 Splitting largest panel:', targetPanelId);
+      
+      if (targetPanelId) {
+        // Split the target panel
+        const newPanelId = this.bspManager.splitPanel(targetPanelId, direction as 'horizontal' | 'vertical', 'right');
+        
+        console.log('✅ Split result - New panel ID:', newPanelId);
+        
+        if (newPanelId) {
+          // Wait for layout to complete, then load the file
+          setTimeout(() => {
+            console.log('📁 Loading file into new panel:', newPanelId);
+            this.openDroppedFileInPanel(file, newPanelId);
+            // Re-setup drag and drop for new resizers
+            this.refreshDividerDragAndDrop();
+          }, 200);
+        } else {
+          console.log('❌ Split panel returned null');
+        }
+      }
+    } else {
+      console.log('❌ No panels found to split');
+    }
+    
+    console.log('=== END DIVIDER DROP DEBUG ===');
+  }
 
   private addOrUpdateFileBreadcrumb(panel: HTMLElement, path: string): void {
     // First check if breadcrumb exists, if not add it

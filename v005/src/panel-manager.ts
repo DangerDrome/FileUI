@@ -1,6 +1,7 @@
 // Panel Manager - Simple fixed layout system
 import { BSPPanelManager } from './bsp-manager';
 import { ServerFileSystem, FileItem, sortFiles, getFileType } from './filemanager';
+import MarkdownIt from 'markdown-it';
 
 // Fixed panel configuration
 const FIXED_PANELS = [
@@ -50,9 +51,16 @@ export class PanelManager {
   private bspManager: BSPPanelManager | null = null;
   private directoryHandles: Map<string, any> = new Map();
   private fileHandles: Map<string, any> = new Map();
+  private md: MarkdownIt;
 
   constructor(container: HTMLElement) {
     this.container = container;
+    // Initialize markdown-it with same settings as StyleUI
+    this.md = new MarkdownIt({
+      html: true,
+      linkify: true,
+      breaks: true
+    });
     this.init();
   }
 
@@ -81,28 +89,43 @@ export class PanelManager {
   private findOrCreateTargetPanel(): string | null {
     if (!this.bspManager) return null;
 
-    // Find an unpinned panel to use (excluding explorer panels)
-    const allPanels = document.querySelectorAll('.bsp-panel:not(.explorer-panel)');
+    // Always prioritize the focused panel first
+    const focusedPanel = document.querySelector('.bsp-panel.focused');
     
-    // First, try the focused panel if it's unpinned
-    const focusedPanel = document.querySelector('.bsp-panel.focused:not(.explorer-panel)');
-    if (focusedPanel) {
+    // If there's a focused panel and it's not an explorer panel
+    if (focusedPanel && !focusedPanel.classList.contains('explorer-panel')) {
       const isPinned = focusedPanel.classList.contains('is-pinned');
       if (!isPinned) {
+        // Use the focused panel
         return focusedPanel.getAttribute('data-panel-id');
       }
     }
     
-    // If focused panel is pinned or doesn't exist, find ANY unpinned panel
+    // If focused panel is pinned or is an explorer, find the next unpinned non-explorer panel
+    const allPanels = document.querySelectorAll('.bsp-panel:not(.explorer-panel)');
     for (const panel of allPanels) {
       const isPinned = panel.classList.contains('is-pinned');
       if (!isPinned) {
+        // Focus this panel before returning it
+        this.focusPanel(panel);
         return panel.getAttribute('data-panel-id');
       }
     }
 
     // Only create a new panel if all existing panels are pinned
-    return this.bspManager.addPanel('right');
+    const newPanelId = this.bspManager.addPanel('right');
+    
+    // Focus the newly created panel
+    if (newPanelId) {
+      setTimeout(() => {
+        const newPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`);
+        if (newPanel) {
+          this.focusPanel(newPanel);
+        }
+      }, 10);
+    }
+    
+    return newPanelId;
   }
 
   private async loadFileContent(content: HTMLElement, source: string | any, fileName: string, sourceType: 'server' | 'native'): Promise<void> {
@@ -116,6 +139,17 @@ export class PanelManager {
         if (fileType === 'file-image') {
           content.innerHTML = `<div class="file-preview image-preview">
             <img src="http://localhost:8001/api/file?path=${encodeURIComponent(source)}" alt="${fileName}" />
+          </div>`;
+        } else if (fileType === 'file-video') {
+          content.innerHTML = `<div class="file-preview video-preview">
+            <video controls src="http://localhost:8001/api/file?path=${encodeURIComponent(source)}" />
+          </div>`;
+        } else if (fileType === 'markdown' || fileName.endsWith('.md')) {
+          const fs = new ServerFileSystem('http://localhost:8001/api');
+          const fileContent = await fs.readFile(source);
+          const renderedHtml = this.md.render(fileContent);
+          content.innerHTML = `<div class="file-content markdown-content">
+            ${renderedHtml}
           </div>`;
         } else {
           const fs = new ServerFileSystem('http://localhost:8001/api');
@@ -132,6 +166,17 @@ export class PanelManager {
           const url = URL.createObjectURL(file);
           content.innerHTML = `<div class="file-preview image-preview">
             <img src="${url}" alt="${fileName}" onload="URL.revokeObjectURL(this.src)" />
+          </div>`;
+        } else if (fileType === 'file-video') {
+          const url = URL.createObjectURL(file);
+          content.innerHTML = `<div class="file-preview video-preview">
+            <video controls src="${url}" onloadedmetadata="URL.revokeObjectURL(this.src)" />
+          </div>`;
+        } else if (fileType === 'markdown' || fileName.endsWith('.md')) {
+          const text = await file.text();
+          const renderedHtml = this.md.render(text);
+          content.innerHTML = `<div class="file-content markdown-content">
+            ${renderedHtml}
           </div>`;
         } else if (file.type.startsWith('text/') || fileType === 'file-code' || file.size < 1024 * 1024) {
           const text = await file.text();
@@ -1167,6 +1212,11 @@ export class PanelManager {
       return;
     }
 
+    // Check if panel has no header (initial empty panel) and add one
+    if (!panel.querySelector('.panel-header')) {
+      this.addHeaderToPanel(panel as HTMLElement, fileName);
+    }
+
     const panelTitle = panel.querySelector('.panel-title');
     const content = panel.querySelector('.panel-content') as HTMLElement;
     
@@ -1222,13 +1272,16 @@ export class PanelManager {
   }
   
   private focusPanel(panel: Element): void {
-    // Remove focus from all panels
-    document.querySelectorAll('.bsp-panel.focused').forEach(p => {
-      p.classList.remove('focused');
-    });
-    
-    // Add focus to the target panel
-    panel.classList.add('focused');
+    // Use BSP manager's focus method to ensure proper focus tracking
+    if (this.bspManager && panel instanceof HTMLElement) {
+      this.bspManager.setFocusedPanel(panel);
+    } else {
+      // Fallback to manual focus management
+      document.querySelectorAll('.bsp-panel.focused').forEach(p => {
+        p.classList.remove('focused');
+      });
+      panel.classList.add('focused');
+    }
   }
 
   private escapeHtml(text: string): string {
@@ -1575,6 +1628,11 @@ export class PanelManager {
       return;
     }
 
+    // Check if panel has no header (initial empty panel) and add one
+    if (!panel.querySelector('.panel-header')) {
+      this.addHeaderToPanel(panel as HTMLElement, fileName);
+    }
+
     const panelTitle = panel.querySelector('.panel-title');
     const content = panel.querySelector('.panel-content') as HTMLElement;
     
@@ -1614,6 +1672,41 @@ export class PanelManager {
     }
     
     return `${size.toFixed(2)} ${units[unitIndex]}`;
+  }
+
+  private addHeaderToPanel(panel: HTMLElement, title: string): void {
+    const panelBody = panel.querySelector('.panel-body');
+    if (!panelBody) return;
+
+    // Create header HTML
+    const headerHTML = `
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>${title}</span>
+        </div>
+        <div class="panel-actions">
+          <button class="panel-action-btn" data-action="pin" title="Pin Panel">
+            <i data-lucide="pin" class="lucide icon-pin"></i>
+            <i data-lucide="pin-off" class="lucide icon-pin-off" style="display: none;"></i>
+          </button>
+          <button class="panel-action-btn" data-action="split-v" title="Split Vertical">
+            <i data-lucide="columns-2" class="lucide"></i>
+          </button>
+          <button class="panel-action-btn" data-action="split-h" title="Split Horizontal">
+            <i data-lucide="rows-2" class="lucide"></i>
+          </button>
+          <button class="panel-action-btn" data-action="close" title="Close Panel">
+            <i data-lucide="x" class="lucide"></i>
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Insert header before panel body
+    panel.insertAdjacentHTML('afterbegin', headerHTML);
+
+    // Re-initialize lucide icons for the new header
+    this.initializeLucideIcons(10);
   }
 
 }

@@ -118,18 +118,33 @@ export function getFileType(filename: string): string {
   }
   
   // Image files
-  if (['exr', 'dpx', 'tiff', 'png', 'jpg', 'jpeg', 'psd'].includes(ext)) {
+  if (['exr', 'dpx', 'tiff', 'png', 'jpg', 'jpeg', 'psd', 'webp', 'gif', 'bmp', 'svg', 'ico', 'heic', 'heif', 'avif'].includes(ext)) {
     return 'file-image';
   }
   
   // Video files
-  if (['mov', 'mp4', 'mxf', 'r3d', 'ari'].includes(ext)) {
+  if (['mov', 'mp4', 'mxf', 'r3d', 'ari', 'webm', 'avi', 'mkv', 'm4v', 'flv', 'wmv', 'mpg', 'mpeg', 'm2v', 'f4v', 'ogg', 'ogv'].includes(ext)) {
     return 'file-video';
   }
   
   // Project files
   if (['prproj', 'drp', 'fcp'].includes(ext)) {
     return 'file-project';
+  }
+  
+  // Audio files
+  if (['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg', 'wma', 'aiff', 'ape', 'opus'].includes(ext)) {
+    return 'file-audio';
+  }
+  
+  // Code files
+  if (['js', 'ts', 'jsx', 'tsx', 'py', 'cpp', 'c', 'h', 'java', 'cs', 'go', 'rs', 'php', 'rb', 'swift'].includes(ext)) {
+    return 'file-code';
+  }
+  
+  // Markdown
+  if (ext === 'md') {
+    return 'markdown';
   }
   
   return 'file-generic';

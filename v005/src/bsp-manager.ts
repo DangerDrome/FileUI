@@ -192,8 +192,8 @@ export class BSPPanelManager {
   }
 
   init(): void {
-    // Create initial panel
-    const initialPanel = this.createPanel('Main Content');
+    // Create initial panel without header
+    const initialPanel = this.createPanel('Main Content', true);
     this.root = new BSPNode({ 
       id: initialPanel.id, 
       element: initialPanel.element 
@@ -355,7 +355,7 @@ export class BSPPanelManager {
     }
   }
 
-  private setFocusedPanel(panel: HTMLElement): void {
+  setFocusedPanel(panel: HTMLElement): void {
     // Remove focus from previous panel
     if (this.focusedPanel) {
       this.focusedPanel.classList.remove('focused');
@@ -469,7 +469,7 @@ export class BSPPanelManager {
     this.layout();
   }
 
-  private createPanel(title: string): { id: string; element: HTMLElement } {
+  private createPanel(title: string, noHeader: boolean = false): { id: string; element: HTMLElement } {
     const panelNumber = this.nextPanelNumber++;
     const id = `bsp-panel-${panelNumber}-${Date.now()}`;
     
@@ -477,33 +477,43 @@ export class BSPPanelManager {
     element.className = 'panel fileui-panel bsp-panel';
     element.dataset.panelId = id;
     
-    element.innerHTML = `
-      <div class="panel-header">
-        <div class="panel-title">
-          <span>${title}</span>
+    if (noHeader) {
+      element.innerHTML = `
+        <div class="panel-body" style="height: 100%;">
+          <div class="panel-content" style="display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
+            <i data-lucide="library" class="lucide" style="width: 64px; height: 64px;"></i>
+          </div>
         </div>
-        <div class="panel-actions">
-          <button class="panel-action-btn" data-action="pin" title="Pin Panel">
-            <i data-lucide="pin" class="lucide icon-pin"></i>
-            <i data-lucide="pin-off" class="lucide icon-pin-off" style="display: none;"></i>
-          </button>
-          <button class="panel-action-btn" data-action="split-v" title="Split Vertical">
-            <i data-lucide="columns-2" class="lucide"></i>
-          </button>
-          <button class="panel-action-btn" data-action="split-h" title="Split Horizontal">
-            <i data-lucide="rows-2" class="lucide"></i>
-          </button>
-          <button class="panel-action-btn" data-action="close" title="Close Panel">
-            <i data-lucide="x" class="lucide"></i>
-          </button>
+      `;
+    } else {
+      element.innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>${title}</span>
+          </div>
+          <div class="panel-actions">
+            <button class="panel-action-btn" data-action="pin" title="Pin Panel">
+              <i data-lucide="pin" class="lucide icon-pin"></i>
+              <i data-lucide="pin-off" class="lucide icon-pin-off" style="display: none;"></i>
+            </button>
+            <button class="panel-action-btn" data-action="split-v" title="Split Vertical">
+              <i data-lucide="columns-2" class="lucide"></i>
+            </button>
+            <button class="panel-action-btn" data-action="split-h" title="Split Horizontal">
+              <i data-lucide="rows-2" class="lucide"></i>
+            </button>
+            <button class="panel-action-btn" data-action="close" title="Close Panel">
+              <i data-lucide="x" class="lucide"></i>
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="panel-body">
-        <div class="panel-content" style="display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
-          <i data-lucide="library" class="lucide" style="width: 64px; height: 64px;"></i>
+        <div class="panel-body">
+          <div class="panel-content" style="display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
+            <i data-lucide="library" class="lucide" style="width: 64px; height: 64px;"></i>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
     
     return { id, element };
   }

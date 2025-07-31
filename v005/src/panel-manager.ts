@@ -38,6 +38,7 @@ export class PanelManager {
   private fileHandles: Map<string, any> = new Map();
   private md: MarkdownIt;
   private contextMenu: ContextMenuManager;
+  private dragDropInitialized: boolean = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -50,6 +51,8 @@ export class PanelManager {
     // Initialize context menu manager
     this.contextMenu = new ContextMenuManager();
     this.init();
+    // Setup global drag and drop
+    this.setupGlobalDragAndDrop();
   }
 
   private initializeLucideIcons(delay: number = 0): void {
@@ -206,6 +209,8 @@ export class PanelManager {
     this.createPanels();
     this.layout();
     this.setupEventListeners();
+    // Setup global drag and drop after layout is created
+    setTimeout(() => this.setupGlobalDragAndDrop(), 200);
   }
 
   private createPanels(): void {
@@ -1150,7 +1155,7 @@ export class PanelManager {
     }
     
     treeItem.innerHTML = `
-      <div class="tree-item-content" data-is-folder="${isDirectory}" data-path="${file.path}" data-file-name="${file.name}" data-file-type="${fileType}" style="padding-left: ${20 + level * 20}px">
+      <div class="tree-item-content" draggable="true" data-is-folder="${isDirectory}" data-path="${file.path}" data-file-name="${file.name}" data-file-type="${fileType}" style="padding-left: ${20 + level * 20}px">
         ${isDirectory ? `
           <button class="tree-item-toggle" aria-label="Toggle node" data-expanded="false">
             <i data-lucide="chevron-right" class="lucide chevron-icon"></i>
@@ -1301,6 +1306,344 @@ export class PanelManager {
     });
   }
 
+  private setupGlobalDragAndDrop(): void {
+    // Prevent default drag behaviors on document
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      document.addEventListener(eventName, (e) => {
+        e.preventDefault();
+      }, false);
+    });
+
+    // Setup drops on ALL panels, not just explorer
+    const setupPanelDropZone = (panel: Element) => {
+      const panelContent = panel.querySelector('.panel-content');
+      if (!panelContent) return;
+
+      // Check if already set up
+      if ((panelContent as any)._dropZoneSetup) return;
+      (panelContent as any)._dropZoneSetup = true;
+
+      // Add dragenter to handle initial entry
+      panelContent.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Drag enter panel:', panel.getAttribute('data-panel-id'));
+        panelContent.classList.add('drag-over');
+      });
+
+      panelContent.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.dataTransfer) {
+          e.dataTransfer.dropEffect = 'copy';
+        }
+        // Ensure class stays on during dragover
+        if (!panelContent.classList.contains('drag-over')) {
+          panelContent.classList.add('drag-over');
+        }
+      });
+
+      panelContent.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Only remove if we're actually leaving the panel
+        const rect = panelContent.getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        
+        if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+          console.log('Drag leave panel:', panel.getAttribute('data-panel-id'));
+          panelContent.classList.remove('drag-over');
+        }
+      });
+
+      panelContent.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Drop on panel:', panel.getAttribute('data-panel-id'), 'Files:', e.dataTransfer?.files.length);
+        panelContent.classList.remove('drag-over');
+        
+        if (e.dataTransfer?.files.length) {
+          const files = Array.from(e.dataTransfer.files);
+          const panelElement = panelContent.closest('.bsp-panel');
+          const targetPanelId = panelElement?.getAttribute('data-panel-id');
+          
+          if (targetPanelId) {
+            // Open files in the panel that was dropped on
+            for (const file of files) {
+              await this.openDroppedFileInPanel(file, targetPanelId);
+            }
+          }
+        }
+      });
+    };
+
+    // Setup drop zones on all existing panels
+    setTimeout(() => {
+      document.querySelectorAll('.bsp-panel').forEach(panel => {
+        console.log('Setting up drop zone for panel:', panel.getAttribute('data-panel-id'));
+        setupPanelDropZone(panel);
+      });
+    }, 100);
+    
+    // Watch for new panels
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof Element && node.classList.contains('bsp-panel')) {
+            console.log('Setting up drop zone for new panel:', node.getAttribute('data-panel-id'));
+            setupPanelDropZone(node);
+          }
+        });
+      });
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Setup internal drag and drop for tree items
+    explorerContent.addEventListener('dragstart', (e) => {
+      const target = e.target as HTMLElement;
+      const treeItemContent = target.closest('.tree-item-content') as HTMLElement;
+      
+      if (treeItemContent && e.dataTransfer) {
+        draggedElement = treeItemContent;
+        treeItemContent.classList.add('dragging');
+        
+        // Set drag data
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', treeItemContent.dataset.path || '');
+        
+        // Create custom drag image
+        const dragGhost = document.createElement('div');
+        dragGhost.className = 'drag-ghost';
+        const fileName = treeItemContent.querySelector('.tree-item-label')?.textContent || '';
+        const iconName = treeItemContent.dataset.isFolder === 'true' ? 'folder' : 'file';
+        dragGhost.innerHTML = `<i data-lucide="${iconName}"></i><span>${fileName}</span>`;
+        document.body.appendChild(dragGhost);
+        
+        // Set custom drag image
+        e.dataTransfer.setDragImage(dragGhost, 0, 0);
+        
+        // Remove ghost after drag starts
+        setTimeout(() => dragGhost.remove(), 0);
+      }
+    });
+
+    explorerContent.addEventListener('dragend', (e) => {
+      const target = e.target as HTMLElement;
+      const treeItemContent = target.closest('.tree-item-content') as HTMLElement;
+      
+      if (treeItemContent) {
+        treeItemContent.classList.remove('dragging');
+      }
+      
+      // Clean up any drag-over classes
+      explorerContent.querySelectorAll('.drag-over, .drag-over-before, .drag-over-after').forEach(el => {
+        el.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
+      });
+      
+      draggedElement = null;
+    });
+
+    // Handle drag over for internal items
+    explorerContent.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      
+      if (!draggedElement) return;
+      
+      const target = e.target as HTMLElement;
+      const treeItemContent = target.closest('.tree-item-content') as HTMLElement;
+      
+      if (treeItemContent && treeItemContent !== draggedElement) {
+        // Remove previous drag-over classes
+        explorerContent.querySelectorAll('.drag-over, .drag-over-before, .drag-over-after').forEach(el => {
+          el.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
+        });
+        
+        // Add appropriate class based on position
+        const rect = treeItemContent.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        const height = rect.height;
+        
+        if (treeItemContent.dataset.isFolder === 'true' && y > height * 0.25 && y < height * 0.75) {
+          // Dragging into a folder
+          treeItemContent.classList.add('drag-over');
+        } else if (y < height / 2) {
+          // Dragging before item
+          treeItemContent.classList.add('drag-over-before');
+        } else {
+          // Dragging after item
+          treeItemContent.classList.add('drag-over-after');
+        }
+      }
+    });
+
+    // Handle drop for internal items
+    explorerContent.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      
+      const target = e.target as HTMLElement;
+      const dropTarget = target.closest('.tree-item-content') as HTMLElement;
+      
+      if (dropTarget && draggedElement && dropTarget !== draggedElement) {
+        const sourcePath = draggedElement.dataset.path;
+        const targetPath = dropTarget.dataset.path;
+        
+        if (sourcePath && targetPath) {
+          await this.handleInternalFileDrop(sourcePath, targetPath, dropTarget, panelId);
+        }
+      }
+      
+      // Clean up
+      explorerContent.querySelectorAll('.drag-over, .drag-over-before, .drag-over-after').forEach(el => {
+        el.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
+      });
+    });
+
+  }
+
+  private async openDroppedFileInPanel(file: File, panelId: string): Promise<void> {
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    // Update panel header
+    const titleSpan = panel.querySelector('.panel-title span');
+    if (titleSpan) titleSpan.textContent = file.name;
+
+    // Update panel content based on file type
+    const panelContent = panel.querySelector('.panel-content');
+    if (!panelContent) return;
+
+    const fileType = getFileType(file.name);
+    
+    if (file.type.startsWith('text/') || fileType === 'file-code' || fileType === 'markdown' || file.name.endsWith('.txt')) {
+      // Read text files
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const content = e.target?.result as string;
+        if (fileType === 'markdown' || file.name.endsWith('.md')) {
+          panelContent.innerHTML = `<div class="markdown-content">${this.md.render(content)}</div>`;
+        } else {
+          panelContent.innerHTML = `<pre class="file-content">${this.escapeHtml(content)}</pre>`;
+        }
+      };
+      reader.readAsText(file);
+    } else if (fileType === 'file-image' || file.type.startsWith('image/')) {
+      // Handle image files
+      const url = URL.createObjectURL(file);
+      panelContent.innerHTML = `
+        <div class="image-viewer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: auto;">
+          <img src="${url}" alt="${file.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+        </div>
+      `;
+    } else if (fileType === 'file-video' || file.type.startsWith('video/')) {
+      // Handle video files
+      const url = URL.createObjectURL(file);
+      panelContent.innerHTML = `
+        <div class="video-viewer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+          <video controls style="max-width: 100%; max-height: 100%;">
+            <source src="${url}" type="${file.type}">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      `;
+    } else if (fileType === 'file-pdf' || file.type === 'application/pdf') {
+      // Handle PDF files
+      const url = URL.createObjectURL(file);
+      panelContent.innerHTML = `
+        <div class="pdf-viewer" style="width: 100%; height: 100%;">
+          <iframe src="${url}" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+      `;
+    } else {
+      // Unsupported file type
+      panelContent.innerHTML = `
+        <div class="file-info" style="padding: 20px;">
+          <p>File: ${file.name}</p>
+          <p>Type: ${file.type || 'Unknown'}</p>
+          <p>Size: ${this.formatFileSize(file.size)}</p>
+          <p style="color: var(--color-text-secondary);">Preview not available for this file type</p>
+        </div>
+      `;
+    }
+  }
+
+
+  private async handleExternalFileDrop(files: File[], panelId: string): Promise<void> {
+    // This method is no longer needed since we handle drops per panel
+    console.log('Legacy method called - should not happen');
+  }
+
+  private escapeHtml(text: string): string {
+    const map: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      '/': '&#x2F;',
+    };
+    return text.replace(/[&<>"'\/]/g, (m) => map[m]);
+  }
+
+  private async handleInternalFileDrop(sourcePath: string, targetPath: string, dropTarget: HTMLElement, panelId: string): Promise<void> {
+    const isTargetFolder = dropTarget.dataset.isFolder === 'true';
+    const position = this.getDropPosition(dropTarget);
+    
+    console.log(`Moving ${sourcePath} to ${targetPath} (position: ${position})`);
+    
+    // In a real implementation, you would:
+    // 1. Call server API to move/copy the file
+    // 2. Update the file explorer
+    // 3. Show progress indicators
+    
+    if (isTargetFolder && position === 'inside') {
+      console.log(`Would move file into folder: ${targetPath}`);
+    } else {
+      console.log(`Would reorder file ${position} ${targetPath}`);
+    }
+    
+    // Refresh the directory view after operation
+    await this.loadDirectoryContents(this.currentPath, panelId);
+    
+    // Show a notification
+    this.showNotification('File operation completed', 'success');
+  }
+
+  private getDropPosition(element: HTMLElement): 'before' | 'after' | 'inside' {
+    if (element.classList.contains('drag-over')) return 'inside';
+    if (element.classList.contains('drag-over-before')) return 'before';
+    if (element.classList.contains('drag-over-after')) return 'after';
+    return 'after';
+  }
+
+  private showNotification(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+    // Simple notification implementation
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
   private async openFileInBSPPanel(path: string, fileName: string): Promise<void> {
     const targetPanelId = this.findOrCreateTargetPanel();
     if (!targetPanelId) return;
@@ -1389,11 +1732,6 @@ export class PanelManager {
     }
   }
 
-  private escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
 
   private setupTreeItemInteractions(_container: HTMLElement, _panelId: string): void {
     // Event delegation is already handled in setupExplorerInteractions
@@ -1608,7 +1946,7 @@ export class PanelManager {
     }
     
     treeItem.innerHTML = `
-      <div class="tree-item-content native-file" data-is-folder="${isDirectory}" data-file-name="${file.name}" data-file-type="${fileType}" data-panel-id="${panelId}" style="padding-left: ${20 + level * 20}px">
+      <div class="tree-item-content native-file" draggable="true" data-is-folder="${isDirectory}" data-file-name="${file.name}" data-file-type="${fileType}" data-panel-id="${panelId}" style="padding-left: ${20 + level * 20}px">
         ${isDirectory ? `
           <button class="tree-item-toggle" aria-label="Toggle node" data-expanded="false">
             <i data-lucide="chevron-right" class="lucide chevron-icon"></i>

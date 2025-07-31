@@ -2952,6 +2952,106 @@ body.is-dragging {
   margin: var(--spacing-4) var(--spacing-0);
 }
 
+/* Drag and Drop Styles */
+.panel-content {
+  position: relative !important;
+}
+
+.panel-content.drag-over {
+  outline: 2px dashed #00cc8b !important;
+  outline-offset: -4px !important;
+  background-color: rgba(0, 204, 139, 0.05) !important;
+}
+
+.panel-content.drag-over::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 204, 139, 0.1); /* Direct color for now */
+  pointer-events: none;
+  z-index: 10;
+}
+
+.panel-content.drag-over::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 2px solid #00cc8b; /* Direct accent color */
+  border-radius: 4px !important;
+  pointer-events: none;
+  z-index: 11;
+}
+
+.tree-item-content {
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  position: relative;
+}
+
+.tree-item-content:hover {
+  background-color: rgba(var(--color-accent-rgb), 0.05);
+}
+
+.tree-item-content.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+.tree-item-content.drag-over {
+  background-color: rgba(var(--color-accent-rgb), 0.2);
+  outline: 2px solid var(--color-accent);
+  outline-offset: -1px;
+}
+
+/* Simple file preview styles */
+.image-viewer img {
+  display: block;
+  margin: 0 auto;
+}
+
+.video-viewer video {
+  display: block;
+  margin: 0 auto;
+}
+
+.pdf-viewer iframe {
+  background: white;
+}
+
+.file-content {
+  padding: var(--spacing-16);
+  overflow: auto;
+  height: 100%;
+  font-family: monospace;
+  font-size: var(--font-size-14);
+  line-height: 1.5;
+}
+
+/* Notification animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
 /* ULTRA AGGRESSIVE BORDER RADIUS REMOVAL - MUST BE LAST IN FILE */
 * {
   border-radius: var(--border-radius-0) !important;

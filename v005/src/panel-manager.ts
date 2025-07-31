@@ -127,9 +127,43 @@ export class PanelManager {
             <img src="http://localhost:8001/api/file?path=${encodeURIComponent(source)}" alt="${fileName}" />
           </div>`;
         } else if (fileType === 'file-video') {
-          content.innerHTML = `<div class="file-preview video-preview">
-            <video controls src="http://localhost:8001/api/file?path=${encodeURIComponent(source)}" />
-          </div>`;
+          content.innerHTML = `
+            <div class="video-player">
+              <video src="http://localhost:8001/api/file?path=${encodeURIComponent(source)}" autoplay muted loop></video>
+              <div class="video-controls">
+                <button class="btn btn-icon btn-sm" data-action="play">
+                  <i data-lucide="play" width="16" height="16"></i>
+                </button>
+                <span class="video-time-label">0:00 / 0:00</span>
+                <div class="timeline" data-video-timeline>
+                  <div class="timeline-track"></div>
+                  <div class="timeline-progress"></div>
+                  <div class="timeline-handle" style="left: 0%">
+                    <i data-lucide="triangle" width="8" height="8"></i>
+                    <div class="timeline-playhead-line"></div>
+                    <div class="timeline-playhead-label">0</div>
+                  </div>
+                  <div class="timeline-ruler">
+                    <div class="timeline-tick timeline-tick-major" style="left: 0%"></div>
+                    <div class="timeline-label" style="left: 0%">0</div>
+                    <div class="timeline-tick timeline-tick-major" style="left: 25%"></div>
+                    <div class="timeline-label" style="left: 25%">60</div>
+                    <div class="timeline-tick timeline-tick-major" style="left: 50%"></div>
+                    <div class="timeline-label" style="left: 50%">120</div>
+                    <div class="timeline-tick timeline-tick-major" style="left: 75%"></div>
+                    <div class="timeline-label" style="left: 75%">180</div>
+                    <div class="timeline-tick timeline-tick-major" style="left: 100%"></div>
+                    <div class="timeline-label" style="left: 100%">240</div>
+                  </div>
+                </div>
+                <button class="btn btn-icon btn-sm" data-action="volume">
+                  <i data-lucide="volume-2" width="16" height="16"></i>
+                </button>
+                <input type="range" class="form-control" min="0" max="100" value="100" style="width: 80px;">
+              </div>
+            </div>
+          `;
+          this.setupVideoPlayer(content);
         } else if (fileType === 'markdown' || fileName.endsWith('.md')) {
           const fs = new ServerFileSystem('http://localhost:8001/api');
           const fileContent = await fs.readFile(source);
@@ -163,9 +197,43 @@ export class PanelManager {
           </div>`;
         } else if (fileType === 'file-video') {
           const url = URL.createObjectURL(file);
-          content.innerHTML = `<div class="file-preview video-preview">
-            <video controls src="${url}" onloadedmetadata="URL.revokeObjectURL(this.src)" />
-          </div>`;
+          content.innerHTML = `
+            <div class="video-player">
+              <video src="${url}" autoplay muted loop></video>
+              <div class="video-controls">
+                <button class="btn btn-icon btn-sm" data-action="play">
+                  <i data-lucide="play" width="16" height="16"></i>
+                </button>
+                <span class="video-time-label">0:00 / 0:00</span>
+                <div class="timeline" data-video-timeline>
+                  <div class="timeline-track"></div>
+                  <div class="timeline-progress"></div>
+                  <div class="timeline-handle" style="left: 0%">
+                    <i data-lucide="triangle" width="8" height="8"></i>
+                    <div class="timeline-playhead-line"></div>
+                    <div class="timeline-playhead-label">0</div>
+                  </div>
+                  <div class="timeline-ruler">
+                    <div class="timeline-tick timeline-tick-major" style="left: 0%"></div>
+                    <div class="timeline-label" style="left: 0%">0</div>
+                    <div class="timeline-tick timeline-tick-major" style="left: 25%"></div>
+                    <div class="timeline-label" style="left: 25%">60</div>
+                    <div class="timeline-tick timeline-tick-major" style="left: 50%"></div>
+                    <div class="timeline-label" style="left: 50%">120</div>
+                    <div class="timeline-tick timeline-tick-major" style="left: 75%"></div>
+                    <div class="timeline-label" style="left: 75%">180</div>
+                    <div class="timeline-tick timeline-tick-major" style="left: 100%"></div>
+                    <div class="timeline-label" style="left: 100%">240</div>
+                  </div>
+                </div>
+                <button class="btn btn-icon btn-sm" data-action="volume">
+                  <i data-lucide="volume-2" width="16" height="16"></i>
+                </button>
+                <input type="range" class="form-control" min="0" max="100" value="100" style="width: 80px;">
+              </div>
+            </div>
+          `;
+          this.setupVideoPlayer(content);
         } else if (fileType === 'markdown' || fileName.endsWith('.md')) {
           const text = await file.text();
           const renderedHtml = this.md.render(text);
@@ -1615,13 +1683,33 @@ export class PanelManager {
       // Handle video files
       const url = URL.createObjectURL(file);
       panelContent.innerHTML = `
-        <div class="video-viewer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-          <video controls style="max-width: 100%; max-height: 100%;">
+        <div class="video-player">
+          <video autoplay muted loop>
             <source src="${url}" type="${file.type}">
             Your browser does not support the video tag.
           </video>
+          <div class="video-controls">
+            <button class="btn btn-icon btn-sm" data-action="play">
+              <i data-lucide="play" width="16" height="16"></i>
+            </button>
+            <span class="video-time-label">0:00 / 0:00</span>
+            <div class="timeline" data-video-timeline>
+              <div class="timeline-track"></div>
+              <div class="timeline-progress"></div>
+              <div class="timeline-handle" style="left: 0%">
+                <div class="timeline-playhead-line"></div>
+                <div class="timeline-playhead-label">0:00</div>
+              </div>
+              <div class="timeline-ruler"></div>
+            </div>
+            <button class="btn btn-icon btn-sm" data-action="volume">
+              <i data-lucide="volume-2" width="16" height="16"></i>
+            </button>
+            <input type="range" class="form-control" min="0" max="100" value="100" style="width: 80px;">
+          </div>
         </div>
       `;
+      this.setupVideoPlayer(panelContent);
     } else if (fileType === 'file-pdf' || file.type === 'application/pdf') {
       // Handle PDF files
       const url = URL.createObjectURL(file);
@@ -2196,6 +2284,139 @@ export class PanelManager {
     
     return `${size.toFixed(2)} ${units[unitIndex]}`;
   }
+
+  private setupVideoPlayer(container: HTMLElement): void {
+    const video = container.querySelector('video') as HTMLVideoElement;
+    const playBtn = container.querySelector('[data-action="play"]') as HTMLButtonElement;
+    const volumeBtn = container.querySelector('[data-action="volume"]') as HTMLButtonElement;
+    const volumeSlider = container.querySelector('input[type="range"]') as HTMLInputElement;
+    const timeLabel = container.querySelector('.video-time-label') as HTMLElement;
+    const timeline = container.querySelector('.timeline') as HTMLElement;
+    const timelineHandle = timeline?.querySelector('.timeline-handle') as HTMLElement;
+    const timelineLabel = timeline?.querySelector('.timeline-playhead-label') as HTMLElement;
+    
+    if (!video) return;
+    
+    // Format time helper
+    const formatTime = (seconds: number): string => {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+    
+    // Set initial state - video starts playing and muted
+    video.muted = true;
+    volumeSlider && (volumeSlider.value = '0');
+    
+    // Update play button based on initial state
+    if (!video.paused) {
+      playBtn && (playBtn.innerHTML = '<i data-lucide="pause" width="16" height="16"></i>');
+    }
+    
+    // Play/pause functionality
+    playBtn?.addEventListener('click', () => {
+      if (video.paused) {
+        video.play();
+        playBtn.innerHTML = '<i data-lucide="pause" width="16" height="16"></i>';
+      } else {
+        video.pause();
+        playBtn.innerHTML = '<i data-lucide="play" width="16" height="16"></i>';
+      }
+      this.initializeLucideIcons();
+    });
+    
+    // Volume control
+    volumeSlider?.addEventListener('input', () => {
+      video.volume = parseInt(volumeSlider.value) / 100;
+      updateVolumeIcon();
+    });
+    
+    const updateVolumeIcon = () => {
+      if (!volumeBtn) return;
+      const volume = video.volume;
+      let icon = 'volume-2';
+      if (video.muted || volume === 0) icon = 'volume-x';
+      else if (volume < 0.5) icon = 'volume-1';
+      volumeBtn.innerHTML = `<i data-lucide="${icon}" width="16" height="16"></i>`;
+      this.initializeLucideIcons();
+    };
+    
+    // Set initial volume icon to muted
+    updateVolumeIcon();
+    
+    // Timeline scrubbing
+    let isDragging = false;
+    
+    const updateTimeline = (percentage: number) => {
+      if (!timelineHandle || !video.duration) return;
+      timelineHandle.style.left = `${percentage}%`;
+      video.currentTime = (percentage / 100) * video.duration;
+      if (timelineLabel) {
+        timelineLabel.textContent = formatTime(video.currentTime);
+      }
+      
+      // Update timeline line opacity based on playhead position
+      const track = timeline?.querySelector('.timeline-track');
+      if (track) {
+        const trackElement = track as HTMLElement;
+        trackElement.style.setProperty('--playhead-position', `${percentage}%`);
+      }
+    };
+    
+    timeline?.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      const rect = timeline.getBoundingClientRect();
+      const percentage = ((e.clientX - rect.left) / rect.width) * 100;
+      updateTimeline(percentage);
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging || !timeline) return;
+      const rect = timeline.getBoundingClientRect();
+      const percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      updateTimeline(percentage);
+    });
+    
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+    
+    // Update time labels
+    video.addEventListener('loadedmetadata', () => {
+      if (timeLabel) {
+        timeLabel.textContent = `0:00 / ${formatTime(video.duration)}`;
+      }
+    });
+    
+    video.addEventListener('timeupdate', () => {
+      if (!video.duration) return;
+      
+      // Update time label
+      if (timeLabel) {
+        timeLabel.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+      }
+      
+      // Update timeline position if not dragging
+      if (!isDragging && timelineHandle) {
+        const percentage = (video.currentTime / video.duration) * 100;
+        timelineHandle.style.left = `${percentage}%`;
+        if (timelineLabel) {
+          timelineLabel.textContent = formatTime(video.currentTime);
+        }
+        
+        // Update timeline line opacity based on playhead position
+        const track = timeline?.querySelector('.timeline-track');
+        if (track) {
+          const trackElement = track as HTMLElement;
+          trackElement.style.setProperty('--playhead-position', `${percentage}%`);
+        }
+      }
+    });
+    
+    // Initialize icons
+    this.initializeLucideIcons();
+  }
+
 
   private addOrUpdateFileBreadcrumb(panel: HTMLElement, path: string): void {
     // First check if breadcrumb exists, if not add it

@@ -735,6 +735,7 @@ body.no-transition * {
   min-width: var(--panel-collapsed-size);
   min-height: var(--size-200); /* Ensure bottom buttons are always visible */
   overflow-y: auto;
+  margin-right: var(--spacing-20); /* Add space between toolbar and main panels */
 }
 
 .action-bar-panel .panel-content {
@@ -2865,12 +2866,77 @@ body.is-dragging {
 
 .bsp-panel .file-preview.video-preview {
   padding: var(--spacing-0);
+  height: var(--percent-100);
+  display: flex;
+  flex-direction: column;
 }
 
-.bsp-panel .file-preview.video-preview video {
-  max-width: var(--percent-100);
-  max-height: var(--percent-100);
+/* Prevent scrolling for video panels */
+.bsp-panel:has(.video-player) .panel-body,
+.bsp-panel:has(.video-player) .panel-content {
+  overflow: hidden !important;
+}
+
+/* Video player fills panel content area */
+.bsp-panel .video-player {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: var(--spacing-20);
+  height: calc(100% - var(--spacing-40));
+}
+
+/* Video takes available space */
+.bsp-panel .video-player video {
+  flex: 1;
+  min-height: 0;
+  width: calc(100% - var(--spacing-16));
   object-fit: contain;
+  border-radius: var(--radius-lg);
+  margin: var(--spacing-8);
+}
+
+/* Controls stay at bottom */
+.bsp-panel .video-player .video-controls {
+  flex-shrink: 0;
+}
+
+/* Timeline already styled by StyleUI - just set flex */
+.bsp-panel .video-controls .timeline {
+  flex: 1;
+  margin: 0 var(--spacing-12);
+}
+
+/* Remove background from video control buttons */
+.bsp-panel .video-controls .btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.bsp-panel .video-controls .btn:hover {
+  background: var(--color-white-opacity-10) !important;
+}
+
+/* Remove top border from video controls */
+.bsp-panel .video-controls {
+  border-top: none !important;
+}
+
+/* Add horizontal line across timeline */
+.bsp-panel .timeline-track::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, 
+    rgba(255, 255, 255, 0.3) 0%, 
+    rgba(255, 255, 255, 0.3) var(--playhead-position, 0%), 
+    rgba(255, 255, 255, 0.1) var(--playhead-position, 0%), 
+    rgba(255, 255, 255, 0.1) 100%);
+  transform: translateY(-50%);
 }
 
 .bsp-panel .file-preview p {

@@ -1402,22 +1402,36 @@ export class PanelManager {
           
           if (isExpanded) {
             treeItem.classList.remove('expanded');
-            // Remove children container
-            const childrenContainer = treeItem.querySelector('.tree-item-children');
+            // Hide children container
+            const childrenContainer = treeItem.querySelector('.tree-item-children') as HTMLElement;
             if (childrenContainer) {
-              childrenContainer.remove();
+              childrenContainer.style.display = 'none';
             }
           } else {
             treeItem.classList.add('expanded');
-            // Create children container if it doesn't exist
-            let childrenContainer = treeItem.querySelector('.tree-item-children');
+            // Show/create children container
+            let childrenContainer = treeItem.querySelector('.tree-item-children') as HTMLElement;
             if (!childrenContainer) {
               childrenContainer = document.createElement('div');
               childrenContainer.className = 'tree-item-children';
               treeItem.appendChild(childrenContainer);
             }
-            // Load subdirectory contents
-            await this.loadNativeSubdirectory(handle, childrenContainer as HTMLElement, panelId, level + 1);
+            
+            // Make sure it's visible
+            childrenContainer.style.display = 'block';
+            
+            // Only load if not already loaded
+            if (childrenContainer.children.length === 0) {
+              // Load subdirectory contents - use the handle stored on this element
+              const folderHandle = (newTreeItemContent as any)._nativeHandle;
+              console.log('Loading subdirectory with handle:', folderHandle);
+              if (folderHandle) {
+                await this.loadNativeSubdirectory(folderHandle, childrenContainer as HTMLElement, panelId, level + 1);
+              } else {
+                console.error('No handle found for subdirectory');
+                childrenContainer.innerHTML = '<div class="error-message">Unable to load folder</div>';
+              }
+            }
           }
           
           // Re-initialize Lucide icons
@@ -1553,34 +1567,55 @@ export class PanelManager {
   }
 
   private async loadNativeSubdirectory(dirHandle: any, containerElement: HTMLElement, panelId: string, level: number): Promise<void> {
-    if (!dirHandle.createReader) return;
-
+    console.log('loadNativeSubdirectory called', { dirHandle, panelId, level });
+    
     // Show loading state
     containerElement.innerHTML = '<div class="loading-indicator">Loading...</div>';
 
-    const reader = dirHandle.createReader();
     const entries: Array<{name: string, kind: string, handle: any}> = [];
 
-    // Read all entries
-    await new Promise<void>((resolve) => {
-      const readEntries = () => {
-        reader.readEntries((results: any[]) => {
-          if (results.length > 0) {
-            results.forEach(entry => {
-              entries.push({
-                name: entry.name,
-                kind: entry.isDirectory ? 'directory' : 'file',
-                handle: entry
-              });
-            });
-            readEntries();
-          } else {
-            resolve();
-          }
+    // Check if this is a FileSystemDirectoryHandle (from showDirectoryPicker or native folder)
+    if (dirHandle.values && typeof dirHandle.values === 'function') {
+      console.log('Using FileSystemDirectoryHandle API for subdirectory');
+      // Modern File System Access API
+      for await (const entry of dirHandle.values()) {
+        entries.push({
+          name: entry.name,
+          kind: entry.kind, // 'file' or 'directory'
+          handle: entry
         });
-      };
-      readEntries();
-    });
+      }
+    }
+    // Check if this is a FileSystemDirectoryEntry (from drag/drop)
+    else if (dirHandle.createReader) {
+      console.log('Using FileSystemDirectoryEntry API for subdirectory');
+      const reader = dirHandle.createReader();
+      
+      // Read all entries
+      await new Promise<void>((resolve) => {
+        const readEntries = () => {
+          reader.readEntries((results: any[]) => {
+            if (results.length > 0) {
+              results.forEach(entry => {
+                entries.push({
+                  name: entry.name,
+                  kind: entry.isDirectory ? 'directory' : 'file',
+                  handle: entry
+                });
+              });
+              readEntries();
+            } else {
+              resolve();
+            }
+          });
+        };
+        readEntries();
+      });
+    } else {
+      console.error('Unknown directory handle type for subdirectory:', dirHandle);
+      containerElement.innerHTML = '<div class="error-message">Unable to read folder</div>';
+      return;
+    }
 
     // Clear loading indicator
     containerElement.innerHTML = '';

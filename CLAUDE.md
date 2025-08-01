@@ -87,11 +87,14 @@ From v003:
 
 ### Common Commands
 ```bash
-# Start development server
-python server.py
+# ALWAYS USE devserver.sh TO START/RESTART THE DEV SERVER
+./devserver.sh start     # Start all servers
+./devserver.sh restart   # Restart all servers
+./devserver.sh status    # Check server status
+./devserver.sh logs      # View server logs
 
-# The server runs on port 3000
-# API endpoints: /api/file (GET/PUT), /api/files (GET)
+# The server runs on port 5173 (Vite) and 8000 (Python API)
+# DO NOT use npm run dev or python server.py directly!
 ```
 
 ### Important Reminders

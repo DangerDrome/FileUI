@@ -2073,6 +2073,17 @@ button.properties-tab-vertical {
   align-items: center !important;
 }
 
+/* Ensure panel title icons are visible */
+.bsp-panel .panel-title .lucide,
+.bsp-panel .panel-title i[data-lucide] {
+  flex-shrink: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin-right: 6px !important;
+  opacity: 1 !important;
+  display: inline-block !important;
+}
+
 /* Ensure text in panel title never wraps */
 .bsp-panel .panel-title span,
 .bsp-panel .panel-title button {
@@ -3190,4 +3201,35 @@ body.is-dragging {
 div[id="main-panel"],
 div.panel {
   border-radius: 6px !important;
+}
+
+/* Folder drop info display */
+.folder-dropped-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-primary);
+}
+
+.folder-dropped-info h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.folder-dropped-info .btn {
+  margin-top: 1rem;
+}
+
+/* Empty folder display */
+.empty-folder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
 }

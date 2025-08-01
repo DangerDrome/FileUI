@@ -635,8 +635,17 @@ export class BSPPanelManager {
     if (noHeader) {
       element.innerHTML = `
         <div class="panel-body" style="height: 100%;">
-          <div class="panel-content" style="display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
+          <div class="panel-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; opacity: 0.3; gap: 24px;">
             <i data-lucide="library" class="lucide" style="width: 96px; height: 96px;"></i>
+            <div style="text-align: center; max-width: 400px;">
+              <div style="font-size: 18px; font-weight: 500; margin-bottom: 20px; color: var(--color-text-primary);">Pro Tips</div>
+              <div style="font-size: 16px; line-height: 1.8; color: var(--color-text-secondary);">
+                • Drag files here to open them<br>
+                • Right-click for options<br>
+                • Drop folders to browse<br>
+                • Split panels with toolbar buttons
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -667,8 +676,17 @@ export class BSPPanelManager {
           </div>
         </div>
         <div class="panel-body">
-          <div class="panel-content" style="display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
+          <div class="panel-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; opacity: 0.3; gap: 24px;">
             <i data-lucide="library" class="lucide" style="width: 96px; height: 96px;"></i>
+            <div style="text-align: center; max-width: 400px;">
+              <div style="font-size: 18px; font-weight: 500; margin-bottom: 20px; color: var(--color-text-primary);">Pro Tips</div>
+              <div style="font-size: 16px; line-height: 1.8; color: var(--color-text-secondary);">
+                • Drag files here to open them<br>
+                • Right-click for options<br>
+                • Drop folders to browse<br>
+                • Split panels with toolbar buttons
+              </div>
+            </div>
           </div>
         </div>
       `;

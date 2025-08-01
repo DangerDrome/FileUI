@@ -1269,6 +1269,11 @@ button.properties-tab-vertical {
   box-sizing: border-box;
 }
 
+/* Remove focus outline */
+.file-explorer-content:focus {
+  outline: none;
+}
+
 /* File Explorer Split Container */
 .file-explorer-split-container {
   height: var(--percent-100);
@@ -1397,15 +1402,46 @@ button.properties-tab-vertical {
 }
 
 .file-explorer-panel .tree-item-content.selected {
-  background: var(--color-accent-opacity-15);
-  color: var(--text-primary);
-  border-left: var(--border-width-2) solid var(--accent);
-  padding-left: calc(var(--space-2) - var(--spacing-2));
+  /* No background for selected - only shows which file is open */
+  border-left: none;
 }
 
-.file-explorer-panel .tree-item-content.selected .tree-item-label {
-  color: var(--accent);
-  font-weight: 500;
+.file-explorer-panel .tree-item-content.focused {
+  background: var(--color-white-opacity-10);
+}
+
+/* When an item is both selected (open file) and focused (keyboard nav), show focused style */
+.file-explorer-panel .tree-item-content.selected.focused {
+  background: var(--color-white-opacity-10);
+}
+
+/* Match text color to icon color for selected items */
+.file-explorer-panel .tree-item-content.selected[data-file-type="file-3d"] .tree-item-label {
+  color: var(--file-3d);
+}
+
+.file-explorer-panel .tree-item-content.selected[data-file-type="file-comp"] .tree-item-label {
+  color: var(--file-comp);
+}
+
+.file-explorer-panel .tree-item-content.selected[data-file-type="file-image"] .tree-item-label {
+  color: var(--file-image);
+}
+
+.file-explorer-panel .tree-item-content.selected[data-file-type="file-video"] .tree-item-label {
+  color: var(--file-video);
+}
+
+.file-explorer-panel .tree-item-content.selected[data-file-type="file-project"] .tree-item-label {
+  color: var(--file-project);
+}
+
+.file-explorer-panel .tree-item-content.selected[data-file-type="file-pdf"] .tree-item-label {
+  color: var(--file-document);
+}
+
+.file-explorer-panel .tree-item-content.selected[data-file-type="folder"] .tree-item-label {
+  color: var(--text-secondary);
 }
 
 .file-explorer-panel .tree-item-icon {
@@ -1537,10 +1573,9 @@ button.properties-tab-vertical {
   opacity: var(--opacity-9);
 }
 
-/* Selected state brightens icons */
+/* Selected state keeps icons at normal brightness */
 .file-explorer-panel .tree-item-content.selected .tree-item-icon {
-  opacity: var(--opacity-full);
-  filter: var(--filter-brightness-12);
+  opacity: var(--opacity-9);
 }
 
 /* VFX file labels - subtle color on hover */
@@ -2189,10 +2224,7 @@ button.properties-tab-vertical {
   cursor: ew-resize;
 }
 
-/* BSP Panel Focus State */
-.bsp-panel:focus-within {
-  border-color: var(--color-gray-dark);
-}
+/* BSP Panel Focus State - removed to avoid border on focus */
 
 /* Focused/active panel highlight - no visual changes except text */
 .bsp-panel.focused {
@@ -2607,10 +2639,46 @@ button.properties-tab-vertical {
 }
 
 .bsp-panel .tree-item-content.selected {
-  background: var(--color-accent-opacity-15);
-  color: var(--text-primary);
-  border-left: var(--border-width-2) solid var(--accent);
-  padding-left: calc(var(--space-2) - var(--spacing-2));
+  /* No background for selected - only shows which file is open */
+  border-left: none;
+}
+
+.bsp-panel .tree-item-content.focused {
+  background: var(--color-white-opacity-10);
+}
+
+/* When an item is both selected (open file) and focused (keyboard nav), show focused style */
+.bsp-panel .tree-item-content.selected.focused {
+  background: var(--color-white-opacity-10);
+}
+
+/* Match text color to icon color for selected items */
+.bsp-panel .tree-item-content.selected[data-file-type="file-3d"] .tree-item-label {
+  color: var(--file-3d);
+}
+
+.bsp-panel .tree-item-content.selected[data-file-type="file-comp"] .tree-item-label {
+  color: var(--file-comp);
+}
+
+.bsp-panel .tree-item-content.selected[data-file-type="file-image"] .tree-item-label {
+  color: var(--file-image);
+}
+
+.bsp-panel .tree-item-content.selected[data-file-type="file-video"] .tree-item-label {
+  color: var(--file-video);
+}
+
+.bsp-panel .tree-item-content.selected[data-file-type="file-project"] .tree-item-label {
+  color: var(--file-project);
+}
+
+.bsp-panel .tree-item-content.selected[data-file-type="file-pdf"] .tree-item-label {
+  color: var(--file-document);
+}
+
+.bsp-panel .tree-item-content.selected[data-file-type="folder"] .tree-item-label {
+  color: var(--text-secondary);
 }
 
 .bsp-panel .tree-item-toggle {

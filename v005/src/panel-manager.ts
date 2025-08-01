@@ -39,6 +39,7 @@ export class PanelManager {
   private md: MarkdownIt;
   private contextMenu: ContextMenuManager;
   private dragDropInitialized: boolean = false;
+  private currentlyOpenFile: string | null = null;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -1691,8 +1692,57 @@ export class PanelManager {
   }
 
   private setupExplorerInteractions(panelId: string): void {
-    const explorerContent = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"] .file-explorer-content`);
+    const explorerContent = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"] .file-explorer-content`) as HTMLElement;
     if (!explorerContent) return;
+
+    // Make the explorer focusable
+    explorerContent.setAttribute('tabindex', '0');
+    
+    // Super simple keyboard navigation
+    explorerContent.addEventListener('keydown', (e) => {
+      if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) return;
+      
+      e.preventDefault();
+      
+      // Get all visible items
+      const items = Array.from(explorerContent.querySelectorAll('.tree-item-content')).filter(item => {
+        return (item as HTMLElement).offsetParent !== null;
+      }) as HTMLElement[];
+      
+      if (items.length === 0) return;
+      
+      // Find currently focused item
+      let currentIndex = items.findIndex(item => item.classList.contains('focused'));
+      
+      // Clear all focus
+      items.forEach(item => item.classList.remove('focused'));
+      
+      switch (e.key) {
+        case 'ArrowDown':
+          currentIndex = currentIndex < items.length - 1 ? currentIndex + 1 : currentIndex;
+          break;
+        case 'ArrowUp':
+          currentIndex = currentIndex > 0 ? currentIndex - 1 : (currentIndex === -1 ? 0 : currentIndex);
+          break;
+        case 'Enter':
+          if (currentIndex >= 0) {
+            items[currentIndex].click();
+          }
+          return;
+      }
+      
+      // Focus the item
+      if (currentIndex >= 0 && currentIndex < items.length) {
+        items[currentIndex].classList.add('focused');
+        items[currentIndex].scrollIntoView({ block: 'nearest' });
+        
+        // Auto-open files
+        const isFolder = items[currentIndex].dataset.isFolder === 'true';
+        if (!isFolder) {
+          items[currentIndex].click();
+        }
+      }
+    });
 
     // Handle tree item clicks
     explorerContent.addEventListener('click', (e) => {
@@ -1701,8 +1751,18 @@ export class PanelManager {
 
       // Handle tree item clicks
       const treeItemContent = target.closest('.tree-item-content') as HTMLElement;
-      console.log('Tree item content found:', treeItemContent);
       if (treeItemContent) {
+        // Remove all previous focus
+        explorerContent.querySelectorAll('.tree-item-content.focused').forEach(item => {
+          item.classList.remove('focused');
+        });
+        
+        // Add focus to clicked item
+        treeItemContent.classList.add('focused');
+        
+        // Focus the explorer for keyboard events
+        explorerContent.focus();
+        
         const isFolder = treeItemContent.dataset.isFolder === 'true';
         const treeItem = treeItemContent.closest('.tree-item') as HTMLElement;
 
@@ -2376,6 +2436,10 @@ export class PanelManager {
     console.log('File:', file.name, 'Size:', file.size, 'Type:', file.type);
     console.log('Panel ID:', panelId);
     
+    // Update currently open file (for native files, just use the name)
+    this.currentlyOpenFile = file.name;
+    this.updateOpenFileHighlight();
+    
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
     console.log('Panel found:', !!panel);
     
@@ -2580,9 +2644,31 @@ export class PanelManager {
     }, 3000);
   }
 
+  private updateOpenFileHighlight(): void {
+    // Remove all existing selected states
+    document.querySelectorAll('.tree-item-content.selected').forEach(el => {
+      el.classList.remove('selected');
+    });
+
+    // Add selected state to the currently open file
+    if (this.currentlyOpenFile) {
+      const allTreeItems = document.querySelectorAll('.tree-item-content');
+      allTreeItems.forEach(item => {
+        const itemPath = item.getAttribute('data-path');
+        if (itemPath === this.currentlyOpenFile) {
+          item.classList.add('selected');
+        }
+      });
+    }
+  }
+
   private async openFileInBSPPanel(path: string, fileName: string): Promise<void> {
     const targetPanelId = this.findOrCreateTargetPanel();
     if (!targetPanelId) return;
+
+    // Update currently open file and refresh highlights
+    this.currentlyOpenFile = path;
+    this.updateOpenFileHighlight();
 
     // Update panel content with file
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
@@ -2831,7 +2917,7 @@ export class PanelManager {
     }
     
     treeItem.innerHTML = `
-      <div class="tree-item-content native-file" draggable="true" data-is-folder="${isDirectory}" data-file-name="${file.name}" data-file-type="${fileType}" data-panel-id="${panelId}" style="padding-left: ${20 + level * 20}px">
+      <div class="tree-item-content native-file" draggable="true" data-is-folder="${isDirectory}" data-path="${file.name}" data-file-name="${file.name}" data-file-type="${fileType}" data-panel-id="${panelId}" style="padding-left: ${20 + level * 20}px">
         ${isDirectory ? `
           <button class="tree-item-toggle" aria-label="Toggle node" data-expanded="false">
             <i data-lucide="chevron-right" class="lucide chevron-icon"></i>

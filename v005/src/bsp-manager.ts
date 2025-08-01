@@ -1533,4 +1533,95 @@ export class BSPPanelManager {
     }
     return null;
   }
+
+  resetToSinglePanel(): void {
+    // Clear existing panels
+    this.container.innerHTML = '';
+    this.resizers = [];
+    this.panels.clear();
+    this.nextPanelNumber = 1;
+    
+    // Create new root with single panel
+    const { id, element } = this.createPanelElement();
+    this.root = new BSPNode(element, id);
+    this.panels.set(id, { node: this.root, element });
+    
+    // Layout the tree
+    this.layout();
+  }
+
+  serializeLayout(): any {
+    if (!this.root) return null;
+    
+    const serializeNode = (node: BSPNode): any => {
+      if (node.isLeaf()) {
+        return {
+          type: 'leaf',
+          panelId: node.panelId,
+          isPinned: node.isPinned,
+          isCollapsed: node.isCollapsed,
+          // You can add more panel-specific data here if needed
+        };
+      } else {
+        return {
+          type: 'split',
+          orientation: node.orientation,
+          splitRatio: node.splitRatio,
+          left: node.left ? serializeNode(node.left) : null,
+          right: node.right ? serializeNode(node.right) : null,
+        };
+      }
+    };
+    
+    return serializeNode(this.root);
+  }
+
+  loadLayout(layoutData: any): void {
+    if (!layoutData) return;
+    
+    // Clear existing panels
+    this.container.innerHTML = '';
+    this.resizers = [];
+    this.panels.clear();
+    this.nextPanelNumber = 1;
+    
+    const buildNode = (data: any): BSPNode | null => {
+      if (!data) return null;
+      
+      if (data.type === 'leaf') {
+        const { id, element } = this.createPanelElement();
+        const node = new BSPNode(element, id);
+        node.isPinned = data.isPinned || false;
+        node.isCollapsed = data.isCollapsed || false;
+        this.panels.set(id, { node, element });
+        return node;
+      } else if (data.type === 'split') {
+        const leftNode = buildNode(data.left);
+        const rightNode = buildNode(data.right);
+        
+        if (leftNode && rightNode) {
+          const splitNode = new BSPNode();
+          splitNode.orientation = data.orientation;
+          splitNode.splitRatio = data.splitRatio || 0.5;
+          splitNode.left = leftNode;
+          splitNode.right = rightNode;
+          leftNode.parent = splitNode;
+          rightNode.parent = splitNode;
+          
+          return splitNode;
+        }
+      }
+      
+      return null;
+    };
+    
+    this.root = buildNode(layoutData);
+    
+    if (this.root) {
+      this.layout();
+    } else {
+      // Fallback to single panel if layout failed
+      this.resetToSinglePanel();
+    }
+  }
 }

@@ -51,6 +51,17 @@ export class PanelManager {
     });
     // Initialize context menu manager
     this.contextMenu = new ContextMenuManager();
+    
+    // Load recent layouts from localStorage
+    const savedLayouts = localStorage.getItem('fileui-recent-layouts');
+    if (savedLayouts) {
+      try {
+        this.recentLayouts = JSON.parse(savedLayouts);
+      } catch (error) {
+        console.error('Failed to load recent layouts:', error);
+      }
+    }
+    
     this.init();
     // Setup global drag and drop
     this.setupGlobalDragAndDrop();
@@ -476,14 +487,21 @@ export class PanelManager {
     });
     
     
-    // Handle toolbar button clicks
+    // Handle toolbar button clicks and menu triggers
     this.container.addEventListener('click', (e) => {
       const button = (e.target as HTMLElement).closest('button[data-action]') as HTMLButtonElement;
+      
       if (button) {
-        // Only handle if it's not inside a BSP panel
-        const bspPanel = button.closest('.bsp-panel');
-        if (!bspPanel) {
-          this.handleToolbarButtonClick(button);
+        // Check if this is a menu trigger button
+        if (button.classList.contains('menu-trigger')) {
+          const action = button.dataset.action;
+          this.handleMenuTrigger(action!, button);
+        } else {
+          // Only handle if it's not inside a BSP panel
+          const bspPanel = button.closest('.bsp-panel');
+          if (!bspPanel) {
+            this.handleToolbarButtonClick(button);
+          }
         }
       }
     });
@@ -784,6 +802,195 @@ export class PanelManager {
     });
   }
 
+  private recentLayouts: Array<{name: string, data: string, timestamp: number}> = [];
+  private maxRecentLayouts = 5;
+
+  private handleMenuTrigger(action: string, trigger: HTMLElement): void {
+    // Close any open menus first
+    document.querySelectorAll('.menu-dropdown').forEach(menu => menu.remove());
+    
+    const rect = trigger.getBoundingClientRect();
+    const dropdown = document.createElement('div');
+    dropdown.className = 'menu-dropdown';
+    dropdown.style.position = 'fixed';
+    dropdown.style.left = `${rect.left}px`;
+    dropdown.style.top = `${rect.bottom}px`;
+    dropdown.style.zIndex = '9999';
+    
+    switch (action) {
+      case 'file':
+        dropdown.innerHTML = this.createFileMenu();
+        break;
+      case 'edit':
+        dropdown.innerHTML = '<div class="menu-item disabled">Edit menu coming soon</div>';
+        break;
+      case 'view':
+        dropdown.innerHTML = '<div class="menu-item disabled">View menu coming soon</div>';
+        break;
+      case 'terminal-menu':
+        dropdown.innerHTML = '<div class="menu-item disabled">Terminal menu coming soon</div>';
+        break;
+      case 'help':
+        dropdown.innerHTML = '<div class="menu-item disabled">Help menu coming soon</div>';
+        break;
+    }
+    
+    document.body.appendChild(dropdown);
+    
+    // Initialize lucide icons
+    this.initializeLucideIcons(0);
+    
+    // Set up menu item clicks
+    dropdown.addEventListener('click', (e) => {
+      const item = (e.target as HTMLElement).closest('.menu-item') as HTMLElement;
+      if (item && !item.classList.contains('disabled')) {
+        const action = item.dataset.action;
+        if (action) {
+          this.handleMenuAction(action, item);
+        }
+        dropdown.remove();
+      }
+    });
+    
+    // Close menu when clicking outside
+    setTimeout(() => {
+      const closeMenu = (e: MouseEvent) => {
+        if (!dropdown.contains(e.target as Node) && e.target !== trigger) {
+          dropdown.remove();
+          document.removeEventListener('click', closeMenu);
+        }
+      };
+      document.addEventListener('click', closeMenu);
+    }, 0);
+  }
+
+  private createFileMenu(): string {
+    const recentLayoutsHtml = this.recentLayouts.length > 0 
+      ? this.recentLayouts.map((layout, index) => `
+          <div class="menu-item" data-action="load-recent-${index}">
+            <i data-lucide="clock" class="lucide menu-icon"></i>
+            <span>${layout.name}</span>
+            <span class="menu-shortcut">${new Date(layout.timestamp).toLocaleDateString()}</span>
+          </div>
+        `).join('')
+      : '<div class="menu-item disabled">No recent layouts</div>';
+
+    return `
+      <div class="menu-item" data-action="save-layout">
+        <i data-lucide="save" class="lucide menu-icon"></i>
+        <span>Save Layout</span>
+        <span class="menu-shortcut">Ctrl+S</span>
+      </div>
+      <div class="menu-item" data-action="save-layout-as">
+        <i data-lucide="save" class="lucide menu-icon"></i>
+        <span>Save Layout As...</span>
+      </div>
+      <div class="menu-separator"></div>
+      <div class="menu-item" data-action="load-layout">
+        <i data-lucide="folder-open" class="lucide menu-icon"></i>
+        <span>Load Layout</span>
+        <span class="menu-shortcut">Ctrl+O</span>
+      </div>
+      <div class="menu-item menu-submenu">
+        <i data-lucide="history" class="lucide menu-icon"></i>
+        <span>Recent Layouts</span>
+        <i data-lucide="chevron-right" class="lucide menu-chevron"></i>
+        <div class="submenu">
+          ${recentLayoutsHtml}
+        </div>
+      </div>
+      <div class="menu-separator"></div>
+      <div class="menu-item" data-action="reset-layout">
+        <i data-lucide="refresh-cw" class="lucide menu-icon"></i>
+        <span>Reset Layout</span>
+      </div>
+    `;
+  }
+
+  private handleMenuAction(action: string, item: HTMLElement): void {
+    if (action === 'save-layout') {
+      this.saveLayout();
+    } else if (action === 'save-layout-as') {
+      this.saveLayoutAs();
+    } else if (action === 'load-layout') {
+      this.loadLayout();
+    } else if (action === 'reset-layout') {
+      this.bspManager.resetToSinglePanel();
+    } else if (action.startsWith('load-recent-')) {
+      const index = parseInt(action.split('-')[2]);
+      this.loadRecentLayout(index);
+    }
+  }
+
+  private saveLayout(): void {
+    const layoutData = this.bspManager.serializeLayout();
+    const layoutName = `Layout ${new Date().toLocaleString()}`;
+    
+    // Add to recent layouts
+    this.recentLayouts.unshift({
+      name: layoutName,
+      data: JSON.stringify(layoutData),
+      timestamp: Date.now()
+    });
+    
+    // Keep only max recent layouts
+    if (this.recentLayouts.length > this.maxRecentLayouts) {
+      this.recentLayouts = this.recentLayouts.slice(0, this.maxRecentLayouts);
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('fileui-recent-layouts', JSON.stringify(this.recentLayouts));
+    
+    console.log('Layout saved:', layoutName);
+  }
+
+  private saveLayoutAs(): void {
+    const name = prompt('Enter layout name:');
+    if (name) {
+      const layoutData = this.bspManager.serializeLayout();
+      
+      // Add to recent layouts
+      this.recentLayouts.unshift({
+        name: name,
+        data: JSON.stringify(layoutData),
+        timestamp: Date.now()
+      });
+      
+      // Keep only max recent layouts
+      if (this.recentLayouts.length > this.maxRecentLayouts) {
+        this.recentLayouts = this.recentLayouts.slice(0, this.maxRecentLayouts);
+      }
+      
+      // Save to localStorage
+      localStorage.setItem('fileui-recent-layouts', JSON.stringify(this.recentLayouts));
+      
+      console.log('Layout saved as:', name);
+    }
+  }
+
+  private loadLayout(): void {
+    // For now, just load the most recent layout
+    if (this.recentLayouts.length > 0) {
+      this.loadRecentLayout(0);
+    } else {
+      alert('No saved layouts found');
+    }
+  }
+
+  private loadRecentLayout(index: number): void {
+    if (index >= 0 && index < this.recentLayouts.length) {
+      const layout = this.recentLayouts[index];
+      try {
+        const layoutData = JSON.parse(layout.data);
+        this.bspManager.loadLayout(layoutData);
+        console.log('Layout loaded:', layout.name);
+      } catch (error) {
+        console.error('Failed to load layout:', error);
+        alert('Failed to load layout');
+      }
+    }
+  }
+
   private handleToolbarButtonClick(btn: HTMLButtonElement): void {
     const action = btn.dataset.action;
     console.log('Toolbar button clicked:', action);
@@ -831,7 +1038,7 @@ export class PanelManager {
               <button class="menu-trigger btn btn-ghost btn-sm" data-action="view">View</button>
             </div>
             <div class="menu">
-              <button class="menu-trigger btn btn-ghost btn-sm" data-action="terminal">Terminal</button>
+              <button class="menu-trigger btn btn-ghost btn-sm" data-action="terminal-menu">Terminal</button>
             </div>
             <div class="menu">
               <button class="menu-trigger btn btn-ghost btn-sm" data-action="help">Help</button>
@@ -865,34 +1072,34 @@ export class PanelManager {
         <div class="menu-bar-vertical">
           <div class="main-actions">
             <div class="menu">
-              <button class="menu-trigger btn btn-ghost btn-sm" data-action="explorer" title="Explorer">
+              <button class="btn btn-ghost btn-sm" data-action="explorer" title="Explorer">
                 <i data-lucide="folder" class="lucide"></i>
               </button>
             </div>
             <div class="menu">
-              <button class="menu-trigger btn btn-ghost btn-sm" data-action="properties" title="Properties">
+              <button class="btn btn-ghost btn-sm" data-action="properties" title="Properties">
                 <i data-lucide="sliders-horizontal" class="lucide"></i>
               </button>
             </div>
             <div class="menu">
-              <button class="menu-trigger btn btn-ghost btn-sm" data-action="terminal" title="Terminal">
+              <button class="btn btn-ghost btn-sm" data-action="terminal" title="Terminal">
                 <i data-lucide="terminal" class="lucide"></i>
               </button>
             </div>
           </div>
           <div class="bottom-actions">
             <div class="menu">
-              <button class="menu-trigger btn btn-ghost btn-sm" data-action="source-control" title="Source Control">
+              <button class="btn btn-ghost btn-sm" data-action="source-control" title="Source Control">
                 <i data-lucide="git-fork" class="lucide"></i>
               </button>
             </div>
             <div class="menu">
-              <button class="menu-trigger btn btn-ghost btn-sm" data-action="reload" title="Reload">
+              <button class="btn btn-ghost btn-sm" data-action="reload" title="Reload">
                 <i data-lucide="refresh-cw" class="lucide"></i>
               </button>
             </div>
             <div class="menu">
-              <button class="menu-trigger btn btn-ghost btn-sm" data-action="settings" title="Settings">
+              <button class="btn btn-ghost btn-sm" data-action="settings" title="Settings">
                 <i data-lucide="settings" class="lucide"></i>
               </button>
             </div>
@@ -1165,20 +1372,33 @@ export class PanelManager {
         }
         
         if (panelContent) {
-          // Mark this panel as an explorer panel
-          focusedPanel.classList.add('explorer-panel');
+          // DON'T mark this panel as an explorer panel yet - only when content is loaded
+          // focusedPanel.classList.add('explorer-panel');
           
-          // Create file explorer tree structure without header
+          // Create file explorer with pro tips instead of loading files
+          // Remove all styling and wrap in panel-content div like the main panel
+          panelContent.style.display = 'flex';
+          panelContent.style.flexDirection = 'column';
+          panelContent.style.alignItems = 'center';
+          panelContent.style.justifyContent = 'center';
+          panelContent.style.height = '100%';
+          panelContent.style.opacity = '0.3';
+          panelContent.style.gap = '24px';
+          
           panelContent.innerHTML = `
-            <div class="file-explorer-content" data-panel-id="${newPanelId}">
-              <div class="tree" aria-label="File Explorer">
-                <div class="loading-indicator">Loading files...</div>
+            <i data-lucide="folder-tree" class="lucide" style="width: 96px; height: 96px;"></i>
+            <div style="text-align: center; max-width: 400px;">
+              <div style="font-size: 18px; font-weight: 500; margin-bottom: 20px; color: var(--color-text-primary);">Explorer Pro Tips</div>
+              <div style="font-size: 16px; line-height: 1.8; color: var(--color-text-secondary);">
+                • Right-click to open folders<br>
+                • Drag folders here to browse<br>
+                • Use arrow keys to navigate<br>
+                • Click files to open them
               </div>
             </div>
           `;
           
-          // Load files and setup interactions
-          this.loadDirectoryContents(this.currentPath, newPanelId);
+          // Setup interactions but don't load files
           this.setupExplorerInteractions(newPanelId);
           
           // Re-initialize Lucide icons
@@ -1692,7 +1912,11 @@ export class PanelManager {
   }
 
   private setupExplorerInteractions(panelId: string): void {
-    const explorerContent = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"] .file-explorer-content`) as HTMLElement;
+    // Try to find file-explorer-content first, if not found, use panel-content for empty state
+    let explorerContent = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"] .file-explorer-content`) as HTMLElement;
+    if (!explorerContent) {
+      explorerContent = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"] .panel-content`) as HTMLElement;
+    }
     if (!explorerContent) return;
 
     // Make the explorer focusable

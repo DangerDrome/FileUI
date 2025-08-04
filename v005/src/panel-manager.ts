@@ -151,55 +151,66 @@ export class PanelManager {
   }
 
   private async loadFileContent(content: HTMLElement, source: string | any, fileName: string, sourceType: 'server' | 'native'): Promise<void> {
+    console.log('loadFileContent called:', { source, fileName, sourceType });
     content.innerHTML = '<div class="file-loading">Loading file...</div>';
 
     try {
       const fileType = getFileType(fileName);
+      console.log('File type detected for', fileName, ':', fileType);
 
       if (sourceType === 'server') {
         // Server-based file loading
         if (fileType === 'file-image') {
+          const imageUrl = `http://localhost:8000/api/file?path=${encodeURIComponent(source)}`;
           content.innerHTML = `<div class="file-preview image-preview">
-            <img src="http://localhost:8000/api/file?path=${encodeURIComponent(source)}" alt="${fileName}" />
+            <img src="${imageUrl}" alt="${fileName}" />
           </div>`;
         } else if (fileType === 'file-video') {
+          const videoUrl = `http://localhost:8000/api/file?path=${encodeURIComponent(source)}`;
+          const ext = fileName.split('.').pop()?.toLowerCase() || '';
+          
           content.innerHTML = `
             <div class="video-player">
-              <video src="http://localhost:8000/api/file?path=${encodeURIComponent(source)}" autoplay muted loop></video>
-              <div class="video-controls">
-                <button class="btn btn-icon btn-sm" data-action="play">
-                  <i data-lucide="play" width="16" height="16"></i>
-                </button>
-                <span class="video-time-label">0:00 / 0:00</span>
-                <div class="timeline" data-video-timeline>
-                  <div class="timeline-track"></div>
-                  <div class="timeline-progress"></div>
-                  <div class="timeline-handle" style="left: 0%">
-                    <i data-lucide="triangle" width="8" height="8"></i>
-                    <div class="timeline-playhead-line"></div>
-                    <div class="timeline-playhead-label">0</div>
-                  </div>
-                  <div class="timeline-ruler">
-                    <div class="timeline-tick timeline-tick-major" style="left: 0%"></div>
-                    <div class="timeline-label" style="left: 0%">0</div>
-                    <div class="timeline-tick timeline-tick-major" style="left: 25%"></div>
-                    <div class="timeline-label" style="left: 25%">60</div>
-                    <div class="timeline-tick timeline-tick-major" style="left: 50%"></div>
-                    <div class="timeline-label" style="left: 50%">120</div>
-                    <div class="timeline-tick timeline-tick-major" style="left: 75%"></div>
-                    <div class="timeline-label" style="left: 75%">180</div>
-                    <div class="timeline-tick timeline-tick-major" style="left: 100%"></div>
-                    <div class="timeline-label" style="left: 100%">240</div>
-                  </div>
-                </div>
-                <button class="btn btn-icon btn-sm" data-action="volume">
-                  <i data-lucide="volume-2" width="16" height="16"></i>
-                </button>
-                <input type="range" class="form-control" min="0" max="100" value="100" style="width: 80px;">
-              </div>
+              <video controls autoplay muted preload="metadata" 
+                     src="${videoUrl}"
+                     style="width: 100%; height: 100%; background: #000;">
+                <source src="${videoUrl}" type="video/${ext === 'mov' ? 'quicktime' : ext}">
+                Your browser does not support this video format.
+              </video>
             </div>
           `;
-          this.setupVideoPlayer(content);
+          
+          // Add enhanced error handling
+          const video = content.querySelector('video');
+          if (video) {
+            video.addEventListener('error', (e) => {
+              console.error('Video error:', e);
+              const errorMsg = ext === 'mov' 
+                ? `<div class="video-error" style="padding: 20px; text-align: center;">
+                     <h3>Unable to play .MOV file</h3>
+                     <p>Chrome cannot play this .MOV file due to codec incompatibility.</p>
+                     <p>The file likely uses ProRes, HEVC, or another codec not supported by Chrome.</p>
+                     <p><strong>Solutions:</strong></p>
+                     <ul style="list-style: none; padding: 0;">
+                       <li>• Convert to MP4 (H.264/AAC) using FFmpeg or similar tools</li>
+                       <li>• Try opening in Safari (better .MOV support)</li>
+                       <li>• Use a desktop video player like VLC</li>
+                     </ul>
+                   </div>`
+                : `<div class="video-error">Failed to load video: ${fileName}</div>`;
+              content.innerHTML = errorMsg;
+            });
+            
+            // Log video metadata when loaded
+            video.addEventListener('loadedmetadata', () => {
+              console.log('Video metadata loaded:', {
+                duration: video.duration,
+                width: video.videoWidth,
+                height: video.videoHeight,
+                src: video.src
+              });
+            });
+          }
         } else if (fileType === 'markdown' || fileName.endsWith('.md')) {
           const fs = new ServerFileSystem('http://localhost:8000/api');
           const fileContent = await fs.readFile(source);
@@ -233,43 +244,58 @@ export class PanelManager {
           </div>`;
         } else if (fileType === 'file-video') {
           const url = URL.createObjectURL(file);
+          const ext = fileName.split('.').pop()?.toLowerCase() || '';
+          
           content.innerHTML = `
             <div class="video-player">
-              <video src="${url}" autoplay muted loop></video>
-              <div class="video-controls">
-                <button class="btn btn-icon btn-sm" data-action="play">
-                  <i data-lucide="play" width="16" height="16"></i>
-                </button>
-                <span class="video-time-label">0:00 / 0:00</span>
-                <div class="timeline" data-video-timeline>
-                  <div class="timeline-track"></div>
-                  <div class="timeline-progress"></div>
-                  <div class="timeline-handle" style="left: 0%">
-                    <i data-lucide="triangle" width="8" height="8"></i>
-                    <div class="timeline-playhead-line"></div>
-                    <div class="timeline-playhead-label">0</div>
-                  </div>
-                  <div class="timeline-ruler">
-                    <div class="timeline-tick timeline-tick-major" style="left: 0%"></div>
-                    <div class="timeline-label" style="left: 0%">0</div>
-                    <div class="timeline-tick timeline-tick-major" style="left: 25%"></div>
-                    <div class="timeline-label" style="left: 25%">60</div>
-                    <div class="timeline-tick timeline-tick-major" style="left: 50%"></div>
-                    <div class="timeline-label" style="left: 50%">120</div>
-                    <div class="timeline-tick timeline-tick-major" style="left: 75%"></div>
-                    <div class="timeline-label" style="left: 75%">180</div>
-                    <div class="timeline-tick timeline-tick-major" style="left: 100%"></div>
-                    <div class="timeline-label" style="left: 100%">240</div>
-                  </div>
-                </div>
-                <button class="btn btn-icon btn-sm" data-action="volume">
-                  <i data-lucide="volume-2" width="16" height="16"></i>
-                </button>
-                <input type="range" class="form-control" min="0" max="100" value="100" style="width: 80px;">
-              </div>
+              <video controls autoplay muted preload="metadata"
+                     src="${url}"
+                     style="width: 100%; height: 100%; background: #000;">
+                <source src="${url}" type="${file.type || `video/${ext === 'mov' ? 'quicktime' : ext}`}">
+                Your browser does not support this video format.
+              </video>
             </div>
           `;
-          this.setupVideoPlayer(content);
+          
+          // Add enhanced error handling
+          const video = content.querySelector('video');
+          if (video) {
+            video.addEventListener('error', (e) => {
+              console.error('Video error:', e);
+              URL.revokeObjectURL(url); // Clean up on error
+              const errorMsg = ext === 'mov' 
+                ? `<div class="video-error" style="padding: 20px; text-align: center;">
+                     <h3>Unable to play .MOV file</h3>
+                     <p>Chrome cannot play this .MOV file due to codec incompatibility.</p>
+                     <p>The file likely uses ProRes, HEVC, or another codec not supported by Chrome.</p>
+                     <p><strong>Solutions:</strong></p>
+                     <ul style="list-style: none; padding: 0;">
+                       <li>• Convert to MP4 (H.264/AAC) using FFmpeg or similar tools</li>
+                       <li>• Try opening in Safari (better .MOV support)</li>
+                       <li>• Use a desktop video player like VLC</li>
+                     </ul>
+                   </div>`
+                : `<div class="video-error">Failed to load video: ${fileName}</div>`;
+              content.innerHTML = errorMsg;
+            });
+            
+            // Log video metadata when loaded
+            video.addEventListener('loadedmetadata', () => {
+              console.log('Video metadata loaded:', {
+                duration: video.duration,
+                width: video.videoWidth,
+                height: video.videoHeight,
+                src: video.src,
+                type: file.type
+              });
+            });
+            
+            // Clean up blob URL when video is removed
+            video.addEventListener('loadeddata', () => {
+              // Video has loaded, can safely revoke after a delay
+              setTimeout(() => URL.revokeObjectURL(url), 1000);
+            });
+          }
         } else if (fileType === 'markdown' || fileName.endsWith('.md')) {
           const text = await file.text();
           const renderedHtml = this.md.render(text);
@@ -300,12 +326,17 @@ export class PanelManager {
           </div>`;
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading file:', error);
-      content.innerHTML = `<div class="file-error">
-        <p>Failed to load file: ${fileName}</p>
-        <p class="error-message">${error}</p>
+      const errorMessage = error.message || String(error);
+      content.innerHTML = `<div class="file-error" style="text-align: center; padding: 40px; color: var(--error);">
+        <i data-lucide="alert-circle" class="lucide" style="width: 48px; height: 48px; margin: 0 auto 16px;"></i>
+        <h3 style="margin: 0 0 8px;">Failed to load file</h3>
+        <p style="margin: 0 0 4px; color: var(--text-primary);">${this.escapeHtml(fileName)}</p>
+        <p style="margin: 0; font-size: 0.9em; opacity: 0.8;">${this.escapeHtml(errorMessage)}</p>
       </div>`;
+      // Re-initialize Lucide icons for the error icon
+      this.initializeLucideIcons(10);
     }
   }
 
@@ -2138,14 +2169,32 @@ export class PanelManager {
       panelContent.addEventListener('dragenter', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Drag enter panel:', panel.getAttribute('data-panel-id'));
+        
+        // Don't show drag feedback on explorer panels
+        const panelElement = panelContent.closest('.bsp-panel');
+        if (panelElement?.classList.contains('explorer-panel')) {
+          return;
+        }
+        
         panelContent.classList.add('drag-over');
       });
 
       panelContent.addEventListener('dragover', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (e.dataTransfer) {
+        
+        const panelElement = panelContent.closest('.bsp-panel');
+        
+        // Check for self-drop on explorer panels
+        if (panelElement?.classList.contains('explorer-panel') && e.dataTransfer) {
+          const dragSource = e.dataTransfer.types.includes('application/x-panel-id') ? 
+            e.dataTransfer.getData('application/x-panel-id') : null;
+          
+          // Note: getData doesn't work in dragover, so we'll just prevent all drops on explorers during dragover
+          // The actual check happens in the drop handler
+          // For now, show 'copy' cursor to indicate drop is possible (will be validated on drop)
+          e.dataTransfer.dropEffect = 'copy';
+        } else if (e.dataTransfer) {
           e.dataTransfer.dropEffect = 'copy';
         }
         // Ensure class stays on during dragover
@@ -2178,53 +2227,33 @@ export class PanelManager {
         
         if (!targetPanelId || !e.dataTransfer) return;
         
-        // Debug: log all available data types
-        console.log('Available data types:', Array.from(e.dataTransfer.types));
-        
         // Check if this is an internal drag (from explorer)
         const plainPath = e.dataTransfer.getData('text/plain');
-        console.log('Plain path from drag:', plainPath);
-        console.log('Files length:', e.dataTransfer.files.length);
         
-        if (plainPath && !e.dataTransfer.files.length) {
-          // This is an internal drag from explorer
-          console.log('Internal drag detected - path:', plainPath);
+        // Check if dragging from explorer to the same explorer panel
+        if (plainPath && !e.dataTransfer.files.length && panelElement?.classList.contains('explorer-panel')) {
+          // Get the source of the drag (which explorer it came from)
+          const dragSource = e.dataTransfer.getData('application/x-panel-id');
+          if (dragSource === targetPanelId) {
+            // Cannot drop file from explorer into the same explorer panel
+            return;
+          }
+          // Allow dropping into a different explorer panel (will replace it)
+        }
+        
+        // Check for internal drag from explorer
+        if ((plainPath !== null && plainPath !== undefined) && !e.dataTransfer.files.length) {
+          // If path is empty, skip
+          if (!plainPath || plainPath.trim() === '') {
+            return;
+          }
           
           // Get the filename from the path
           const pathParts = plainPath.split('/');
           const fileName = pathParts[pathParts.length - 1];
-          console.log('Filename:', fileName);
           
-          // Direct approach - set the panel content like clicking does
-          const panel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
-          if (panel) {
-            // Update panel header with icon
-            const panelTitle = panel.querySelector('.panel-title');
-            if (panelTitle) {
-              const fileType = getFileType(fileName);
-              const iconName = this.getFileIcon(fileType);
-              const iconColor = this.getFileIconColor(fileType);
-              panelTitle.innerHTML = `
-                <i data-lucide="${iconName}" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: ${iconColor};"></i>
-                <span>${fileName}</span>
-              `;
-            }
-            
-            const content = panel.querySelector('.panel-content') as HTMLElement;
-            if (content) {
-              await this.loadFileContent(content, plainPath, fileName, 'server');
-              
-              // Store file info in panel
-              panel.setAttribute('data-file-path', plainPath);
-              panel.setAttribute('data-file-name', fileName);
-              
-              // Focus the panel
-              this.focusPanel(panel);
-              
-              // Re-initialize Lucide icons
-              this.initializeLucideIcons(10);
-            }
-          }
+          // JUST LIKE CLICKING - use openFileInBSPPanel
+          await this.openFileInBSPPanel(plainPath, fileName);
           return;
         }
         
@@ -2429,6 +2458,8 @@ export class PanelManager {
         // Set drag data
         e.dataTransfer.effectAllowed = 'copy';
         e.dataTransfer.setData('text/plain', draggedFilePath);
+        // Add the source panel ID to detect self-drops
+        e.dataTransfer.setData('application/x-panel-id', panelId);
         // Use a simpler mime type that browsers won't interfere with
         e.dataTransfer.setData('text/x-fileui-internal', JSON.stringify({
           path: draggedFilePath,
@@ -2505,9 +2536,15 @@ export class PanelManager {
       }
     });
 
-    // Handle drop for internal items
+    // Handle drop for internal items (reorganizing within explorer)
     explorerContent.addEventListener('drop', async (e) => {
       e.preventDefault();
+      
+      // Only handle internal reorganization, not external drops
+      if (!draggedElement) {
+        console.log('No internal drag element, ignoring drop on explorer');
+        return;
+      }
       
       const target = e.target as HTMLElement;
       const dropTarget = target.closest('.tree-item-content') as HTMLElement;
@@ -2743,34 +2780,41 @@ export class PanelManager {
     } else if (fileType === 'file-video' || file.type.startsWith('video/')) {
       // Handle video files
       const url = URL.createObjectURL(file);
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      
       panelContent.innerHTML = `
-        <div class="video-player">
-          <video autoplay muted loop>
-            <source src="${url}" type="${file.type}">
+        <div class="video-player" style="width: 100%; height: 100%;">
+          <video src="${url}" controls autoplay muted style="width: 100%; height: 100%; background: #000;">
+            <source src="${url}" type="${file.type || `video/${ext === 'mov' ? 'quicktime' : ext}`}">
             Your browser does not support the video tag.
           </video>
-          <div class="video-controls">
-            <button class="btn btn-icon btn-sm" data-action="play">
-              <i data-lucide="play" width="16" height="16"></i>
-            </button>
-            <span class="video-time-label">0:00 / 0:00</span>
-            <div class="timeline" data-video-timeline>
-              <div class="timeline-track"></div>
-              <div class="timeline-progress"></div>
-              <div class="timeline-handle" style="left: 0%">
-                <div class="timeline-playhead-line"></div>
-                <div class="timeline-playhead-label">0:00</div>
-              </div>
-              <div class="timeline-ruler"></div>
-            </div>
-            <button class="btn btn-icon btn-sm" data-action="volume">
-              <i data-lucide="volume-2" width="16" height="16"></i>
-            </button>
-            <input type="range" class="form-control" min="0" max="100" value="100" style="width: 80px;">
-          </div>
         </div>
       `;
-      this.setupVideoPlayer(panelContent);
+      
+      // Add error handling for .mov files
+      const video = panelContent.querySelector('video');
+      if (video) {
+        video.addEventListener('error', () => {
+          URL.revokeObjectURL(url);
+          const errorMsg = ext === 'mov' 
+            ? `<div class="video-error" style="padding: 20px; text-align: center;">
+                 <h3>Unable to play .MOV file</h3>
+                 <p>Chrome cannot play this .MOV file due to codec incompatibility.</p>
+                 <p><strong>Solutions:</strong></p>
+                 <ul style="list-style: none; padding: 0;">
+                   <li>• Convert to MP4 (H.264/AAC)</li>
+                   <li>• Try Safari or VLC</li>
+                 </ul>
+               </div>`
+            : `<div class="video-error">Failed to load video: ${file.name}</div>`;
+          panelContent.innerHTML = errorMsg;
+        });
+        
+        // Clean up blob URL after load
+        video.addEventListener('loadeddata', () => {
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        });
+      }
     } else if (fileType === 'file-pdf' || file.type === 'application/pdf') {
       // Handle PDF files
       const url = URL.createObjectURL(file);

@@ -3002,6 +3002,18 @@ body.is-dragging {
   border-top: none !important;
 }
 
+/* Video error message */
+.video-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--error);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
 /* Add horizontal line across timeline */
 .bsp-panel .timeline-track::after {
   content: '';

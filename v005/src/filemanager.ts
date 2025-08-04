@@ -42,6 +42,9 @@ export class ServerFileSystem implements FileSystemAPI {
   async readFile(path: string): Promise<string> {
     const response = await fetch(`${this.baseUrl}/file?path=${encodeURIComponent(path)}`);
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`File not found: ${path}`);
+      }
       throw new Error(`Failed to read file: ${response.statusText}`);
     }
     return response.text();

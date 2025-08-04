@@ -319,8 +319,8 @@ export class BSPPanelManager {
             // Focus the panel being dragged
             this.setFocusedPanel(panel);
             
-            // Start dragging immediately (no delay/threshold)
-            this.initDrag();
+            // Don't start dragging immediately - wait for mouse movement threshold
+            // this.initDrag(); // Removed - will be triggered by mousemove with threshold
             
             e.preventDefault();
           }
@@ -347,8 +347,21 @@ export class BSPPanelManager {
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (this.activeDrag.type === 'move' && this.activeDrag.isDragging) {
-        this.handleDragOver(e);
+      if (this.activeDrag.type === 'move') {
+        // Check if we should start dragging (with threshold)
+        if (!this.activeDrag.isDragging) {
+          const dx = Math.abs(e.clientX - this.activeDrag.startX);
+          const dy = Math.abs(e.clientY - this.activeDrag.startY);
+          const DRAG_THRESHOLD = 10; // Require 10px movement before starting drag
+          
+          if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) {
+            // Start drag after threshold is met
+            this.initDrag();
+          }
+        } else {
+          // Already dragging, handle drag over
+          this.handleDragOver(e);
+        }
       } else if (this.activeResizer && this.isResizing) {
         const { node } = this.activeResizer;
         const containerRect = this.container.getBoundingClientRect();
@@ -444,6 +457,19 @@ export class BSPPanelManager {
     document.addEventListener('mouseup', () => {
       if (this.activeDrag?.isDragging) {
         this.handleDrop();
+      } else if (this.activeDrag.type === 'move') {
+        // Drag was initiated but threshold not met - just cancel
+        this.activeDrag = {
+          isDragging: false,
+          target: null,
+          type: null,
+          startX: 0,
+          startY: 0,
+          offsetX: 0,
+          offsetY: 0,
+          currentDropZone: null,
+          currentTargetPanel: null
+        };
       }
       if (this.activeResizer) {
         this.activeResizer = null;

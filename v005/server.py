@@ -121,16 +121,32 @@ class FileAPIHandler(BaseHTTPRequestHandler):
                 return
             
             if not safe_path.exists() or not safe_path.is_file():
-                self.send_error(404, "File not found")
+                self.send_response(404)
+                self.send_header('Content-Type', 'text/plain')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(b"File not found")
                 return
             
-            content = safe_path.read_text()
+            # Determine content type
+            mime_type, _ = mimetypes.guess_type(str(safe_path))
             
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/plain; charset=utf-8')
-            self.send_cors_headers()
-            self.end_headers()
-            self.wfile.write(content.encode())
+            # For text files or unknown types, read as text
+            if mime_type and (mime_type.startswith('text/') or mime_type in ['application/json', 'application/javascript']):
+                content = safe_path.read_text()
+                self.send_response(200)
+                self.send_header('Content-Type', f'{mime_type}; charset=utf-8')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(content.encode())
+            else:
+                # For binary files (images, videos, etc), read as bytes
+                content = safe_path.read_bytes()
+                self.send_response(200)
+                self.send_header('Content-Type', mime_type or 'application/octet-stream')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(content)
             
         except Exception as e:
             self.send_error(500, str(e))

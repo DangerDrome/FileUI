@@ -170,15 +170,42 @@ export class PanelManager {
           const ext = fileName.split('.').pop()?.toLowerCase() || '';
           
           content.innerHTML = `
-            <div class="video-player">
-              <video controls autoplay muted preload="metadata" 
-                     src="${videoUrl}"
-                     style="width: 100%; height: 100%; background: #000;">
+            <div class="video-player" style="display: flex; flex-direction: column; height: 100%;">
+              <video autoplay muted preload="metadata"
+                     style="flex: 1; width: 100%; background: #000;">
                 <source src="${videoUrl}" type="video/${ext === 'mov' ? 'quicktime' : ext}">
                 Your browser does not support this video format.
               </video>
+              <div class="video-controls" style="display: flex; align-items: center; padding: 8px; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+                <button class="btn btn-sm" data-action="play">
+                  <i data-lucide="play" width="16" height="16"></i>
+                </button>
+                <div class="timeline">
+                  <div class="timeline-ticks"></div>
+                  <div class="timeline-track">
+                    <div class="timeline-progress"></div>
+                    <div class="timeline-handle" style="left: 0%;">
+                      <div class="timeline-playhead-label">0:00</div>
+                      <div class="timeline-playhead-line"></div>
+                    </div>
+                  </div>
+                </div>
+                <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 90px; margin: 0 8px;">0:00 / 0:00</span>
+                <button class="btn btn-sm" data-action="volume">
+                  <i data-lucide="volume-2" width="16" height="16"></i>
+                </button>
+                <input type="range" min="0" max="100" value="100" style="width: 80px; margin: 0 8px 0 4px;">
+                <button class="btn btn-sm" data-action="fullscreen">
+                  <i data-lucide="maximize" width="16" height="16"></i>
+                </button>
+              </div>
             </div>
           `;
+          
+          // Setup video player controls
+          this.setupVideoPlayer(content);
+          // Initialize Lucide icons for the video controls
+          this.initializeLucideIcons();
           
           // Add enhanced error handling
           const video = content.querySelector('video');
@@ -201,14 +228,9 @@ export class PanelManager {
               content.innerHTML = errorMsg;
             });
             
-            // Log video metadata when loaded
+            // Handle video metadata load
             video.addEventListener('loadedmetadata', () => {
-              console.log('Video metadata loaded:', {
-                duration: video.duration,
-                width: video.videoWidth,
-                height: video.videoHeight,
-                src: video.src
-              });
+              // Metadata loaded successfully
             });
           }
         } else if (fileType === 'markdown' || fileName.endsWith('.md')) {
@@ -247,15 +269,42 @@ export class PanelManager {
           const ext = fileName.split('.').pop()?.toLowerCase() || '';
           
           content.innerHTML = `
-            <div class="video-player">
-              <video controls autoplay muted preload="metadata"
-                     src="${url}"
-                     style="width: 100%; height: 100%; background: #000;">
+            <div class="video-player" style="display: flex; flex-direction: column; height: 100%;">
+              <video autoplay muted preload="metadata"
+                     style="flex: 1; width: 100%; background: #000;">
                 <source src="${url}" type="${file.type || `video/${ext === 'mov' ? 'quicktime' : ext}`}">
                 Your browser does not support this video format.
               </video>
+              <div class="video-controls" style="display: flex; align-items: center; padding: 8px; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+                <button class="btn btn-sm" data-action="play">
+                  <i data-lucide="play" width="16" height="16"></i>
+                </button>
+                <div class="timeline">
+                  <div class="timeline-ticks"></div>
+                  <div class="timeline-track">
+                    <div class="timeline-progress"></div>
+                    <div class="timeline-handle" style="left: 0%;">
+                      <div class="timeline-playhead-label">0:00</div>
+                      <div class="timeline-playhead-line"></div>
+                    </div>
+                  </div>
+                </div>
+                <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 90px; margin: 0 8px;">0:00 / 0:00</span>
+                <button class="btn btn-sm" data-action="volume">
+                  <i data-lucide="volume-2" width="16" height="16"></i>
+                </button>
+                <input type="range" min="0" max="100" value="100" style="width: 80px; margin: 0 8px 0 4px;">
+                <button class="btn btn-sm" data-action="fullscreen">
+                  <i data-lucide="maximize" width="16" height="16"></i>
+                </button>
+              </div>
             </div>
           `;
+          
+          // Setup video player controls
+          this.setupVideoPlayer(content);
+          // Initialize Lucide icons for the video controls
+          this.initializeLucideIcons();
           
           // Add enhanced error handling
           const video = content.querySelector('video');
@@ -2714,12 +2763,46 @@ export class PanelManager {
     const isDirectory = file.webkitRelativePath !== '' || 
                        (file.type === '' && file.size === 0 && file.name.indexOf('.') === -1);
 
+    // Get file info for header
+    const headerFileType = getFileType(file.name);
+    const iconName = this.getFileIcon(headerFileType);
+    const iconColor = this.getFileIconColor(headerFileType);
+
+    // Ensure panel has a header
+    let panelHeader = panel.querySelector('.panel-header');
+    if (!panelHeader) {
+      // Create header if it doesn't exist
+      const headerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">
+            <i data-lucide="${iconName}" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: ${iconColor};"></i>
+            <span>${file.name}</span>
+          </div>
+          <div class="panel-actions">
+            <button class="panel-action-btn" data-action="pin" title="Pin Panel">
+              <i data-lucide="pin" class="lucide"></i>
+            </button>
+            <button class="panel-action-btn" data-action="split-v" title="Split Vertical">
+              <i data-lucide="columns-2" class="lucide"></i>
+            </button>
+            <button class="panel-action-btn" data-action="split-h" title="Split Horizontal">
+              <i data-lucide="rows-2" class="lucide"></i>
+            </button>
+            <button class="panel-action-btn" data-action="close" title="Close Panel">
+              <i data-lucide="x" class="lucide"></i>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      // Insert header at the beginning of the panel
+      panel.insertAdjacentHTML('afterbegin', headerHTML);
+      panelHeader = panel.querySelector('.panel-header');
+    }
+
     // Update panel header with icon
     const panelTitle = panel.querySelector('.panel-title');
     if (panelTitle) {
-      const fileType = getFileType(file.name);
-      const iconName = this.getFileIcon(fileType);
-      const iconColor = this.getFileIconColor(fileType);
       panelTitle.innerHTML = `
         <i data-lucide="${iconName}" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: ${iconColor};"></i>
         <span>${file.name}</span>
@@ -2783,19 +2866,51 @@ export class PanelManager {
       const ext = file.name.split('.').pop()?.toLowerCase() || '';
       
       panelContent.innerHTML = `
-        <div class="video-player" style="width: 100%; height: 100%;">
-          <video src="${url}" controls autoplay muted style="width: 100%; height: 100%; background: #000;">
+        <div class="video-player" style="display: flex; flex-direction: column; height: 100%;">
+          <video autoplay muted preload="metadata"
+                 style="flex: 1; width: 100%; background: #000;">
             <source src="${url}" type="${file.type || `video/${ext === 'mov' ? 'quicktime' : ext}`}">
             Your browser does not support the video tag.
           </video>
+          <div class="video-controls" style="display: flex; align-items: center; padding: 8px; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+            <button class="btn btn-sm" data-action="play">
+              <i data-lucide="play" width="16" height="16"></i>
+            </button>
+            <div class="timeline">
+              <div class="timeline-ticks"></div>
+              <div class="timeline-track">
+                <div class="timeline-progress"></div>
+                <div class="timeline-handle" style="left: 0%;">
+                  <div class="timeline-playhead-label">0:00</div>
+                  <div class="timeline-playhead-line"></div>
+                </div>
+              </div>
+            </div>
+            <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 90px; margin: 0 8px;">0:00 / 0:00</span>
+            <button class="btn btn-sm" data-action="volume">
+              <i data-lucide="volume-2" width="16" height="16"></i>
+            </button>
+            <input type="range" min="0" max="100" value="100" style="width: 80px; margin: 0 8px 0 4px;">
+            <button class="btn btn-sm" data-action="fullscreen">
+              <i data-lucide="maximize" width="16" height="16"></i>
+            </button>
+          </div>
         </div>
       `;
+      
+      // Setup video player controls
+      this.setupVideoPlayer(panelContent);
+      // Initialize Lucide icons for the video controls
+      this.initializeLucideIcons();
       
       // Add error handling for .mov files
       const video = panelContent.querySelector('video');
       if (video) {
-        video.addEventListener('error', () => {
-          URL.revokeObjectURL(url);
+        let hasError = false;
+        
+        video.addEventListener('error', (e) => {
+          hasError = true;
+          console.error('Video error:', e);
           const errorMsg = ext === 'mov' 
             ? `<div class="video-error" style="padding: 20px; text-align: center;">
                  <h3>Unable to play .MOV file</h3>
@@ -2808,12 +2923,23 @@ export class PanelManager {
                </div>`
             : `<div class="video-error">Failed to load video: ${file.name}</div>`;
           panelContent.innerHTML = errorMsg;
+          // Only revoke URL on actual error
+          URL.revokeObjectURL(url);
         });
         
-        // Clean up blob URL after load
-        video.addEventListener('loadeddata', () => {
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        // Don't revoke the URL too early - wait for the video to fully load
+        video.addEventListener('loadedmetadata', () => {
+          // Don't revoke here - the video still needs the blob URL to play
         });
+        
+        // Clean up blob URL when panel is removed or video is replaced
+        const observer = new MutationObserver(() => {
+          if (!document.contains(video) && !hasError) {
+            URL.revokeObjectURL(url);
+            observer.disconnect();
+          }
+        });
+        observer.observe(panelContent, { childList: true });
       }
     } else if (fileType === 'file-pdf' || file.type === 'application/pdf') {
       // Handle PDF files
@@ -3370,6 +3496,11 @@ export class PanelManager {
     const timeline = container.querySelector('.timeline') as HTMLElement;
     const timelineHandle = timeline?.querySelector('.timeline-handle') as HTMLElement;
     const timelineLabel = timeline?.querySelector('.timeline-playhead-label') as HTMLElement;
+    const videoControls = container.querySelector('.video-controls') as HTMLElement;
+    
+    // Debug: log what we found
+    console.log('setupVideoPlayer - Timeline found:', !!timeline);
+    console.log('setupVideoPlayer - Video found:', !!video);
     
     if (!video) return;
     
@@ -3384,26 +3515,74 @@ export class PanelManager {
     video.muted = true;
     volumeSlider && (volumeSlider.value = '0');
     
-    // Update play button based on initial state
-    if (!video.paused) {
-      playBtn && (playBtn.innerHTML = '<i data-lucide="pause" width="16" height="16"></i>');
+    // Add focus handling for dimming controls
+    if (videoControls) {
+      // Set initial unfocused state
+      videoControls.style.opacity = '0.6';
+      videoControls.style.transition = 'opacity 0.3s ease';
+      
+      // Focus on hover or interaction
+      container.addEventListener('mouseenter', () => {
+        videoControls.style.opacity = '1';
+      });
+      
+      container.addEventListener('mouseleave', () => {
+        videoControls.style.opacity = '0.6';
+      });
+      
+      // Also brighten on video interaction
+      video.addEventListener('click', () => {
+        videoControls.style.opacity = '1';
+        setTimeout(() => {
+          if (!container.matches(':hover')) {
+            videoControls.style.opacity = '0.6';
+          }
+        }, 3000);
+      });
     }
+    
+    // Update play button icon based on video state
+    const updatePlayButton = () => {
+      if (playBtn) {
+        if (video.paused) {
+          playBtn.innerHTML = '<i data-lucide="play" width="16" height="16"></i>';
+        } else {
+          playBtn.innerHTML = '<i data-lucide="pause" width="16" height="16"></i>';
+        }
+        this.initializeLucideIcons();
+      }
+    };
+    
+    // Set initial play button state
+    updatePlayButton();
+    
+    // Listen for play/pause events from video itself (e.g., clicking on video)
+    video.addEventListener('play', updatePlayButton);
+    video.addEventListener('pause', updatePlayButton);
     
     // Play/pause functionality
     playBtn?.addEventListener('click', () => {
       if (video.paused) {
         video.play();
-        playBtn.innerHTML = '<i data-lucide="pause" width="16" height="16"></i>';
       } else {
         video.pause();
-        playBtn.innerHTML = '<i data-lucide="play" width="16" height="16"></i>';
       }
-      this.initializeLucideIcons();
     });
     
     // Volume control
     volumeSlider?.addEventListener('input', () => {
       video.volume = parseInt(volumeSlider.value) / 100;
+      video.muted = video.volume === 0;
+      updateVolumeIcon();
+    });
+    
+    // Volume button toggle
+    volumeBtn?.addEventListener('click', () => {
+      video.muted = !video.muted;
+      if (volumeSlider) {
+        volumeSlider.value = video.muted ? '0' : '100';
+        video.volume = video.muted ? 0 : 1;
+      }
       updateVolumeIcon();
     });
     
@@ -3420,6 +3599,19 @@ export class PanelManager {
     // Set initial volume icon to muted
     updateVolumeIcon();
     
+    // Fullscreen functionality
+    const fullscreenBtn = container.querySelector('[data-action="fullscreen"]') as HTMLButtonElement;
+    fullscreenBtn?.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        container.requestFullscreen();
+        fullscreenBtn.innerHTML = '<i data-lucide="minimize" width="16" height="16"></i>';
+      } else {
+        document.exitFullscreen();
+        fullscreenBtn.innerHTML = '<i data-lucide="maximize" width="16" height="16"></i>';
+      }
+      this.initializeLucideIcons();
+    });
+    
     // Timeline scrubbing
     let isDragging = false;
     
@@ -3431,11 +3623,10 @@ export class PanelManager {
         timelineLabel.textContent = formatTime(video.currentTime);
       }
       
-      // Update timeline line opacity based on playhead position
-      const track = timeline?.querySelector('.timeline-track');
-      if (track) {
-        const trackElement = track as HTMLElement;
-        trackElement.style.setProperty('--playhead-position', `${percentage}%`);
+      // Update timeline progress bar
+      const progress = timeline?.querySelector('.timeline-progress') as HTMLElement;
+      if (progress) {
+        progress.style.width = `${percentage}%`;
       }
     };
     
@@ -3457,10 +3648,53 @@ export class PanelManager {
       isDragging = false;
     });
     
-    // Update time labels
+    // Update time labels and generate ticks
+    console.log('Adding loadedmetadata listener to video');
     video.addEventListener('loadedmetadata', () => {
+      console.log('Video loadedmetadata event fired! Duration:', video.duration);
+      
       if (timeLabel) {
         timeLabel.textContent = `0:00 / ${formatTime(video.duration)}`;
+      }
+      
+      // Generate timeline ticks based on video duration
+      // The ticks container is inside .timeline which is inside .video-controls
+      const ticksContainer = container.querySelector('.timeline-ticks') as HTMLElement;
+      console.log('Looking for .timeline-ticks, found:', !!ticksContainer);
+      
+      // If not found, let's check what IS in the container
+      if (!ticksContainer) {
+        console.log('Container HTML:', container.innerHTML.substring(0, 500));
+      }
+      
+      if (ticksContainer && video.duration) {
+        // Clear existing ticks
+        ticksContainer.innerHTML = '';
+        
+        // Simple approach - just add ticks at regular intervals
+        const numTicks = Math.min(30, Math.floor(video.duration * 2)); // 2 ticks per second, max 30
+        
+        for (let i = 0; i <= numTicks; i++) {
+          const percentage = (i / numTicks) * 100;
+          const tick = document.createElement('div');
+          tick.className = 'timeline-tick';
+          
+          // Make every 5th tick a major tick
+          if (i % 5 === 0) {
+            tick.classList.add('major');
+          }
+          
+          tick.style.left = `${percentage}%`;
+          tick.style.position = 'absolute'; // Ensure position is set
+          ticksContainer.appendChild(tick);
+        }
+        
+        // Debug: Check if ticks were actually added
+        if (ticksContainer.children.length > 0) {
+          console.log(`✓ Generated ${ticksContainer.children.length} timeline ticks`);
+        } else {
+          console.error('✗ Failed to generate timeline ticks');
+        }
       }
     });
     
@@ -3480,11 +3714,10 @@ export class PanelManager {
           timelineLabel.textContent = formatTime(video.currentTime);
         }
         
-        // Update timeline line opacity based on playhead position
-        const track = timeline?.querySelector('.timeline-track');
-        if (track) {
-          const trackElement = track as HTMLElement;
-          trackElement.style.setProperty('--playhead-position', `${percentage}%`);
+        // Update timeline progress bar
+        const progress = timeline?.querySelector('.timeline-progress') as HTMLElement;
+        if (progress) {
+          progress.style.width = `${percentage}%`;
         }
       }
     });

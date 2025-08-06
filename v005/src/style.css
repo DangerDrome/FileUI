@@ -3002,6 +3002,92 @@ body.is-dragging {
   border-top: none !important;
 }
 
+/* Video timeline track - ensure proper height */
+.video-player .timeline-track {
+  height: 4px !important;
+  background-color: var(--bg-tertiary) !important;
+  border-radius: 2px !important;
+  position: relative !important;
+  width: 100% !important;
+  z-index: 2 !important; /* Above ticks */
+}
+
+/* Video timeline progress bar - thin accent line */
+.video-player .timeline-progress {
+  background-color: var(--accent) !important;
+  opacity: 0.7;
+  height: 100% !important; /* Fill the 4px track height */
+  border-radius: 2px !important;
+}
+
+/* Make the progress bar more visible on hover */
+.video-player .timeline:hover .timeline-progress {
+  opacity: 0.8;
+}
+
+/* Timeline container - center it vertically */
+.video-player .timeline {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 !important;
+  margin: 0 12px !important;
+  height: 20px !important; /* Give enough height for the handle */
+  position: relative !important;
+}
+
+/* Timeline ticks container */
+.video-player .timeline-ticks {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 5 !important; /* Make sure it's visible */
+}
+
+/* Individual tick marks - regular 5-frame ticks */
+.video-player .timeline-tick {
+  position: absolute !important;
+  width: 1px !important;
+  height: 12px !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* Every 10-frame tick (thicker and taller) */
+.video-player .timeline-tick.major {
+  width: 2px !important;
+  height: 16px !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Timeline handle container */
+.video-player .timeline-handle {
+  z-index: 10 !important; /* Above everything */
+}
+
+/* Style the playhead line */
+.video-player .timeline-playhead-line {
+  background-color: var(--accent) !important;
+  width: 2px;
+  height: 20px !important; /* Taller vertical line */
+  position: absolute;
+  top: -8px !important; /* Center it vertically on the track */
+}
+
+/* Style the playhead label */
+.video-player .timeline-playhead-label {
+  background-color: var(--accent) !important;
+  color: var(--grey-100) !important;
+  border-radius: 4px !important;
+  top: -2px !important; /* Almost touching the timeline */
+  padding: 2px 6px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
 /* Video error message */
 .video-error {
   display: flex;

@@ -191,8 +191,9 @@ export class PanelManager {
                     `http://localhost:8000/api/file?path=${encodeURIComponent(f.path)}`
                   );
                   
-                  // Load the sequence
+                  // Load the sequence and auto-play
                   await sequencePlayer.loadSequence(sequenceInfo, '', frameUrls);
+                  sequencePlayer.play();
                   
                   // Initialize Lucide icons
                   this.initializeLucideIcons();
@@ -2132,8 +2133,8 @@ export class PanelManager {
             }
           }
           
-          // Open in new panel or current panel
-          const targetPanelId = this.bspManager?.addPanel('right') || panelId;
+          // Find an existing unpinned panel or create a new one
+          const targetPanelId = this.findOrCreateTargetPanel() || panelId;
           
           // Wait for panel to be created
           setTimeout(() => {
@@ -2156,8 +2157,10 @@ export class PanelManager {
             panelContent.innerHTML = `<div id="sequence-container-${targetPanelId}" style="width: 100%; height: 100%;"></div>`;
             const sequencePlayer = new ImageSequencePlayer(panelContent.querySelector(`#sequence-container-${targetPanelId}`)!);
             
-            // Load the sequence with server URLs
+            // Load the sequence with server URLs and auto-play
             sequencePlayer.loadSequence(sequence, '', frameUrls).then(() => {
+              // Auto-play the sequence
+              sequencePlayer.play();
             });
             
             // Initialize Lucide icons
@@ -3154,8 +3157,9 @@ export class PanelManager {
                 `http://localhost:8000/api/file?path=${encodeURIComponent(f.path)}`
               );
               
-              // Load the sequence
+              // Load the sequence and auto-play
               await sequencePlayer.loadSequence(sequenceInfo, '', frameUrls);
+              sequencePlayer.play();
               
               // Initialize Lucide icons
               this.initializeLucideIcons();
@@ -3183,6 +3187,8 @@ export class PanelManager {
           
           const url = URL.createObjectURL(file);
           sequencePlayer.loadSequence(singleFrameSequence, '', [url]).then(() => {
+            // Auto-play single frame sequences too
+            sequencePlayer.play();
           });
           
           this.initializeLucideIcons();
@@ -3323,8 +3329,8 @@ export class PanelManager {
       if (files.length === 0) return;
       
       
-      // Create a new panel for the sequence
-      const targetPanelId = this.bspManager?.addPanel('right');
+      // Find an existing unpinned panel or create a new one
+      const targetPanelId = this.findOrCreateTargetPanel();
       if (!targetPanelId) {
         return;
       }
@@ -3377,8 +3383,9 @@ export class PanelManager {
           }
         }
         
-        // Load the sequence with blob URLs
+        // Load the sequence with blob URLs and auto-play
         await sequencePlayer.loadSequence(sequenceInfo, '', frameUrls);
+        sequencePlayer.play();
         
         // Initialize Lucide icons
         this.initializeLucideIcons();

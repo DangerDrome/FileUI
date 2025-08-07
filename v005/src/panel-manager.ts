@@ -3719,6 +3719,51 @@ export class PanelManager {
       isDragging = false;
     });
     
+    // Keyboard controls for arrow key scrubbing
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Only handle if video player is focused or visible
+      if (!container.contains(document.activeElement) && document.activeElement !== video) {
+        // Check if video player panel is visible
+        const videoPanel = container.closest('.bsp-panel') as HTMLElement;
+        if (!videoPanel || videoPanel.style.display === 'none') return;
+      }
+      
+      const skipAmount = e.shiftKey ? 10 : 5; // Hold shift for larger skips
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          video.currentTime = Math.max(0, video.currentTime - skipAmount);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          video.currentTime = Math.min(video.duration || 0, video.currentTime + skipAmount);
+          break;
+        case ' ':
+          // Spacebar to play/pause
+          e.preventDefault();
+          if (video.paused) {
+            video.play();
+          } else {
+            video.pause();
+          }
+          break;
+      }
+    };
+    
+    // Add keyboard listener to the container and video
+    container.addEventListener('keydown', handleKeyPress);
+    video.addEventListener('keydown', handleKeyPress);
+    // Also listen on document level when video has focus
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === video || container.contains(document.activeElement)) {
+        handleKeyPress(e);
+      }
+    });
+    
+    // Make video focusable
+    video.tabIndex = 0;
+    
     // Update time labels and generate ticks
     console.log('Adding loadedmetadata listener to video');
     video.addEventListener('loadedmetadata', () => {

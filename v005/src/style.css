@@ -2986,15 +2986,84 @@ body.is-dragging {
   margin: 0 var(--spacing-12);
 }
 
-/* Remove background from video control buttons */
+/* Remove background from video control buttons and dim them */
 .bsp-panel .video-controls .btn {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  opacity: 0.5; /* Dim the buttons */
+  transition: opacity 0.2s ease;
 }
 
 .bsp-panel .video-controls .btn:hover {
   background: var(--color-white-opacity-10) !important;
+  opacity: 0.8; /* Slightly brighter on hover */
+}
+
+/* Specifically dim play, volume and fullscreen buttons */
+.video-controls button[data-action="play"],
+.video-controls button[data-action="pause"],
+.video-controls button[data-action="mute"],
+.video-controls button[data-action="unmute"],
+.video-controls button[data-action="fullscreen"] {
+  opacity: 0.4 !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.video-controls button[data-action="play"]:hover,
+.video-controls button[data-action="pause"]:hover,
+.video-controls button[data-action="mute"]:hover,
+.video-controls button[data-action="unmute"]:hover,
+.video-controls button[data-action="fullscreen"]:hover {
+  opacity: 0.7 !important;
+}
+
+/* Also dim the icons inside these buttons */
+.video-controls button[data-action="play"] svg,
+.video-controls button[data-action="pause"] svg,
+.video-controls button[data-action="mute"] svg,
+.video-controls button[data-action="unmute"] svg,
+.video-controls button[data-action="fullscreen"] svg {
+  opacity: 0.7 !important;
+}
+
+/* FORCE dim the bright green play/pause/fullscreen/volume icons */
+.video-controls button svg {
+  stroke: #666 !important; /* Gray instead of bright green */
+  opacity: 0.6 !important;
+}
+
+.video-controls button:hover svg {
+  stroke: #00cc8b !important; /* Back to bright green on hover */
+  opacity: 1 !important; /* Full opacity on hover */
+}
+
+/* Specifically target the play button's bright green */
+.video-controls button[data-action="play"] svg,
+.video-controls button[data-action="pause"] svg {
+  stroke: #666 !important;
+  fill: none !important;
+}
+
+.video-controls button[data-action="mute"] svg,
+.video-controls button[data-action="unmute"] svg {
+  stroke: #666 !important;
+  fill: none !important;
+}
+
+.video-controls button[data-action="fullscreen"] svg {
+  stroke: #666 !important;
+  fill: none !important;
+}
+
+/* On hover, restore the bright green color */
+.video-controls button[data-action="play"]:hover svg,
+.video-controls button[data-action="pause"]:hover svg,
+.video-controls button[data-action="mute"]:hover svg,
+.video-controls button[data-action="unmute"]:hover svg,
+.video-controls button[data-action="fullscreen"]:hover svg {
+  stroke: #00cc8b !important;
+  opacity: 1 !important;
 }
 
 /* Remove top border from video controls */

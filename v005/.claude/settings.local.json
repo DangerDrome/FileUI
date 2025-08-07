@@ -22,7 +22,8 @@
       "Bash(find:*)",
       "WebFetch(domain:github.com)",
       "Bash(npm install:*)",
-      "Bash(xdg-open:*)"
+      "Bash(xdg-open:*)",
+      "WebFetch(domain:jeri.io)"
     ],
     "deny": []
   }

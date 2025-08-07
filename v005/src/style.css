@@ -3068,6 +3068,92 @@ body.is-dragging {
   z-index: 10 !important; /* Above everything */
 }
 
+/* Volume control popover styling */
+.volume-control {
+  position: relative;
+}
+
+.volume-slider-popup {
+  background: #161614 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 100% !important;
+  height: 100px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  margin-bottom: 25px !important;
+  border-radius: 4px !important;
+}
+
+/* Simple horizontal slider styling */
+.volume-slider-popup input[type="range"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  height: 100px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  margin-bottom: 25px !important;
+  border-radius: 8px !important;
+}
+
+.volume-slider-popup input[type="range"]::-webkit-slider-runnable-track {
+  width: 6px !important;
+  height: 6px !important;
+  margin-bottom: 35px !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 3px !important;
+}
+
+.volume-slider-popup input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  background: #00cc8b !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  border: none !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+  margin-top: -5px !important;
+  margin-left: -5px !important;
+}
+
+.volume-slider-popup input[type="range"]::-moz-range-thumb {
+  width: 16px !important;
+  height: 16px !important;
+  background: #00cc8b !important;
+  border-radius: 50% !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+}
+
+.volume-slider-popup input[type="range"]::-webkit-slider-thumb:hover {
+  background: #00ffaa !important;
+}
+
+.volume-slider-popup input[type="range"]::-moz-range-thumb:hover {
+  background: #00ffaa !important;
+}
+
+/* Firefox track */
+.volume-slider-popup input[type="range"]::-moz-range-track {
+  width: 100% !important;
+  height: 6px !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 3px !important;
+  border: none !important;
+}
+
+/* Firefox progress fill */
+.volume-slider-popup input[type="range"]::-moz-range-progress {
+  background: #00cc8b !important;
+  height: 6px !important;
+  border-radius: 3px !important;
+}
+
 /* Style the playhead line */
 .video-player .timeline-playhead-line {
   background-color: var(--accent) !important;

@@ -191,10 +191,14 @@ export class PanelManager {
                   </div>
                 </div>
                 <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 90px; margin: 0 8px;">0:00 / 0:00</span>
-                <button class="btn btn-sm" data-action="volume">
-                  <i data-lucide="volume-2" width="16" height="16"></i>
-                </button>
-                <input type="range" min="0" max="100" value="100" style="width: 80px; margin: 0 8px 0 4px;">
+                <div class="volume-control" style="position: relative; display: inline-flex; align-items: center;">
+                  <button class="btn btn-sm" data-action="volume">
+                    <i data-lucide="volume-2" width="16" height="16"></i>
+                  </button>
+                  <div class="volume-slider-popup" style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; background: #161614; border-radius: 6px; padding: 8px 12px; display: none; box-shadow: 0 -4px 12px rgba(0,0,0,0.8); z-index: 1000;">
+                    <input type="range" min="0" max="100" value="0" style="width: 100px;">
+                  </div>
+                </div>
                 <button class="btn btn-sm" data-action="fullscreen">
                   <i data-lucide="maximize" width="16" height="16"></i>
                 </button>
@@ -290,10 +294,14 @@ export class PanelManager {
                   </div>
                 </div>
                 <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 90px; margin: 0 8px;">0:00 / 0:00</span>
-                <button class="btn btn-sm" data-action="volume">
-                  <i data-lucide="volume-2" width="16" height="16"></i>
-                </button>
-                <input type="range" min="0" max="100" value="100" style="width: 80px; margin: 0 8px 0 4px;">
+                <div class="volume-control" style="position: relative; display: inline-flex; align-items: center;">
+                  <button class="btn btn-sm" data-action="volume">
+                    <i data-lucide="volume-2" width="16" height="16"></i>
+                  </button>
+                  <div class="volume-slider-popup" style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; background: #161614; border-radius: 6px; padding: 8px 12px; display: none; box-shadow: 0 -4px 12px rgba(0,0,0,0.8); z-index: 1000;">
+                    <input type="range" min="0" max="100" value="0" style="width: 100px;">
+                  </div>
+                </div>
                 <button class="btn btn-sm" data-action="fullscreen">
                   <i data-lucide="maximize" width="16" height="16"></i>
                 </button>
@@ -2887,10 +2895,14 @@ export class PanelManager {
               </div>
             </div>
             <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 90px; margin: 0 8px;">0:00 / 0:00</span>
-            <button class="btn btn-sm" data-action="volume">
-              <i data-lucide="volume-2" width="16" height="16"></i>
-            </button>
-            <input type="range" min="0" max="100" value="100" style="width: 80px; margin: 0 8px 0 4px;">
+            <div class="volume-control" style="position: relative; display: inline-flex; align-items: center;">
+              <button class="btn btn-sm" data-action="volume">
+                <i data-lucide="volume-2" width="16" height="16"></i>
+              </button>
+              <div class="volume-slider-popup" style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; background: var(--bg-primary); border-radius: 6px; padding: 12px 8px; display: none; box-shadow: 0 -4px 12px rgba(0,0,0,0.5); z-index: 1000; width: 40px;">
+                <input type="range" min="0" max="100" value="100" style="width: 120px; writing-mode: vertical-lr; direction: rtl; height: 100px;">
+              </div>
+            </div>
             <button class="btn btn-sm" data-action="fullscreen">
               <i data-lucide="maximize" width="16" height="16"></i>
             </button>
@@ -3491,6 +3503,8 @@ export class PanelManager {
     const video = container.querySelector('video') as HTMLVideoElement;
     const playBtn = container.querySelector('[data-action="play"]') as HTMLButtonElement;
     const volumeBtn = container.querySelector('[data-action="volume"]') as HTMLButtonElement;
+    const volumeControl = container.querySelector('.volume-control') as HTMLElement;
+    const volumePopup = container.querySelector('.volume-slider-popup') as HTMLElement;
     const volumeSlider = container.querySelector('input[type="range"]') as HTMLInputElement;
     const timeLabel = container.querySelector('.video-time-label') as HTMLElement;
     const timeline = container.querySelector('.timeline') as HTMLElement;
@@ -3568,6 +3582,27 @@ export class PanelManager {
         video.pause();
       }
     });
+    
+    // Volume popover control
+    if (volumeControl && volumePopup) {
+      let hoverTimeout: number | null = null;
+      
+      const showPopup = () => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        volumePopup.style.display = 'block';
+      };
+      
+      const hidePopup = () => {
+        hoverTimeout = window.setTimeout(() => {
+          volumePopup.style.display = 'none';
+        }, 300);
+      };
+      
+      volumeControl.addEventListener('mouseenter', showPopup);
+      volumeControl.addEventListener('mouseleave', hidePopup);
+      volumePopup.addEventListener('mouseenter', showPopup);
+      volumePopup.addEventListener('mouseleave', hidePopup);
+    }
     
     // Volume control
     volumeSlider?.addEventListener('input', () => {

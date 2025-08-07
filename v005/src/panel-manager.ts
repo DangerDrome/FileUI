@@ -570,6 +570,11 @@ export class PanelManager {
 
   private setupEventListeners(): void {
     window.addEventListener('resize', () => {
+      // Skip layout during fullscreen to prevent fullscreen exit
+      if (document.fullscreenElement || (document as any).webkitFullscreenElement) {
+        console.log('Skipping layout during fullscreen');
+        return;
+      }
       this.layout();
       this.refreshDividerDragAndDrop();
     });
@@ -3500,6 +3505,9 @@ export class PanelManager {
   }
 
   private setupVideoPlayer(container: HTMLElement): void {
+    // Find the actual video player container
+    const videoPlayer = container.querySelector('.video-player') as HTMLElement || container;
+    
     const video = container.querySelector('video') as HTMLVideoElement;
     const playBtn = container.querySelector('[data-action="play"]') as HTMLButtonElement;
     const volumeBtn = container.querySelector('[data-action="volume"]') as HTMLButtonElement;
@@ -3636,16 +3644,44 @@ export class PanelManager {
     
     // Fullscreen functionality
     const fullscreenBtn = container.querySelector('[data-action="fullscreen"]') as HTMLButtonElement;
-    fullscreenBtn?.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        container.requestFullscreen();
-        fullscreenBtn.innerHTML = '<i data-lucide="minimize" width="16" height="16"></i>';
-      } else {
-        document.exitFullscreen();
-        fullscreenBtn.innerHTML = '<i data-lucide="maximize" width="16" height="16"></i>';
-      }
-      this.initializeLucideIcons();
-    });
+    
+    if (fullscreenBtn && video) {
+      fullscreenBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+          // Enter fullscreen - try container first, then video
+          if (videoPlayer.requestFullscreen) {
+            videoPlayer.requestFullscreen();
+          } else if ((videoPlayer as any).webkitRequestFullscreen) {
+            (videoPlayer as any).webkitRequestFullscreen();
+          } else if (video.requestFullscreen) {
+            video.requestFullscreen();
+          } else if ((video as any).webkitRequestFullscreen) {
+            (video as any).webkitRequestFullscreen();
+          }
+        } else {
+          // Exit fullscreen
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if ((document as any).webkitExitFullscreen) {
+            (document as any).webkitExitFullscreen();
+          }
+        }
+      });
+      
+      // Update button icon on fullscreen change
+      ['fullscreenchange', 'webkitfullscreenchange'].forEach(event => {
+        document.addEventListener(event, () => {
+          const isFS = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+          fullscreenBtn.innerHTML = isFS 
+            ? '<i data-lucide="minimize" width="16" height="16"></i>'
+            : '<i data-lucide="maximize" width="16" height="16"></i>';
+          this.initializeLucideIcons();
+        });
+      });
+    }
     
     // Timeline scrubbing
     let isDragging = false;

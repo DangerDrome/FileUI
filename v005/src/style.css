@@ -3154,6 +3154,26 @@ body.is-dragging {
   border-radius: 3px !important;
 }
 
+/* Fullscreen video player styling */
+.video-player:fullscreen {
+  background: #000 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.video-player:fullscreen video {
+  flex: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+.video-player:fullscreen .video-controls {
+  position: relative !important;
+  bottom: 0 !important;
+  width: 100% !important;
+}
+
 /* Style the playhead line */
 .video-player .timeline-playhead-line {
   background-color: var(--accent) !important;

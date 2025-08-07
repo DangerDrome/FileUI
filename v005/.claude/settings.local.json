@@ -23,7 +23,13 @@
       "WebFetch(domain:github.com)",
       "Bash(npm install:*)",
       "Bash(xdg-open:*)",
-      "WebFetch(domain:jeri.io)"
+      "WebFetch(domain:jeri.io)",
+      "Bash(/home/danger/Documents/GitHub/FileUI/v005/devserver.sh restart:*)",
+      "Bash(bash:*)",
+      "Bash(sed:*)",
+      "Bash(python3:*)",
+      "Bash(npx tsc:*)",
+      "Bash(/home/danger/Documents/GitHub/FileUI/v005/devserver.sh logs:*)"
     ],
     "deny": []
   }

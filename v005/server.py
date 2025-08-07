@@ -27,6 +27,8 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             self.handle_read_file(parsed_path)
         elif parsed_path.path == '/api/metadata':
             self.handle_get_metadata(parsed_path)
+        elif parsed_path.path == '/api/sequence':
+            self.handle_get_sequence(parsed_path)
         else:
             self.send_error(404, "Not Found")
     
@@ -232,6 +234,139 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             self.send_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(metadata).encode())
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def handle_get_sequence(self, parsed_path):
+        """Detect if a file is part of a sequence and return all sequence files"""
+        query_params = parse_qs(parsed_path.query)
+        filepath = query_params.get('path', [''])[0]
+        
+        if not filepath:
+            self.send_error(400, "Path parameter required")
+            return
+        
+        try:
+            import re
+            
+            # Parse the filename to detect sequence pattern
+            file_path = Path(filepath)
+            filename = file_path.name
+            
+            # Handle both absolute and relative paths
+            if file_path.is_absolute():
+                directory = file_path.parent
+            else:
+                # If relative, use the root directory
+                full_path = self.root_dir / filepath
+                directory = full_path.parent
+                filename = full_path.name
+            
+            # Try different sequence patterns
+            patterns = [
+                r'^(.+?)([._])(\d{3,6})\.(\w+)$',  # name.0001.ext or name_0001.ext
+                r'^(.+?)(\d{3,6})\.(\w+)$',         # name0001.ext
+            ]
+            
+            match = None
+            for pattern in patterns:
+                match = re.match(pattern, filename)
+                if match:
+                    break
+            
+            if not match:
+                # Not a sequence file
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({'is_sequence': False}).encode())
+                return
+            
+            # Extract sequence components
+            if len(match.groups()) == 4:
+                base_name = match.group(1)
+                delimiter = match.group(2)
+                frame_num = match.group(3)
+                extension = match.group(4)
+            else:
+                base_name = match.group(1)
+                delimiter = ''
+                frame_num = match.group(2)
+                extension = match.group(3)
+            
+            padding = len(frame_num)
+            
+            # Scan directory for matching files
+            # Directory is already an absolute Path or has been resolved
+            if directory.is_absolute():
+                safe_dir = directory.resolve()
+            else:
+                safe_dir = (self.root_dir / directory).resolve()
+                
+            if not str(safe_dir).startswith(str(self.root_dir.resolve())):
+                self.send_error(403, "Access Denied")
+                return
+            
+            sequence_files = []
+            frame_numbers = []
+            
+            # Pattern to match all files in the sequence
+            if delimiter:
+                seq_pattern = re.compile(f'^{re.escape(base_name)}{re.escape(delimiter)}(\\d{{{padding},}})\.{re.escape(extension)}$')
+            else:
+                seq_pattern = re.compile(f'^{re.escape(base_name)}(\\d{{{padding},}})\.{re.escape(extension)}$')
+            
+            for item in safe_dir.iterdir():
+                if item.is_file():
+                    match = seq_pattern.match(item.name)
+                    if match:
+                        frame = int(match.group(1))
+                        frame_numbers.append(frame)
+                        sequence_files.append({
+                            'name': item.name,
+                            'path': str(item.relative_to(self.root_dir.resolve())),
+                            'frame': frame
+                        })
+            
+            if len(sequence_files) < 2:
+                # Not enough files for a sequence
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({'is_sequence': False}).encode())
+                return
+            
+            # Sort by frame number
+            sequence_files.sort(key=lambda x: x['frame'])
+            frame_numbers.sort()
+            
+            # Build sequence info
+            sequence_info = {
+                'is_sequence': True,
+                'base_name': base_name,
+                'delimiter': delimiter,
+                'padding': padding,
+                'extension': extension,
+                'start_frame': frame_numbers[0],
+                'end_frame': frame_numbers[-1],
+                'frame_count': len(frame_numbers),
+                'files': sequence_files,
+                'missing_frames': []
+            }
+            
+            # Check for missing frames
+            for i in range(frame_numbers[0], frame_numbers[-1] + 1):
+                if i not in frame_numbers:
+                    sequence_info['missing_frames'].append(i)
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(sequence_info).encode())
             
         except Exception as e:
             self.send_error(500, str(e))

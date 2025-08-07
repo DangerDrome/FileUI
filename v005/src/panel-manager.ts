@@ -3,6 +3,8 @@ import { BSPPanelManager } from './bsp-manager';
 import { ServerFileSystem, FileItem, sortFiles, getFileType } from './filemanager';
 import MarkdownIt from 'markdown-it';
 import { ContextMenuManager, ContextMenuItem } from './context-menu';
+import { ImageSequencePlayer } from './sequence-player';
+import { detectSequences, SequenceInfo, isSequenceableImage, parseSequenceFrame } from './sequence-utils';
 
 // Fixed panel configuration - header, left toolbar, and right toolbar remain fixed
 const FIXED_PANELS = [
@@ -40,6 +42,9 @@ export class PanelManager {
   private contextMenu: ContextMenuManager;
   private dragDropInitialized: boolean = false;
   private currentlyOpenFile: string | null = null;
+  private currentPath: string = '.';
+  // Store native file handles for sequences - key is "folderPath/sequenceName"
+  private nativeSequenceHandles: Map<string, Map<string, FileSystemFileHandle>> = new Map();
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -58,7 +63,6 @@ export class PanelManager {
       try {
         this.recentLayouts = JSON.parse(savedLayouts);
       } catch (error) {
-        console.error('Failed to load recent layouts:', error);
       }
     }
     
@@ -122,45 +126,84 @@ export class PanelManager {
     }
 
     // Only create a new panel if no non-explorer panels exist
-    console.log('Creating new panel for file...');
     const newPanelId = this.bspManager.addPanel('right');
-    console.log('New panel ID:', newPanelId);
     
     // Focus the newly created panel
     if (newPanelId) {
       // Wait for panel to be created in DOM
       setTimeout(() => {
         const newPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`);
-        console.log('New panel element found:', !!newPanel);
         if (newPanel) {
           this.focusPanel(newPanel);
           // Ensure panel is ready
           const panelContent = newPanel.querySelector('.panel-content');
           if (!panelContent) {
-            console.error('Panel content not found in new panel');
           }
         } else {
-          console.error('New panel not found in DOM after creation');
         }
       }, 50); // Increased timeout
     } else {
-      console.error('BSP manager failed to create new panel');
     }
     
     return newPanelId;
   }
 
   private async loadFileContent(content: HTMLElement, source: string | any, fileName: string, sourceType: 'server' | 'native'): Promise<void> {
-    console.log('loadFileContent called:', { source, fileName, sourceType });
     content.innerHTML = '<div class="file-loading">Loading file...</div>';
 
     try {
       const fileType = getFileType(fileName);
-      console.log('File type detected for', fileName, ':', fileType);
 
       if (sourceType === 'server') {
         // Server-based file loading
         if (fileType === 'file-image') {
+          // Check if this image is part of a sequence
+          if (isSequenceableImage(fileName)) {
+            const parsed = parseSequenceFrame(fileName);
+            if (parsed && parsed.padding >= 3) {
+              // Check server for full sequence
+              try {
+                const response = await fetch(`http://localhost:8000/api/sequence?path=${encodeURIComponent(source)}`);
+                const sequenceData = await response.json();
+                
+                if (sequenceData.is_sequence && sequenceData.files.length > 1) {
+                  
+                  // Create sequence player
+                  const containerId = `sequence-container-${Date.now()}`;
+                  content.innerHTML = `<div id="${containerId}" style="width: 100%; height: 100%;"></div>`;
+                  const sequencePlayer = new ImageSequencePlayer(content.querySelector(`#${containerId}`)!);
+                  
+                  // Create sequence info from server data
+                  const sequenceInfo: SequenceInfo = {
+                    baseName: sequenceData.base_name,
+                    padding: sequenceData.padding,
+                    startFrame: sequenceData.start_frame,
+                    endFrame: sequenceData.end_frame,
+                    frameCount: sequenceData.frame_count,
+                    extension: sequenceData.extension,
+                    delimiter: sequenceData.delimiter,
+                    pattern: `${sequenceData.base_name}${sequenceData.delimiter}${'#'.repeat(sequenceData.padding)}.${sequenceData.extension}`,
+                    files: sequenceData.files.map((f: any) => f.name)
+                  };
+                  
+                  // Build URLs for all frames
+                  const frameUrls = sequenceData.files.map((f: any) => 
+                    `http://localhost:8000/api/file?path=${encodeURIComponent(f.path)}`
+                  );
+                  
+                  // Load the sequence
+                  await sequencePlayer.loadSequence(sequenceInfo, '', frameUrls);
+                  
+                  // Initialize Lucide icons
+                  this.initializeLucideIcons();
+                  return;
+                }
+              } catch (error) {
+              }
+            }
+          }
+          
+          // Not a sequence, load as regular image
           const imageUrl = `http://localhost:8000/api/file?path=${encodeURIComponent(source)}`;
           content.innerHTML = `<div class="file-preview image-preview">
             <img src="${imageUrl}" alt="${fileName}" />
@@ -215,7 +258,6 @@ export class PanelManager {
           const video = content.querySelector('video');
           if (video) {
             video.addEventListener('error', (e) => {
-              console.error('Video error:', e);
               const errorMsg = ext === 'mov' 
                 ? `<div class="video-error" style="padding: 20px; text-align: center;">
                      <h3>Unable to play .MOV file</h3>
@@ -318,7 +360,6 @@ export class PanelManager {
           const video = content.querySelector('video');
           if (video) {
             video.addEventListener('error', (e) => {
-              console.error('Video error:', e);
               URL.revokeObjectURL(url); // Clean up on error
               const errorMsg = ext === 'mov' 
                 ? `<div class="video-error" style="padding: 20px; text-align: center;">
@@ -336,15 +377,9 @@ export class PanelManager {
               content.innerHTML = errorMsg;
             });
             
-            // Log video metadata when loaded
+            // Handle video metadata when loaded
             video.addEventListener('loadedmetadata', () => {
-              console.log('Video metadata loaded:', {
-                duration: video.duration,
-                width: video.videoWidth,
-                height: video.videoHeight,
-                src: video.src,
-                type: file.type
-              });
+              // Metadata is now available
             });
             
             // Clean up blob URL when video is removed
@@ -384,7 +419,6 @@ export class PanelManager {
         }
       }
     } catch (error: any) {
-      console.error('Error loading file:', error);
       const errorMessage = error.message || String(error);
       content.innerHTML = `<div class="file-error" style="text-align: center; padding: 40px; color: var(--error);">
         <i data-lucide="alert-circle" class="lucide" style="width: 48px; height: 48px; margin: 0 auto 16px;"></i>
@@ -539,18 +573,7 @@ export class PanelManager {
       const bspWidth = viewportWidth - totalToolbarWidth;
       const bspHeight = viewportHeight - headerHeight;
       
-      console.log('BSP Container sizing:', {
-        viewportWidth,
-        viewportHeight,
-        toolbarWidth,
-        headerHeight,
-        bspWidth,
-        bspHeight,
-        left: toolbarWidth,
-        top: headerHeight,
-        'available width after toolbars': bspWidth
-      });
-      
+      // BSP container styles
       Object.assign(bspContainer.style, {
         position: 'fixed',
         left: `${toolbarWidth}px`,
@@ -572,7 +595,6 @@ export class PanelManager {
     window.addEventListener('resize', () => {
       // Skip layout during fullscreen to prevent fullscreen exit
       if (document.fullscreenElement || (document as any).webkitFullscreenElement) {
-        console.log('Skipping layout during fullscreen');
         return;
       }
       this.layout();
@@ -802,11 +824,7 @@ export class PanelManager {
 
     // Empty panel content context menu
     this.contextMenu.registerHandler('.panel-content', (e) => {
-      console.log('Panel content context menu handler triggered');
       const target = e.target as HTMLElement;
-      console.log('Target element:', target);
-      console.log('Target classes:', target.className);
-      console.log('Target parent:', target.parentElement?.className);
       
       // Only show if clicking on empty panel content
       if (target.closest('.tree-item-content') || 
@@ -816,7 +834,6 @@ export class PanelManager {
           target.closest('.video-player') ||
           target.closest('.markdown-content') ||
           target.closest('.file-content')) {
-        console.log('Context menu blocked - clicking on file content');
         return null;
       }
 
@@ -830,7 +847,6 @@ export class PanelManager {
                 const [handle] = await (window as any).showOpenFilePicker();
                 this.openNativeFileInBSPPanel(handle, handle.name);
               } catch (err) {
-                console.log('User cancelled file selection');
               }
             }
           }
@@ -839,20 +855,14 @@ export class PanelManager {
           label: 'Open Folder',
           icon: 'folder',
           action: () => {
-            console.log('Open Folder clicked');
             const panel = target.closest('.bsp-panel');
-            console.log('Panel found:', !!panel);
             if (panel) {
               const panelId = panel.getAttribute('data-panel-id');
-              console.log('Panel ID:', panelId);
               if (panelId) {
-                console.log('Calling showDirectoryChooser');
                 this.showDirectoryChooser(panelId);
               } else {
-                console.error('No panel ID found');
               }
             } else {
-              console.error('No panel found');
             }
           }
         }
@@ -1034,7 +1044,6 @@ export class PanelManager {
     // Save to localStorage
     localStorage.setItem('fileui-recent-layouts', JSON.stringify(this.recentLayouts));
     
-    console.log('Layout saved:', layoutName);
   }
 
   private saveLayoutAs(): void {
@@ -1057,7 +1066,6 @@ export class PanelManager {
       // Save to localStorage
       localStorage.setItem('fileui-recent-layouts', JSON.stringify(this.recentLayouts));
       
-      console.log('Layout saved as:', name);
     }
   }
 
@@ -1076,9 +1084,7 @@ export class PanelManager {
       try {
         const layoutData = JSON.parse(layout.data);
         this.bspManager.loadLayout(layoutData);
-        console.log('Layout loaded:', layout.name);
       } catch (error) {
-        console.error('Failed to load layout:', error);
         alert('Failed to load layout');
       }
     }
@@ -1086,7 +1092,6 @@ export class PanelManager {
 
   private handleToolbarButtonClick(btn: HTMLButtonElement): void {
     const action = btn.dataset.action;
-    console.log('Toolbar button clicked:', action);
     
     if (action === 'add-panel' && this.bspManager) {
       // Add a new panel to the BSP tree
@@ -1268,7 +1273,6 @@ export class PanelManager {
   }
 
   private initializeBSPLayout(): void {
-    console.log('=== Initializing BSP Layout ===');
     
     // Also show status in the main content area for debugging
     const bspContainer = document.getElementById('bsp-container');
@@ -1283,47 +1287,37 @@ export class PanelManager {
       }, 3000);
     }
     if (!this.bspManager) {
-      console.error('BSP Manager not available');
       return;
     }
 
     // Initialize the BSP manager
-    console.log('Initializing BSP manager...');
     this.bspManager.init();
     
     // Get the initial main panel
     const rootNode = this.bspManager.getRoot();
-    console.log('Root node after init:', rootNode);
     if (!rootNode) {
-      console.error('No root node found after BSP init');
       return;
     }
 
     // Split horizontally to add terminal at bottom (80% main, 20% terminal)
-    console.log('Splitting root panel horizontally for terminal...');
     const terminalPanelId = this.bspManager.splitPanel(rootNode.id, 'horizontal', 'bottom');
-    console.log('Terminal panel creation result:', terminalPanelId);
     
     // Get the new root after first split
     const rootAfterTerminal = this.bspManager.getRoot();
-    console.log('Root after terminal split:', rootAfterTerminal);
     
     if (terminalPanelId) {
       // Set the split ratio - root should now be the parent containing main and terminal
       const newRoot = this.bspManager.getRoot();
       if (newRoot && newRoot.direction === 'horizontal') {
-        console.log('Setting terminal split ratio for collapsed state');
         // Calculate ratio for collapsed terminal (48px height)
         const viewportHeight = window.innerHeight - 64; // minus header
         const collapsedRatio = (viewportHeight - 48) / viewportHeight;
         newRoot.split = collapsedRatio; // Most space for content, 48px for collapsed terminal
       } else {
-        console.log('Root direction not horizontal or root not found:', newRoot);
       }
       
       // Add terminal content to the bottom panel, pin it, and collapse it
       setTimeout(() => {
-        console.log('Setting up terminal content...');
         this.setupTerminalContent(terminalPanelId);
         this.pinPanel(terminalPanelId);
         
@@ -1342,38 +1336,29 @@ export class PanelManager {
     if (currentRoot && currentRoot.children.length > 0) {
       // The main content should be the first child (top/left in the split)
       mainContentPanelId = currentRoot.children[0].id;
-      console.log('Main content panel ID after terminal split:', mainContentPanelId);
     }
 
     // Split the main content vertically to add properties on right (95% content, 5% for collapsed properties)  
-    console.log('Splitting main content vertically for properties...');
     const propertiesPanelId = this.bspManager.splitPanel(mainContentPanelId, 'vertical', 'right');
-    console.log('Properties panel creation result:', propertiesPanelId);
     
     if (propertiesPanelId) {
       // Find the vertical split node and set its ratio for collapsed state
       const currentRoot = this.bspManager.getRoot();
-      console.log('Root after properties split:', currentRoot);
       if (currentRoot && currentRoot.children.length > 0) {
         // The first child should be the vertical split containing main content and properties
         const verticalSplit = currentRoot.children[0];
-        console.log('First child (should be vertical split):', verticalSplit);
         if (verticalSplit && verticalSplit.direction === 'vertical') {
-          console.log('Setting properties split ratio for collapsed state');
           // Set ratio so properties panel starts at collapsed width
           const viewportWidth = window.innerWidth - 48 - 48; // minus both toolbars
           const collapsedRatio = (viewportWidth - 48) / viewportWidth; // 48px for collapsed panel
           verticalSplit.split = collapsedRatio;
         } else {
-          console.log('First child not a vertical split or not found');
         }
       } else {
-        console.log('No children found in current root');
       }
       
       // Add properties content to the right panel, pin it, and mark as collapsed
       setTimeout(() => {
-        console.log('Setting up properties content...');
         this.setupPropertiesContent(propertiesPanelId);
         this.pinPanel(propertiesPanelId);
         
@@ -1387,7 +1372,6 @@ export class PanelManager {
     }
 
     // Layout the BSP tree
-    console.log('Running BSP layout...');
     this.bspManager.layout();
     
     // Setup drag and drop for resizers after initial layout
@@ -1398,18 +1382,15 @@ export class PanelManager {
     // Debug: Check how many BSP panels exist
     setTimeout(() => {
       const bspPanels = document.querySelectorAll('.bsp-panel');
-      console.log(`Total BSP panels found: ${bspPanels.length}`);
       bspPanels.forEach((panel, index) => {
         const panelId = panel.getAttribute('data-panel-id');
         const panelType = panel.getAttribute('data-panel-type');
         const title = panel.querySelector('.panel-title span')?.textContent;
-        console.log(`Panel ${index + 1}: ID=${panelId}, Type=${panelType}, Title=${title}`);
       });
     }, 200);
     
     // Don't create an explorer panel on startup - let user do it manually
     
-    console.log('=== BSP Layout Complete ===');
   }
 
 
@@ -1488,8 +1469,24 @@ export class PanelManager {
                 • Use arrow keys to navigate<br>
                 • Click files to open them
               </div>
+              <div style="margin-top: 24px;">
+                <button class="btn btn-primary" id="import-sequence-btn">
+                  <i data-lucide="film" class="lucide" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+                  Import Image Sequence
+                </button>
+              </div>
             </div>
           `;
+          
+          // Add Import Sequence button handler
+          setTimeout(() => {
+            const importBtn = panel.querySelector('#import-sequence-btn');
+            if (importBtn) {
+              importBtn.addEventListener('click', () => {
+                this.importImageSequence();
+              });
+            }
+          }, 10);
           
           // Setup interactions but don't load files
           this.setupExplorerInteractions(newPanelId);
@@ -1519,10 +1516,47 @@ export class PanelManager {
       // Sort files (folders first, then by name)
       const sortedFiles = sortFiles(files);
 
+      // Detect sequences in the files
+      const imageFiles = sortedFiles.filter(f => f.type === 'file' && isSequenceableImage(f.name));
+      const imageFilenames = imageFiles.map(f => f.name);
+      
+      const sequences = detectSequences(imageFilenames);
+      
+      // Create a set of files that are part of sequences
+      const sequenceFiles = new Set<string>();
+      sequences.forEach(seq => {
+        seq.files.forEach(f => sequenceFiles.add(f));
+      });
+
       // Create tree items
+      const addedSequences = new Set<string>();
+      
       sortedFiles.forEach(file => {
-        const treeItem = this.createTreeItem(file, panelId);
-        treeElement.appendChild(treeItem);
+        // Skip files that are part of a sequence (we'll add the sequence as a group)
+        if (file.type === 'file' && sequenceFiles.has(file.name)) {
+          // Check if we've already added this sequence
+          let foundSequence = null;
+          for (const [seqName, seqInfo] of sequences.entries()) {
+            if (seqInfo.files.includes(file.name)) {
+              foundSequence = [seqName, seqInfo];
+              break;
+            }
+          }
+          
+          if (foundSequence && !addedSequences.has(foundSequence[0] as string)) {
+            // Add the sequence as a single item
+            const [seqName, seqInfo] = foundSequence as [string, SequenceInfo];
+            addedSequences.add(seqName);
+            
+            // Create a special tree item for the sequence
+            const sequenceItem = this.createSequenceTreeItem(seqInfo, seqName, this.currentPath, panelId);
+            treeElement.appendChild(sequenceItem);
+          }
+        } else {
+          // Regular file or directory
+          const treeItem = this.createTreeItem(file, panelId);
+          treeElement.appendChild(treeItem);
+        }
       });
 
       // Update path display
@@ -1550,7 +1584,6 @@ export class PanelManager {
       this.initializeLucideIcons(10);
 
     } catch (error) {
-      console.error('Error loading directory contents:', error);
       treeElement.innerHTML = `
         <div class="error-message">
           <i data-lucide="alert-circle" class="lucide"></i>
@@ -1564,14 +1597,9 @@ export class PanelManager {
   }
 
   private async loadNativeFolderContents(folderHandle: any, panelId: string): Promise<void> {
-    console.log('=== loadNativeFolderContents called ===');
-    console.log('Panel ID:', panelId);
-    console.log('Folder handle:', folderHandle);
-    console.log('Folder handle type:', folderHandle?.constructor?.name);
     
     const treeElement = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"] .tree`) as HTMLElement;
     if (!treeElement) {
-      console.error('Tree element not found for panel:', panelId);
       return;
     }
 
@@ -1584,10 +1612,8 @@ export class PanelManager {
 
       // Check if this is a FileSystemDirectoryHandle (from showDirectoryPicker)
       if (folderHandle.values && typeof folderHandle.values === 'function') {
-        console.log('Using FileSystemDirectoryHandle API');
         // Modern File System Access API
         for await (const entry of folderHandle.values()) {
-          console.log('Entry:', entry.name, 'kind:', entry.kind);
           entries.push({
             name: entry.name,
             kind: entry.kind, // 'file' or 'directory'
@@ -1597,17 +1623,14 @@ export class PanelManager {
       } 
       // Check if this is a FileSystemDirectoryEntry (from drag/drop)
       else if (folderHandle.createReader) {
-        console.log('Using FileSystemDirectoryEntry API');
         const reader = folderHandle.createReader();
         
         // Read all entries
         await new Promise<void>((resolve) => {
           const readEntries = () => {
             reader.readEntries((results: any[]) => {
-              console.log('Read entries count:', results.length);
               if (results.length > 0) {
                 results.forEach(entry => {
-                  console.log('Entry:', entry.name, 'isDirectory:', entry.isDirectory);
                   entries.push({
                     name: entry.name,
                     kind: entry.isDirectory ? 'directory' : 'file',
@@ -1623,7 +1646,6 @@ export class PanelManager {
           readEntries();
         });
       } else {
-        console.error('Unknown folder handle type:', folderHandle);
         throw new Error('Unknown folder handle type');
       }
 
@@ -1634,23 +1656,80 @@ export class PanelManager {
         return a.name.localeCompare(b.name);
       });
 
+      // Detect sequences in native files
+      const fileEntries = entries.filter(e => e.kind === 'file');
+      const imageFilenames = fileEntries.filter(e => isSequenceableImage(e.name)).map(e => e.name);
+      
+      const sequences = detectSequences(imageFilenames);
+      
+      // Create a map of file handles for sequence playback
+      const fileHandleMap = new Map<string, FileSystemFileHandle>();
+      
+      // Store the original folder handle and its type for later use
+      const isModernAPI = folderHandle.values && typeof folderHandle.values === 'function';
+      
+      fileEntries.forEach(entry => {
+        // The handle is stored on entry.handle
+        const handle = entry.handle;
+        if (handle) {
+          // For modern File System Access API
+          if (entry.kind === 'file') {
+            fileHandleMap.set(entry.name, handle as FileSystemFileHandle);
+          }
+        }
+      });
+      
+      // Create a set of files that are part of sequences
+      const sequenceFiles = new Set<string>();
+      sequences.forEach(seq => {
+        seq.files.forEach(f => sequenceFiles.add(f));
+      });
+      
+      // Track which sequences we've already added
+      const addedSequences = new Set<string>();
+
       // Create tree items for each entry
-      console.log('Creating tree items for', entries.length, 'entries');
       entries.forEach((entry, index) => {
-        console.log(`Creating item ${index + 1}/${entries.length}:`, entry.name, entry.kind);
-        const fileItem: FileItem = {
-          name: entry.name,
-          path: entry.name,
-          type: entry.kind as 'file' | 'directory',
-          size: 0,
-          modified: new Date().toISOString()
-        };
-        
-        console.log(`About to call createNativeTreeItem for ${fileItem.name}`);
-        const treeItem = this.createNativeTreeItem(fileItem, panelId, 0, entry.handle);
-        console.log(`createNativeTreeItem returned for ${fileItem.name}:`, treeItem);
-        
-        treeElement.appendChild(treeItem);
+        // Check if this file is part of a sequence
+        if (entry.kind === 'file' && sequenceFiles.has(entry.name)) {
+          // Find which sequence this file belongs to
+          let foundSequence = null;
+          for (const [seqName, seqInfo] of sequences.entries()) {
+            if (seqInfo.files.includes(entry.name)) {
+              foundSequence = [seqName, seqInfo];
+              break;
+            }
+          }
+          
+          // Only add the sequence once (for the first file in the sequence)
+          if (foundSequence && !addedSequences.has(foundSequence[0] as string)) {
+            const [seqName, seqInfo] = foundSequence as [string, SequenceInfo];
+            addedSequences.add(seqName);
+            
+            // Create a special tree item for the sequence with native flag and file handles
+            // Store the file handles for this sequence globally  
+            const rootFolderName = folderHandle.name || 'root';
+            const sequenceKey = `${rootFolderName}/${seqName}`;
+            this.nativeSequenceHandles.set(sequenceKey, fileHandleMap);
+            
+            // Create a special tree item for the sequence with native flag and folder name
+            const sequenceItem = this.createSequenceTreeItem(seqInfo, seqName, rootFolderName, panelId, 0, true, rootFolderName);
+            treeElement.appendChild(sequenceItem);
+          }
+        } else if (entry.kind === 'directory' || !sequenceFiles.has(entry.name)) {
+          // Regular file or directory (not part of a sequence)
+          const rootFolderName = folderHandle.name || 'root';
+          const fileItem: FileItem = {
+            name: entry.name,
+            path: `${rootFolderName}/${entry.name}`,
+            type: entry.kind as 'file' | 'directory',
+            size: 0,
+            modified: new Date().toISOString()
+          };
+          
+          const treeItem = this.createNativeTreeItem(fileItem, panelId, 0, entry.handle);
+          treeElement.appendChild(treeItem);
+        }
       });
 
       // If no entries, show empty message
@@ -1664,11 +1743,9 @@ export class PanelManager {
       }
 
       // Re-initialize Lucide icons
-      console.log('About to initialize Lucide icons...');
       this.initializeLucideIcons(10);
 
     } catch (error) {
-      console.error('Error loading native folder contents:', error);
       treeElement.innerHTML = `
         <div class="error-message">
           <i data-lucide="alert-circle" class="lucide"></i>
@@ -1681,25 +1758,18 @@ export class PanelManager {
   }
 
   private createNativeTreeItem(file: FileItem, panelId: string, level: number = 0, handle: any): HTMLElement {
-    console.log('=== createNativeTreeItem ENTRY ===');
-    console.log('File:', file);
-    console.log('PanelId:', panelId);
-    console.log('Level:', level);
-    console.log('Handle:', handle);
     
     const treeItem = this.createTreeItem(file, panelId, level);
     
     // Mark as native and store the handle
     const treeItemContent = treeItem.querySelector('.tree-item-content');
     if (treeItemContent) {
-      console.log(`Found tree item content for ${file.name}`);
       treeItemContent.classList.add('native-file');
       
       // Remove any existing click handlers to avoid conflicts
       const newTreeItemContent = treeItemContent.cloneNode(true) as HTMLElement;
       treeItemContent.parentNode?.replaceChild(newTreeItemContent, treeItemContent);
       
-      console.log(`Replaced tree item content for ${file.name}`);
       
       // Store the handle on the new element
       (newTreeItemContent as any)._nativeHandle = handle;
@@ -1738,11 +1808,11 @@ export class PanelManager {
             if (childrenContainer.children.length === 0) {
               // Load subdirectory contents - use the handle stored on this element
               const folderHandle = (newTreeItemContent as any)._nativeHandle;
-              console.log('Loading subdirectory with handle:', folderHandle);
               if (folderHandle) {
-                await this.loadNativeSubdirectory(folderHandle, childrenContainer as HTMLElement, panelId, level + 1);
+                // Get the parent path from the current tree item
+                const parentPath = newTreeItemContent.getAttribute('data-path') || file.path;
+                await this.loadNativeSubdirectory(folderHandle, childrenContainer as HTMLElement, panelId, level + 1, parentPath);
               } else {
-                console.error('No handle found for subdirectory');
                 childrenContainer.innerHTML = '<div class="error-message">Unable to load folder</div>';
               }
             }
@@ -1754,16 +1824,10 @@ export class PanelManager {
       }
       
       // Add click handler for the content area (not toggle button)
-      console.log(`Adding click handler for ${file.name}`);
       const clickHandler = async (e: Event) => {
-        console.log('=== Native item clicked ===');
-        console.log('Target:', e.target);
-        console.log('Current target:', e.currentTarget);
-        console.log('File:', file);
         
         // Don't handle if clicking on toggle button
         if ((e.target as HTMLElement).closest('.tree-item-toggle')) {
-          console.log('Click was on toggle button, ignoring');
           return;
         }
         
@@ -1771,30 +1835,23 @@ export class PanelManager {
         e.stopPropagation();
         
         if (file.type === 'directory') {
-          console.log('Directory clicked, toggling');
           // For directories, clicking the content area also toggles
           const toggleBtn = newTreeItemContent.querySelector('.tree-item-toggle') as HTMLElement;
           if (toggleBtn) {
             toggleBtn.click();
           }
         } else {
-          console.log('File clicked, opening:', file.name);
           // Select the file
           this.selectFile(treeItem, panelId);
           
           // Open file
-          console.log('Opening native file:', file.name);
           // Retrieve the handle from the clicked element
           const clickedHandle = (newTreeItemContent as any)._nativeHandle;
-          console.log('Handle:', clickedHandle);
-          console.log('Handle type:', typeof clickedHandle);
           if (clickedHandle) {
-            console.log('Handle methods:', Object.getOwnPropertyNames(clickedHandle));
           }
           
           // Check for different file handle types
           if (clickedHandle && clickedHandle.file) {
-            console.log('Using handle.file() method');
             
             // Create a promise wrapper for the callback-based API
             const getFile = () => new Promise<File>((resolve, reject) => {
@@ -1806,71 +1863,53 @@ export class PanelManager {
             
             try {
               const fileObj = await getFile();
-              console.log('Got file object:', fileObj.name, 'Size:', fileObj.size);
               
               const targetPanelId = this.findOrCreateTargetPanel();
-              console.log('Target panel ID:', targetPanelId);
               
               if (targetPanelId) {
                 // Wait a bit for panel creation if needed
                 await new Promise(resolve => setTimeout(resolve, 100));
                 
                 const targetPanel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
-                console.log('Target panel found:', !!targetPanel);
                 
                 if (targetPanel) {
                   await this.openDroppedFileInPanel(fileObj, targetPanelId);
-                  console.log('File opened in panel');
                 } else {
-                  console.error('Target panel not found after creation');
                 }
               } else {
-                console.error('No target panel ID returned');
               }
             } catch (error) {
-              console.error('Error opening file:', error);
             }
           } else if (clickedHandle && clickedHandle.getFile) {
-            console.log('Using handle.getFile() method (FileSystemFileHandle)');
             // Modern File System Access API
             try {
               const fileObj = await clickedHandle.getFile();
-              console.log('Got file object:', fileObj.name, 'Size:', fileObj.size);
               
               const targetPanelId = this.findOrCreateTargetPanel();
-              console.log('Target panel ID:', targetPanelId);
               
               if (targetPanelId) {
                 // Wait a bit for panel creation if needed
                 await new Promise(resolve => setTimeout(resolve, 100));
                 
                 const targetPanel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
-                console.log('Target panel found:', !!targetPanel);
                 
                 if (targetPanel) {
                   await this.openDroppedFileInPanel(fileObj, targetPanelId);
-                  console.log('File opened in panel');
                 } else {
-                  console.error('Target panel not found after creation');
                 }
               } else {
-                console.error('No target panel ID returned');
               }
             } catch (error) {
-              console.error('Error opening file:', error);
             }
           } else {
-            console.error('No file or getFile method on handle:', clickedHandle);
           }
         }
       };
       
       newTreeItemContent.addEventListener('click', clickHandler);
-      console.log(`Click handler attached to ${file.name}. Element:`, newTreeItemContent);
       
       // Verify the handler was added
       if (newTreeItemContent.onclick !== null || newTreeItemContent.hasAttribute('onclick')) {
-        console.log('WARNING: onclick attribute found, may interfere');
       }
       
       // Store the handle on the new content element
@@ -1880,17 +1919,21 @@ export class PanelManager {
     return treeItem;
   }
 
-  private async loadNativeSubdirectory(dirHandle: any, containerElement: HTMLElement, panelId: string, level: number): Promise<void> {
-    console.log('loadNativeSubdirectory called', { dirHandle, panelId, level });
+  private async loadNativeSubdirectory(dirHandle: any, containerElement: HTMLElement, panelId: string, level: number, parentPath: string = ''): Promise<void> {
     
     // Show loading state
     containerElement.innerHTML = '<div class="loading-indicator">Loading...</div>';
 
+    // Get the folder name from the handle
+    const folderName = dirHandle.name || '';
+    // Use parentPath as the current path - it already contains the full path of this directory
+    // parentPath is passed from the folder's data-path attribute which has the complete path
+    const currentPath = parentPath || folderName;
+    
     const entries: Array<{name: string, kind: string, handle: any}> = [];
 
     // Check if this is a FileSystemDirectoryHandle (from showDirectoryPicker or native folder)
     if (dirHandle.values && typeof dirHandle.values === 'function') {
-      console.log('Using FileSystemDirectoryHandle API for subdirectory');
       // Modern File System Access API
       for await (const entry of dirHandle.values()) {
         entries.push({
@@ -1902,7 +1945,6 @@ export class PanelManager {
     }
     // Check if this is a FileSystemDirectoryEntry (from drag/drop)
     else if (dirHandle.createReader) {
-      console.log('Using FileSystemDirectoryEntry API for subdirectory');
       const reader = dirHandle.createReader();
       
       // Read all entries
@@ -1926,7 +1968,6 @@ export class PanelManager {
         readEntries();
       });
     } else {
-      console.error('Unknown directory handle type for subdirectory:', dirHandle);
       containerElement.innerHTML = '<div class="error-message">Unable to read folder</div>';
       return;
     }
@@ -1944,21 +1985,190 @@ export class PanelManager {
     if (entries.length === 0) {
       containerElement.innerHTML = '<div class="empty-folder" style="padding-left: 20px; opacity: 0.6;">Empty folder</div>';
     } else {
+      // Detect sequences in the native subfolder
+      const fileEntries = entries.filter(e => e.kind === 'file');
+      const imageFilenames = fileEntries.filter(e => isSequenceableImage(e.name)).map(e => e.name);
+      
+      const sequences = detectSequences(imageFilenames);
+      
+      // Create a map of file handles for sequences
+      const fileHandleMap = new Map<string, FileSystemFileHandle>();
+      fileEntries.forEach(entry => {
+        // entry.handle IS the FileSystemFileHandle, not an object containing it
+        if (entry.handle && entry.kind === 'file') {
+          fileHandleMap.set(entry.name, entry.handle as FileSystemFileHandle);
+        }
+      });
+      
+      // Create a set of files that are part of sequences
+      const sequenceFiles = new Set<string>();
+      sequences.forEach(seq => {
+        seq.files.forEach(f => sequenceFiles.add(f));
+      });
+      
+      // Track which sequences we've already added
+      const addedSequences = new Set<string>();
+      
       entries.forEach(entry => {
-        const fileItem: FileItem = {
-          name: entry.name,
-          path: entry.name,
-          type: entry.kind as 'file' | 'directory',
-          size: 0,
-          modified: new Date().toISOString()
-        };
-        
-        const treeItem = this.createNativeTreeItem(fileItem, panelId, level, entry.handle);
-        containerElement.appendChild(treeItem);
+        // Check if this file is part of a sequence
+        if (entry.kind === 'file' && sequenceFiles.has(entry.name)) {
+          // Find which sequence this file belongs to
+          let foundSequence = null;
+          for (const [seqName, seqInfo] of sequences.entries()) {
+            if (seqInfo.files.includes(entry.name)) {
+              foundSequence = [seqName, seqInfo];
+              break;
+            }
+          }
+          
+          // Only add the sequence once (for the first file in the sequence)
+          if (foundSequence && !addedSequences.has(foundSequence[0] as string)) {
+            const [seqName, seqInfo] = foundSequence as [string, SequenceInfo];
+            addedSequences.add(seqName);
+            
+            // Store the file handles for this sequence globally using full path
+            const sequenceKey = `${currentPath}/${seqName}`;
+            this.nativeSequenceHandles.set(sequenceKey, fileHandleMap);
+            
+            // Create a special tree item for the sequence with native flag and full path
+            const sequenceItem = this.createSequenceTreeItem(seqInfo, seqName, currentPath, panelId, level, true, currentPath);
+            containerElement.appendChild(sequenceItem);
+          }
+        } else if (entry.kind === 'directory' || !sequenceFiles.has(entry.name)) {
+          // Regular file or directory (not part of a sequence)
+          const fileItem: FileItem = {
+            name: entry.name,
+            path: `${currentPath}/${entry.name}`,
+            type: entry.kind as 'file' | 'directory',
+            size: 0,
+            modified: new Date().toISOString()
+          };
+          
+          const treeItem = this.createNativeTreeItem(fileItem, panelId, level, entry.handle);
+          containerElement.appendChild(treeItem);
+        }
       });
     }
 
     this.initializeLucideIcons(10);
+  }
+
+  private createSequenceTreeItem(sequence: SequenceInfo, displayName: string, basePath: string, panelId: string, level: number = 0, isNative: boolean = false, nativeFolderName?: string): HTMLElement {
+    const treeItem = document.createElement('div');
+    treeItem.className = 'tree-item tree-item-sequence';
+    treeItem.setAttribute('role', 'treeitem');
+    treeItem.setAttribute('data-level', level.toString());
+    
+    // Create full path for the sequence
+    const sequencePath = basePath ? `${basePath}/${sequence.baseName}` : sequence.baseName;
+    
+    // Use film icon for sequences
+    const iconName = 'film';
+    
+    // Format frame count
+    const frameCount = `${sequence.frameCount} frames`;
+    
+    treeItem.innerHTML = `
+      <div class="tree-item-content" draggable="true" data-is-sequence="true" data-path="${sequencePath}" data-sequence-info='${JSON.stringify(sequence)}' data-file-type="sequence" data-native-folder="${nativeFolderName || ''}" style="padding-left: ${20 + level * 20}px">
+        <div class="tree-item-spacer"></div>
+        <i data-lucide="${iconName}" class="lucide tree-item-icon" data-file-type="sequence" style="color: var(--file-video);"></i>
+        <span class="tree-item-label">${displayName}</span>
+        <span class="tree-item-badge" style="margin-left: 8px; font-size: 11px; opacity: 0.7;">${frameCount}</span>
+      </div>
+    `;
+    
+    // Add click handler to open sequence
+    const content = treeItem.querySelector('.tree-item-content') as HTMLElement;
+    if (content) {
+      content.addEventListener('click', async () => {
+        
+        // Load the sequence files
+        try {
+          // Build URLs for all frames
+          const frameUrls: string[] = [];
+          
+          if (isNative) {
+            // For native files, retrieve stored file handles
+            const nativePath = content.getAttribute('data-native-folder') || '';
+            const sequenceKey = `${nativePath}/${displayName}`;
+            const fileHandles = this.nativeSequenceHandles.get(sequenceKey);
+            
+            if (fileHandles && fileHandles.size > 0) {
+              for (let i = sequence.startFrame; i <= sequence.endFrame; i++) {
+              const frameNumber = i.toString().padStart(sequence.padding, '0');
+              const filename = `${sequence.baseName}${sequence.delimiter}${frameNumber}.${sequence.extension}`;
+              
+              const handle = fileHandles.get(filename);
+              if (handle) {
+                // Check if it's a FileSystemFileHandle (modern API)
+                if (handle.getFile) {
+                  const file = await handle.getFile();
+                  const url = URL.createObjectURL(file);
+                  frameUrls.push(url);
+                }
+                // Or if it's a FileSystemFileEntry (drag/drop API)
+                else if (handle.file) {
+                  await new Promise<void>((resolve) => {
+                    handle.file((file: File) => {
+                      const url = URL.createObjectURL(file);
+                      frameUrls.push(url);
+                      resolve();
+                    });
+                  });
+                }
+              }
+            }
+            } else {
+              // No file handles found for native sequence
+            }
+          } else {
+            // For server files, use API URLs
+            for (let i = sequence.startFrame; i <= sequence.endFrame; i++) {
+              const frameNumber = i.toString().padStart(sequence.padding, '0');
+              const filename = `${sequence.baseName}${sequence.delimiter}${frameNumber}.${sequence.extension}`;
+              const fullPath = basePath ? `${basePath}/${filename}` : filename;
+              const url = `http://localhost:8000/api/file?path=${encodeURIComponent(fullPath)}`;
+              frameUrls.push(url);
+            }
+          }
+          
+          // Open in new panel or current panel
+          const targetPanelId = this.bspManager?.addPanel('right') || panelId;
+          
+          // Wait for panel to be created
+          setTimeout(() => {
+            const panel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
+            if (!panel) return;
+            
+            const panelContent = panel.querySelector('.panel-content');
+            if (!panelContent) return;
+            
+            // Update panel header
+            const panelTitle = panel.querySelector('.panel-title');
+            if (panelTitle) {
+              panelTitle.innerHTML = `
+                <i data-lucide="film" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: var(--file-video);"></i>
+                <span>${displayName}</span>
+              `;
+            }
+            
+            // Create sequence player
+            panelContent.innerHTML = `<div id="sequence-container-${targetPanelId}" style="width: 100%; height: 100%;"></div>`;
+            const sequencePlayer = new ImageSequencePlayer(panelContent.querySelector(`#sequence-container-${targetPanelId}`)!);
+            
+            // Load the sequence with server URLs
+            sequencePlayer.loadSequence(sequence, '', frameUrls).then(() => {
+            });
+            
+            // Initialize Lucide icons
+            this.initializeLucideIcons();
+          }, 100);
+        } catch (error) {
+        }
+      });
+    }
+    
+    return treeItem;
   }
 
   private createTreeItem(file: FileItem, _panelId: string, level: number = 0): HTMLElement {
@@ -2064,7 +2274,19 @@ export class PanelManager {
     // Handle tree item clicks
     explorerContent.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      console.log('Explorer click detected on:', target);
+      
+      // Check if we clicked on the icon inside the button
+      if (target.tagName === 'svg' || target.tagName === 'path') {
+        const button = target.closest('.tree-item-toggle');
+        if (button) {
+          e.stopPropagation();
+          const treeItem = button.closest('.tree-item') as HTMLElement;
+          if (treeItem) {
+            this.toggleFolder(treeItem, panelId);
+          }
+          return;
+        }
+      }
 
       // Handle tree item clicks
       const treeItemContent = target.closest('.tree-item-content') as HTMLElement;
@@ -2084,8 +2306,10 @@ export class PanelManager {
         const treeItem = treeItemContent.closest('.tree-item') as HTMLElement;
 
         // Handle toggle button clicks
-        if (target.closest('.tree-item-toggle')) {
+        const toggleButton = target.closest('.tree-item-toggle') as HTMLElement;
+        if (toggleButton) {
           e.stopPropagation();
+          const treeItem = toggleButton.closest('.tree-item') as HTMLElement;
           if (treeItem) {
             this.toggleFolder(treeItem, panelId);
           }
@@ -2093,18 +2317,22 @@ export class PanelManager {
         }
 
         if (!isFolder && treeItem) {
+          // Skip file opening for sequences - they have their own click handler
+          if (treeItem.classList.contains('tree-item-sequence')) {
+            // Just handle selection
+            this.selectFile(treeItem, panelId);
+            return;
+          }
+          
           // Handle file selection and opening
           this.selectFile(treeItem, panelId);
           
           // Open file in new panel on single click
           const path = treeItemContent.dataset.path;
           const fileName = treeItemContent.querySelector('.tree-item-label')?.textContent || '';
-          console.log('File clicked - Path:', path, 'FileName:', fileName);
           if (path && fileName) {
-            console.log('Opening file in BSP panel');
             this.openFileInBSPPanel(path, fileName);
           } else {
-            console.error('Missing path or filename for clicked item');
           }
         }
       }
@@ -2120,7 +2348,9 @@ export class PanelManager {
     const childrenContainer = treeItem.querySelector('.tree-item-children') as HTMLElement;
     const path = treeItemContent?.dataset.path;
 
-    if (!childrenContainer || !path || !toggleBtn) return;
+    if (!childrenContainer || !path || !toggleBtn) {
+      return;
+    }
 
     const isExpanded = toggleBtn.getAttribute('data-expanded') === 'true';
 
@@ -2144,9 +2374,50 @@ export class PanelManager {
 
           childrenContainer.innerHTML = '';
           const currentLevel = parseInt(treeItem.getAttribute('data-level') || '0');
+          
+          // Detect sequences in the subfolder
+          const imageFilenames = sortedFiles
+            .filter(f => f.type === 'file' && isSequenceableImage(f.name))
+            .map(f => f.name);
+          
+          
+          const sequences = detectSequences(imageFilenames);
+          
+          // Create a set of files that are part of sequences
+          const sequenceFiles = new Set<string>();
+          sequences.forEach(seq => {
+            seq.files.forEach(f => sequenceFiles.add(f));
+          });
+          
+          // Track which sequences we've already added
+          const addedSequences = new Set<string>();
+          
           sortedFiles.forEach(file => {
-            const childItem = this.createTreeItem(file, panelId, currentLevel + 1);
-            childrenContainer.appendChild(childItem);
+            // Check if this file is part of a sequence
+            if (file.type === 'file' && sequenceFiles.has(file.name)) {
+              // Find which sequence this file belongs to
+              let foundSequence = null;
+              for (const [seqName, seqInfo] of sequences.entries()) {
+                if (seqInfo.files.includes(file.name)) {
+                  foundSequence = [seqName, seqInfo];
+                  break;
+                }
+              }
+              
+              // Only add the sequence once (for the first file in the sequence)
+              if (foundSequence && !addedSequences.has(foundSequence[0] as string)) {
+                const [seqName, seqInfo] = foundSequence as [string, SequenceInfo];
+                addedSequences.add(seqName);
+                
+                // Create a special tree item for the sequence
+                const sequenceItem = this.createSequenceTreeItem(seqInfo, seqName, path, panelId, currentLevel + 1);
+                childrenContainer.appendChild(sequenceItem);
+              }
+            } else if (file.type === 'directory' || !sequenceFiles.has(file.name)) {
+              // Regular file or directory (not part of a sequence)
+              const childItem = this.createTreeItem(file, panelId, currentLevel + 1);
+              childrenContainer.appendChild(childItem);
+            }
           });
 
           // Event delegation is already set up on the explorer content, 
@@ -2156,7 +2427,6 @@ export class PanelManager {
           this.initializeLucideIcons(10);
 
         } catch (error) {
-          console.error('Error loading folder contents:', error);
           this.showErrorMessage(childrenContainer, 'Failed to load');
         }
       }
@@ -2274,7 +2544,6 @@ export class PanelManager {
         const y = e.clientY;
         
         if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
-          console.log('Drag leave panel:', panel.getAttribute('data-panel-id'));
           panelContent.classList.remove('drag-over');
         }
       });
@@ -2320,7 +2589,6 @@ export class PanelManager {
         }
         
         // Handle external file drops
-        console.log('External drop on panel:', panel.getAttribute('data-panel-id'), 'Files:', e.dataTransfer?.files.length);
         
         // Check if we have items (which may include folders)
         if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
@@ -2335,7 +2603,6 @@ export class PanelManager {
                 // We have a FileSystemEntry
                 if (entry.isDirectory) {
                   // Handle directory
-                  console.log('Directory dropped:', entry.name);
                   await this.openDroppedFolderInPanel(entry.name, targetPanelId, entry);
                 } else {
                   // Handle file
@@ -2356,8 +2623,12 @@ export class PanelManager {
         } else if (e.dataTransfer.files.length) {
           // Fallback to FileList API
           const files = Array.from(e.dataTransfer.files);
-          for (const file of files) {
-            await this.openDroppedFileInPanel(file, targetPanelId);
+          
+          // Check if multiple files might be a sequence
+          if (files.length > 1) {
+            await this.handleMultipleFileDrop(files, targetPanelId);
+          } else {
+            await this.openDroppedFileInPanel(files[0], targetPanelId);
           }
         }
       });
@@ -2377,7 +2648,6 @@ export class PanelManager {
         e.stopPropagation();
         // Only show indicator if no panels exist
         if (!bspContainer.querySelector('.bsp-panel')) {
-          console.log('Drag enter empty BSP container');
           bspContainer.classList.add('drag-over');
         }
       });
@@ -2404,7 +2674,6 @@ export class PanelManager {
         const y = e.clientY;
         
         if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
-          console.log('Drag leave BSP container');
           bspContainer.classList.remove('drag-over');
         }
       });
@@ -2414,7 +2683,6 @@ export class PanelManager {
         if (!bspContainer.querySelector('.bsp-panel')) {
           e.preventDefault();
           e.stopPropagation();
-          console.log('Drop on empty BSP container, creating panel');
           bspContainer.classList.remove('drag-over');
           
           if (!e.dataTransfer || !this.bspManager) return;
@@ -2436,7 +2704,6 @@ export class PanelManager {
                     // We have a FileSystemEntry
                     if (entry.isDirectory) {
                       // Handle directory
-                      console.log('Directory dropped on BSP container:', entry.name);
                       await this.openDroppedFolderInPanel(entry.name, newPanelId, entry);
                     } else {
                       // Handle file
@@ -2471,7 +2738,6 @@ export class PanelManager {
       setupMainContainerDropZone();
       
       document.querySelectorAll('.bsp-panel').forEach(panel => {
-        console.log('Setting up drop zone for panel:', panel.getAttribute('data-panel-id'));
         setupPanelDropZone(panel);
       });
     }, 100);
@@ -2481,7 +2747,6 @@ export class PanelManager {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node instanceof Element && node.classList.contains('bsp-panel')) {
-            console.log('Setting up drop zone for new panel:', node.getAttribute('data-panel-id'));
             setupPanelDropZone(node);
           }
         });
@@ -2604,7 +2869,6 @@ export class PanelManager {
       
       // Only handle internal reorganization, not external drops
       if (!draggedElement) {
-        console.log('No internal drag element, ignoring drop on explorer');
         return;
       }
       
@@ -2628,10 +2892,8 @@ export class PanelManager {
   }
 
   private async openDroppedFolderInPanel(folderName: string, panelId: string, folderHandle?: any): Promise<void> {
-    console.log('openDroppedFolderInPanel called with:', { folderName, panelId });
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
     if (!panel) {
-      console.error('Panel not found:', panelId);
       return;
     }
 
@@ -2654,7 +2916,6 @@ export class PanelManager {
     // Check if panel has a header, create one if it doesn't
     let panelHeader = panel.querySelector('.panel-header');
     if (!panelHeader) {
-      console.log('Panel header not found, creating one');
       // Panel doesn't have a header (was created with noHeader: true)
       // We need to create the header structure
       const panelBody = panel.querySelector('.panel-body');
@@ -2691,7 +2952,6 @@ export class PanelManager {
       // Update existing panel header with folder name
       const panelTitle = panelHeader.querySelector('.panel-title');
       if (panelTitle) {
-        console.log('Updating panel title with folder name:', folderName);
         panelTitle.innerHTML = `
           <i data-lucide="folder-open" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: var(--file-folder);"></i>
           <span>${folderName || 'Folder'}</span>
@@ -2711,13 +2971,6 @@ export class PanelManager {
       folderHandle.kind === 'directory' // FileSystemDirectoryHandle from picker
     );
     
-    console.log('Checking if native folder:', { 
-      folderHandle, 
-      isDirectory: folderHandle?.isDirectory,
-      kind: folderHandle?.kind,
-      isNativeFolder 
-    });
-    
     if (isNativeFolder) {
       panelContent.innerHTML = `
         <div class="file-explorer-content native-explorer" data-panel-id="${panelId}">
@@ -2730,7 +2983,6 @@ export class PanelManager {
       // Load native folder contents
       this.loadNativeFolderContents(folderHandle, panelId).then(() => {
         // Set up explorer interactions after content is loaded
-        console.log('Setting up explorer interactions for native folder');
         this.setupExplorerInteractions(panelId);
       });
     } else {
@@ -2755,19 +3007,14 @@ export class PanelManager {
   }
 
   private async openDroppedFileInPanel(file: File, panelId: string): Promise<void> {
-    console.log('=== openDroppedFileInPanel called ===');
-    console.log('File:', file.name, 'Size:', file.size, 'Type:', file.type);
-    console.log('Panel ID:', panelId);
     
     // Update currently open file (for native files, just use the name)
     this.currentlyOpenFile = file.name;
     this.updateOpenFileHighlight();
     
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
-    console.log('Panel found:', !!panel);
     
     if (!panel) {
-      console.error('Panel not found for ID:', panelId);
       return;
     }
 
@@ -2830,7 +3077,6 @@ export class PanelManager {
 
     if (isDirectory) {
       // Handle folder drop - create an explorer view
-      console.log('Folder dropped:', file.name);
       panelContent.innerHTML = `
         <div class="file-info" style="padding: 20px;">
           <i data-lucide="folder" style="width: 48px; height: 48px; color: var(--file-folder);"></i>
@@ -2866,13 +3112,98 @@ export class PanelManager {
       };
       reader.readAsText(file);
     } else if (fileType === 'file-image' || file.type.startsWith('image/')) {
-      // Handle image files
-      const url = URL.createObjectURL(file);
-      panelContent.innerHTML = `
-        <div class="image-viewer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: auto;">
-          <img src="${url}" alt="${file.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-        </div>
-      `;
+      // Check if this might be part of a sequence
+      if (isSequenceableImage(file.name)) {
+        const parsed = parseSequenceFrame(file.name);
+        if (parsed && parsed.padding >= 3) {
+          // This looks like it might be part of a sequence
+          
+          // For dropped files, we can't check the server (file isn't on server yet)
+          // Only check if we have a server path (from file browser click)
+          const isServerFile = (file as any).serverPath;
+          
+          if (isServerFile) {
+            // Check server for the full sequence
+            try {
+              const filePath = (file as any).serverPath;
+              
+              const response = await fetch(`http://localhost:8000/api/sequence?path=${encodeURIComponent(filePath)}`);
+              const sequenceData = await response.json();
+              
+              if (sequenceData.is_sequence && sequenceData.files.length > 1) {
+              
+              // Create sequence player
+              panelContent.innerHTML = `<div id="sequence-container-${panelId}" style="width: 100%; height: 100%;"></div>`;
+              const sequencePlayer = new ImageSequencePlayer(panelContent.querySelector(`#sequence-container-${panelId}`)!);
+              
+              // Create sequence info from server data
+              const sequenceInfo: SequenceInfo = {
+                baseName: sequenceData.base_name,
+                padding: sequenceData.padding,
+                startFrame: sequenceData.start_frame,
+                endFrame: sequenceData.end_frame,
+                frameCount: sequenceData.frame_count,
+                extension: sequenceData.extension,
+                delimiter: sequenceData.delimiter,
+                pattern: `${sequenceData.base_name}${sequenceData.delimiter}${'#'.repeat(sequenceData.padding)}.${sequenceData.extension}`,
+                files: sequenceData.files.map((f: any) => f.name)
+              };
+              
+              // Build URLs for all frames
+              const frameUrls = sequenceData.files.map((f: any) => 
+                `http://localhost:8000/api/file?path=${encodeURIComponent(f.path)}`
+              );
+              
+              // Load the sequence
+              await sequencePlayer.loadSequence(sequenceInfo, '', frameUrls);
+              
+              // Initialize Lucide icons
+              this.initializeLucideIcons();
+              return;
+            }
+          } catch (error) {
+          }
+          }  // Close the isServerFile check
+          
+          // Fall back to single frame if no sequence detected
+          panelContent.innerHTML = `<div id="sequence-container-${panelId}" style="width: 100%; height: 100%;"></div>`;
+          const sequencePlayer = new ImageSequencePlayer(panelContent.querySelector(`#sequence-container-${panelId}`)!);
+          
+          const singleFrameSequence: SequenceInfo = {
+            baseName: parsed.baseName,
+            padding: parsed.padding,
+            startFrame: parsed.frameNumber,
+            endFrame: parsed.frameNumber,
+            frameCount: 1,
+            extension: parsed.extension,
+            delimiter: parsed.delimiter,
+            pattern: `${parsed.baseName}${parsed.delimiter}${'#'.repeat(parsed.padding)}.${parsed.extension}`,
+            files: [file.name]
+          };
+          
+          const url = URL.createObjectURL(file);
+          sequencePlayer.loadSequence(singleFrameSequence, '', [url]).then(() => {
+          });
+          
+          this.initializeLucideIcons();
+        } else {
+          // Regular single image
+          const url = URL.createObjectURL(file);
+          panelContent.innerHTML = `
+            <div class="image-viewer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: auto;">
+              <img src="${url}" alt="${file.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+          `;
+        }
+      } else {
+        // Regular single image
+        const url = URL.createObjectURL(file);
+        panelContent.innerHTML = `
+          <div class="image-viewer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: auto;">
+            <img src="${url}" alt="${file.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+          </div>
+        `;
+      }
     } else if (fileType === 'file-video' || file.type.startsWith('video/')) {
       // Handle video files
       const url = URL.createObjectURL(file);
@@ -2927,7 +3258,6 @@ export class PanelManager {
         
         video.addEventListener('error', (e) => {
           hasError = true;
-          console.error('Video error:', e);
           const errorMsg = ext === 'mov' 
             ? `<div class="video-error" style="padding: 20px; text-align: center;">
                  <h3>Unable to play .MOV file</h3>
@@ -2980,9 +3310,87 @@ export class PanelManager {
   }
 
 
-  private async handleExternalFileDrop(files: File[], panelId: string): Promise<void> {
-    // This method is no longer needed since we handle drops per panel
-    console.log('Legacy method called - should not happen');
+  private async importImageSequence(): Promise<void> {
+    // Create a file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = 'image/*,.jpg,.jpeg,.png,.tga,.tif,.tiff,.exr,.dpx';
+    
+    input.addEventListener('change', async (e) => {
+      const files = Array.from((e.target as HTMLInputElement).files || []);
+      
+      if (files.length === 0) return;
+      
+      
+      // Create a new panel for the sequence
+      const targetPanelId = this.bspManager?.addPanel('right');
+      if (!targetPanelId) {
+        return;
+      }
+      
+      // Wait for panel to be created
+      setTimeout(async () => {
+        // Handle the imported files as a potential sequence
+        await this.handleMultipleFileDrop(files, targetPanelId);
+      }, 100);
+    });
+    
+    // Trigger the file picker
+    input.click();
+  }
+
+  private async handleMultipleFileDrop(files: File[], panelId: string): Promise<void> {
+    // Check if these files form a sequence
+    const imageFiles = files.filter(f => isSequenceableImage(f.name));
+    
+    if (imageFiles.length >= 2) {
+      // Try to detect sequences
+      const filenames = imageFiles.map(f => f.name);
+      const sequences = detectSequences(filenames);
+      
+      if (sequences.size > 0) {
+        // We found at least one sequence
+        const firstSequence = sequences.entries().next();
+        if (!firstSequence.value) {
+          return;
+        }
+        const [sequenceName, sequenceInfo] = firstSequence.value;
+        
+        // Open the sequence in the panel
+        const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+        if (!panel) return;
+        
+        const panelContent = panel.querySelector('.panel-content');
+        if (!panelContent) return;
+        
+        // Create sequence player
+        panelContent.innerHTML = `<div id="sequence-container-${panelId}" style="width: 100%; height: 100%;"></div>`;
+        const sequencePlayer = new ImageSequencePlayer(panelContent.querySelector(`#sequence-container-${panelId}`)!);
+        
+        // Create blob URLs for all frames in the sequence
+        const frameUrls: string[] = [];
+        for (const filename of sequenceInfo.files) {
+          const file = imageFiles.find(f => f.name === filename);
+          if (file) {
+            frameUrls.push(URL.createObjectURL(file));
+          }
+        }
+        
+        // Load the sequence with blob URLs
+        await sequencePlayer.loadSequence(sequenceInfo, '', frameUrls);
+        
+        // Initialize Lucide icons
+        this.initializeLucideIcons();
+        
+        return; // Don't process files individually
+      }
+    }
+    
+    // Not a sequence, process files individually
+    for (const file of files) {
+      await this.openDroppedFileInPanel(file, panelId);
+    }
   }
 
   private escapeHtml(text: string): string {
@@ -3001,7 +3409,6 @@ export class PanelManager {
     const isTargetFolder = dropTarget.dataset.isFolder === 'true';
     const position = this.getDropPosition(dropTarget);
     
-    console.log(`Moving ${sourcePath} to ${targetPath} (position: ${position})`);
     
     // In a real implementation, you would:
     // 1. Call server API to move/copy the file
@@ -3009,9 +3416,7 @@ export class PanelManager {
     // 3. Show progress indicators
     
     if (isTargetFolder && position === 'inside') {
-      console.log(`Would move file into folder: ${targetPath}`);
     } else {
-      console.log(`Would reorder file ${position} ${targetPath}`);
     }
     
     // Refresh the directory view after operation
@@ -3084,7 +3489,6 @@ export class PanelManager {
     // Update panel content with file
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
     if (!panel) {
-      console.error('Panel not found with ID:', targetPanelId);
       return;
     }
 
@@ -3173,23 +3577,19 @@ export class PanelManager {
   }
 
   private async showDirectoryChooser(panelId: string): Promise<void> {
-    console.log('showDirectoryChooser called with panelId:', panelId);
     
     // Check if File System Access API is available
     if (!('showDirectoryPicker' in window)) {
-      console.log('showDirectoryPicker not available, using fallback');
       // Fallback to manual input modal
       this.showManualDirectoryChooser(panelId);
       return;
     }
 
     try {
-      console.log('Showing native directory picker');
       // Use native file system picker
       const dirHandle = await (window as any).showDirectoryPicker({
         mode: 'read'
       });
-      console.log('Directory selected:', dirHandle);
 
       // Store the directory handle for later use
       if (!this.directoryHandles) {
@@ -3202,7 +3602,6 @@ export class PanelManager {
 
     } catch (error) {
       // User cancelled or error occurred
-      console.log('Directory picker cancelled or error:', error);
     }
   }
 
@@ -3290,11 +3689,8 @@ export class PanelManager {
     input?.focus();
   }
 
-  // Add a property to store current path
-  private currentPath: string = '.';
 
   private async loadDirectoryFromHandle(dirHandle: any, panelId: string): Promise<void> {
-    console.log('loadDirectoryFromHandle called for panel:', panelId);
     
     // Use the existing method to create an explorer panel with the folder
     await this.openDroppedFolderInPanel(dirHandle.name, panelId, dirHandle);
@@ -3425,16 +3821,67 @@ export class PanelManager {
           const currentLevel = parseInt(treeItem.getAttribute('data-level') || '0');
           const sortedFiles = sortFiles(files);
           
+          // Detect sequences in the native subfolder
+          const imageFilenames = sortedFiles
+            .filter(f => f.type === 'file' && isSequenceableImage(f.name))
+            .map(f => f.name);
+          
+          
+          const sequences = detectSequences(imageFilenames);
+          
+          // Create a map of file handles for sequences
+          const fileHandleMap = new Map<string, FileSystemFileHandle>();
+          for await (const entry of folderHandle.values()) {
+            if (entry.kind === 'file') {
+              fileHandleMap.set(entry.name, entry as FileSystemFileHandle);
+            }
+          }
+          
+          // Create a set of files that are part of sequences
+          const sequenceFiles = new Set<string>();
+          sequences.forEach(seq => {
+            seq.files.forEach(f => sequenceFiles.add(f));
+          });
+          
+          // Track which sequences we've already added
+          const addedSequences = new Set<string>();
+          
           sortedFiles.forEach(file => {
-            const childItem = this.createNativeTreeItem(file, panelId, folderHandle, currentLevel + 1);
-            childrenContainer.appendChild(childItem);
+            // Check if this file is part of a sequence
+            if (file.type === 'file' && sequenceFiles.has(file.name)) {
+              // Find which sequence this file belongs to
+              let foundSequence = null;
+              for (const [seqName, seqInfo] of sequences.entries()) {
+                if (seqInfo.files.includes(file.name)) {
+                  foundSequence = [seqName, seqInfo];
+                  break;
+                }
+              }
+              
+              // Only add the sequence once (for the first file in the sequence)
+              if (foundSequence && !addedSequences.has(foundSequence[0] as string)) {
+                const [seqName, seqInfo] = foundSequence as [string, SequenceInfo];
+                addedSequences.add(seqName);
+                
+                // Store the file handles for this sequence globally
+                const sequenceKey = `${folderName}/${seqName}`;
+                this.nativeSequenceHandles.set(sequenceKey, fileHandleMap);
+                
+                // Create a special tree item for the sequence with native flag and folder name
+                const sequenceItem = this.createSequenceTreeItem(seqInfo, seqName, `${folderName}`, panelId, currentLevel + 1, true, folderName);
+                childrenContainer.appendChild(sequenceItem);
+              }
+            } else if (file.type === 'directory' || !sequenceFiles.has(file.name)) {
+              // Regular file or directory (not part of a sequence)
+              const childItem = this.createNativeTreeItem(file, panelId, folderHandle, currentLevel + 1);
+              childrenContainer.appendChild(childItem);
+            }
           });
           
           // Re-initialize Lucide icons for newly loaded items
           this.initializeLucideIcons(10);
 
         } catch (error) {
-          console.error('Error loading folder contents:', error);
           this.showErrorMessage(childrenContainer, 'Failed to load');
         }
       }
@@ -3451,7 +3898,6 @@ export class PanelManager {
     // Update panel content with file
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
     if (!panel) {
-      console.error('Panel not found with ID:', targetPanelId);
       return;
     }
 
@@ -3521,8 +3967,6 @@ export class PanelManager {
     const videoControls = container.querySelector('.video-controls') as HTMLElement;
     
     // Debug: log what we found
-    console.log('setupVideoPlayer - Timeline found:', !!timeline);
-    console.log('setupVideoPlayer - Video found:', !!video);
     
     if (!video) return;
     
@@ -3765,9 +4209,7 @@ export class PanelManager {
     video.tabIndex = 0;
     
     // Update time labels and generate ticks
-    console.log('Adding loadedmetadata listener to video');
     video.addEventListener('loadedmetadata', () => {
-      console.log('Video loadedmetadata event fired! Duration:', video.duration);
       
       if (timeLabel) {
         timeLabel.textContent = `0:00 / ${formatTime(video.duration)}`;
@@ -3776,11 +4218,9 @@ export class PanelManager {
       // Generate timeline ticks based on video duration
       // The ticks container is inside .timeline which is inside .video-controls
       const ticksContainer = container.querySelector('.timeline-ticks') as HTMLElement;
-      console.log('Looking for .timeline-ticks, found:', !!ticksContainer);
       
       // If not found, let's check what IS in the container
       if (!ticksContainer) {
-        console.log('Container HTML:', container.innerHTML.substring(0, 500));
       }
       
       if (ticksContainer && video.duration) {
@@ -3807,9 +4247,7 @@ export class PanelManager {
         
         // Debug: Check if ticks were actually added
         if (ticksContainer.children.length > 0) {
-          console.log(`✓ Generated ${ticksContainer.children.length} timeline ticks`);
         } else {
-          console.error('✗ Failed to generate timeline ticks');
         }
       }
     });
@@ -3851,14 +4289,12 @@ export class PanelManager {
     
     // Setup drag and drop for BSP resizers/dividers 
     const resizers = document.querySelectorAll('.bsp-resizer');
-    console.log('Setting up drag and drop for', resizers.length, 'resizers');
     
     resizers.forEach(resizer => {
       // Add drag over events to resizers
       resizer.addEventListener('dragenter', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Drag enter resizer');
         resizer.classList.add('drag-over-divider');
       });
       
@@ -3875,7 +4311,6 @@ export class PanelManager {
         const y = e.clientY;
         
         if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
-          console.log('Drag leave resizer');
           resizer.classList.remove('drag-over-divider');
         }
       });
@@ -3883,7 +4318,6 @@ export class PanelManager {
       resizer.addEventListener('drop', async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Drop on resizer');
         resizer.classList.remove('drag-over-divider');
         
         if (!e.dataTransfer) return;
@@ -3924,7 +4358,6 @@ export class PanelManager {
 
   private async handleDividerDropWithEntry(resizer: HTMLElement, entry: any): Promise<void> {
     if (entry.isDirectory) {
-      console.log('Directory dropped on divider:', entry.name);
       await this.handleDividerDropForFolder(resizer, entry.name, entry);
     } else {
       // Get file and handle normally
@@ -3943,15 +4376,10 @@ export class PanelManager {
   }
 
   private async handleDividerDrop(resizer: HTMLElement, fileOrFolder: File | { name: string }, isFolder: boolean): Promise<void> {
-    console.log('=== DIVIDER DROP DEBUG ===');
-    console.log('Resizer element:', resizer);
-    console.log('Resizer classes:', resizer.className);
-    console.log('Resizer dataset:', resizer.dataset);
     
     // Get the node ID from the resizer
     const nodeId = resizer.dataset.nodeId;
     if (!nodeId || !this.bspManager) {
-      console.log('❌ No nodeId or bspManager');
       return;
     }
     
@@ -3959,21 +4387,18 @@ export class PanelManager {
     const direction = resizer.dataset.direction;
     const isHorizontal = direction === 'horizontal';
     
-    console.log('🎯 Attempting split - Node ID:', nodeId, 'Direction:', direction);
     
     // Find the largest panel to split instead of trying to match resizer position
     const allPanels = document.querySelectorAll('.bsp-panel');
     let largestPanel: HTMLElement | null = null;
     let largestArea = 0;
     
-    console.log('📊 Available panels:', allPanels.length);
     
     for (const panel of allPanels) {
       const rect = panel.getBoundingClientRect();
       const area = rect.width * rect.height;
       const panelId = panel.getAttribute('data-panel-id');
       
-      console.log(`Panel ${panelId}: ${rect.width}x${rect.height} = ${area}px²`);
       
       if (area > largestArea) {
         largestArea = area;
@@ -3983,18 +4408,15 @@ export class PanelManager {
     
     if (largestPanel) {
       const targetPanelId = largestPanel.getAttribute('data-panel-id');
-      console.log('🎯 Splitting largest panel:', targetPanelId);
       
       if (targetPanelId) {
         // Split the target panel
         const newPanelId = this.bspManager.splitPanel(targetPanelId, direction as 'horizontal' | 'vertical', 'right');
         
-        console.log('✅ Split result - New panel ID:', newPanelId);
         
         if (newPanelId) {
           // Wait for layout to complete, then load the file
           setTimeout(async () => {
-            console.log('📁 Loading into new panel:', newPanelId);
             if (isFolder) {
               const folderData = fileOrFolder as { name: string; handle?: any };
               await this.openDroppedFolderInPanel(folderData.name, newPanelId, folderData.handle);
@@ -4005,14 +4427,11 @@ export class PanelManager {
             this.refreshDividerDragAndDrop();
           }, 200);
         } else {
-          console.log('❌ Split panel returned null');
         }
       }
     } else {
-      console.log('❌ No panels found to split');
     }
     
-    console.log('=== END DIVIDER DROP DEBUG ===');
   }
 
   private addOrUpdateFileBreadcrumb(panel: HTMLElement, path: string): void {
@@ -4072,7 +4491,6 @@ export class PanelManager {
         const targetPath = (e.target as HTMLElement).dataset.path;
         if (targetPath) {
           // TODO: Navigate to the clicked path in the file explorer
-          console.log('Navigate to:', targetPath);
         }
       });
     });
@@ -4260,7 +4678,6 @@ export class PanelManager {
       const panelElement = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
       if (panelElement && !panelElement.classList.contains('is-pinned')) {
         this.bspManager.togglePinPanel(panelId);
-        console.log(`Pinned panel: ${panelId}`);
       }
     }
   }

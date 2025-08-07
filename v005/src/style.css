@@ -3407,6 +3407,35 @@ body.is-dragging {
   z-index: 100 !important;
 }
 
+/* Sequence tree item styling - make them stand out */
+.tree-item-sequence .tree-item-content {
+  background: linear-gradient(90deg, rgba(0, 204, 139, 0.15) 0%, rgba(0, 204, 139, 0.05) 100%);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  margin: 4px 4px;
+  position: relative;
+}
+
+.tree-item-sequence .tree-item-content:hover {
+  background: linear-gradient(90deg, rgba(0, 204, 139, 0.25) 0%, rgba(0, 204, 139, 0.1) 100%);
+}
+
+.tree-item-badge {
+  background: rgba(0, 204, 139, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* Sequence icon should be bright */
+.tree-item-sequence .tree-item-icon[data-file-type="sequence"] {
+  color: var(--accent) !important;
+  opacity: 1 !important;
+}
+
 .bsp-resizer-horizontal.drag-over-divider::after {
   content: 'Drop to split horizontally';
   position: absolute;

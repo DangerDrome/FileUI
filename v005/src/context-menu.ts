@@ -1,7 +1,7 @@
 // Context Menu Manager for FileUI v005
 
 export interface ContextMenuItem {
-  label: string;
+  label?: string;
   icon?: string; // Lucide icon name
   action?: () => void | Promise<void>;
   separator?: boolean;
@@ -86,7 +86,7 @@ export class ContextMenuManager {
         const separator = document.createElement('div');
         separator.className = 'context-menu-separator';
         this.menuElement!.appendChild(separator);
-      } else {
+      } else if (item.label) {
         const menuItem = document.createElement('div');
         menuItem.className = 'context-menu-item';
         if (item.disabled) {
@@ -104,7 +104,7 @@ export class ContextMenuManager {
         
         // Add label
         const label = document.createElement('span');
-        label.textContent = item.label;
+        label.textContent = item.label ?? '';
         menuItem.appendChild(label);
         
         // Add click handler

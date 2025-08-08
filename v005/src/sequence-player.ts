@@ -40,14 +40,14 @@ export class ImageSequencePlayer {
   // Set up the player UI
   private setupUI(): void {
     this.container.innerHTML = `
-      <div class="sequence-player" style="display: flex; flex-direction: column; height: 100%; background: #000;">
-        <div class="sequence-viewport" style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+      <div class="video-player" style="display: flex; flex-direction: column; height: 100%;">
+        <div class="sequence-viewport" style="flex: 1; width: 100%; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
           <canvas class="sequence-canvas" style="max-width: 100%; max-height: 100%; object-fit: contain;"></canvas>
           <div class="sequence-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; display: none;">
             Loading frame...
           </div>
         </div>
-        <div class="sequence-controls" style="display: flex; align-items: center; padding: 8px; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+        <div class="video-controls" style="display: flex; align-items: center; padding: 8px; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
           <button class="btn btn-sm" data-action="play">
             <i data-lucide="play" width="16" height="16"></i>
           </button>
@@ -62,14 +62,12 @@ export class ImageSequencePlayer {
             <div class="timeline-track">
               <div class="timeline-progress"></div>
               <div class="timeline-handle" style="left: 0%;">
-                <div class="timeline-playhead-label">1001</div>
+                <div class="timeline-playhead-label">0:00</div>
                 <div class="timeline-playhead-line"></div>
               </div>
             </div>
           </div>
-          <span class="sequence-frame-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 120px; margin: 0 8px;">
-            Frame 0 / 0
-          </span>
+          <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 120px; margin: 0 8px;">0:00 / 0:00</span>
           <select class="form-select form-select-sm" data-action="fps" style="width: 80px;">
             <option value="12">12 fps</option>
             <option value="24" selected>24 fps</option>
@@ -96,7 +94,7 @@ export class ImageSequencePlayer {
     this.playBtn = this.container.querySelector('[data-action="play"]');
     this.timelineElement = this.container.querySelector('.timeline');
     this.timelineHandle = this.container.querySelector('.timeline-handle');
-    this.frameLabel = this.container.querySelector('.sequence-frame-label');
+    this.frameLabel = this.container.querySelector('.video-time-label');
     this.fpsSelector = this.container.querySelector('[data-action="fps"]');
   }
   
@@ -382,10 +380,17 @@ export class ImageSequencePlayer {
   private updateUI(): void {
     if (!this.sequence) return;
     
-    // Update frame label
+    // Update time label to match video style (mm:ss / mm:ss)
+    const formatTime = (seconds: number): string => {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     if (this.frameLabel) {
-      const actualFrame = this.sequence.startFrame + this.currentFrame;
-      this.frameLabel.textContent = `Frame ${actualFrame} / ${this.sequence.endFrame}`;
+      const currentSeconds = this.currentFrame / Math.max(1, this.fps);
+      const totalSeconds = (Math.max(1, this.sequence.frameCount) - 1) / Math.max(1, this.fps);
+      this.frameLabel.textContent = `${formatTime(currentSeconds)} / ${formatTime(totalSeconds)}`;
     }
     
     // Update timeline position
@@ -393,11 +398,11 @@ export class ImageSequencePlayer {
       const percentage = (this.currentFrame / Math.max(1, this.sequence.frameCount - 1)) * 100;
       this.timelineHandle.style.left = `${percentage}%`;
       
-      // Update playhead label
+      // Update playhead label (time)
       const label = this.timelineHandle.querySelector('.timeline-playhead-label');
       if (label) {
-        const actualFrame = this.sequence.startFrame + this.currentFrame;
-        label.textContent = actualFrame.toString();
+        const currentSeconds = this.currentFrame / Math.max(1, this.fps);
+        (label as HTMLElement).textContent = formatTime(currentSeconds);
       }
     }
     

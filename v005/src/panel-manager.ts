@@ -1,6 +1,8 @@
 // Panel Manager - Simple fixed layout system
 import { BSPPanelManager } from './bsp-manager';
-import { ServerFileSystem, FileItem, sortFiles, getFileType } from './filemanager';
+import { ServerFileSystem, FileItem, sortFiles, getFileType, formatFileSize } from './filemanager';
+import { escapeHtml } from './utils/strings';
+import { getFileIcon, getFileIconColor } from './utils/ui';
 import MarkdownIt from 'markdown-it';
 import { ContextMenuManager, ContextMenuItem } from './context-menu';
 import { ImageSequencePlayer } from './sequence-player';
@@ -103,8 +105,8 @@ export class PanelManager {
     if (focusedPanel && !focusedPanel.classList.contains('explorer-panel')) {
       const panelId = focusedPanel.getAttribute('data-panel-id');
       if (panelId) {
-        const bspNode = this.bspManager.panels.get(panelId)?.node;
-        if (bspNode && !bspNode.isPinned) {
+        const isPinnedEl = (focusedPanel as HTMLElement).classList.contains('is-pinned');
+        if (!isPinnedEl) {
           // Use the focused panel only if it's not pinned
           return panelId;
         }
@@ -116,8 +118,8 @@ export class PanelManager {
     for (const panel of allPanels) {
       const panelId = panel.getAttribute('data-panel-id');
       if (panelId) {
-        const bspNode = this.bspManager.panels.get(panelId)?.node;
-        if (bspNode && !bspNode.isPinned) {
+        const isPinnedEl = (panel as HTMLElement).classList.contains('is-pinned');
+        if (!isPinnedEl) {
           // Use the first available non-explorer, non-pinned panel
           this.focusPanel(panel);
           return panelId;
@@ -299,7 +301,7 @@ export class PanelManager {
           const fs = new ServerFileSystem('http://localhost:8000/api');
           const fileContent = await fs.readFile(source);
           content.innerHTML = `<div class="file-content">
-            <pre class="file-text">${this.escapeHtml(fileContent)}</pre>
+            <pre class="file-text">${escapeHtml(fileContent)}</pre>
           </div>`;
         }
       } else {
@@ -408,13 +410,13 @@ export class PanelManager {
         } else if (file.type.startsWith('text/') || fileType === 'file-code' || file.size < 1024 * 1024) {
           const text = await file.text();
           content.innerHTML = `<div class="file-content">
-            <pre class="file-text">${this.escapeHtml(text)}</pre>
+            <pre class="file-text">${escapeHtml(text)}</pre>
           </div>`;
         } else {
           content.innerHTML = `<div class="file-info">
             <p>File: ${fileName}</p>
             <p>Type: ${file.type || 'Unknown'}</p>
-            <p>Size: ${this.formatFileSize(file.size)}</p>
+            <p>Size: ${formatFileSize(file.size)}</p>
             <p>Last Modified: ${new Date(file.lastModified).toLocaleString()}</p>
           </div>`;
         }
@@ -424,8 +426,8 @@ export class PanelManager {
       content.innerHTML = `<div class="file-error" style="text-align: center; padding: 40px; color: var(--error);">
         <i data-lucide="alert-circle" class="lucide" style="width: 48px; height: 48px; margin: 0 auto 16px;"></i>
         <h3 style="margin: 0 0 8px;">Failed to load file</h3>
-        <p style="margin: 0 0 4px; color: var(--text-primary);">${this.escapeHtml(fileName)}</p>
-        <p style="margin: 0; font-size: 0.9em; opacity: 0.8;">${this.escapeHtml(errorMessage)}</p>
+        <p style="margin: 0 0 4px; color: var(--text-primary);">${escapeHtml(fileName)}</p>
+        <p style="margin: 0; font-size: 0.9em; opacity: 0.8;">${escapeHtml(errorMessage)}</p>
       </div>`;
       // Re-initialize Lucide icons for the error icon
       this.initializeLucideIcons(10);
@@ -814,7 +816,7 @@ export class PanelManager {
           icon: 'x',
           action: () => {
             if (this.bspManager && panelId) {
-              this.bspManager.removePanel(panelId);
+              this.bspManager.closePanel(panelId);
             }
           }
         }
@@ -1234,7 +1236,8 @@ export class PanelManager {
       // Focus existing properties panel
       const panelId = existingPropertiesPanel.getAttribute('data-panel-id');
       if (panelId && this.bspManager) {
-        this.bspManager.focusPanel(panelId);
+        const panelEl = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+        if (panelEl) this.focusPanel(panelEl);
       }
       return;
     }
@@ -1323,10 +1326,14 @@ export class PanelManager {
         this.pinPanel(terminalPanelId);
         
         // Mark the terminal as collapsed immediately
-        const panel = this.bspManager.panels.get(terminalPanelId);
-        if (panel) {
-          panel.node.isCollapsed = true;
-          this.bspManager.updateCollapseVisualState(terminalPanelId, true);
+        const terminalEl = document.querySelector(`.bsp-panel[data-panel-id="${terminalPanelId}"]`) as HTMLElement | null;
+        if (terminalEl) {
+          terminalEl.classList.add('is-collapsed');
+          const collapseBtn = terminalEl.querySelector('[data-action="collapse"]');
+          const collapseIcon = collapseBtn?.querySelector('.icon-collapse') as HTMLElement;
+          const expandIcon = collapseBtn?.querySelector('.icon-expand') as HTMLElement;
+          if (collapseIcon) collapseIcon.style.display = 'none';
+          if (expandIcon) expandIcon.style.display = 'block';
         }
       }, 100);
     }
@@ -1364,10 +1371,14 @@ export class PanelManager {
         this.pinPanel(propertiesPanelId);
         
         // Mark the panel as collapsed immediately
-        const panel = this.bspManager.panels.get(propertiesPanelId);
-        if (panel) {
-          panel.node.isCollapsed = true;
-          this.bspManager.updateCollapseVisualState(propertiesPanelId, true);
+        const propsEl = document.querySelector(`.bsp-panel[data-panel-id="${propertiesPanelId}"]`) as HTMLElement | null;
+        if (propsEl) {
+          propsEl.classList.add('is-collapsed');
+          const collapseBtn = propsEl.querySelector('[data-action="collapse"]');
+          const collapseIcon = collapseBtn?.querySelector('.icon-collapse') as HTMLElement;
+          const expandIcon = collapseBtn?.querySelector('.icon-expand') as HTMLElement;
+          if (collapseIcon) collapseIcon.style.display = 'none';
+          if (expandIcon) expandIcon.style.display = 'block';
         }
       }, 100);
     }
@@ -1405,29 +1416,10 @@ export class PanelManager {
     // Set the explorer panel to 15vw on initialization
     // This is the default initialization - saved layouts will override this
     // Future: Check for saved layout preferences before setting default
-    const panelInfo = this.bspManager.panels.get(newPanelId);
-    if (panelInfo && panelInfo.node.parent && panelInfo.node.parent.direction === 'vertical') {
-      // For left panel, we want 15% for explorer, 85% for content
-      // Check if this is the first (left) child
-      const parent = panelInfo.node.parent;
-      const isFirstChild = parent.children[0].id === newPanelId;
-      
-      // Default layout configuration - can be overridden by saved layouts
+          // Default layout configuration - can be overridden by saved layouts
       const explorerDefaultRatio = 0.15; // 15% width
-      
-      if (isFirstChild) {
-        parent.split = explorerDefaultRatio; // 15% for explorer panel
-      } else {
-        parent.split = 1 - explorerDefaultRatio; // 85% if it's the second child
-      }
-      
-      // Mark this as a user-resizable split (for future layout saving)
-      parent.userResizable = true;
-      parent.defaultSplit = parent.split; // Store default for reset functionality
-      
-      // Re-layout to apply the new split ratio
+      this.bspManager.setParentSplitForPanelRatio(newPanelId, explorerDefaultRatio);
       this.bspManager.layout();
-    }
     
     // Wait for the panel to be created and then update its content
     setTimeout(() => {
@@ -1437,7 +1429,7 @@ export class PanelManager {
         // Mark this as an explorer panel
         focusedPanel.setAttribute('data-panel-type', 'explorer');
         const panelTitle = focusedPanel.querySelector('.panel-title span');
-        const panelContent = focusedPanel.querySelector('.panel-content');
+        const panelContent = focusedPanel.querySelector('.panel-content') as HTMLElement;
         
         if (panelTitle && panelTitle.parentElement) {
           panelTitle.parentElement.innerHTML = `
@@ -1461,7 +1453,7 @@ export class PanelManager {
           panelContent.style.gap = '24px';
           
           panelContent.innerHTML = `
-            <i data-lucide="folder-tree" class="lucide" style="width: 96px; height: 96px;"></i>
+            <i data-lucide="folder" class="lucide lucide-library" style="width: 96px; height: 96px;"></i>
             <div style="text-align: center; max-width: 400px;">
               <div style="font-size: 18px; font-weight: 500; margin-bottom: 20px; color: var(--color-text-primary);">Explorer Pro Tips</div>
               <div style="font-size: 16px; line-height: 1.8; color: var(--color-text-secondary);">
@@ -1470,24 +1462,8 @@ export class PanelManager {
                 • Use arrow keys to navigate<br>
                 • Click files to open them
               </div>
-              <div style="margin-top: 24px;">
-                <button class="btn btn-primary" id="import-sequence-btn">
-                  <i data-lucide="film" class="lucide" style="width: 16px; height: 16px; margin-right: 8px;"></i>
-                  Import Image Sequence
-                </button>
-              </div>
             </div>
           `;
-          
-          // Add Import Sequence button handler
-          setTimeout(() => {
-            const importBtn = panel.querySelector('#import-sequence-btn');
-            if (importBtn) {
-              importBtn.addEventListener('click', () => {
-                this.importImageSequence();
-              });
-            }
-          }, 10);
           
           // Setup interactions but don't load files
           this.setupExplorerInteractions(newPanelId);
@@ -2484,6 +2460,8 @@ export class PanelManager {
   }
 
   private setupGlobalDragAndDrop(): void {
+    if (this.dragDropInitialized) return;
+    this.dragDropInitialized = true;
     // Prevent default drag behaviors on document
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
       document.addEventListener(eventName, (e) => {
@@ -3028,8 +3006,8 @@ export class PanelManager {
 
     // Get file info for header
     const headerFileType = getFileType(file.name);
-    const iconName = this.getFileIcon(headerFileType);
-    const iconColor = this.getFileIconColor(headerFileType);
+    const iconName = getFileIcon(headerFileType);
+const iconColor = getFileIconColor(headerFileType);
 
     // Ensure panel has a header
     let panelHeader = panel.querySelector('.panel-header');
@@ -3110,7 +3088,7 @@ export class PanelManager {
         if (fileType === 'markdown' || file.name.endsWith('.md')) {
           panelContent.innerHTML = `<div class="markdown-content">${this.md.render(content)}</div>`;
         } else {
-          panelContent.innerHTML = `<pre class="file-content">${this.escapeHtml(content)}</pre>`;
+          panelContent.innerHTML = `<pre class="file-content">${escapeHtml(content)}</pre>`;
         }
       };
       reader.readAsText(file);
@@ -3308,7 +3286,7 @@ export class PanelManager {
         <div class="file-info" style="padding: 20px;">
           <p>File: ${file.name}</p>
           <p>Type: ${file.type || 'Unknown'}</p>
-          <p>Size: ${this.formatFileSize(file.size)}</p>
+          <p>Size: ${formatFileSize(file.size)}</p>
           <p style="color: var(--color-text-secondary);">Preview not available for this file type</p>
         </div>
       `;
@@ -3400,17 +3378,7 @@ export class PanelManager {
     }
   }
 
-  private escapeHtml(text: string): string {
-    const map: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;',
-      '/': '&#x2F;',
-    };
-    return text.replace(/[&<>"'\/]/g, (m) => map[m]);
-  }
+
 
   private async handleInternalFileDrop(sourcePath: string, targetPath: string, dropTarget: HTMLElement, panelId: string): Promise<void> {
     const isTargetFolder = dropTarget.dataset.isFolder === 'true';
@@ -3509,8 +3477,8 @@ export class PanelManager {
     
     if (panelTitle) {
       const fileType = getFileType(fileName);
-      const iconName = this.getFileIcon(fileType);
-      const iconColor = this.getFileIconColor(fileType);
+      const iconName = getFileIcon(fileType);
+      const iconColor = getFileIconColor(fileType);
       panelTitle.innerHTML = `
         <i data-lucide="${iconName}" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: ${iconColor};"></i>
         <span>${fileName}</span>
@@ -3535,33 +3503,7 @@ export class PanelManager {
     }
   }
   
-  private getFileIcon(fileType: string): string {
-    switch (fileType) {
-      case 'file-3d': return 'box';
-      case 'file-comp': return 'layers';
-      case 'file-image': return 'image';
-      case 'file-video': return 'film';
-      case 'file-project': return 'folder-open';
-      case 'file-pdf': return 'file-text';
-      case 'javascript':
-      case 'typescript': return 'file-code';
-      case 'json': return 'file-json';
-      case 'markdown': return 'file-text';
-      default: return 'file';
-    }
-  }
-  
-  private getFileIconColor(fileType: string): string {
-    switch (fileType) {
-      case 'file-3d': return 'var(--file-3d)';
-      case 'file-comp': return 'var(--file-comp)';
-      case 'file-image': return 'var(--file-image)';
-      case 'file-video': return 'var(--file-video)';
-      case 'file-project': return 'var(--file-project)';
-      case 'file-pdf': return 'var(--file-document)';
-      default: return 'var(--color-white-rgba-70)';
-    }
-  }
+
   
   private focusPanel(panel: Element): void {
     // Use BSP manager's focus method to ensure proper focus tracking
@@ -3703,83 +3645,7 @@ export class PanelManager {
     await this.openDroppedFolderInPanel(dirHandle.name, panelId, dirHandle);
   }
 
-  private createNativeTreeItemOLD(file: FileItem, panelId: string, _parentHandle: any, level: number = 0): HTMLElement {
-    const treeItem = document.createElement('div');
-    treeItem.className = 'tree-item';
-    treeItem.setAttribute('role', 'treeitem');
-    treeItem.setAttribute('data-level', level.toString());
-    
-    const isDirectory = file.type === 'directory';
-    const fileType = isDirectory ? 'folder' : getFileType(file.name);
-    
-    // Get appropriate icon
-    let iconName = 'file';
-    if (isDirectory) {
-      iconName = 'folder';
-    } else if (fileType === 'file-3d') {
-      iconName = 'box';
-    } else if (fileType === 'file-comp') {
-      iconName = 'layers';
-    } else if (fileType === 'file-image') {
-      iconName = 'image';
-    } else if (fileType === 'file-video') {
-      iconName = 'film';
-    } else if (fileType === 'file-project') {
-      iconName = 'briefcase';
-    } else if (fileType === 'file-pdf') {
-      iconName = 'file-text';
-    }
-    
-    treeItem.innerHTML = `
-      <div class="tree-item-content native-file" draggable="true" data-is-folder="${isDirectory}" data-path="${file.name}" data-file-name="${file.name}" data-file-type="${fileType}" data-panel-id="${panelId}" style="padding-left: ${20 + level * 20}px">
-        ${isDirectory ? `
-          <button class="tree-item-toggle" aria-label="Toggle node" data-expanded="false">
-            <i data-lucide="chevron-right" class="lucide chevron-icon"></i>
-          </button>
-        ` : '<div class="tree-item-spacer"></div>'}
-        <i data-lucide="${iconName}" class="lucide tree-item-icon" data-file-type="${fileType}"></i>
-        <span class="tree-item-label">${file.name}</span>
-      </div>
-      ${isDirectory ? '<div class="tree-item-children" style="display: none;"></div>' : ''}
-    `;
 
-    // Add event handlers for native file system
-    const treeItemContent = treeItem.querySelector('.tree-item-content') as HTMLElement;
-    if (treeItemContent) {
-      // Handle clicks
-      treeItemContent.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        
-        // Handle toggle button clicks
-        if ((e.target as HTMLElement).closest('.tree-item-toggle')) {
-          if (isDirectory) {
-            await this.toggleNativeFolder(treeItem, file.name, panelId);
-          }
-          return;
-        }
-
-        if (!isDirectory) {
-          // Handle file selection
-          this.selectFile(treeItem, panelId);
-        }
-      });
-
-      // Handle single clicks for opening files
-      if (!isDirectory) {
-        treeItemContent.addEventListener('click', async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const fileHandle = this.fileHandles?.get(`${panelId}:${file.name}`);
-          if (fileHandle) {
-            await this.openNativeFileInBSPPanel(fileHandle, file.name);
-          }
-        });
-      }
-    }
-    
-    return treeItem;
-  }
 
   private async toggleNativeFolder(treeItem: HTMLElement, folderName: string, panelId: string): Promise<void> {
     const toggleBtn = treeItem.querySelector('.tree-item-toggle') as HTMLButtonElement;
@@ -3918,8 +3784,8 @@ export class PanelManager {
     
     if (panelTitle) {
       const fileType = getFileType(fileName);
-      const iconName = this.getFileIcon(fileType);
-      const iconColor = this.getFileIconColor(fileType);
+      const iconName = getFileIcon(fileType);
+const iconColor = getFileIconColor(fileType);
       panelTitle.innerHTML = `
         <i data-lucide="${iconName}" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: ${iconColor};"></i>
         <span>${fileName}</span>
@@ -3944,18 +3810,7 @@ export class PanelManager {
     }
   }
 
-  private formatFileSize(bytes: number): string {
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let size = bytes;
-    let unitIndex = 0;
-    
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    
-    return `${size.toFixed(2)} ${units[unitIndex]}`;
-  }
+
 
   private setupVideoPlayer(container: HTMLElement): void {
     // Find the actual video player container
@@ -3977,6 +3832,9 @@ export class PanelManager {
     
     if (!video) return;
     
+    // Ensure videos loop by default
+    video.loop = true;
+
     // Format time helper
     const formatTime = (seconds: number): string => {
       const mins = Math.floor(seconds / 60);
@@ -4512,8 +4370,8 @@ export class PanelManager {
 
     // Determine icon from title
     const fileType = getFileType(title);
-    const iconName = this.getFileIcon(fileType);
-    const iconColor = this.getFileIconColor(fileType);
+    const iconName = getFileIcon(fileType);
+    const iconColor = getFileIconColor(fileType);
 
     // Create header HTML with breadcrumb sub-header
     const headerHTML = `

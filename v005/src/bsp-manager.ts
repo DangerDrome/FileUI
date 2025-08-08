@@ -232,6 +232,8 @@ export class BSPNode {
 export class BSPPanelManager {
   private container: HTMLElement;
   private panels: Map<string, { node: BSPNode; element: HTMLElement }> = new Map();
+
+
   private resizers: HTMLElement[] = [];
   private root: BSPNode | null = null;
   private nextPanelNumber: number = 1;
@@ -264,6 +266,31 @@ export class BSPPanelManager {
   private alignmentGuides: HTMLElement[] = [];
   private dropPreview: HTMLElement | null = null;
   private lastDragOverTarget: { panelId: string | null; zone: string | null } = { panelId: null, zone: null };
+
+  /**
+   * Sets the parent split so that the panel with panelId receives the desiredRatio (0..1) of space
+   * relative to its sibling. No-op if node or parent not found.
+   */
+  public setParentSplitForPanelRatio(panelId: string, desiredRatioForPanel: number): void {
+    if (!this.root) return;
+    const node = this.findLeafNodeById(this.root, panelId);
+    if (!node || !node.parent) return;
+    const parent = node.parent;
+    const isFirstChild = parent.children[0] === node;
+    parent.split = isFirstChild ? desiredRatioForPanel : (1 - desiredRatioForPanel);
+  }
+
+  /**
+   * Programmatically collapse/expand a panel by id and update visuals.
+   */
+  public setCollapsed(panelId: string, isCollapsed: boolean): void {
+    if (!this.root) return;
+    const node = this.findLeafNodeById(this.root, panelId);
+    if (!node) return;
+    node.isCollapsed = isCollapsed;
+    this.updateCollapseVisualState(panelId, isCollapsed);
+    this.layout();
+  }
 
   constructor(container: HTMLElement) {
     this.container = container;

@@ -2958,26 +2958,28 @@ body.is-dragging {
 
 /* Video player fills panel content area */
 .bsp-panel .video-player {
-  height: 100%;
+  height: 100% !important;
   display: flex;
   flex-direction: column;
-  margin: var(--spacing-20);
-  height: calc(100% - var(--spacing-40));
+  padding: var(--spacing-8);
+  box-sizing: border-box;
+  margin: 0;
 }
 
 /* Video takes available space */
 .bsp-panel .video-player video {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-  width: calc(100% - var(--spacing-16));
+  width: 100%;
   object-fit: contain;
   border-radius: var(--radius-lg);
-  margin: var(--spacing-8);
+  margin: 0 0 var(--spacing-8) 0;
 }
 
 /* Controls stay at bottom */
 .bsp-panel .video-player .video-controls {
   flex-shrink: 0;
+  margin-top: auto; /* stick to bottom */
 }
 
 /* Timeline already styled by StyleUI - just set flex */

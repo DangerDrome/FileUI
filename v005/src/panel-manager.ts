@@ -3,6 +3,7 @@ import { BSPPanelManager } from './bsp-manager';
 import { ServerFileSystem, FileItem, sortFiles, getFileType, formatFileSize } from './filemanager';
 import { escapeHtml } from './utils/strings';
 import { getFileIcon, getFileIconColor } from './utils/ui';
+import { formatTime } from './utils/time';
 import MarkdownIt from 'markdown-it';
 import { ContextMenuManager, ContextMenuItem } from './context-menu';
 import { ImageSequencePlayer } from './sequence-player';
@@ -2040,17 +2041,18 @@ export class PanelManager {
     const sequencePath = basePath ? `${basePath}/${sequence.baseName}` : sequence.baseName;
     
     // Use film icon for sequences
-    const iconName = 'film';
+    const iconName = 'videotape';
     
     // Format frame count
     const frameCount = `${sequence.frameCount} frames`;
     
     treeItem.innerHTML = `
-      <div class="tree-item-content" draggable="true" data-is-sequence="true" data-path="${sequencePath}" data-sequence-info='${JSON.stringify(sequence)}' data-file-type="sequence" data-native-folder="${nativeFolderName || ''}" style="padding-left: ${20 + level * 20}px">
+      <div class="tree-item-content" draggable="true" data-is-sequence="true" data-path="${sequencePath}" data-sequence-info='${JSON.stringify(sequence)}' data-file-type="sequence" data-native-folder="${nativeFolderName || ''}" style="padding-left: 0px">
         <div class="tree-item-spacer"></div>
         <i data-lucide="${iconName}" class="lucide tree-item-icon" data-file-type="sequence" style="color: var(--file-video);"></i>
         <span class="tree-item-label">${displayName}</span>
-        <span class="tree-item-badge" style="margin-left: 8px; font-size: 11px; opacity: 0.7;">${frameCount}</span>
+        <span class="tree-item-badge" style="margin-left: 8px; font-size: 11px; opacity: 0.9;">${frameCount}</span>
+        <span class="tree-item-tag" style="margin-left: 6px; font-size: 11px; opacity: 0.9;">${sequence.extension.toUpperCase()}</span>
       </div>
     `;
     
@@ -2124,7 +2126,7 @@ export class PanelManager {
             const panelTitle = panel.querySelector('.panel-title');
             if (panelTitle) {
               panelTitle.innerHTML = `
-                <i data-lucide="film" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: var(--file-video);"></i>
+                <i data-lucide="videotape" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: var(--file-video);"></i>
                 <span>${displayName}</span>
               `;
             }
@@ -3835,12 +3837,7 @@ const iconColor = getFileIconColor(fileType);
     // Ensure videos loop by default
     video.loop = true;
 
-    // Format time helper
-    const formatTime = (seconds: number): string => {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
+    // Using shared formatTime from utils/time
     
     // Set initial state - video starts playing and muted
     video.muted = true;

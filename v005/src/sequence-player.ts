@@ -2,6 +2,7 @@
 
 import { FrameCache } from './frame-cache';
 import { SequenceInfo, getFrameFilename } from './sequence-utils';
+import { formatTime } from './utils/time';
 
 export class ImageSequencePlayer {
   private container: HTMLElement;
@@ -62,7 +63,7 @@ export class ImageSequencePlayer {
             <div class="timeline-track">
               <div class="timeline-progress"></div>
               <div class="timeline-handle" style="left: 0%;">
-                <div class="timeline-playhead-label">0:00</div>
+                <div class="timeline-playhead-label">0</div>
                 <div class="timeline-playhead-line"></div>
               </div>
             </div>
@@ -381,11 +382,6 @@ export class ImageSequencePlayer {
     if (!this.sequence) return;
     
     // Update time label to match video style (mm:ss / mm:ss)
-    const formatTime = (seconds: number): string => {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
 
     if (this.frameLabel) {
       const currentSeconds = this.currentFrame / Math.max(1, this.fps);
@@ -401,8 +397,8 @@ export class ImageSequencePlayer {
       // Update playhead label (time)
       const label = this.timelineHandle.querySelector('.timeline-playhead-label');
       if (label) {
-        const currentSeconds = this.currentFrame / Math.max(1, this.fps);
-        (label as HTMLElement).textContent = formatTime(currentSeconds);
+        const frameNumber = (this.sequence?.startFrame ?? 0) + this.currentFrame;
+        (label as HTMLElement).textContent = frameNumber.toString();
       }
     }
     

@@ -5,7 +5,7 @@ export interface FileItem {
   path: string;
   type: 'file' | 'directory';
   size?: number;
-  modified?: Date;
+  modified?: string; // ISO string (Date.toISOString())
   extension?: string;
   metadata?: Record<string, any>;
 }

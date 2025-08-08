@@ -2,6 +2,7 @@
 // Based on v003 but adapted for the main content area only
 
 import { BSPNodeData, Rect } from './types';
+import { escapeHtml } from './utils/strings';
 
 export interface BSPConfig {
   DEFAULT_SPLIT: number;
@@ -1512,7 +1513,7 @@ export class BSPPanelManager {
               <span class="file-name">${title}</span>
               <span class="file-extension">.${extension}</span>
             </div>
-            <pre class="code-content"><code>${this.escapeHtml(content)}</code></pre>
+            <pre class="code-content"><code>${escapeHtml(content)}</code></pre>
           </div>
         `;
       } else {
@@ -1521,18 +1522,13 @@ export class BSPPanelManager {
             <div class="file-header">
               <span class="file-name">${title}</span>
             </div>
-            <div class="text-content">${this.escapeHtml(content).replace(/\n/g, '<br>')}</div>
+            <div class="text-content">${escapeHtml(content).replace(/\n/g, '<br>')}</div>
           </div>
         `;
       }
     }
   }
 
-  private escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
 
   private isPanelPinned(panel: HTMLElement): boolean {
     const panelId = panel.dataset.panelId;
@@ -1559,10 +1555,10 @@ export class BSPPanelManager {
     this.panels.clear();
     this.nextPanelNumber = 1;
     
-    // Create new root with single panel
-    const { id, element } = this.createPanelElement();
-    this.root = new BSPNode(element, id);
-    this.panels.set(id, { node: this.root, element });
+    // Create new root with single panel (no header like init)
+    const initialPanel = this.createPanel('Main Content', true);
+    this.root = new BSPNode({ id: initialPanel.id, element: initialPanel.element });
+    this.panels.set(initialPanel.id, { node: this.root, element: initialPanel.element });
     
     // Layout the tree
     this.layout();
@@ -1575,18 +1571,16 @@ export class BSPPanelManager {
       if (node.isLeaf()) {
         return {
           type: 'leaf',
-          panelId: node.panelId,
+          id: node.id,
           isPinned: node.isPinned,
           isCollapsed: node.isCollapsed,
-          // You can add more panel-specific data here if needed
         };
       } else {
         return {
           type: 'split',
-          orientation: node.orientation,
-          splitRatio: node.splitRatio,
-          left: node.left ? serializeNode(node.left) : null,
-          right: node.right ? serializeNode(node.right) : null,
+          direction: node.direction,
+          split: node.split,
+          children: node.children.map(serializeNode),
         };
       }
     };
@@ -1603,31 +1597,19 @@ export class BSPPanelManager {
     this.panels.clear();
     this.nextPanelNumber = 1;
     
-    const buildNode = (data: any): BSPNode | null => {
+    const buildNode = (data: any, parent: BSPNode | null = null): BSPNode | null => {
       if (!data) return null;
       
       if (data.type === 'leaf') {
-        const { id, element } = this.createPanelElement();
-        const node = new BSPNode(element, id);
-        node.isPinned = data.isPinned || false;
-        node.isCollapsed = data.isCollapsed || false;
-        this.panels.set(id, { node, element });
+        const panel = this.createPanel('Panel ' + this.nextPanelNumber++);
+        const node = new BSPNode({ id: data.id || panel.id, parent, element: panel.element, isPinned: !!data.isPinned, isCollapsed: !!data.isCollapsed });
+        this.panels.set(node.id, { node, element: panel.element });
         return node;
       } else if (data.type === 'split') {
-        const leftNode = buildNode(data.left);
-        const rightNode = buildNode(data.right);
-        
-        if (leftNode && rightNode) {
-          const splitNode = new BSPNode();
-          splitNode.orientation = data.orientation;
-          splitNode.splitRatio = data.splitRatio || 0.5;
-          splitNode.left = leftNode;
-          splitNode.right = rightNode;
-          leftNode.parent = splitNode;
-          rightNode.parent = splitNode;
-          
-          return splitNode;
-        }
+        const node = new BSPNode({ parent, direction: data.direction, split: data.split ?? 0.5, children: [] });
+        const children = Array.isArray(data.children) ? data.children : [];
+        node.children = children.map((child: any) => buildNode(child, node)!).filter(Boolean);
+        return node;
       }
       
       return null;

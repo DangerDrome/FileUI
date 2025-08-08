@@ -1,220 +1,218 @@
-// Context Menu Manager for FileUI v005
+// Context menu manager
 
 export interface ContextMenuItem {
   label?: string;
-  icon?: string; // Lucide icon name
-  action?: () => void | Promise<void>;
-  separator?: boolean;
+  icon?: string;
+  shortcut?: string;
+  action?: (() => void | Promise<void>);
   disabled?: boolean;
+  separator?: boolean;
 }
 
 export type ContextMenuHandler = (e: MouseEvent) => ContextMenuItem[] | null;
 
 export class ContextMenuManager {
-  private menuElement: HTMLElement | null = null;
-  private currentTarget: EventTarget | null = null;
-  private handlers: Map<string, ContextMenuHandler> = new Map();
-  private selectedIndex: number = -1;
+  private menuElement: HTMLElement | null;
+  // Support selector-based handlers and a default '*' handler
+  private handlers: Map<string, ContextMenuHandler>;
+  private activeIndex: number;
 
+  /**
+   * Create a context menu manager that shows a contextual menu at mouse position.
+   */
   constructor() {
+    this.menuElement = null;
+    this.handlers = new Map();
+    this.activeIndex = -1;
     this.init();
   }
 
+  /**
+   * Register a handler. Overloads:
+   * - registerHandler(selector, handler)
+   * - registerHandler(handler) → registers as default ('*')
+   */
+  public registerHandler(selector: string, handler: ContextMenuHandler): void;
+  public registerHandler(handler: ContextMenuHandler): void;
+  public registerHandler(selectorOrHandler: string | ContextMenuHandler, maybeHandler?: ContextMenuHandler): void {
+    if (typeof selectorOrHandler === 'string' && maybeHandler) {
+      this.handlers.set(selectorOrHandler, maybeHandler);
+      return;
+    }
+    if (typeof selectorOrHandler === 'function') {
+      this.handlers.set('*', selectorOrHandler);
+    }
+  }
+
+  /** Initialize global listeners for contextmenu and keyboard navigation. */
   private init(): void {
-    // Single event listener for all context menus
-    document.addEventListener('contextmenu', this.handleContextMenu.bind(this));
-    
-    // Hide menu on click outside
-    document.addEventListener('click', this.hideMenu.bind(this));
-    
-    // Handle escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this.hideMenu();
-      }
-    });
+    document.addEventListener('contextmenu', (e) => this.handleContextMenu(e));
+    document.addEventListener('keydown', (e) => this.handleKeyNavigation(e));
+    document.addEventListener('click', () => this.hideMenu());
+    window.addEventListener('resize', () => this.hideMenu());
   }
 
-  // Register a context menu handler for a specific selector
-  public registerHandler(selector: string, handler: ContextMenuHandler): void {
-    this.handlers.set(selector, handler);
-  }
-
+  /** Process right-click event, gather items, and render the menu. */
   private handleContextMenu(e: MouseEvent): void {
-    e.preventDefault();
-    
-    // Find the most specific handler that matches
+    // Find most specific matching selector up the DOM tree
+    const target = e.target as HTMLElement | null;
+    let node: HTMLElement | null = target;
     let items: ContextMenuItem[] | null = null;
-    let target = e.target as HTMLElement;
-    
-    // Walk up the DOM tree to find a matching handler
-    while (target && target !== document.body) {
+
+    // Try concrete selectors first
+    while (node && node !== document.body) {
       for (const [selector, handler] of this.handlers) {
-        if (target.matches(selector)) {
+        if (selector === '*') continue;
+        if (node.matches(selector)) {
           items = handler(e);
-          if (items) break;
+          if (items && items.length > 0) break;
         }
       }
-      if (items) break;
-      target = target.parentElement as HTMLElement;
+      if (items && items.length > 0) break;
+      node = node.parentElement as HTMLElement | null;
     }
-    
-    // If no specific handler, check for default handler
-    if (!items && this.handlers.has('*')) {
+
+    // Fallback to default handler
+    if ((!items || items.length === 0) && this.handlers.has('*')) {
       const defaultHandler = this.handlers.get('*')!;
       items = defaultHandler(e);
     }
-    
-    if (items && items.length > 0) {
-      this.currentTarget = e.target;
-      this.showMenu(e.clientX, e.clientY, items);
-    } else {
-      this.hideMenu();
+
+    if (!items || items.length === 0) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!this.menuElement) {
+      this.menuElement = document.createElement('div');
+      this.menuElement.className = 'menu-dropdown';
+      document.body.appendChild(this.menuElement);
     }
+
+    this.showMenu(e.clientX, e.clientY, items);
   }
 
+  /** Render the menu at a given position. */
   private showMenu(x: number, y: number, items: ContextMenuItem[]): void {
-    this.hideMenu();
-    
-    // Create menu element
-    this.menuElement = document.createElement('div');
-    this.menuElement.className = 'context-menu';
-    
-    // Add menu items
+    if (!this.menuElement) return;
+
+    this.menuElement.innerHTML = '';
+
     items.forEach((item, index) => {
       if (item.separator) {
-        const separator = document.createElement('div');
-        separator.className = 'context-menu-separator';
-        this.menuElement!.appendChild(separator);
-      } else if (item.label) {
-        const menuItem = document.createElement('div');
-        menuItem.className = 'context-menu-item';
-        if (item.disabled) {
-          menuItem.classList.add('disabled');
-        }
-        menuItem.dataset.index = index.toString();
-        
-        // Add icon if specified
-        if (item.icon) {
-          const icon = document.createElement('i');
-          icon.setAttribute('data-lucide', item.icon);
-          icon.className = 'lucide';
-          menuItem.appendChild(icon);
-        }
-        
-        // Add label
-        const label = document.createElement('span');
-        label.textContent = item.label ?? '';
-        menuItem.appendChild(label);
-        
-        // Add click handler
-        if (!item.disabled && item.action) {
-          menuItem.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.hideMenu();
-            item.action!();
-          });
-        }
-        
-        this.menuElement!.appendChild(menuItem);
+        const sep = document.createElement('div');
+        sep.className = 'menu-separator';
+        this.menuElement!.appendChild(sep);
+        return;
+      }
+      if (!item.label) return;
+
+      const menuItem = document.createElement('div');
+      menuItem.className = 'menu-item';
+      if (item.disabled) menuItem.classList.add('disabled');
+      menuItem.dataset.index = index.toString();
+
+      const content = document.createElement('div');
+      content.className = 'menu-item-content';
+
+      if (item.icon) {
+        const icon = document.createElement('i');
+        icon.setAttribute('data-lucide', item.icon);
+        icon.className = 'menu-icon';
+        content.appendChild(icon);
+      }
+
+      const label = document.createElement('span');
+      label.className = 'menu-label';
+      label.textContent = item.label ?? '';
+      content.appendChild(label);
+
+      if (item.shortcut) {
+        const shortcut = document.createElement('span');
+        shortcut.className = 'menu-shortcut';
+        shortcut.textContent = item.shortcut;
+        content.appendChild(shortcut);
+      }
+
+      menuItem.appendChild(content);
+      this.menuElement!.appendChild(menuItem);
+
+      if (item.action && !item.disabled) {
+        menuItem.addEventListener('click', async (ev) => {
+          ev.stopPropagation();
+          this.hideMenu();
+          try {
+            await item.action?.();
+          } catch {
+          }
+        });
       }
     });
-    
-    // Add to document
-    document.body.appendChild(this.menuElement);
-    
-    // Initialize Lucide icons
-    if ((window as any).lucide) {
-      (window as any).lucide.createIcons();
-    }
-    
-    // Position menu
+
     this.positionMenu(x, y);
-    
-    // Add keyboard navigation
-    this.menuElement.addEventListener('keydown', this.handleKeyNavigation.bind(this));
-    
-    // Focus menu for keyboard navigation
-    this.menuElement.setAttribute('tabindex', '-1');
-    this.menuElement.focus();
+    this.menuElement.style.display = 'block';
+    (window as any).lucide && (window as any).lucide.createIcons({ icons: (window as any).lucide.icons });
+
+    this.activeIndex = -1;
   }
 
+  /** Ensure the menu stays within viewport bounds. */
   private positionMenu(x: number, y: number): void {
     if (!this.menuElement) return;
-    
-    // Get menu dimensions
-    const menuRect = this.menuElement.getBoundingClientRect();
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-    
-    // Adjust position to stay within viewport
-    let finalX = x;
-    let finalY = y;
-    
-    // Check right edge
-    if (x + menuRect.width > windowWidth) {
-      finalX = windowWidth - menuRect.width - 10;
-    }
-    
-    // Check bottom edge
-    if (y + menuRect.height > windowHeight) {
-      finalY = windowHeight - menuRect.height - 10;
-    }
-    
-    // Apply position
-    this.menuElement.style.left = `${finalX}px`;
-    this.menuElement.style.top = `${finalY}px`;
+    const rect = this.menuElement.getBoundingClientRect();
+    let left = x;
+    let top = y;
+
+    if (left + rect.width > window.innerWidth) left = window.innerWidth - rect.width - 8;
+    if (top + rect.height > window.innerHeight) top = window.innerHeight - rect.height - 8;
+
+    this.menuElement.style.left = `${left}px`;
+    this.menuElement.style.top = `${top}px`;
   }
 
+  /** Hide the menu and clear active state. */
   private hideMenu(): void {
-    if (this.menuElement) {
-      this.menuElement.remove();
-      this.menuElement = null;
-      this.currentTarget = null;
-      this.selectedIndex = -1;
-    }
+    if (!this.menuElement) return;
+    this.menuElement.style.display = 'none';
+    this.activeIndex = -1;
   }
 
+  /** Keyboard navigation for the active menu. */
   private handleKeyNavigation(e: KeyboardEvent): void {
-    if (!this.menuElement) return;
-    
-    const items = this.menuElement.querySelectorAll('.context-menu-item:not(.disabled)');
+    if (!this.menuElement || this.menuElement.style.display !== 'block') return;
+    const items = this.menuElement.querySelectorAll('.menu-item:not(.disabled)');
     if (items.length === 0) return;
-    
+
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        this.selectedIndex = (this.selectedIndex + 1) % items.length;
+        this.activeIndex = (this.activeIndex + 1) % items.length;
         this.updateSelection(items);
         break;
-        
       case 'ArrowUp':
         e.preventDefault();
-        this.selectedIndex = this.selectedIndex <= 0 ? items.length - 1 : this.selectedIndex - 1;
+        this.activeIndex = (this.activeIndex - 1 + items.length) % items.length;
         this.updateSelection(items);
         break;
-        
       case 'Enter':
         e.preventDefault();
-        if (this.selectedIndex >= 0 && this.selectedIndex < items.length) {
-          (items[this.selectedIndex] as HTMLElement).click();
+        if (this.activeIndex >= 0 && this.activeIndex < items.length) {
+          (items[this.activeIndex] as HTMLElement).click();
         }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        this.hideMenu();
         break;
     }
   }
 
+  /** Update visual selection state for items. */
   private updateSelection(items: NodeListOf<Element>): void {
-    items.forEach((item, index) => {
-      if (index === this.selectedIndex) {
-        item.classList.add('selected');
-      } else {
-        item.classList.remove('selected');
-      }
-    });
-  }
-
-  // Helper method to get the current target
-  public getCurrentTarget(): EventTarget | null {
-    return this.currentTarget;
+    items.forEach(i => i.classList.remove('selected'));
+    if (this.activeIndex >= 0 && this.activeIndex < items.length) {
+      items[this.activeIndex].classList.add('selected');
+      (items[this.activeIndex] as HTMLElement).scrollIntoView({ block: 'nearest' });
+    }
   }
 }

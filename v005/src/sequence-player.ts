@@ -2,7 +2,7 @@
 
 import { FrameCache } from './frame-cache';
 import { SequenceInfo, getFrameFilename } from './sequence-utils';
-import { formatTime } from './utils/time';
+// Removed timecode formatting since we display frames in UI
 
 export class ImageSequencePlayer {
   private container: HTMLElement;
@@ -23,7 +23,7 @@ export class ImageSequencePlayer {
   private timelineElement: HTMLElement | null = null;
   private timelineHandle: HTMLElement | null = null;
   private frameLabel: HTMLElement | null = null;
-  private fpsSelector: HTMLSelectElement | null = null;
+  private fpsSelector: HTMLSelectElement | null = null; // Legacy; not used with custom dropdown
   
   // Callbacks
   private onFrameChange?: (frame: number) => void;
@@ -68,15 +68,21 @@ export class ImageSequencePlayer {
               </div>
             </div>
           </div>
-          <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 120px; margin: 0 8px;">0:00 / 0:00</span>
-          <select class="form-select form-select-sm" data-action="fps" style="width: 80px;">
-            <option value="12">12 fps</option>
-            <option value="24" selected>24 fps</option>
-            <option value="25">25 fps</option>
-            <option value="30">30 fps</option>
-            <option value="48">48 fps</option>
-            <option value="60">60 fps</option>
-          </select>
+          <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 120px; margin: 0 8px;">0 / 0</span>
+          <div class="fps-dropdown" data-action="fps" aria-haspopup="listbox" aria-expanded="false">
+            <button class="fps-button" type="button" aria-label="Frames per second">
+              <span class="fps-current">24 fps</span>
+              <svg class="fps-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"></polyline></svg>
+            </button>
+            <ul class="fps-menu" role="listbox" tabindex="-1" hidden>
+              <li role="option" data-fps="12">12 fps</li>
+              <li role="option" data-fps="24" aria-selected="true">24 fps</li>
+              <li role="option" data-fps="25">25 fps</li>
+              <li role="option" data-fps="30">30 fps</li>
+              <li role="option" data-fps="48">48 fps</li>
+              <li role="option" data-fps="60">60 fps</li>
+            </ul>
+          </div>
           <button class="btn btn-sm" data-action="loop" title="Loop">
             <i data-lucide="repeat" width="16" height="16"></i>
           </button>
@@ -96,7 +102,7 @@ export class ImageSequencePlayer {
     this.timelineElement = this.container.querySelector('.timeline');
     this.timelineHandle = this.container.querySelector('.timeline-handle');
     this.frameLabel = this.container.querySelector('.video-time-label');
-    this.fpsSelector = this.container.querySelector('[data-action="fps"]');
+    this.fpsSelector = null;
   }
   
   // Set up event listeners
@@ -119,9 +125,64 @@ export class ImageSequencePlayer {
       this.nextFrame();
     });
     
-    // FPS selector
-    this.fpsSelector?.addEventListener('change', (e) => {
-      this.fps = parseInt((e.target as HTMLSelectElement).value);
+    // FPS dropdown (custom)
+    const fpsDropdown = this.container.querySelector('.fps-dropdown') as HTMLElement | null;
+    const fpsButton = this.container.querySelector('.fps-button') as HTMLButtonElement | null;
+    const fpsMenu = this.container.querySelector('.fps-menu') as HTMLElement | null;
+    const fpsLabel = this.container.querySelector('.fps-current') as HTMLElement | null;
+
+    const setFps = (value: number) => {
+      if (Number.isFinite(value) && value > 0) {
+        this.fps = value;
+        if (fpsLabel) fpsLabel.textContent = `${value} fps`;
+        // Update menu selection state
+        fpsMenu?.querySelectorAll('[role="option"]').forEach((el) => {
+          const opt = el as HTMLElement;
+          if (opt.getAttribute('data-fps') === String(value)) {
+            opt.setAttribute('aria-selected', 'true');
+          } else {
+            opt.removeAttribute('aria-selected');
+          }
+        });
+      }
+    };
+
+    const openMenu = () => {
+      if (!fpsDropdown || !fpsMenu) return;
+      fpsMenu.hidden = false;
+      fpsDropdown.setAttribute('aria-expanded', 'true');
+      fpsMenu.focus();
+    };
+    const closeMenu = () => {
+      if (!fpsDropdown || !fpsMenu) return;
+      fpsMenu.hidden = true;
+      fpsDropdown.setAttribute('aria-expanded', 'false');
+    };
+
+    fpsButton?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (fpsMenu?.hidden) openMenu(); else closeMenu();
+    });
+
+    fpsMenu?.addEventListener('click', (e) => {
+      const target = (e.target as HTMLElement).closest('[role="option"]') as HTMLElement | null;
+      if (!target) return;
+      const value = parseInt(target.getAttribute('data-fps') || '24', 10);
+      setFps(value);
+      closeMenu();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!fpsDropdown) return;
+      if (!(e.target as HTMLElement).closest('.fps-dropdown')) closeMenu();
+    });
+
+    fpsMenu?.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeMenu();
+        fpsButton?.focus();
+      }
     });
     
     // Timeline scrubbing
@@ -384,9 +445,9 @@ export class ImageSequencePlayer {
     // Update time label to match video style (mm:ss / mm:ss)
 
     if (this.frameLabel) {
-      const currentSeconds = this.currentFrame / Math.max(1, this.fps);
-      const totalSeconds = (Math.max(1, this.sequence.frameCount) - 1) / Math.max(1, this.fps);
-      this.frameLabel.textContent = `${formatTime(currentSeconds)} / ${formatTime(totalSeconds)}`;
+      const currentFrameNumber = this.sequence.startFrame + this.currentFrame;
+      const totalFrameNumber = this.sequence.endFrame;
+      this.frameLabel.textContent = `${currentFrameNumber} / ${totalFrameNumber}`;
     }
     
     // Update timeline position

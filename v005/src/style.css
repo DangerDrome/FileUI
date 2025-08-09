@@ -3777,3 +3777,20 @@ div.panel {
 }
 .fps-menu [role="option"]:hover { background: var(--color-white-opacity-10); color: var(--text-primary); }
 .fps-menu [role="option"][aria-selected="true"] { background: var(--color-accent-opacity-15); color: var(--text-primary); }
+
+/* Align all playbar buttons vertically */
+.video-controls .btn,
+.video-controls .fps-button {
+  margin-top: 6px;
+  align-self: center;
+}
+
+/* Subtle high-fidelity subticks */
+.video-player .timeline-subtick {
+  position: absolute !important;
+  width: 1px !important;
+  height: 8px !important;
+  background-color: var(--color-white-opacity-10) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}

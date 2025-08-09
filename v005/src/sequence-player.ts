@@ -17,6 +17,8 @@ export class ImageSequencePlayer {
   private fps: number = 24;
   private lastFrameTime: number = 0;
   private animationId: number | null = null;
+  private loopMode: 'single' | 'loop' | 'pingpong' = 'loop';
+  private playDirection: 1 | -1 = 1;
   
   // UI Elements
   private playBtn: HTMLButtonElement | null = null;
@@ -237,6 +239,15 @@ export class ImageSequencePlayer {
           break;
       }
     });
+
+    // Loop mode toggle
+    const loopBtn = this.container.querySelector('[data-action="loop"]') as HTMLButtonElement | null;
+    loopBtn?.addEventListener('click', () => {
+      this.cycleLoopMode();
+    });
+
+    // Initialize loop button UI
+    this.updateLoopButtonUI();
   }
   
   // Load a sequence
@@ -326,6 +337,14 @@ export class ImageSequencePlayer {
   // Play the sequence
   play(): void {
     if (this.isPlaying || !this.sequence) return;
+
+    // If in single-play mode and we're at the end, restart from the beginning
+    const lastIndex = this.sequence.frameCount - 1;
+    if (this.loopMode === 'single' && this.currentFrame >= lastIndex) {
+      this.goToFrame(0);
+    }
+    // Always start forward when (re)playing
+    this.playDirection = 1;
     
     this.isPlaying = true;
     this.lastFrameTime = performance.now();
@@ -370,31 +389,53 @@ export class ImageSequencePlayer {
     const frameDuration = 1000 / this.fps;
     
     if (deltaTime >= frameDuration) {
-      // Time for next frame
-      this.nextFrame(true);
+      // Advance by one frame honoring loop mode and direction
+      this.stepFrame();
       this.lastFrameTime = currentTime - (deltaTime % frameDuration);
     }
     
     this.animationId = requestAnimationFrame(() => this.animate());
   }
+
+  // Advance one frame according to loop mode and play direction
+  private stepFrame(): void {
+    if (!this.sequence) return;
+    const lastIndex = this.sequence.frameCount - 1;
+    let nextIndex = this.currentFrame + this.playDirection;
+
+    if (nextIndex > lastIndex) {
+      if (this.loopMode === 'loop') {
+        nextIndex = 0;
+      } else if (this.loopMode === 'pingpong') {
+        this.playDirection = -1;
+        nextIndex = Math.max(0, lastIndex - 1);
+      } else {
+        this.pause();
+        return;
+      }
+    } else if (nextIndex < 0) {
+      if (this.loopMode === 'loop') {
+        nextIndex = lastIndex;
+      } else if (this.loopMode === 'pingpong') {
+        this.playDirection = 1;
+        nextIndex = Math.min(lastIndex, 1);
+      } else {
+        this.pause();
+        return;
+      }
+    }
+
+    this.displayFrame(nextIndex);
+  }
   
   // Go to next frame
-  nextFrame(isPlaying: boolean = false): void {
+  nextFrame(): void {
     if (!this.sequence) return;
     
     let nextFrame = this.currentFrame + 1;
     
     if (nextFrame >= this.sequence.frameCount) {
-      // Check if loop is enabled
-      const loopBtn = this.container.querySelector('[data-action="loop"]') as HTMLElement;
-      if (loopBtn?.classList.contains('active') || isPlaying) {
-        nextFrame = 0; // Loop back to start
-      } else {
-        if (isPlaying) {
-          this.pause(); // Stop at end if not looping
-        }
-        return;
-      }
+      if (this.loopMode === 'loop') nextFrame = 0; else return;
     }
     
     this.displayFrame(nextFrame);
@@ -407,13 +448,7 @@ export class ImageSequencePlayer {
     let prevFrame = this.currentFrame - 1;
     
     if (prevFrame < 0) {
-      // Check if loop is enabled
-      const loopBtn = this.container.querySelector('[data-action="loop"]') as HTMLElement;
-      if (loopBtn?.classList.contains('active')) {
-        prevFrame = this.sequence.frameCount - 1; // Loop to end
-      } else {
-        return;
-      }
+      if (this.loopMode === 'loop') prevFrame = this.sequence.frameCount - 1; else return;
     }
     
     this.displayFrame(prevFrame);
@@ -488,15 +523,32 @@ export class ImageSequencePlayer {
     else if (frameCount > 100) tickInterval = 10;
     else if (frameCount > 50) tickInterval = 5;
     
-    // Generate ticks
+    // Subtle high-fidelity subticks: 1/5th of main interval (at least 1)
+    let subTickInterval = Math.max(1, Math.floor(tickInterval / 5));
+    if (tickInterval >= 50) subTickInterval = Math.max(1, Math.floor(tickInterval / 10));
+    if (subTickInterval > 0) {
+      for (let i = 0; i < frameCount; i += subTickInterval) {
+        if (i % tickInterval === 0) continue; // skip where main ticks will render
+        const sub = document.createElement('div');
+        sub.className = 'timeline-subtick';
+        const percentage = (i / (frameCount - 1)) * 100;
+        sub.style.left = `${percentage}%`;
+        ticksContainer.appendChild(sub);
+      }
+    }
+    
+    // Generate main ticks with labels at ~120px apart for readability
+    const timelineWidth = (this.timelineElement as HTMLElement).getBoundingClientRect().width || 1;
+    const approxLabelPx = 120;
+    const labelEveryN = Math.max(1, Math.round((approxLabelPx / timelineWidth) * (frameCount - 1)));
     for (let i = 0; i < frameCount; i += tickInterval) {
       const tick = document.createElement('div');
       tick.className = 'timeline-tick';
       const percentage = (i / (frameCount - 1)) * 100;
       tick.style.left = `${percentage}%`;
       
-      // Major tick every 10 intervals
-      if (i % (tickInterval * 10) === 0) {
+      // Major tick roughly every labelEveryN frames
+      if (i % Math.max(tickInterval, labelEveryN) === 0) {
         tick.classList.add('major');
         
         // Add frame number label
@@ -507,6 +559,40 @@ export class ImageSequencePlayer {
       }
       
       ticksContainer.appendChild(tick);
+    }
+  }
+
+  // Cycle loop modes: single -> loop -> pingpong -> single
+  private cycleLoopMode(): void {
+    if (this.loopMode === 'single') this.loopMode = 'loop';
+    else if (this.loopMode === 'loop') this.loopMode = 'pingpong';
+    else this.loopMode = 'single';
+    this.updateLoopButtonUI();
+  }
+
+  // Update the loop button icon/title based on mode
+  private updateLoopButtonUI(): void {
+    const loopBtn = this.container.querySelector('[data-action="loop"]') as HTMLElement | null;
+    if (!loopBtn) return;
+    let icon = 'repeat';
+    let title = 'Loop';
+    if (this.loopMode === 'pingpong') { icon = 'arrow-right-left'; title = 'Ping-Pong'; }
+    if (this.loopMode === 'single') { icon = 'move-right'; title = 'Single play'; }
+
+    // Fallbacks if certain Lucide icons are unavailable
+    const lucideGlobal = (window as any).lucide;
+    const ensureIcon = (name: string, fallback: string): string => {
+      try {
+        return lucideGlobal?.icons && lucideGlobal.icons[name] ? name : fallback;
+      } catch { return fallback; }
+    };
+    if (this.loopMode === 'pingpong') icon = ensureIcon(icon, 'arrow-left-right');
+    if (this.loopMode === 'single') icon = ensureIcon(icon, 'move-right');
+
+    loopBtn.innerHTML = `<i data-lucide="${icon}" width="16" height="16"></i>`;
+    loopBtn.setAttribute('title', title);
+    if (lucideGlobal) {
+      lucideGlobal.createIcons();
     }
   }
   

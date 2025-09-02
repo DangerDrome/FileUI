@@ -1363,6 +1363,36 @@ export class PanelManager {
     // Initialize the BSP manager
     this.bspManager.init();
     
+    // Add global click handler for panel focus and properties update
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const panel = target.closest('.bsp-panel');
+      if (panel) {
+        // Focus the panel when clicked
+        this.focusPanel(panel);
+      }
+    });
+
+    // Watch for focus changes made by BSP manager
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target as HTMLElement;
+          if (target.classList.contains('bsp-panel') && target.classList.contains('focused')) {
+            // Panel was focused by BSP manager, update properties
+            this.updatePropertiesPanel(target);
+          }
+        }
+      });
+    });
+
+    // Start observing all panels for class changes
+    observer.observe(document.getElementById('bsp-container')!, {
+      attributes: true,
+      attributeFilter: ['class'],
+      subtree: true
+    });
+    
     // Get the initial main panel
     const rootNode = this.bspManager.getRoot();
     if (!rootNode) {
@@ -2350,6 +2380,13 @@ export class PanelManager {
         
         const isFolder = treeItemContent.dataset.isFolder === 'true';
         const treeItem = treeItemContent.closest('.tree-item') as HTMLElement;
+        
+        // Update properties panel for selected item
+        const itemPath = treeItemContent.dataset.path || '';
+        const itemName = treeItemContent.dataset.fileName || '';
+        if (itemPath && itemName) {
+          this.updatePropertiesForExplorerItem(itemPath, itemName, isFolder, panelId);
+        }
 
         // Handle toggle button clicks
         const toggleButton = target.closest('.tree-item-toggle') as HTMLElement;
@@ -2494,37 +2531,10 @@ export class PanelManager {
     // Add selection to current item
     treeItem.classList.add('selected');
 
-    // Update properties panel if visible
-    const path = treeItem.dataset.path;
-    const fileName = treeItem.querySelector('.tree-item-label')?.textContent || '';
-    
-    // Update properties panel
-    this.updatePropertiesPanel({
-      name: fileName,
-      path: path || '',
-      type: getFileType(fileName)
-    });
+    // Note: Properties panel update is handled by the click handler that calls this method
+    // The click handler calls updatePropertiesForExplorerItem which is the correct method for explorer items
   }
 
-  private updatePropertiesPanel(fileInfo: { name: string; path: string; type: string }): void {
-    // Find property items by iterating through them
-    const propertyItems = document.querySelectorAll('.property-item');
-    
-    propertyItems.forEach(item => {
-      const label = item.querySelector('.property-label');
-      const value = item.querySelector('.property-value');
-      
-      if (label && value) {
-        const labelText = label.textContent?.trim();
-        
-        if (labelText === 'Name:') {
-          value.textContent = fileInfo.name;
-        } else if (labelText === 'Type:') {
-          value.textContent = fileInfo.type;
-        }
-      }
-    });
-  }
 
   private setupGlobalDragAndDrop(): void {
     if (this.dragDropInitialized) return;
@@ -3066,6 +3076,12 @@ export class PanelManager {
       return;
     }
 
+    // Store file info in panel attributes
+    panel.setAttribute('data-file-name', file.name);
+    panel.setAttribute('data-file-source', 'local');
+    panel.setAttribute('data-file-size', file.size.toString());
+    panel.setAttribute('data-file-type', getFileType(file.name));
+
     // Check if this is a directory (folder)
     // Browsers don't directly support folder drops from File API, but we can check webkitRelativePath
     const isDirectory = file.webkitRelativePath !== '' || 
@@ -3358,6 +3374,9 @@ const iconColor = getFileIconColor(headerFileType);
         </div>
       `;
     }
+    
+    // Focus the panel to trigger properties update
+    this.focusPanel(panel);
   }
 
 
@@ -3558,6 +3577,7 @@ const iconColor = getFileIconColor(headerFileType);
       // Store file info in panel
       panel.setAttribute('data-file-path', path);
       panel.setAttribute('data-file-name', fileName);
+      panel.setAttribute('data-file-source', 'local');
       
       // Add or update breadcrumb for file panels
       this.addOrUpdateFileBreadcrumb(panel as HTMLElement, path);
@@ -3567,6 +3587,9 @@ const iconColor = getFileIconColor(headerFileType);
       
       // Re-initialize Lucide icons for the new file icon
       this.initializeLucideIcons(10);
+      
+      // Update properties panel
+      this.updatePropertiesPanel(panel);
     }
   }
   
@@ -3583,6 +3606,9 @@ const iconColor = getFileIconColor(headerFileType);
       });
       panel.classList.add('focused');
     }
+    
+    // Update properties panel when focus changes
+    this.updatePropertiesPanel(panel);
   }
 
 
@@ -3865,6 +3891,7 @@ const iconColor = getFileIconColor(fileType);
       // Store file info in panel
       panel.setAttribute('data-file-name', fileName);
       panel.setAttribute('data-file-handle', 'native');
+      panel.setAttribute('data-file-source', 'local');
       
       // Add or update breadcrumb for file panels - for native files, just show the filename
       this.addOrUpdateFileBreadcrumb(panel as HTMLElement, fileName);
@@ -3874,6 +3901,9 @@ const iconColor = getFileIconColor(fileType);
       
       // Re-initialize Lucide icons for the new file icon
       this.initializeLucideIcons(10);
+      
+      // Update properties panel
+      this.updatePropertiesPanel(panel);
     }
   }
 
@@ -4685,6 +4715,317 @@ const iconColor = getFileIconColor(fileType);
 
     // Re-initialize Lucide icons
     this.initializeLucideIcons(10);
+    
+    // Update with current panel's properties
+    this.updatePropertiesForCurrentPanel();
+  }
+
+  private updatePropertiesForCurrentPanel(): void {
+    // Get the currently focused panel
+    const focusedPanel = document.querySelector('.bsp-panel.focused');
+    if (focusedPanel) {
+      this.updatePropertiesPanel(focusedPanel);
+    }
+  }
+
+  private async updatePropertiesForExplorerItem(itemPath: string, itemName: string, isFolder: boolean, panelId: string): Promise<void> {
+    // Find the properties panel
+    const propertiesPanel = document.querySelector('.bsp-panel[data-panel-type="properties"]');
+    if (!propertiesPanel) return;
+
+    const propertiesContent = propertiesPanel.querySelector('.properties-content');
+    if (!propertiesContent) return;
+
+    try {
+      let metadata: any = {};
+
+      if (isFolder) {
+        // For folders, just show basic info
+        metadata = {
+          name: itemName,
+          path: itemPath,
+          type: 'folder',
+          source: 'Local'
+        };
+      } else {
+        // For files, fetch metadata from the server
+        const response = await fetch(`/api/metadata?path=${encodeURIComponent(itemPath)}`);
+        if (response.ok) {
+          metadata = await response.json();
+          metadata.source = 'Local';
+        } else {
+          // If metadata fetch fails, use basic info
+          const fileType = getFileType(itemName);
+          const extension = itemName.includes('.') ? itemName.split('.').pop() || '' : '';
+          metadata = {
+            name: itemName,
+            path: itemPath,
+            type: fileType,
+            extension: extension,
+            source: 'Local'
+          };
+        }
+      }
+
+      // Update properties display
+      this.displayFileProperties(propertiesContent, metadata);
+
+    } catch (error) {
+      console.error('Error fetching item metadata:', error);
+    }
+  }
+
+  private async updatePropertiesForR2Item(itemPath: string, itemName: string, isFolder: boolean, panelId: string): Promise<void> {
+    // Find the properties panel
+    const propertiesPanel = document.querySelector('.bsp-panel[data-panel-type="properties"]');
+    if (!propertiesPanel) return;
+
+    const propertiesContent = propertiesPanel.querySelector('.properties-content');
+    if (!propertiesContent) return;
+
+    const fileType = isFolder ? 'folder' : getFileType(itemName);
+    const extension = !isFolder ? itemName.split('.').pop() || '' : '';
+    
+    const metadata = {
+      name: itemName,
+      path: itemPath,
+      type: fileType,
+      extension: extension,
+      source: 'R2 Bucket'
+    };
+
+    // Update properties display
+    this.displayFileProperties(propertiesContent, metadata);
+  }
+
+  private async updatePropertiesPanel(focusedPanel: Element): Promise<void> {
+    // Find the properties panel
+    const propertiesPanel = document.querySelector('.bsp-panel[data-panel-type="properties"]');
+    if (!propertiesPanel) return;
+
+    // Get file information from the focused panel
+    const filePath = focusedPanel.getAttribute('data-file-path');
+    const fileName = focusedPanel.getAttribute('data-file-name');
+    const fileSource = focusedPanel.getAttribute('data-file-source'); // 'local' or 'r2'
+    const panelType = focusedPanel.getAttribute('data-panel-type');
+
+    // Skip if focused panel is not a file panel
+    // Check if it's a system panel type OR if it has no file info at all
+    const isSystemPanel = ['explorer', 'properties', 'terminal', 'r2-browser', 'r2-config'].includes(panelType || '');
+    const hasFileInfo = filePath || fileName;
+    
+    if (isSystemPanel || !hasFileInfo) {
+      // Clear properties panel for non-file panels
+      const propertiesContent = propertiesPanel.querySelector('.properties-content');
+      if (propertiesContent) {
+        propertiesContent.innerHTML = `
+          <div class="property-section">
+            <h4 class="property-section-title">File Info</h4>
+            <div class="property-item">
+              <span class="property-label">No file selected</span>
+            </div>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    // Update the properties content
+    const propertiesContent = propertiesPanel.querySelector('.properties-content');
+    if (!propertiesContent) return;
+
+    // Show loading state
+    const fileInfoSection = propertiesContent.querySelector('.property-section:last-child');
+    if (fileInfoSection) {
+      fileInfoSection.innerHTML = `
+        <h4 class="property-section-title">File Info</h4>
+        <div class="property-item">
+          <span class="property-label">Loading...</span>
+        </div>
+      `;
+    }
+
+    try {
+      let metadata: any = {};
+
+      if (fileSource === 'r2') {
+        // For R2 files, we already have some basic info
+        const fileType = getFileType(fileName || '');
+        const extension = fileName?.split('.').pop() || '';
+        
+        metadata = {
+          name: fileName || 'Unknown',
+          path: filePath,
+          type: fileType,
+          extension: extension,
+          source: 'R2 Bucket'
+        };
+
+        // For images/videos from R2, we might want to fetch additional metadata
+        if (['image', 'video'].includes(fileType)) {
+          // We could potentially fetch EXIF data or video metadata here
+          // For now, we'll just show basic info
+        }
+      } else {
+        // For local files, fetch metadata from the server
+        // Use filePath if available, otherwise try to construct from fileName
+        const pathToUse = filePath || fileName;
+        if (pathToUse) {
+          const response = await fetch(`/api/metadata?path=${encodeURIComponent(pathToUse)}`);
+          if (response.ok) {
+            metadata = await response.json();
+            metadata.source = 'Local';
+          } else {
+            // If metadata fetch fails, use basic info
+            const nameToUse = fileName || pathToUse.split('/').pop() || 'Unknown';
+            metadata = {
+              name: nameToUse,
+              path: pathToUse,
+              type: getFileType(nameToUse),
+              extension: nameToUse.includes('.') ? nameToUse.split('.').pop() || '' : '',
+              source: 'Local'
+            };
+          }
+        }
+      }
+
+      // Update properties display
+      this.displayFileProperties(propertiesContent, metadata, focusedPanel);
+
+    } catch (error) {
+      console.error('Error fetching file metadata:', error);
+      
+      // Show error state
+      if (fileInfoSection) {
+        fileInfoSection.innerHTML = `
+          <h4 class="property-section-title">File Info</h4>
+          <div class="property-item">
+            <span class="property-label">Error loading metadata</span>
+          </div>
+        `;
+      }
+    }
+  }
+
+  private displayFileProperties(container: Element, metadata: any, focusedPanel?: Element): void {
+    // Use the type from metadata if available, otherwise derive from filename
+    const fileType = metadata.type || (metadata.name ? getFileType(metadata.name) : 'unknown');
+    
+    let propertiesHTML = `
+      <div class="property-section">
+        <h4 class="property-section-title">File Info</h4>
+        <div class="property-item">
+          <span class="property-label">Name:</span>
+          <span class="property-value" title="${escapeHtml(metadata.name || '')}">${escapeHtml(metadata.name || 'Unknown')}</span>
+        </div>
+        <div class="property-item">
+          <span class="property-label">Type:</span>
+          <span class="property-value">${fileType.charAt(0).toUpperCase() + fileType.slice(1).replace('file-', '')}</span>
+        </div>
+        <div class="property-item">
+          <span class="property-label">Extension:</span>
+          <span class="property-value">${metadata.extension || '-'}</span>
+        </div>
+        <div class="property-item">
+          <span class="property-label">Source:</span>
+          <span class="property-value">${metadata.source || 'Unknown'}</span>
+        </div>
+    `;
+
+    if (metadata.size !== undefined) {
+      propertiesHTML += `
+        <div class="property-item">
+          <span class="property-label">Size:</span>
+          <span class="property-value">${formatFileSize(metadata.size)}</span>
+        </div>
+      `;
+    }
+
+    if (metadata.modified) {
+      propertiesHTML += `
+        <div class="property-item">
+          <span class="property-label">Modified:</span>
+          <span class="property-value" title="${metadata.modified}">${new Date(metadata.modified).toLocaleDateString()}</span>
+        </div>
+      `;
+    }
+
+    if (metadata.created) {
+      propertiesHTML += `
+        <div class="property-item">
+          <span class="property-label">Created:</span>
+          <span class="property-value" title="${metadata.created}">${new Date(metadata.created).toLocaleDateString()}</span>
+        </div>
+      `;
+    }
+
+    propertiesHTML += `</div>`;
+
+    // Add media-specific metadata section
+    if (['image', 'video'].includes(fileType)) {
+      propertiesHTML += `
+        <div class="property-section">
+          <h4 class="property-section-title">Media Info</h4>
+      `;
+
+      // For images
+      if (fileType === 'image') {
+        // If we're showing an image, we can get dimensions from the img element
+        const imagePanel = document.querySelector(`.bsp-panel[data-file-path="${metadata.path || metadata.name}"] img`);
+        if (imagePanel && imagePanel instanceof HTMLImageElement) {
+          if (imagePanel.naturalWidth && imagePanel.naturalHeight) {
+            propertiesHTML += `
+              <div class="property-item">
+                <span class="property-label">Dimensions:</span>
+                <span class="property-value">${imagePanel.naturalWidth} × ${imagePanel.naturalHeight}</span>
+              </div>
+            `;
+          } else {
+            // Image not loaded yet, wait for it
+            imagePanel.addEventListener('load', () => {
+              if (focusedPanel) {
+                this.updatePropertiesPanel(focusedPanel);
+              }
+            }, { once: true });
+          }
+        }
+      }
+
+      // For videos
+      if (fileType === 'video') {
+        const videoPanel = document.querySelector(`.bsp-panel[data-file-path="${metadata.path || metadata.name}"] video`);
+        if (videoPanel && videoPanel instanceof HTMLVideoElement) {
+          if (videoPanel.readyState >= 1) { // HAVE_METADATA
+            propertiesHTML += `
+              <div class="property-item">
+                <span class="property-label">Duration:</span>
+                <span class="property-value">${formatTime(videoPanel.duration || 0)}</span>
+              </div>
+            `;
+            
+            if (videoPanel.videoWidth && videoPanel.videoHeight) {
+              propertiesHTML += `
+                <div class="property-item">
+                  <span class="property-label">Resolution:</span>
+                  <span class="property-value">${videoPanel.videoWidth} × ${videoPanel.videoHeight}</span>
+                </div>
+              `;
+            }
+          } else {
+            // Video metadata not loaded yet, wait for it
+            videoPanel.addEventListener('loadedmetadata', () => {
+              if (focusedPanel) {
+                this.updatePropertiesPanel(focusedPanel);
+              }
+            }, { once: true });
+          }
+        }
+      }
+
+      propertiesHTML += `</div>`;
+    }
+
+    container.innerHTML = propertiesHTML;
   }
 
   private pinPanel(panelId: string): void {
@@ -5002,6 +5343,8 @@ const iconColor = getFileIconColor(fileType);
       // Mark as R2 file preview panel
       newPanel.setAttribute('data-panel-type', 'r2-file-preview');
       newPanel.setAttribute('data-file-path', filePath);
+      newPanel.setAttribute('data-file-name', fileName);
+      newPanel.setAttribute('data-file-source', 'r2');
       
       // Update panel title
       const fileType = getFileType(fileName);
@@ -5127,6 +5470,9 @@ const iconColor = getFileIconColor(fileType);
               content.innerHTML = '';
               content.appendChild(container);
               
+              // Update properties panel now that content is loaded
+              this.updatePropertiesPanel(newPanel);
+              
               // Clean up blob URL when panel is closed
               const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
@@ -5172,6 +5518,9 @@ const iconColor = getFileIconColor(fileType);
                 (window as any).Prism.highlightAll();
               }
             }
+            
+            // Update properties panel
+            this.updatePropertiesPanel(newPanel);
           }
         } catch (error) {
           content.innerHTML = `
@@ -5968,8 +6317,26 @@ const iconColor = getFileIconColor(fileType);
           }
           
           e.stopPropagation();
+          
+          // Remove previous focus from all R2 items
+          const treeContainer = item.closest('.tree');
+          if (treeContainer) {
+            treeContainer.querySelectorAll('.tree-item-content.focused').forEach(el => {
+              el.classList.remove('focused');
+            });
+          }
+          
+          // Add focus to clicked item
+          itemContent.classList.add('focused');
+          
           const itemPath = item.getAttribute('data-path');
           const itemType = item.getAttribute('data-type');
+          const itemName = item.querySelector('.tree-item-label')?.textContent || '';
+          
+          // Update properties panel for selected R2 item
+          if (itemPath && itemName) {
+            this.updatePropertiesForR2Item(itemPath, itemName, itemType === 'directory', panelId);
+          }
           
           if (itemType === 'directory' && itemPath) {
             // For directories, clicking the content area also toggles

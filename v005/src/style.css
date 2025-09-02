@@ -4048,6 +4048,20 @@ div.panel {
   cursor: wait;
 }
 
+/* Creating folder state */
+.tree-item.creating {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.tree-item.creating .tree-item-content::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  cursor: wait;
+}
+
 /* R2 Upload Progress */
 .r2-upload-progress {
   margin: var(--spacing-16);
@@ -4101,6 +4115,49 @@ div.panel {
   font-size: var(--text-lg);
   color: var(--accent);
   pointer-events: none;
+}
+
+/* R2 file/folder drag and drop states */
+.bsp-panel[data-panel-type="r2-browser"] .tree-item.drag-over {
+  background: var(--color-accent-opacity-20);
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-radius: var(--border-radius-2);
+}
+
+.bsp-panel[data-panel-type="r2-browser"] .tree-item-content.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+/* R2 operation overlay */
+.r2-operation-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.r2-operation-overlay .operation-message {
+  background: var(--bg-secondary);
+  padding: var(--spacing-16) var(--spacing-24);
+  border-radius: var(--border-radius-3);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.r2-operation-overlay .lucide.spinning {
+  animation: spin 1s linear infinite;
 }
 
 /* R2 File Preview Styles */

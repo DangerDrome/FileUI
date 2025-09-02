@@ -5258,7 +5258,9 @@ const iconColor = getFileIconColor(fileType);
 
     try {
       const files = await r2fs.listFiles(path);
-      const sortedFiles = sortFiles(files);
+      // Filter out .keep files
+      const filteredFiles = files.filter(file => !file.name.endsWith('.keep'));
+      const sortedFiles = sortFiles(filteredFiles);
 
       // Update breadcrumbs
       const pathContainer = panel.querySelector('.r2-browser-path');
@@ -5277,37 +5279,8 @@ const iconColor = getFileIconColor(fileType);
       } else {
         treeContainer.innerHTML = sortedFiles.map(file => this.createR2TreeItem(file, panelId)).join('');
 
-        // Add click and context menu handlers
-        treeContainer.querySelectorAll('.tree-item').forEach(item => {
-          item.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const itemPath = item.getAttribute('data-path');
-            const itemType = item.getAttribute('data-type');
-            
-            if (itemType === 'directory' && itemPath) {
-              this.loadR2Contents(panelId, itemPath);
-            } else if (itemType === 'file' && itemPath) {
-              // Skip .keep files
-              if (itemPath.endsWith('.keep')) {
-                return;
-              }
-              // Open file in new panel
-              this.openR2FileInPanel(panelId, itemPath);
-            }
-          });
-
-          // Add context menu
-          item.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const itemPath = item.getAttribute('data-path') || '';
-            const itemType = item.getAttribute('data-type') || 'file';
-            const itemName = item.querySelector('.tree-item-label')?.textContent || 'Unknown';
-            
-            this.showR2ContextMenu(e as MouseEvent, panelId, itemPath, itemType, itemName, path);
-          });
-        });
+        // Attach event handlers to all tree items
+        this.attachR2TreeItemHandlers(treeContainer as HTMLElement, panelId, path);
       }
 
       // Add context menu to browser background
@@ -5337,21 +5310,28 @@ const iconColor = getFileIconColor(fileType);
     }
   }
 
-  private createR2TreeItem(file: FileItem, panelId: string): string {
+  private createR2TreeItem(file: FileItem, panelId: string, level: number = 0): string {
     // Get the file type using the same system as the rest of the app
     const fileType = file.type === 'directory' ? 'folder' : getFileType(file.name);
     const icon = getFileIcon(fileType);
     const iconColor = getFileIconColor(fileType);
     const displayName = escapeHtml(file.name);
     const sizeStr = file.type === 'file' && file.size !== undefined ? formatFileSize(file.size) : '';
+    const isDirectory = file.type === 'directory';
 
     return `
-      <div class="tree-item" data-path="${escapeHtml(file.path)}" data-type="${file.type}" data-panel-id="${panelId}">
-        <div class="tree-item-content" data-file-type="${fileType}">
+      <div class="tree-item" data-path="${escapeHtml(file.path)}" data-type="${file.type}" data-panel-id="${panelId}" data-level="${level}">
+        <div class="tree-item-content" data-file-type="${fileType}" draggable="${file.type === 'file' ? 'true' : 'false'}" style="padding-left: ${20 + level * 20}px">
+          ${isDirectory ? `
+            <button class="tree-item-toggle" aria-label="Toggle folder" data-expanded="false">
+              <i data-lucide="chevron-right" class="lucide chevron-icon"></i>
+            </button>
+          ` : '<div class="tree-item-spacer"></div>'}
           <i data-lucide="${icon}" class="lucide tree-item-icon" style="color: ${iconColor}"></i>
           <span class="tree-item-label">${displayName}</span>
           ${sizeStr ? `<span class="file-size">${sizeStr}</span>` : ''}
         </div>
+        ${isDirectory ? '<div class="tree-item-children" style="display: none;"></div>' : ''}
       </div>
     `;
   }
@@ -5492,25 +5472,106 @@ const iconColor = getFileIconColor(fileType);
   }
 
   private async createR2Folder(panelId: string, currentPath: string): Promise<void> {
-    const folderName = prompt('Enter folder name:');
-    if (!folderName) return;
-
     const r2fs = this.r2FileSystems.get(panelId);
     if (!r2fs) return;
 
-    try {
-      // In S3/R2, folders are created by adding a trailing slash
-      const folderPath = currentPath ? `${currentPath}/${folderName}/` : `${folderName}/`;
-      
-      // Create an empty file to represent the folder
-      await r2fs.writeFile(folderPath + '.keep', '');
-      
-      // Reload the contents
-      await this.loadR2Contents(panelId, currentPath);
-    } catch (error) {
-      console.error('Error creating folder:', error);
-      alert('Failed to create folder: ' + (error as Error).message);
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    const treeContainer = panel.querySelector('.tree');
+    if (!treeContainer) return;
+
+    // Create a temporary folder item with inline editing
+    const tempId = `new-folder-${Date.now()}`;
+    const tempFolderHtml = `
+      <div class="tree-item" data-temp-id="${tempId}">
+        <div class="tree-item-content" data-file-type="folder">
+          <i data-lucide="folder" class="lucide tree-item-icon" style="color: var(--file-project);"></i>
+          <input type="text" class="tree-item-rename-input" placeholder="New folder" value="">
+        </div>
+      </div>
+    `;
+
+    // Insert at the beginning of the tree
+    const firstChild = treeContainer.firstElementChild;
+    if (firstChild && firstChild.classList.contains('empty-state')) {
+      // Replace empty state
+      treeContainer.innerHTML = tempFolderHtml;
+    } else {
+      // Insert before first item
+      treeContainer.insertAdjacentHTML('afterbegin', tempFolderHtml);
     }
+
+    // Re-initialize icons
+    this.initializeLucideIcons(10);
+
+    // Get the input and focus it
+    const input = treeContainer.querySelector(`[data-temp-id="${tempId}"] .tree-item-rename-input`) as HTMLInputElement;
+    if (!input) return;
+
+    input.focus();
+    
+    // Handle folder creation
+    const createFolder = async () => {
+      const folderName = input.value.trim();
+      const tempItem = treeContainer.querySelector(`[data-temp-id="${tempId}"]`);
+      
+      if (!folderName) {
+        // Remove temp item if no name entered
+        tempItem?.remove();
+        return;
+      }
+
+      // Validate folder name
+      if (folderName.includes('/') || folderName.includes('\\')) {
+        alert('Invalid folder name: cannot contain / or \\');
+        tempItem?.remove();
+        return;
+      }
+
+      try {
+        // Show loading state
+        if (tempItem) {
+          tempItem.classList.add('creating');
+          input.disabled = true;
+        }
+
+        // In S3/R2, folders are created by adding a trailing slash
+        const folderPath = currentPath ? `${currentPath}/${folderName}/` : `${folderName}/`;
+        
+        // Create an empty file to represent the folder
+        await r2fs.writeFile(folderPath + '.keep', '');
+        
+        // Reload the contents
+        await this.loadR2Contents(panelId, currentPath);
+      } catch (error) {
+        console.error('Error creating folder:', error);
+        alert('Failed to create folder: ' + (error as Error).message);
+        tempItem?.remove();
+      }
+    };
+
+    // Handle escape/enter keys
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        createFolder();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        const tempItem = treeContainer.querySelector(`[data-temp-id="${tempId}"]`);
+        tempItem?.remove();
+      }
+    });
+
+    // Handle blur
+    input.addEventListener('blur', () => {
+      // Small delay to allow clicks on other elements
+      setTimeout(() => {
+        if (document.activeElement !== input) {
+          createFolder();
+        }
+      }, 200);
+    });
   }
 
   private async deleteR2Item(panelId: string, itemPath: string, itemName: string, isFolder: boolean): Promise<void> {
@@ -5697,6 +5758,316 @@ const iconColor = getFileIconColor(fileType);
     // Handle blur
     input.addEventListener('blur', () => {
       completeRename();
+    });
+  }
+
+  private async moveR2File(panelId: string, sourcePath: string, targetFolder: string, fileName: string, currentPath: string): Promise<void> {
+    const r2fs = this.r2FileSystems.get(panelId);
+    if (!r2fs) return;
+
+    try {
+      // Calculate new path - ensure we handle trailing slashes properly
+      let newPath: string;
+      if (targetFolder) {
+        // Remove any trailing slash from target folder
+        const cleanTargetFolder = targetFolder.endsWith('/') ? targetFolder.slice(0, -1) : targetFolder;
+        newPath = `${cleanTargetFolder}/${fileName}`;
+      } else {
+        newPath = fileName;
+      }
+
+      // Check if source and target are the same
+      if (sourcePath === newPath) {
+        return;
+      }
+
+      // Show loading indicator
+      const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'r2-operation-overlay';
+      loadingDiv.innerHTML = `
+        <div class="operation-message">
+          <i data-lucide="loader" class="lucide spinning"></i>
+          <span>Moving ${fileName}...</span>
+        </div>
+      `;
+      panel?.appendChild(loadingDiv);
+      this.initializeLucideIcons(10);
+
+      // Read the file content
+      const response = await fetch(`/api/r2/read?path=${encodeURIComponent(sourcePath)}`, {
+        headers: {
+          'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to read file for move');
+      }
+
+      const fileContent = await response.blob();
+
+      // Write to new location
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Content = (reader.result as string).split(',')[1];
+        
+        const writeResponse = await fetch('/api/r2/write', {
+          method: 'PUT',
+          headers: {
+            'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            path: newPath,
+            content: base64Content,
+            encoding: 'base64',
+            contentType: fileContent.type || 'application/octet-stream'
+          })
+        });
+        
+        if (!writeResponse.ok) {
+          throw new Error('Failed to write file to new location');
+        }
+        
+        // Delete old file
+        const deleteResponse = await fetch('/api/r2/delete', {
+          method: 'DELETE',
+          headers: {
+            'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ path: sourcePath })
+        });
+        
+        if (!deleteResponse.ok) {
+          // Try to clean up the new file if delete failed
+          await fetch('/api/r2/delete', {
+            method: 'DELETE',
+            headers: {
+              'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ path: newPath })
+          });
+          throw new Error('Failed to delete old file');
+        }
+        
+        // Remove loading overlay
+        loadingDiv.remove();
+        
+        // Success - reload the current directory
+        await this.loadR2Contents(panelId, currentPath);
+      };
+      
+      reader.readAsDataURL(fileContent);
+      
+    } catch (error) {
+      console.error('Move error:', error);
+      // Remove loading overlay if it exists
+      panel?.querySelector('.r2-operation-overlay')?.remove();
+      alert('Failed to move file: ' + (error as Error).message);
+    }
+  }
+
+  private async toggleR2Folder(treeItem: HTMLElement, panelId: string): Promise<void> {
+    const toggleBtn = treeItem.querySelector('.tree-item-toggle') as HTMLButtonElement;
+    const childrenContainer = treeItem.querySelector('.tree-item-children') as HTMLElement;
+    const path = treeItem.getAttribute('data-path');
+    
+    if (!childrenContainer || !path || !toggleBtn) {
+      return;
+    }
+
+    const isExpanded = toggleBtn.getAttribute('data-expanded') === 'true';
+    
+    if (isExpanded) {
+      // Collapse
+      childrenContainer.style.display = 'none';
+      toggleBtn.setAttribute('data-expanded', 'false');
+    } else {
+      // Expand
+      toggleBtn.setAttribute('data-expanded', 'true');
+      
+      // Show loading if not already loaded
+      if (!childrenContainer.hasChildNodes()) {
+        childrenContainer.style.display = 'block';
+        childrenContainer.innerHTML = `
+          <div class="loading-indicator" style="padding-left: 40px;">
+            <i data-lucide="loader" class="lucide spinning"></i>
+            <span>Loading...</span>
+          </div>
+        `;
+        this.initializeLucideIcons(10);
+        
+        try {
+          // Load subfolder contents
+          const r2fs = this.r2FileSystems.get(panelId);
+          if (!r2fs) return;
+          
+          const files = await r2fs.listFiles(path);
+          // Filter out .keep files
+          const filteredFiles = files.filter(file => !file.name.endsWith('.keep'));
+          const sortedFiles = sortFiles(filteredFiles);
+          const currentLevel = parseInt(treeItem.getAttribute('data-level') || '0');
+          
+          // Clear loading indicator
+          childrenContainer.innerHTML = '';
+          
+          // Add child items
+          if (sortedFiles.length === 0) {
+            childrenContainer.innerHTML = `
+              <div class="empty-folder-message" style="padding-left: ${40 + currentLevel * 20}px; opacity: 0.5; font-style: italic;">
+                Empty folder
+              </div>
+            `;
+          } else {
+            sortedFiles.forEach(file => {
+              const childHtml = this.createR2TreeItem(file, panelId, currentLevel + 1);
+              childrenContainer.insertAdjacentHTML('beforeend', childHtml);
+            });
+            
+            // Re-attach event handlers to new child items
+            this.attachR2TreeItemHandlers(childrenContainer, panelId, path);
+          }
+          
+          this.initializeLucideIcons(10);
+        } catch (error) {
+          console.error('Error loading folder contents:', error);
+          childrenContainer.innerHTML = `
+            <div class="error-message" style="padding-left: 40px; color: var(--error);">
+              Failed to load folder contents
+            </div>
+          `;
+        }
+      } else {
+        // Just show/hide if already loaded
+        childrenContainer.style.display = 'block';
+      }
+    }
+  }
+
+  private attachR2TreeItemHandlers(container: HTMLElement, panelId: string, currentPath: string): void {
+    container.querySelectorAll('.tree-item').forEach(item => {
+      // Handle toggle button clicks
+      const toggleBtn = item.querySelector('.tree-item-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await this.toggleR2Folder(item as HTMLElement, panelId);
+        });
+      }
+
+      // Handle item clicks (not on toggle button)
+      const itemContent = item.querySelector('.tree-item-content');
+      if (itemContent) {
+        itemContent.addEventListener('click', (e) => {
+          // Don't handle if clicking on toggle button
+          if ((e.target as HTMLElement).closest('.tree-item-toggle')) {
+            return;
+          }
+          
+          e.stopPropagation();
+          const itemPath = item.getAttribute('data-path');
+          const itemType = item.getAttribute('data-type');
+          
+          if (itemType === 'directory' && itemPath) {
+            // For directories, clicking the content area also toggles
+            if (toggleBtn) {
+              (toggleBtn as HTMLElement).click();
+            }
+          } else if (itemType === 'file' && itemPath) {
+            // Skip .keep files
+            if (itemPath.endsWith('.keep')) {
+              return;
+            }
+            // Open file in new panel
+            this.openR2FileInPanel(panelId, itemPath);
+          }
+        });
+      }
+
+      // Add context menu
+      item.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const itemPath = item.getAttribute('data-path') || '';
+        const itemType = item.getAttribute('data-type') || 'file';
+        const itemName = item.querySelector('.tree-item-label')?.textContent || 'Unknown';
+        
+        this.showR2ContextMenu(e as MouseEvent, panelId, itemPath, itemType, itemName, currentPath);
+      });
+
+      // Add drag and drop for files
+      const itemType = item.getAttribute('data-type');
+      const itemPath = item.getAttribute('data-path') || '';
+      const itemName = item.querySelector('.tree-item-label')?.textContent || '';
+
+      if (itemType === 'file' && itemContent) {
+        itemContent.addEventListener('dragstart', (e) => {
+          e.stopPropagation();
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', JSON.stringify({
+              type: 'r2-file',
+              path: itemPath,
+              name: itemName,
+              panelId: panelId
+            }));
+            itemContent.classList.add('dragging');
+          }
+        });
+
+        itemContent.addEventListener('dragend', () => {
+          itemContent.classList.remove('dragging');
+        });
+      }
+
+      // Make folders drop targets
+      if (itemType === 'directory') {
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Check if it's an R2 file being dragged
+          if (e.dataTransfer && e.dataTransfer.types.includes('text/plain')) {
+            e.dataTransfer.dropEffect = 'move';
+            item.classList.add('drag-over');
+          }
+        });
+
+        item.addEventListener('dragleave', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Only remove if leaving the folder entirely
+          const rect = item.getBoundingClientRect();
+          if (e.clientX < rect.left || e.clientX > rect.right || 
+              e.clientY < rect.top || e.clientY > rect.bottom) {
+            item.classList.remove('drag-over');
+          }
+        });
+
+        item.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          item.classList.remove('drag-over');
+
+          if (!e.dataTransfer) return;
+
+          try {
+            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            
+            // Only handle R2 file drops from the same panel
+            if (data.type === 'r2-file' && data.panelId === panelId) {
+              await this.moveR2File(panelId, data.path, itemPath, data.name, currentPath);
+            }
+          } catch (error) {
+            console.error('Drop error:', error);
+          }
+        });
+      }
     });
   }
 

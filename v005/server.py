@@ -15,6 +15,11 @@ import argparse
 import boto3
 from botocore.client import Config
 import base64
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
+import io
+import tempfile
 
 class FileAPIHandler(BaseHTTPRequestHandler):
     # Class variable to store root directory
@@ -38,6 +43,12 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             self.handle_r2_read(parsed_path)
         elif parsed_path.path == '/api/r2/test':
             self.handle_r2_test()
+        elif parsed_path.path == '/api/gdrive/test':
+            self.handle_gdrive_test()
+        elif parsed_path.path == '/api/gdrive/list':
+            self.handle_gdrive_list(parsed_path)
+        elif parsed_path.path == '/api/gdrive/read':
+            self.handle_gdrive_read(parsed_path)
         else:
             self.send_error(404, "Not Found")
     
@@ -48,6 +59,10 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             self.handle_write_file()
         elif parsed_path.path == '/api/r2/write':
             self.handle_r2_write()
+        elif parsed_path.path == '/api/gdrive/write':
+            self.handle_gdrive_write()
+        elif parsed_path.path == '/api/gdrive/mkdir':
+            self.handle_gdrive_mkdir()
         else:
             self.send_error(404, "Not Found")
     
@@ -56,6 +71,8 @@ class FileAPIHandler(BaseHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         if parsed_path.path == '/api/r2/delete':
             self.handle_r2_delete()
+        elif parsed_path.path == '/api/gdrive/delete':
+            self.handle_gdrive_delete()
         else:
             self.send_error(404, "Not Found")
     
@@ -69,7 +86,7 @@ class FileAPIHandler(BaseHTTPRequestHandler):
         """Send CORS headers to allow Vite dev server access"""
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-R2-Credentials')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-R2-Credentials, X-GDrive-Credentials')
     
     def handle_list_files(self, parsed_path):
         """List files in a directory"""
@@ -691,6 +708,331 @@ class FileAPIHandler(BaseHTTPRequestHandler):
         mime_type, _ = mimetypes.guess_type(path)
         return mime_type or 'application/octet-stream'
     
+    def handle_gdrive_test(self):
+        """Test Google Drive connection"""
+        try:
+            credentials = self._get_gdrive_credentials()
+            if not credentials:
+                self.send_error(400, "Google Drive credentials required")
+                return
+            
+            print(f"Testing Google Drive connection")
+            
+            try:
+                # Create service using service account
+                service = self._create_gdrive_service(credentials)
+                
+                # Test by getting drive info
+                about = service.about().get(fields="user").execute()
+                user = about.get('user', {})
+                print(f"Google Drive test successful for: {user.get('emailAddress', 'Unknown')}")
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': True,
+                    'user': user.get('emailAddress', 'Unknown')
+                }).encode())
+                
+            except Exception as e:
+                print(f"Google Drive test failed: {type(e).__name__}: {str(e)}")
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': False,
+                    'error': str(e),
+                    'type': type(e).__name__
+                }).encode())
+                
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def handle_gdrive_list(self, parsed_path):
+        """List Google Drive contents"""
+        try:
+            credentials = self._get_gdrive_credentials()
+            if not credentials:
+                self.send_error(400, "Google Drive credentials required")
+                return
+            
+            query_params = parse_qs(parsed_path.query)
+            folder_id = query_params.get('folderId', ['root'])[0]
+            
+            service = self._create_gdrive_service(credentials)
+            
+            # Build query for listing files
+            query = f"'{folder_id}' in parents and trashed = false"
+            
+            response = service.files().list(
+                q=query,
+                fields="files(id, name, mimeType, size, modifiedTime, parents)",
+                orderBy="folder,name"
+            ).execute()
+            
+            files = []
+            for item in response.get('files', []):
+                file_type = 'directory' if item['mimeType'] == 'application/vnd.google-apps.folder' else 'file'
+                
+                file_info = {
+                    'id': item['id'],
+                    'name': item['name'],
+                    'type': file_type,
+                    'mimeType': item['mimeType']
+                }
+                
+                if file_type == 'file':
+                    file_info['size'] = int(item.get('size', 0))
+                    file_info['modified'] = item.get('modifiedTime')
+                    file_info['extension'] = item['name'].split('.')[-1] if '.' in item['name'] else ''
+                
+                files.append(file_info)
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(files).encode())
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def handle_gdrive_read(self, parsed_path):
+        """Read file from Google Drive"""
+        try:
+            credentials = self._get_gdrive_credentials()
+            if not credentials:
+                self.send_error(400, "Google Drive credentials required")
+                return
+            
+            query_params = parse_qs(parsed_path.query)
+            file_id = query_params.get('fileId', [''])[0]
+            
+            if not file_id:
+                self.send_error(400, "File ID required")
+                return
+            
+            service = self._create_gdrive_service(credentials)
+            
+            # Get file metadata first
+            file_metadata = service.files().get(fileId=file_id, fields="name, mimeType").execute()
+            
+            # Handle Google Docs/Sheets/Slides export
+            if file_metadata['mimeType'].startswith('application/vnd.google-apps'):
+                # Export Google Docs to appropriate format
+                export_mime_type = self._get_export_mime_type(file_metadata['mimeType'])
+                request = service.files().export_media(fileId=file_id, mimeType=export_mime_type)
+            else:
+                # Regular file download
+                request = service.files().get_media(fileId=file_id)
+            
+            # Download file content
+            fh = io.BytesIO()
+            downloader = MediaIoBaseDownload(fh, request)
+            done = False
+            while not done:
+                status, done = downloader.next_chunk()
+            
+            content = fh.getvalue()
+            
+            # Determine content type
+            content_type = self._get_content_type(file_metadata['name'])
+            
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', str(len(content)))
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(content)
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def handle_gdrive_write(self):
+        """Write file to Google Drive"""
+        try:
+            credentials = self._get_gdrive_credentials()
+            if not credentials:
+                self.send_error(400, "Google Drive credentials required")
+                return
+            
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode())
+            
+            file_name = data.get('fileName')
+            parent_id = data.get('parentId', 'root')
+            content = data.get('content')
+            encoding = data.get('encoding')
+            
+            if not file_name or content is None:
+                self.send_error(400, "File name and content required")
+                return
+            
+            service = self._create_gdrive_service(credentials)
+            
+            # Handle base64 encoded content
+            if encoding == 'base64':
+                import base64
+                file_content = base64.b64decode(content)
+            else:
+                file_content = content.encode() if isinstance(content, str) else content
+            
+            # Write content to temporary file
+            with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+                tmp_file.write(file_content)
+                tmp_file_path = tmp_file.name
+            
+            try:
+                # Prepare file metadata
+                file_metadata = {
+                    'name': file_name,
+                    'parents': [parent_id]
+                }
+                
+                # Determine MIME type
+                mime_type = self._get_content_type(file_name)
+                
+                # Upload file
+                media = MediaFileUpload(tmp_file_path, mimetype=mime_type)
+                file = service.files().create(
+                    body=file_metadata,
+                    media_body=media,
+                    fields='id'
+                ).execute()
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': True,
+                    'fileId': file.get('id')
+                }).encode())
+                
+            finally:
+                # Clean up temp file
+                os.unlink(tmp_file_path)
+                
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def handle_gdrive_mkdir(self):
+        """Create folder in Google Drive"""
+        try:
+            credentials = self._get_gdrive_credentials()
+            if not credentials:
+                self.send_error(400, "Google Drive credentials required")
+                return
+            
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode())
+            
+            folder_name = data.get('folderName')
+            parent_id = data.get('parentId', 'root')
+            
+            if not folder_name:
+                self.send_error(400, "Folder name required")
+                return
+            
+            service = self._create_gdrive_service(credentials)
+            
+            # Create folder metadata
+            file_metadata = {
+                'name': folder_name,
+                'mimeType': 'application/vnd.google-apps.folder',
+                'parents': [parent_id]
+            }
+            
+            # Create folder
+            folder = service.files().create(
+                body=file_metadata,
+                fields='id'
+            ).execute()
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'success': True,
+                'folderId': folder.get('id')
+            }).encode())
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def handle_gdrive_delete(self):
+        """Delete file from Google Drive"""
+        try:
+            credentials = self._get_gdrive_credentials()
+            if not credentials:
+                self.send_error(400, "Google Drive credentials required")
+                return
+            
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode())
+            
+            file_id = data.get('fileId')
+            if not file_id:
+                self.send_error(400, "File ID required")
+                return
+            
+            service = self._create_gdrive_service(credentials)
+            
+            # Move to trash instead of permanent delete
+            service.files().update(
+                fileId=file_id,
+                body={'trashed': True}
+            ).execute()
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': True}).encode())
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def _get_gdrive_credentials(self):
+        """Extract Google Drive credentials from request header"""
+        creds_header = self.headers.get('X-GDrive-Credentials')
+        if not creds_header:
+            return None
+        
+        try:
+            # Decode base64 credentials
+            decoded = base64.b64decode(creds_header).decode()
+            return json.loads(decoded)
+        except:
+            return None
+    
+    def _create_gdrive_service(self, credentials):
+        """Create Google Drive service using service account"""
+        # Parse the service account JSON
+        creds = service_account.Credentials.from_service_account_info(
+            credentials,
+            scopes=['https://www.googleapis.com/auth/drive']
+        )
+        
+        return build('drive', 'v3', credentials=creds)
+    
+    def _get_export_mime_type(self, google_mime_type):
+        """Get export MIME type for Google Docs formats"""
+        export_formats = {
+            'application/vnd.google-apps.document': 'application/pdf',
+            'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.google-apps.presentation': 'application/pdf',
+            'application/vnd.google-apps.drawing': 'image/png'
+        }
+        return export_formats.get(google_mime_type, 'application/pdf')
+    
     def log_message(self, format, *args):
         """Override to customize logging"""
         print(f"{self.address_string()} - {format % args}")
@@ -719,6 +1061,12 @@ def main():
     print("  GET  /api/r2/list   - List R2 bucket contents")
     print("  GET  /api/r2/read   - Read R2 file")
     print("  PUT  /api/r2/write  - Write R2 file")
+    print("  GET  /api/gdrive/test  - Test Google Drive connection")
+    print("  GET  /api/gdrive/list  - List Google Drive contents")
+    print("  GET  /api/gdrive/read  - Read Google Drive file")
+    print("  PUT  /api/gdrive/write - Write Google Drive file")
+    print("  PUT  /api/gdrive/mkdir - Create Google Drive folder")
+    print("  DELETE /api/gdrive/delete - Delete Google Drive file")
     print("\nPress Ctrl+C to stop the server")
     
     try:

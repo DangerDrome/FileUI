@@ -31,7 +31,9 @@
       "Bash(npx tsc:*)",
       "Bash(/home/danger/Documents/GitHub/FileUI/v005/devserver.sh logs:*)",
       "Bash(npm run typecheck:*)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(pip install:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

@@ -2,6 +2,7 @@
 import { BSPPanelManager } from './bsp-manager';
 import { ServerFileSystem, FileItem, sortFiles, getFileType, formatFileSize } from './filemanager';
 import { R2FileSystem } from './r2-filesystem';
+import { GoogleDriveFileSystem } from './google-drive-filesystem';
 import { escapeHtml } from './utils/strings';
 import { getFileIcon, getFileIconColor } from './utils/ui';
 import { formatTime } from './utils/time';
@@ -43,10 +44,16 @@ export class PanelManager {
   private directoryHandles: Map<string, any> = new Map();
   private fileHandles: Map<string, any> = new Map();
   private r2FileSystems: Map<string, R2FileSystem> = new Map();
+  private googleDriveCredentials: Map<string, any> = new Map();
+  private googleDriveFileSystems: Map<string, GoogleDriveFileSystem> = new Map();
+  private r2ExpandedFolders: Map<string, Set<string>> = new Map(); // panelId -> Set of expanded folder paths
+  private r2SelectedItems: Map<string, Set<string>> = new Map(); // panelId -> Set of selected item paths
+  private r2LastSelectedItem: Map<string, string> = new Map(); // panelId -> last selected item path
   private md: MarkdownIt;
   private contextMenu: ContextMenuManager;
   private dragDropInitialized: boolean = false;
   private currentlyOpenFile: string | null = null;
+  private dragCleanupTimer: number | null = null;
   private currentPath: string = '.';
   // Store native file handles for sequences - key is "folderPath/sequenceName"
   private nativeSequenceHandles: Map<string, Map<string, FileSystemFileHandle>> = new Map();
@@ -61,6 +68,9 @@ export class PanelManager {
     });
     // Initialize context menu manager
     this.contextMenu = new ContextMenuManager();
+    
+    // Set up global drag cleanup
+    this.setupGlobalDragCleanup();
     
     // Load recent layouts from localStorage
     const savedLayouts = localStorage.getItem('fileui-recent-layouts');
@@ -90,6 +100,126 @@ export class PanelManager {
     }
   }
 
+  private handleR2ItemSelection(panelId: string, itemPath: string, event: MouseEvent): void {
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+    
+    const treeContainer = panel.querySelector('.tree');
+    if (!treeContainer) return;
+    
+    // Initialize selection set if needed
+    if (!this.r2SelectedItems.has(panelId)) {
+      this.r2SelectedItems.set(panelId, new Set());
+    }
+    
+    const selectedItems = this.r2SelectedItems.get(panelId)!;
+    const lastSelected = this.r2LastSelectedItem.get(panelId);
+    
+    if (event.ctrlKey || event.metaKey) {
+      // Ctrl/Cmd click - toggle selection
+      if (selectedItems.has(itemPath)) {
+        selectedItems.delete(itemPath);
+      } else {
+        selectedItems.add(itemPath);
+      }
+    } else if (event.shiftKey && lastSelected) {
+      // Shift click - select range
+      const allItems = Array.from(treeContainer.querySelectorAll('.tree-item'));
+      const startIndex = allItems.findIndex(el => el.getAttribute('data-path') === lastSelected);
+      const endIndex = allItems.findIndex(el => el.getAttribute('data-path') === itemPath);
+      
+      if (startIndex !== -1 && endIndex !== -1) {
+        const [from, to] = startIndex < endIndex ? [startIndex, endIndex] : [endIndex, startIndex];
+        
+        // Clear existing selection
+        selectedItems.clear();
+        
+        // Select all items in range
+        for (let i = from; i <= to; i++) {
+          const path = allItems[i].getAttribute('data-path');
+          if (path) {
+            selectedItems.add(path);
+          }
+        }
+      }
+    } else {
+      // Regular click - single selection
+      selectedItems.clear();
+      selectedItems.add(itemPath);
+    }
+    
+    // Update last selected
+    this.r2LastSelectedItem.set(panelId, itemPath);
+    
+    // Update visual selection
+    treeContainer.querySelectorAll('.tree-item').forEach(item => {
+      const path = item.getAttribute('data-path');
+      const content = item.querySelector('.tree-item-content');
+      if (content) {
+        if (path && selectedItems.has(path)) {
+          content.classList.add('selected');
+          content.classList.add('focused');
+        } else {
+          content.classList.remove('selected');
+          content.classList.remove('focused');
+        }
+      }
+    });
+  }
+
+  private setupGlobalDragCleanup(): void {
+    // Clean up on any drag end
+    document.addEventListener('dragend', () => {
+      this.cleanupAllDragHighlights();
+    });
+    
+    // Also clean up if drag leaves the window
+    document.addEventListener('dragleave', (e) => {
+      if (e.clientY <= 0 || e.clientX <= 0 || 
+          e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
+        this.cleanupAllDragHighlights();
+      }
+    });
+    
+    // Clean up on mouse up (in case drag end doesn't fire)
+    document.addEventListener('mouseup', () => {
+      if (this.dragCleanupTimer) {
+        clearTimeout(this.dragCleanupTimer);
+      }
+      this.dragCleanupTimer = window.setTimeout(() => {
+        this.cleanupAllDragHighlights();
+      }, 100);
+    });
+    
+    // Clean up on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.cleanupAllDragHighlights();
+      }
+    });
+  }
+  
+  private cleanupAllDragHighlights(): void {
+    // Remove all drag-related classes from all elements
+    const dragClasses = ['drag-over', 'drag-over-before', 'drag-over-after', 'drag-over-divider', 'dragging'];
+    dragClasses.forEach(className => {
+      document.querySelectorAll(`.${className}`).forEach(el => {
+        el.classList.remove(className);
+      });
+    });
+    
+    // Extra cleanup for panel-content and nested elements
+    document.querySelectorAll('.panel-content').forEach(el => {
+      el.classList.remove('drag-over');
+    });
+    document.querySelectorAll('.r2-browser').forEach(el => {
+      el.classList.remove('drag-over');
+    });
+    document.querySelectorAll('.file-explorer-content').forEach(el => {
+      el.classList.remove('drag-over');
+    });
+  }
+
   private showErrorMessage(container: HTMLElement, message: string): void {
     container.innerHTML = `<div class="error-message">${message}</div>`;
   }
@@ -104,10 +234,11 @@ export class PanelManager {
     // Always prioritize the focused panel first
     const focusedPanel = document.querySelector('.bsp-panel.focused');
     
-    // If there's a focused panel and it's not an explorer panel, not an R2 panel, and not pinned
+    // If there's a focused panel and it's not an explorer panel, not an R2 panel, not a Google Drive panel, and not pinned
     if (focusedPanel && !focusedPanel.classList.contains('explorer-panel')) {
       const panelType = focusedPanel.getAttribute('data-panel-type');
-      if (panelType !== 'r2-browser' && panelType !== 'r2-config') {
+      if (panelType !== 'r2-browser' && panelType !== 'r2-config' && 
+          panelType !== 'google-drive-config' && panelType !== 'google-drive-browser') {
         const panelId = focusedPanel.getAttribute('data-panel-id');
         if (panelId) {
           const isPinnedEl = (focusedPanel as HTMLElement).classList.contains('is-pinned');
@@ -119,12 +250,13 @@ export class PanelManager {
       }
     }
     
-    // Find the first non-explorer, non-R2, non-pinned panel
+    // Find the first non-explorer, non-R2, non-Google Drive, non-pinned panel
     const allPanels = document.querySelectorAll('.bsp-panel:not(.explorer-panel)');
     for (const panel of allPanels) {
       const panelType = panel.getAttribute('data-panel-type');
-      if (panelType === 'r2-browser' || panelType === 'r2-config') {
-        continue; // Skip R2 panels
+      if (panelType === 'r2-browser' || panelType === 'r2-config' ||
+          panelType === 'google-drive-config' || panelType === 'google-drive-browser') {
+        continue; // Skip R2 and Google Drive panels
       }
       
       const panelId = panel.getAttribute('data-panel-id');
@@ -1146,6 +1278,9 @@ export class PanelManager {
     } else if (action === 'r2' && this.bspManager) {
       // Create R2 configuration panel
       this.createR2ConfigPanel();
+    } else if (action === 'google-drive' && this.bspManager) {
+      // Create Google Drive configuration panel
+      this.createGoogleDriveConfigPanel();
     }
   }
 
@@ -1226,8 +1361,13 @@ export class PanelManager {
               </button>
             </div>
             <div class="menu">
-              <button class="btn btn-ghost btn-sm" data-action="r2" title="R2 Bucket">
-                <i data-lucide="cloud" class="lucide"></i>
+              <button class="btn btn-ghost btn-sm" data-action="r2" title="Bucket">
+                <i data-lucide="cloudy" class="lucide"></i>
+              </button>
+            </div>
+            <div class="menu">
+              <button class="btn btn-ghost btn-sm" data-action="google-drive" title="Google Drive">
+                <img src="/src/gfx/drive_icon.svg" class="toolbar-drive-icon" alt="Google Drive" />
               </button>
             </div>
           </div>
@@ -1342,6 +1482,212 @@ export class PanelManager {
     }, 100);
   }
 
+  private createGoogleDriveConfigPanel(): void {
+    if (!this.bspManager) return;
+    
+    // Add a new panel on the left side for Google Drive configuration (like explorer)
+    const newPanelId = this.bspManager.addPanel('left');
+    if (!newPanelId) return;
+    
+    // Set the Google Drive panel to 15vw on initialization (same as explorer)
+    const explorerDefaultRatio = 0.15; // 15% width
+    this.bspManager.setParentSplitForPanelRatio(newPanelId, explorerDefaultRatio);
+    this.bspManager.layout();
+    
+    // Wait for the panel to be created and then update its content
+    setTimeout(() => {
+      const focusedPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`) as HTMLElement;
+      if (focusedPanel) {
+        // Mark this as a Google Drive panel
+        focusedPanel.setAttribute('data-panel-type', 'google-drive-config');
+        this.setupGoogleDriveConfigContent(newPanelId);
+      }
+    }, 100);
+  }
+
+  private setupGoogleDriveConfigContent(panelId: string): void {
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    // Mark this as a Google Drive config panel
+    panel.setAttribute('data-panel-type', 'google-drive-config');
+
+    // Update panel title with icon
+    const panelTitle = panel.querySelector('.panel-title span');
+    if (panelTitle && panelTitle.parentElement) {
+      panelTitle.parentElement.innerHTML = `
+        <img src="/src/gfx/drive_icon.svg" class="panel-header-drive-icon" alt="Google Drive" style="margin-right: 6px;" />
+        <span>Google Drive</span>
+      `;
+    }
+
+    // Update panel content with configuration form (similar to R2)
+    const content = panel.querySelector('.panel-content') as HTMLElement;
+    if (content) {
+      content.innerHTML = `
+        <div class="google-drive-config-container">
+          <div class="google-drive-config-form">
+            <!-- Large Icon Header -->
+            <div class="config-icon-header">
+              <img src="/src/gfx/drive_icon.svg" class="config-icon drive-icon" alt="Google Drive" />
+            </div>
+            
+            <!-- Service Account Section -->
+            <div class="form-section">
+              <div class="section-header">
+                <h3>Service Account Access</h3>
+                <span class="section-subtitle">Connect with service account for full access</span>
+              </div>
+              
+              <div class="setup-steps">
+                <div class="step-item">
+                  <span class="step-number">1</span>
+                  <span class="step-text">Go to <a href="https://console.cloud.google.com" target="_blank" class="link">Google Cloud Console</a></span>
+                </div>
+                <div class="step-item">
+                  <span class="step-number">2</span>
+                  <span class="step-text">Create project & enable Google Drive API</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-number">3</span>
+                  <span class="step-text">Create service account & download JSON key</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-number">4</span>
+                  <span class="step-text">Share folders with service account email</span>
+                </div>
+              </div>
+              
+              <div class="form-fields">
+                <div class="form-group">
+                  <label for="gd-service-key-${panelId}">
+                    <span class="label-text">Service Account Key</span>
+                    <span class="label-hint">JSON format</span>
+                  </label>
+                  <textarea 
+                    id="gd-service-key-${panelId}" 
+                    class="gd-input" 
+                    placeholder="Paste your Google Cloud service account JSON key here"
+                    rows="2"
+                  ></textarea>
+                  <div class="help-text">
+                    <a href="https://console.cloud.google.com/iam-admin/serviceaccounts" target="_blank" class="link">
+                      Create service account
+                    </a> in Google Cloud Console
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="gd-folder-id-${panelId}">
+                    <span class="label-text">Folder ID</span>
+                    <span class="label-hint">Optional</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="gd-folder-id-${panelId}" 
+                    class="gd-input" 
+                    placeholder="Leave empty to browse My Drive"
+                  />
+                </div>
+                
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="gd-remember-${panelId}" checked />
+                    <span>Remember credentials</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-actions">
+                <button class="btn btn-primary connect-btn" id="gd-connect-${panelId}">
+                  <i data-lucide="link" class="lucide" style="width: 16px; height: 16px;"></i>
+                  <span>Connect</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Add styles similar to R2
+      const style = document.createElement('style');
+      style.textContent = `
+        .google-drive-config-container {
+          padding: 20px;
+          height: 100%;
+          overflow-y: auto;
+        }
+        
+        .google-drive-config-form {
+          max-width: 400px;
+          margin: 0 auto;
+        }
+        
+        /* gd-input styles moved to external CSS */
+        
+        .help-text {
+          font-size: 12px;
+          color: var(--color-text-secondary);
+          margin-top: 4px;
+        }
+        
+        .help-text .link {
+          color: var(--accent);
+          text-decoration: none;
+        }
+        
+        .help-text .link:hover {
+          text-decoration: underline;
+        }
+        
+        .form-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 16px;
+        }
+        
+        .divider {
+          height: 1px;
+          background: var(--border-color);
+          margin: 24px 0;
+        }
+        
+        .quick-access-section h4 {
+          margin: 0 0 8px 0;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        
+        .quick-access-section .form-group {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
+      `;
+      
+      if (!document.querySelector('#google-drive-styles')) {
+        style.id = 'google-drive-styles';
+        document.head.appendChild(style);
+      }
+
+      // Re-initialize Lucide icons
+      this.initializeLucideIcons(10);
+
+      // Add event listeners
+      const connectBtn = document.getElementById(`gd-connect-${panelId}`);
+      if (connectBtn) {
+        connectBtn.addEventListener('click', () => {
+          this.handleGoogleDriveConnect(panelId);
+        });
+      }
+
+
+
+      // Load saved credentials if any
+      this.loadGoogleDriveCredentials(panelId);
+    }
+  }
+
   private initializeBSPLayout(): void {
     
     // Also show status in the main content area for debugging
@@ -1366,6 +1712,12 @@ export class PanelManager {
     // Add global click handler for panel focus and properties update
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
+      
+      // Skip if clicking on a modal
+      if (target.closest('.modal-overlay')) {
+        return;
+      }
+      
       const panel = target.closest('.bsp-panel');
       if (panel) {
         // Focus the panel when clicked
@@ -2577,25 +2929,16 @@ export class PanelManager {
         
         // Check for self-drop on explorer panels
         if (panelElement?.classList.contains('explorer-panel') && e.dataTransfer) {
-          const dragSource = e.dataTransfer.types.includes('application/x-panel-id') ? 
-            e.dataTransfer.getData('application/x-panel-id') : null;
-          
-          // Note: getData doesn't work in dragover, so we'll just prevent all drops on explorers during dragover
-          // The actual check happens in the drop handler
-          // For now, show 'copy' cursor to indicate drop is possible (will be validated on drop)
           e.dataTransfer.dropEffect = 'copy';
         } else if (e.dataTransfer) {
           e.dataTransfer.dropEffect = 'copy';
-        }
-        // Ensure class stays on during dragover
-        if (!panelContent.classList.contains('drag-over')) {
-          panelContent.classList.add('drag-over');
         }
       });
 
       panelContent.addEventListener('dragleave', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        
         // Only remove if we're actually leaving the panel
         const rect = panelContent.getBoundingClientRect();
         const x = e.clientX;
@@ -2609,12 +2952,20 @@ export class PanelManager {
       panelContent.addEventListener('drop', async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        console.log('Drop event fired on panel');
         panelContent.classList.remove('drag-over');
+        
+        // Clean up any other drag highlights that might be stuck
+        this.cleanupAllDragHighlights();
         
         const panelElement = panelContent.closest('.bsp-panel');
         const targetPanelId = panelElement?.getAttribute('data-panel-id');
+        console.log('Panel type:', panelElement?.getAttribute('data-panel-type'), 'Panel ID:', targetPanelId);
         
-        if (!targetPanelId || !e.dataTransfer) return;
+        if (!targetPanelId || !e.dataTransfer) {
+          console.log('No panel ID or dataTransfer');
+          return;
+        }
         
         // Check if this is an internal drag (from explorer)
         const plainPath = e.dataTransfer.getData('text/plain');
@@ -2630,23 +2981,69 @@ export class PanelManager {
           // Allow dropping into a different explorer panel (will replace it)
         }
         
-        // Check for internal drag from explorer
+        // Check for internal drag from explorer or R2
         if ((plainPath !== null && plainPath !== undefined) && !e.dataTransfer.files.length) {
-          // If path is empty, skip
-          if (!plainPath || plainPath.trim() === '') {
+          try {
+            // Try to parse as JSON first (R2 drag)
+            const data = JSON.parse(plainPath);
+            if (data.type === 'r2-file' || data.type === 'r2-file-multi') {
+              // This is an R2 internal drag, let it fall through to be handled later
+            } else {
+              // Unknown JSON format, skip
+              return;
+            }
+          } catch {
+            // Not JSON, treat as file path from explorer
+            if (!plainPath || plainPath.trim() === '') {
+              return;
+            }
+            
+            // Get the filename from the path
+            const pathParts = plainPath.split('/');
+            const fileName = pathParts[pathParts.length - 1];
+            
+            // JUST LIKE CLICKING - use openFileInBSPPanel
+            await this.openFileInBSPPanel(plainPath, fileName);
             return;
           }
-          
-          // Get the filename from the path
-          const pathParts = plainPath.split('/');
-          const fileName = pathParts[pathParts.length - 1];
-          
-          // JUST LIKE CLICKING - use openFileInBSPPanel
-          await this.openFileInBSPPanel(plainPath, fileName);
-          return;
         }
         
         // Handle external file drops
+        
+        // Special handling for R2 panels - upload files instead of opening them
+        if (panelElement?.getAttribute('data-panel-type') === 'r2-browser') {
+          console.log('R2 panel detected, handling file upload');
+          const files: File[] = [];
+          
+          if (e.dataTransfer.items) {
+            console.log('Using dataTransfer.items, length:', e.dataTransfer.items.length);
+            for (let i = 0; i < e.dataTransfer.items.length; i++) {
+              const item = e.dataTransfer.items[i];
+              if (item.kind === 'file') {
+                const file = item.getAsFile();
+                if (file) files.push(file);
+              }
+            }
+          } else if (e.dataTransfer.files) {
+            console.log('Using dataTransfer.files, length:', e.dataTransfer.files.length);
+            files.push(...Array.from(e.dataTransfer.files));
+          }
+          
+          console.log('Files to upload:', files.length);
+          if (files.length > 0) {
+            // Upload to root for now (since we removed breadcrumbs)
+            console.log('Calling uploadR2Files');
+            await this.uploadR2Files(targetPanelId, '', files);
+          }
+          
+          // Force cleanup for R2 panels
+          panelContent.classList.remove('drag-over');
+          const r2Browser = panelContent.querySelector('.r2-browser');
+          if (r2Browser) {
+            r2Browser.classList.remove('drag-over');
+          }
+          return;
+        }
         
         // Check if we have items (which may include folders)
         if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
@@ -2742,6 +3139,9 @@ export class PanelManager {
           e.preventDefault();
           e.stopPropagation();
           bspContainer.classList.remove('drag-over');
+          
+          // Clean up any other highlights
+          this.cleanupAllDragHighlights();
           
           if (!e.dataTransfer || !this.bspManager) return;
           
@@ -2946,6 +3346,9 @@ export class PanelManager {
       explorerContent.querySelectorAll('.drag-over, .drag-over-before, .drag-over-after').forEach(el => {
         el.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
       });
+      
+      // Also do global cleanup in case anything is stuck
+      this.cleanupAllDragHighlights();
     });
   }
 
@@ -4277,6 +4680,9 @@ const iconColor = getFileIconColor(fileType);
         e.stopPropagation();
         resizer.classList.remove('drag-over-divider');
         
+        // Clean up any other highlights
+        this.cleanupAllDragHighlights();
+        
         if (!e.dataTransfer) return;
         
         // Check if we have items (which may include folders)
@@ -4568,8 +4974,8 @@ const iconColor = getFileIconColor(fileType);
     const panelTitle = panel.querySelector('.panel-title span');
     if (panelTitle && panelTitle.parentElement) {
       panelTitle.parentElement.innerHTML = `
-        <i data-lucide="cloud" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
-        <span>R2 Bucket Configuration</span>
+        <i data-lucide="cloudy" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+        <span>Bucket</span>
       `;
     }
 
@@ -4585,45 +4991,65 @@ const iconColor = getFileIconColor(fileType);
       content.innerHTML = `
         <div class="r2-config-container">
           <div class="r2-config-form">
-            <div class="form-group">
-              <label for="r2-access-key-${panelId}">Access Key ID:</label>
-              <input type="text" id="r2-access-key-${panelId}" class="r2-input" placeholder="Enter Access Key ID" value="${testAccessKey}" />
+            <!-- Large Icon Header -->
+            <div class="config-icon-header">
+              <i data-lucide="cloudy" class="lucide config-icon"></i>
             </div>
             
-            <div class="form-group">
-              <label for="r2-secret-key-${panelId}">Secret Access Key:</label>
-              <input type="password" id="r2-secret-key-${panelId}" class="r2-input" placeholder="Enter Secret Access Key" value="${testSecretKey}" />
-            </div>
-            
-            <div class="form-group">
-              <label for="r2-endpoint-${panelId}">Endpoint URL:</label>
-              <input type="text" id="r2-endpoint-${panelId}" class="r2-input" value="${defaultEndpoint}" placeholder="R2 Endpoint URL" />
-            </div>
-            
-            <div class="form-group">
-              <label for="r2-bucket-${panelId}">Bucket Name (optional):</label>
-              <input type="text" id="r2-bucket-${panelId}" class="r2-input" placeholder="Leave empty to browse all buckets" value="${testBucket}" />
-            </div>
-            
-            <div class="form-group">
-              <label>
-                <input type="checkbox" id="r2-remember-${panelId}" />
-                Remember credentials
-              </label>
-            </div>
-            
-            <div class="form-actions">
-              <button class="btn btn-primary" id="r2-connect-${panelId}">
-                <i data-lucide="link" class="lucide" style="width: 16px; height: 16px; margin-right: 4px;"></i>
-                Connect
-              </button>
-            </div>
-            
-            <div class="r2-status" id="r2-status-${panelId}">
-              <span class="status-disconnected">
-                <i data-lucide="cloud-off" class="lucide" style="width: 16px; height: 16px;"></i>
-                Not connected
-              </span>
+            <!-- Connection Setup Section -->
+            <div class="form-section connection-section">
+              <div class="section-header">
+                <h3>S3-Compatible Storage</h3>
+                <span class="section-subtitle">Connect to S3, R2, or any S3-compatible bucket</span>
+              </div>
+              
+              <div class="form-fields">
+                <div class="form-group">
+                  <label for="r2-access-key-${panelId}">
+                    <span class="label-text">Access Key ID</span>
+                    <span class="label-hint">Required</span>
+                  </label>
+                  <input type="text" id="r2-access-key-${panelId}" class="r2-input" placeholder="Enter Access Key ID" value="${testAccessKey}" />
+                </div>
+                
+                <div class="form-group">
+                  <label for="r2-secret-key-${panelId}">
+                    <span class="label-text">Secret Access Key</span>
+                    <span class="label-hint">Required</span>
+                  </label>
+                  <input type="password" id="r2-secret-key-${panelId}" class="r2-input" placeholder="Enter Secret Access Key" value="${testSecretKey}" />
+                </div>
+                
+                <div class="form-group">
+                  <label for="r2-endpoint-${panelId}">
+                    <span class="label-text">Endpoint URL</span>
+                    <span class="label-hint">Auto-filled</span>
+                  </label>
+                  <input type="text" id="r2-endpoint-${panelId}" class="r2-input" value="${defaultEndpoint}" placeholder="R2 Endpoint URL" />
+                </div>
+                
+                <div class="form-group">
+                  <label for="r2-bucket-${panelId}">
+                    <span class="label-text">Bucket Name</span>
+                    <span class="label-hint">Optional</span>
+                  </label>
+                  <input type="text" id="r2-bucket-${panelId}" class="r2-input" placeholder="Leave empty to browse all buckets" value="${testBucket}" />
+                </div>
+                
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="r2-remember-${panelId}" checked />
+                    <span>Remember credentials</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-actions">
+                <button class="btn btn-primary connect-btn" id="r2-connect-${panelId}">
+                  <i data-lucide="link" class="lucide" style="width: 16px; height: 16px;"></i>
+                  <span>Connect</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -5128,12 +5554,12 @@ const iconColor = getFileIconColor(fileType);
 
     // Validate required fields
     if (!accessKey || !secretKey || !endpoint) {
-      this.updateR2Status(panelId, 'error', 'Please fill in all required fields');
+      // Status update removed - redundant UI
       return;
     }
 
     // Update status to connecting
-    this.updateR2Status(panelId, 'connecting', 'Connecting to R2...');
+    // Status update removed - redundant UI
 
     // Store credentials if remember is checked
     if (remember) {
@@ -5151,56 +5577,25 @@ const iconColor = getFileIconColor(fileType);
         this.r2FileSystems.set(panelId, r2fs);
         console.log('Current R2FileSystems:', Array.from(this.r2FileSystems.keys()));
         
-        this.updateR2Status(panelId, 'connected', 'Connected to R2');
+        // Status update removed - redundant UI
         // Transform panel to file browser
         this.transformR2PanelToBrowser(panelId, { accessKey, secretKey, endpoint, bucket });
       } else {
-        this.updateR2Status(panelId, 'error', 'Failed to connect to R2 - Check credentials');
+        // Status update removed - redundant UI
       }
     }).catch(error => {
       console.error('R2 connection error:', error);
       const errorMsg = (error as Error).message || 'Unknown error';
       // Show a shortened error message in the UI
       if (errorMsg.length > 100) {
-        this.updateR2Status(panelId, 'error', errorMsg.substring(0, 100) + '...');
+        // Status update removed - redundant UI
       } else {
-        this.updateR2Status(panelId, 'error', errorMsg);
+        // Status update removed - redundant UI
       }
     });
   }
 
-  private updateR2Status(panelId: string, status: 'connected' | 'disconnected' | 'connecting' | 'error', message: string): void {
-    const statusEl = document.getElementById(`r2-status-${panelId}`);
-    if (!statusEl) return;
-
-    let icon = 'cloud-off';
-    let className = 'status-disconnected';
-
-    switch (status) {
-      case 'connected':
-        icon = 'cloud';
-        className = 'status-connected';
-        break;
-      case 'connecting':
-        icon = 'loader';
-        className = 'status-connecting';
-        break;
-      case 'error':
-        icon = 'alert-circle';
-        className = 'status-error';
-        break;
-    }
-
-    statusEl.innerHTML = `
-      <span class="${className}">
-        <i data-lucide="${icon}" class="lucide" style="width: 16px; height: 16px;"></i>
-        ${message}
-      </span>
-    `;
-
-    // Re-initialize Lucide icons
-    this.initializeLucideIcons(10);
-  }
+  // Status update method removed - redundant UI
 
   private saveR2Credentials(panelId: string, credentials: any): void {
     // Simple encryption - in production, use a proper encryption library
@@ -5255,13 +5650,6 @@ const iconColor = getFileIconColor(fileType);
       // Match file explorer structure more closely
       content.innerHTML = `
         <div class="file-explorer-content r2-browser" data-panel-id="${panelId}">
-          <div class="r2-browser-header">
-            <div class="r2-browser-path">
-              <button class="breadcrumb-item icon-only" data-path="" title="Root">
-                <i data-lucide="folder-open" class="lucide" style="width: 16px; height: 16px;"></i>
-              </button>
-            </div>
-          </div>
           <div class="tree" aria-label="R2 Browser">
             <div class="loading-indicator">Loading R2 contents...</div>
           </div>
@@ -5280,44 +5668,334 @@ const iconColor = getFileIconColor(fileType);
     // Clean up filesystem instance
     this.r2FileSystems.delete(panelId);
     
+    // Clean up expanded folders state
+    this.r2ExpandedFolders.delete(panelId);
+    
+    // Clean up selection state
+    this.r2SelectedItems.delete(panelId);
+    this.r2LastSelectedItem.delete(panelId);
+    
     // Transform back to config panel
     this.setupR2ConfigContent(panelId);
   }
 
-  private updateR2Breadcrumbs(container: HTMLElement, panelId: string, currentPath: string): void {
-    const parts = currentPath ? currentPath.split('/').filter(p => p) : [];
-    
-    let breadcrumbHtml = `
-      <button class="breadcrumb-item icon-only" data-path="" title="Root">
-        <i data-lucide="folder-open" class="lucide" style="width: 16px; height: 16px;"></i>
-      </button>
-    `;
-    
-    let path = '';
-    parts.forEach((part, index) => {
-      path += (path ? '/' : '') + part;
-      const isLast = index === parts.length - 1;
-      breadcrumbHtml += `
-        <div class="breadcrumb-separator">/</div>
-        ${isLast ? 
-          `<span class="breadcrumb-item current">${escapeHtml(part)}</span>` : 
-          `<button class="breadcrumb-item" data-path="${path}">${escapeHtml(part)}</button>`
-        }
-      `;
-    });
-    
-    container.innerHTML = breadcrumbHtml;
-    
-    // Setup breadcrumb navigation
-    container.querySelectorAll('.breadcrumb-item[data-path]').forEach(item => {
-      item.addEventListener('click', () => {
-        const targetPath = item.getAttribute('data-path') || '';
-        this.loadR2Contents(panelId, targetPath);
-      });
-    });
-    
-    this.initializeLucideIcons(10);
+  private handleGoogleDriveConnect(panelId: string): void {
+    // Get form values
+    const serviceKeyInput = document.getElementById(`gd-service-key-${panelId}`) as HTMLTextAreaElement;
+    const folderIdInput = document.getElementById(`gd-folder-id-${panelId}`) as HTMLInputElement;
+    const rememberInput = document.getElementById(`gd-remember-${panelId}`) as HTMLInputElement;
+
+    const serviceKey = serviceKeyInput?.value.trim();
+    const folderId = folderIdInput?.value.trim();
+    const remember = rememberInput?.checked;
+
+    // Validate required fields
+    if (!serviceKey) {
+      // Status update removed - redundant UI
+      return;
+    }
+
+    // Try to parse JSON
+    try {
+      const parsed = JSON.parse(serviceKey);
+      if (!parsed.client_email || !parsed.private_key) {
+        throw new Error('Invalid service account key format');
+      }
+    } catch (error) {
+      // Status update removed - redundant UI
+      return;
+    }
+
+    // Update status to connecting
+    // Status update removed - redundant UI
+
+    // Store credentials if remember is checked
+    if (remember) {
+      this.saveGoogleDriveCredentials(panelId, { serviceKey, folderId });
+    }
+
+    // For now, simulate connection (real implementation would verify with Google)
+    setTimeout(() => {
+      // Status update removed - redundant UI
+      
+      // Store credentials temporarily for this session
+      this.googleDriveCredentials.set(panelId, { serviceKey, folderId });
+      
+      // Transform panel to file browser
+      this.transformGoogleDrivePanelToBrowser(panelId, folderId || 'root');
+    }, 1000);
   }
+
+
+
+  private transformGoogleDrivePanelToBrowser(panelId: string, folderId: string): void {
+    console.log('transformGoogleDrivePanelToBrowser called with:', { panelId, folderId });
+    
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) {
+      console.error('Panel not found with id:', panelId);
+      return;
+    }
+
+    console.log('Found panel:', panel);
+
+    // Update panel type
+    panel.setAttribute('data-panel-type', 'google-drive-browser');
+
+    // Update panel title
+    const panelTitle = panel.querySelector('.panel-title span');
+    console.log('Panel title element:', panelTitle);
+    
+    if (panelTitle && panelTitle.parentElement) {
+      panelTitle.parentElement.innerHTML = `
+        <img src="/src/gfx/drive_icon.svg" class="panel-header-drive-icon" alt="Google Drive" style="margin-right: 6px;" />
+        <span>Google Drive</span>
+      `;
+    }
+
+    // Update panel content to file browser
+    const content = panel.querySelector('.panel-content') as HTMLElement;
+    console.log('Panel content element:', content);
+    
+    if (content) {
+      console.log('Setting panel content HTML...');
+      content.innerHTML = `
+        <div class="file-explorer-content google-drive-browser" data-panel-id="${panelId}">
+          <div class="google-drive-browser-header">
+            <div class="google-drive-browser-path">
+              <button class="breadcrumb-item" data-path="root" title="My Drive">
+                <i data-lucide="hard-drive" class="lucide" style="width: 14px; height: 14px;"></i>
+                <span>My Drive</span>
+              </button>
+              <span class="breadcrumb-separator">/</span>
+              <span class="breadcrumb-current">Shared Folder</span>
+            </div>
+          </div>
+          <div class="file-list-container">
+            <div class="file-list loading-state">
+              <div class="loading-indicator">
+                <i data-lucide="loader-2" class="lucide spinning"></i>
+                <span>Loading folder contents...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Initialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // Store the folder ID for later use
+      panel.setAttribute('data-google-drive-folder', folderId);
+
+      // Get the stored credentials
+      const credentials = this.googleDriveCredentials.get(panelId);
+      if (credentials) {
+        // Create GoogleDriveFileSystem instance
+        const gdfs = new GoogleDriveFileSystem(credentials);
+        
+        // Store the file system instance
+        this.googleDriveFileSystems.set(panelId, gdfs);
+        
+        // Load the folder contents
+        this.loadGoogleDriveContents(panelId, folderId);
+      }
+    } else {
+      console.error('Panel content not found!');
+    }
+  }
+
+  private async loadGoogleDriveContents(panelId: string, folderId: string): Promise<void> {
+    const gdfs = this.googleDriveFileSystems.get(panelId);
+    if (!gdfs) return;
+
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    const fileList = panel.querySelector('.file-list');
+    if (!fileList) return;
+
+    try {
+      // Load files from Google Drive
+      const files = await gdfs.listFiles(folderId);
+      
+      if (files.length === 0) {
+        fileList.innerHTML = `
+          <div class="empty-state">
+            <i data-lucide="folder-open" class="lucide" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+            <p>This folder is empty</p>
+          </div>
+        `;
+      } else {
+        // Display files similar to R2 browser
+        const sortedFiles = sortFiles(files);
+        fileList.innerHTML = '';
+        fileList.classList.remove('loading-state');
+        
+        const tree = document.createElement('div');
+        tree.className = 'tree';
+        
+        sortedFiles.forEach((file: FileItem) => {
+          const item = this.createFileItemElement(file, 'google-drive', panelId);
+          tree.appendChild(item);
+        });
+        
+        fileList.appendChild(tree);
+      }
+      
+      // Initialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    } catch (error) {
+      console.error('Error loading Google Drive contents:', error);
+      fileList.innerHTML = `
+        <div class="empty-state">
+          <i data-lucide="alert-circle" class="lucide" style="width: 48px; height: 48px; opacity: 0.3; color: var(--error);"></i>
+          <p>Error loading folder contents</p>
+          <p style="font-size: var(--text-xs); opacity: 0.6;">${error}</p>
+        </div>
+      `;
+      
+      // Initialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+  }
+
+  private saveGoogleDriveCredentials(panelId: string, credentials: any): void {
+    // Simple base64 encoding for storage (in production, use proper encryption)
+    const encoded = btoa(JSON.stringify(credentials));
+    localStorage.setItem(`fileui-gd-creds-${panelId}`, encoded);
+  }
+
+  private loadGoogleDriveCredentials(panelId: string): void {
+    const encoded = localStorage.getItem(`fileui-gd-creds-${panelId}`);
+    if (!encoded) return;
+
+    try {
+      const credentials = JSON.parse(atob(encoded));
+      
+      // Fill form fields
+      const serviceKeyInput = document.getElementById(`gd-service-key-${panelId}`) as HTMLTextAreaElement;
+      const folderIdInput = document.getElementById(`gd-folder-id-${panelId}`) as HTMLInputElement;
+      const rememberInput = document.getElementById(`gd-remember-${panelId}`) as HTMLInputElement;
+
+      if (serviceKeyInput && credentials.serviceKey) {
+        serviceKeyInput.value = credentials.serviceKey;
+      }
+      if (folderIdInput && credentials.folderId) {
+        folderIdInput.value = credentials.folderId;
+      }
+      if (rememberInput) {
+        rememberInput.checked = true;
+      }
+    } catch (error) {
+      console.error('Failed to load Google Drive credentials:', error);
+    }
+  }
+
+  // Google Drive status update method removed - redundant UI
+
+
+  private disconnectGoogleDrive(panelId: string): void {
+    // Clear auth token
+    localStorage.removeItem('fileui-google-drive-token');
+    
+    // Transform back to config panel
+    this.setupGoogleDriveConfigContent(panelId);
+  }
+
+  private async loadGoogleDriveContents(panelId: string, path: string): Promise<void> {
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    const treeContainer = panel.querySelector('.tree');
+    if (!treeContainer) return;
+
+    // Simulate loading Google Drive files
+    // In real implementation, this would call Google Drive API
+    const mockFiles = [
+      { name: 'Documents', type: 'folder', id: 'doc-123' },
+      { name: 'Pictures', type: 'folder', id: 'pic-456' },
+      { name: 'Videos', type: 'folder', id: 'vid-789' },
+      { name: 'project-render.exr', type: 'file', id: 'file-001', mimeType: 'image/x-exr' },
+      { name: 'scene-backup.blend', type: 'file', id: 'file-002', mimeType: 'application/x-blender' },
+      { name: 'comp-v3.nk', type: 'file', id: 'file-003', mimeType: 'application/x-nuke' }
+    ];
+
+    // Clear loading indicator
+    treeContainer.innerHTML = '';
+
+    // Create file items
+    mockFiles.forEach(file => {
+      const isFolder = file.type === 'folder';
+      const fileType = isFolder ? 'folder' : getFileType(file.name);
+      const iconName = getFileIcon(fileType);
+      const iconColor = getFileIconColor(fileType);
+
+      const item = document.createElement('div');
+      item.className = 'tree-item';
+      item.innerHTML = `
+        <div class="tree-item-content google-drive-item" data-id="${file.id}" data-name="${file.name}" data-is-folder="${isFolder}">
+          ${isFolder ? `
+            <button class="tree-item-toggle" aria-label="Toggle folder">
+              <i data-lucide="chevron-right" class="lucide chevron-icon"></i>
+            </button>
+          ` : '<div class="tree-item-spacer"></div>'}
+          <i data-lucide="${iconName}" class="lucide tree-item-icon" style="color: ${iconColor};"></i>
+          <span class="tree-item-label">${file.name}</span>
+        </div>
+        ${isFolder ? '<div class="tree-item-children" style="display: none;"></div>' : ''}
+      `;
+
+      treeContainer.appendChild(item);
+    });
+
+    // Re-initialize Lucide icons
+    this.initializeLucideIcons(10);
+
+    // Add click handlers
+    this.setupGoogleDriveBrowserInteractions(panelId);
+  }
+
+  private setupGoogleDriveBrowserInteractions(panelId: string): void {
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    // Handle item clicks
+    panel.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const item = target.closest('.google-drive-item') as HTMLElement;
+      
+      if (item) {
+        const isFolder = item.dataset.isFolder === 'true';
+        const fileName = item.dataset.name || '';
+        const fileId = item.dataset.id || '';
+
+        if (isFolder) {
+          // Toggle folder expansion
+          const treeItem = item.closest('.tree-item');
+          const toggle = treeItem?.querySelector('.tree-item-toggle');
+          if (toggle) {
+            toggle.classList.toggle('expanded');
+            const children = treeItem?.querySelector('.tree-item-children') as HTMLElement;
+            if (children) {
+              children.style.display = children.style.display === 'none' ? 'block' : 'none';
+            }
+          }
+        } else {
+          // Open file in new panel
+          console.log(`Opening Google Drive file: ${fileName} (${fileId})`);
+          // In real implementation, this would download/stream the file
+        }
+      }
+    });
+  }
+
 
   private async openR2FileInPanel(sourcePanelId: string, filePath: string): Promise<void> {
     const r2fs = this.r2FileSystems.get(sourcePanelId);
@@ -5595,6 +6273,9 @@ const iconColor = getFileIconColor(fileType);
 
     const treeContainer = panel.querySelector('.tree');
     if (!treeContainer) return;
+    
+    // Save expanded folder states before reloading
+    const expandedFolders = this.saveR2ExpandedState(panelId, treeContainer as HTMLElement);
 
     // Show loading indicator
     treeContainer.innerHTML = `
@@ -5611,12 +6292,6 @@ const iconColor = getFileIconColor(fileType);
       const filteredFiles = files.filter(file => !file.name.endsWith('.keep'));
       const sortedFiles = sortFiles(filteredFiles);
 
-      // Update breadcrumbs
-      const pathContainer = panel.querySelector('.r2-browser-path');
-      if (pathContainer) {
-        this.updateR2Breadcrumbs(pathContainer as HTMLElement, panelId, path);
-      }
-
       // Display files
       if (sortedFiles.length === 0) {
         treeContainer.innerHTML = `
@@ -5630,7 +6305,28 @@ const iconColor = getFileIconColor(fileType);
 
         // Attach event handlers to all tree items
         this.attachR2TreeItemHandlers(treeContainer as HTMLElement, panelId, path);
+        
+        // Restore expanded folder states
+        this.restoreR2ExpandedState(panelId, treeContainer as HTMLElement, expandedFolders);
       }
+
+      // Add click handler to deselect when clicking empty space
+      treeContainer.addEventListener('click', (e) => {
+        // Only handle if clicking on empty space, not on items
+        if ((e.target as HTMLElement).closest('.tree-item')) return;
+        
+        // Clear selection
+        const selectedItems = this.r2SelectedItems.get(panelId);
+        if (selectedItems) {
+          selectedItems.clear();
+          
+          // Update visual selection
+          treeContainer.querySelectorAll('.tree-item-content.selected').forEach(el => {
+            el.classList.remove('selected');
+            el.classList.remove('focused');
+          });
+        }
+      });
 
       // Add context menu to browser background
       treeContainer.addEventListener('contextmenu', (e) => {
@@ -5642,8 +6338,68 @@ const iconColor = getFileIconColor(fileType);
         this.showR2ContextMenu(e as MouseEvent, panelId, path, 'background', '', path);
       });
 
-      // Add drag and drop support
-      this.setupR2DragAndDrop(treeContainer as HTMLElement, panelId, path);
+      // Add drag and drop support for moving files to root
+      treeContainer.addEventListener('dragover', (e) => {
+        // Only handle if dragging over empty space, not items
+        if ((e.target as HTMLElement).closest('.tree-item')) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Check if it's an R2 file being dragged
+        if (e.dataTransfer && e.dataTransfer.types.includes('text/plain')) {
+          e.dataTransfer.dropEffect = 'move';
+          treeContainer.classList.add('drag-over-root');
+        }
+      });
+
+      treeContainer.addEventListener('dragleave', (e) => {
+        // Only handle if leaving the tree container itself
+        if (e.target !== treeContainer) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        treeContainer.classList.remove('drag-over-root');
+      });
+
+      treeContainer.addEventListener('drop', async (e) => {
+        // Don't prevent default or stop propagation for external file drops
+        treeContainer.classList.remove('drag-over-root');
+        
+        if (!e.dataTransfer) return;
+        
+        // Check if this is an external file drop
+        if (e.dataTransfer.files.length > 0) {
+          // This is an external file drop, let the panel handler deal with it
+          // Don't stop propagation, let it bubble up
+          return;
+        }
+        
+        // For internal R2 drags, we handle them here
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Only handle internal R2 file moves to root when dropping on empty space
+        if ((e.target as HTMLElement).closest('.tree-item')) return;
+        
+        try {
+          const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+          
+          // Handle single file drops
+          if (data.type === 'r2-file' && data.panelId === panelId) {
+            // Move to root (empty path)
+            await this.moveR2File(panelId, data.path, '', data.name, path);
+          }
+          // Handle multi-file drops
+          else if (data.type === 'r2-file-multi' && data.panelId === panelId) {
+            for (const fileItem of data.items) {
+              await this.moveR2File(panelId, fileItem.path, '', fileItem.name, path);
+            }
+          }
+        } catch (error) {
+          // Not an R2 file drag, ignore
+        }
+      });
 
       this.initializeLucideIcons(10);
     } catch (error) {
@@ -5923,12 +6679,8 @@ const iconColor = getFileIconColor(fileType);
     });
   }
 
+
   private async deleteR2Item(panelId: string, itemPath: string, itemName: string, isFolder: boolean): Promise<void> {
-    const confirmMsg = isFolder 
-      ? `Are you sure you want to delete the folder "${itemName}" and all its contents?`
-      : `Are you sure you want to delete "${itemName}"?`;
-    
-    if (!confirm(confirmMsg)) return;
 
     const r2fs = this.r2FileSystems.get(panelId);
     if (!r2fs) return;
@@ -6110,7 +6862,7 @@ const iconColor = getFileIconColor(fileType);
     });
   }
 
-  private async moveR2File(panelId: string, sourcePath: string, targetFolder: string, fileName: string, currentPath: string): Promise<void> {
+  private async moveR2File(panelId: string, sourcePath: string, targetFolder: string, fileName: string, currentPath: string, targetElement?: HTMLElement): Promise<void> {
     const r2fs = this.r2FileSystems.get(panelId);
     if (!r2fs) return;
 
@@ -6130,17 +6882,22 @@ const iconColor = getFileIconColor(fileType);
         return;
       }
 
-      // Show loading indicator
-      const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+      // Show loading indicator on the target folder
+      const overlayTarget = targetElement || document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
       const loadingDiv = document.createElement('div');
       loadingDiv.className = 'r2-operation-overlay';
       loadingDiv.innerHTML = `
         <div class="operation-message">
-          <i data-lucide="loader" class="lucide spinning"></i>
-          <span>Moving ${fileName}...</span>
+          <i data-lucide="loader-circle" class="lucide spinning"></i>
         </div>
       `;
-      panel?.appendChild(loadingDiv);
+      
+      // Add position relative to the target if it's a folder
+      if (targetElement) {
+        targetElement.style.position = 'relative';
+      }
+      
+      overlayTarget?.appendChild(loadingDiv);
       this.initializeLucideIcons(10);
 
       // Read the file content
@@ -6204,6 +6961,9 @@ const iconColor = getFileIconColor(fileType);
         
         // Remove loading overlay
         loadingDiv.remove();
+        if (targetElement) {
+          targetElement.style.position = '';
+        }
         
         // Success - reload the current directory
         await this.loadR2Contents(panelId, currentPath);
@@ -6214,12 +6974,43 @@ const iconColor = getFileIconColor(fileType);
     } catch (error) {
       console.error('Move error:', error);
       // Remove loading overlay if it exists
-      panel?.querySelector('.r2-operation-overlay')?.remove();
+      overlayTarget?.querySelector('.r2-operation-overlay')?.remove();
+      if (targetElement) {
+        targetElement.style.position = '';
+      }
       alert('Failed to move file: ' + (error as Error).message);
     }
   }
 
-  private async toggleR2Folder(treeItem: HTMLElement, panelId: string): Promise<void> {
+  private saveR2ExpandedState(panelId: string, container: HTMLElement): Set<string> {
+    const expanded = new Set<string>();
+    
+    // Find all expanded folders
+    container.querySelectorAll('.tree-item-toggle[data-expanded="true"]').forEach((toggle) => {
+      const treeItem = toggle.closest('.tree-item');
+      const path = treeItem?.getAttribute('data-path');
+      if (path) {
+        expanded.add(path);
+      }
+    });
+    
+    // Store in our map
+    this.r2ExpandedFolders.set(panelId, expanded);
+    return expanded;
+  }
+  
+  private async restoreR2ExpandedState(panelId: string, container: HTMLElement, expandedPaths: Set<string>): Promise<void> {
+    // For each previously expanded folder, expand it again
+    for (const path of expandedPaths) {
+      const treeItem = container.querySelector(`.tree-item[data-path="${CSS.escape(path)}"]`);
+      if (treeItem) {
+        // Trigger the toggle without animation
+        await this.toggleR2Folder(treeItem as HTMLElement, panelId, true);
+      }
+    }
+  }
+
+  private async toggleR2Folder(treeItem: HTMLElement, panelId: string, skipAnimation: boolean = false): Promise<void> {
     const toggleBtn = treeItem.querySelector('.tree-item-toggle') as HTMLButtonElement;
     const childrenContainer = treeItem.querySelector('.tree-item-children') as HTMLElement;
     const path = treeItem.getAttribute('data-path');
@@ -6234,6 +7025,11 @@ const iconColor = getFileIconColor(fileType);
       // Collapse
       childrenContainer.style.display = 'none';
       toggleBtn.setAttribute('data-expanded', 'false');
+      
+      // Remove from expanded folders set
+      const expandedSet = this.r2ExpandedFolders.get(panelId) || new Set<string>();
+      expandedSet.delete(path);
+      this.r2ExpandedFolders.set(panelId, expandedSet);
     } else {
       // Expand
       toggleBtn.setAttribute('data-expanded', 'true');
@@ -6293,6 +7089,11 @@ const iconColor = getFileIconColor(fileType);
         // Just show/hide if already loaded
         childrenContainer.style.display = 'block';
       }
+      
+      // Add to expanded folders set
+      const expandedSet = this.r2ExpandedFolders.get(panelId) || new Set<string>();
+      expandedSet.add(path);
+      this.r2ExpandedFolders.set(panelId, expandedSet);
     }
   }
 
@@ -6318,38 +7119,36 @@ const iconColor = getFileIconColor(fileType);
           
           e.stopPropagation();
           
-          // Remove previous focus from all R2 items
-          const treeContainer = item.closest('.tree');
-          if (treeContainer) {
-            treeContainer.querySelectorAll('.tree-item-content.focused').forEach(el => {
-              el.classList.remove('focused');
-            });
-          }
-          
-          // Add focus to clicked item
-          itemContent.classList.add('focused');
-          
           const itemPath = item.getAttribute('data-path');
           const itemType = item.getAttribute('data-type');
+          
+          if (!itemPath) return;
+          
+          // Handle selection
+          this.handleR2ItemSelection(panelId, itemPath, e as MouseEvent);
+          
           const itemName = item.querySelector('.tree-item-label')?.textContent || '';
           
           // Update properties panel for selected R2 item
-          if (itemPath && itemName) {
+          if (itemName) {
             this.updatePropertiesForR2Item(itemPath, itemName, itemType === 'directory', panelId);
           }
           
-          if (itemType === 'directory' && itemPath) {
-            // For directories, clicking the content area also toggles
-            if (toggleBtn) {
-              (toggleBtn as HTMLElement).click();
+          // Only open/toggle on regular click (not ctrl/shift)
+          if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+            if (itemType === 'directory') {
+              // For directories, clicking the content area also toggles
+              if (toggleBtn) {
+                (toggleBtn as HTMLElement).click();
+              }
+            } else if (itemType === 'file') {
+              // Skip .keep files
+              if (itemPath.endsWith('.keep')) {
+                return;
+              }
+              // Open file in new panel
+              this.openR2FileInPanel(panelId, itemPath);
             }
-          } else if (itemType === 'file' && itemPath) {
-            // Skip .keep files
-            if (itemPath.endsWith('.keep')) {
-              return;
-            }
-            // Open file in new panel
-            this.openR2FileInPanel(panelId, itemPath);
           }
         });
       }
@@ -6375,19 +7174,45 @@ const iconColor = getFileIconColor(fileType);
         itemContent.addEventListener('dragstart', (e) => {
           e.stopPropagation();
           if (e.dataTransfer) {
+            const selectedItems = this.r2SelectedItems.get(panelId) || new Set();
+            
+            // If dragging an unselected item, select only it
+            if (!selectedItems.has(itemPath)) {
+              this.handleR2ItemSelection(panelId, itemPath, { ctrlKey: false, metaKey: false, shiftKey: false } as MouseEvent);
+            }
+            
+            // Get all selected items for multi-drag
+            const draggedItems: Array<{path: string, name: string}> = [];
+            selectedItems.forEach(path => {
+              const itemEl = container.querySelector(`.tree-item[data-path="${path}"]`);
+              if (itemEl) {
+                const name = itemEl.querySelector('.tree-item-label')?.textContent || '';
+                draggedItems.push({ path, name });
+              }
+            });
+            
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', JSON.stringify({
-              type: 'r2-file',
-              path: itemPath,
-              name: itemName,
+              type: 'r2-file-multi',
+              items: draggedItems,
               panelId: panelId
             }));
-            itemContent.classList.add('dragging');
+            
+            // Add dragging class to all selected items
+            selectedItems.forEach(path => {
+              const itemEl = container.querySelector(`.tree-item[data-path="${path}"] .tree-item-content`);
+              if (itemEl) {
+                itemEl.classList.add('dragging');
+              }
+            });
           }
         });
 
         itemContent.addEventListener('dragend', () => {
-          itemContent.classList.remove('dragging');
+          // Remove dragging class from all items
+          container.querySelectorAll('.tree-item-content.dragging').forEach(el => {
+            el.classList.remove('dragging');
+          });
         });
       }
 
@@ -6420,15 +7245,24 @@ const iconColor = getFileIconColor(fileType);
           e.preventDefault();
           e.stopPropagation();
           item.classList.remove('drag-over');
+          
+          // Clean up any other highlights
+          this.cleanupAllDragHighlights();
 
           if (!e.dataTransfer) return;
 
           try {
             const data = JSON.parse(e.dataTransfer.getData('text/plain'));
             
-            // Only handle R2 file drops from the same panel
+            // Handle single file drops (backward compatibility)
             if (data.type === 'r2-file' && data.panelId === panelId) {
-              await this.moveR2File(panelId, data.path, itemPath, data.name, currentPath);
+              await this.moveR2File(panelId, data.path, itemPath, data.name, currentPath, item as HTMLElement);
+            }
+            // Handle multi-file drops
+            else if (data.type === 'r2-file-multi' && data.panelId === panelId) {
+              for (const fileItem of data.items) {
+                await this.moveR2File(panelId, fileItem.path, itemPath, fileItem.name, currentPath, item as HTMLElement);
+              }
             }
           } catch (error) {
             console.error('Drop error:', error);
@@ -6514,19 +7348,16 @@ const iconColor = getFileIconColor(fileType);
     const treeContainer = panel.querySelector('.tree');
     if (!treeContainer) return;
 
-    // Show upload progress
-    const progressDiv = document.createElement('div');
-    progressDiv.className = 'r2-upload-progress';
-    progressDiv.innerHTML = `
-      <div class="upload-header">
-        <i data-lucide="upload" class="lucide"></i>
-        <span>Uploading ${files.length} file(s)...</span>
-      </div>
-      <div class="upload-progress-bar">
-        <div class="upload-progress-fill" style="width: 0%"></div>
+    // Show upload overlay (same style as move operation)
+    const overlay = document.createElement('div');
+    overlay.className = 'r2-operation-overlay';
+    overlay.innerHTML = `
+      <div class="operation-message">
+        <i data-lucide="loader-circle" class="lucide rotating"></i>
       </div>
     `;
-    treeContainer.insertBefore(progressDiv, treeContainer.firstChild);
+    treeContainer.style.position = 'relative';
+    treeContainer.appendChild(overlay);
     this.initializeLucideIcons(10);
 
     try {
@@ -6558,70 +7389,28 @@ const iconColor = getFileIconColor(fileType);
         }
         
         completed++;
-        const progress = (completed / files.length) * 100;
-        const progressFill = progressDiv.querySelector('.upload-progress-fill') as HTMLElement;
-        if (progressFill) {
-          progressFill.style.width = `${progress}%`;
-        }
       }
 
-      // Remove progress and reload
-      progressDiv.remove();
+      // Remove overlay and reload
+      overlay.remove();
       await this.loadR2Contents(panelId, currentPath);
     } catch (error) {
       console.error('Upload error:', error);
-      progressDiv.innerHTML = `
-        <div class="upload-error">
-          <i data-lucide="alert-circle" class="lucide"></i>
-          <span>Upload failed: ${(error as Error).message}</span>
-        </div>
+      overlay.remove();
+      
+      // Show error briefly
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'r2-upload-error';
+      errorDiv.innerHTML = `
+        <i data-lucide="alert-circle" class="lucide"></i>
+        <span>Upload failed: ${(error as Error).message}</span>
       `;
+      treeContainer.insertBefore(errorDiv, treeContainer.firstChild);
       this.initializeLucideIcons(10);
       
-      setTimeout(() => progressDiv.remove(), 3000);
+      setTimeout(() => errorDiv.remove(), 3000);
     }
   }
 
-  private setupR2DragAndDrop(element: HTMLElement, panelId: string, currentPath: string): void {
-    element.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      element.classList.add('drag-over');
-    });
-
-    element.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.target === element) {
-        element.classList.remove('drag-over');
-      }
-    });
-
-    element.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      element.classList.remove('drag-over');
-
-      const files: File[] = [];
-      
-      if (e.dataTransfer?.items) {
-        // Use DataTransferItemList interface
-        for (let i = 0; i < e.dataTransfer.items.length; i++) {
-          const item = e.dataTransfer.items[i];
-          if (item.kind === 'file') {
-            const file = item.getAsFile();
-            if (file) files.push(file);
-          }
-        }
-      } else if (e.dataTransfer?.files) {
-        // Use DataTransfer.files if available
-        files.push(...Array.from(e.dataTransfer.files));
-      }
-
-      if (files.length > 0) {
-        await this.uploadR2Files(panelId, currentPath, files);
-      }
-    });
-  }
 
 }

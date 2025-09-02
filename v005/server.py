@@ -51,6 +51,14 @@ class FileAPIHandler(BaseHTTPRequestHandler):
         else:
             self.send_error(404, "Not Found")
     
+    def do_DELETE(self):
+        """Handle DELETE requests"""
+        parsed_path = urlparse(self.path)
+        if parsed_path.path == '/api/r2/delete':
+            self.handle_r2_delete()
+        else:
+            self.send_error(404, "Not Found")
+    
     def do_OPTIONS(self):
         """Handle preflight CORS requests"""
         self.send_response(200)
@@ -60,7 +68,7 @@ class FileAPIHandler(BaseHTTPRequestHandler):
     def send_cors_headers(self):
         """Send CORS headers to allow Vite dev server access"""
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, PUT, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-R2-Credentials')
     
     def handle_list_files(self, parsed_path):
@@ -548,8 +556,18 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             # Determine content type
             content_type = response.get('ContentType', 'application/octet-stream')
             
+            # If no content type, guess from file extension
+            if content_type == 'application/octet-stream':
+                import mimetypes
+                guessed_type = mimetypes.guess_type(path)[0]
+                if guessed_type:
+                    content_type = guessed_type
+            
+            print(f"Serving R2 file: {path}, Content-Type: {content_type}, Size: {len(content)}")
+            
             self.send_response(200)
             self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', str(len(content)))
             self.send_cors_headers()
             self.end_headers()
             self.wfile.write(content)
@@ -571,6 +589,8 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             
             path = data.get('path')
             content = data.get('content')
+            encoding = data.get('encoding')
+            provided_content_type = data.get('contentType')
             
             if not path or content is None:
                 self.send_error(400, "Path and content required")
@@ -581,15 +601,55 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             bucket = credentials.get('bucket') or path.split('/')[0]
             key = path[len(bucket)+1:] if path.startswith(bucket) else path
             
-            # Determine content type
-            content_type = self._get_content_type(path)
+            # Handle base64 encoded content
+            if encoding == 'base64':
+                import base64
+                body = base64.b64decode(content)
+            else:
+                body = content.encode() if isinstance(content, str) else content
+            
+            # Use provided content type or determine from path
+            content_type = provided_content_type or self._get_content_type(path)
             
             s3_client.put_object(
                 Bucket=bucket,
                 Key=key,
-                Body=content.encode() if isinstance(content, str) else content,
+                Body=body,
                 ContentType=content_type
             )
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': True}).encode())
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def handle_r2_delete(self):
+        """Delete file from R2"""
+        try:
+            credentials = self._get_r2_credentials()
+            if not credentials:
+                self.send_error(400, "R2 credentials required")
+                return
+            
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode())
+            
+            path = data.get('path')
+            if not path:
+                self.send_error(400, "Path parameter required")
+                return
+            
+            s3_client = self._create_s3_client(credentials)
+            
+            bucket = credentials.get('bucket') or path.split('/')[0]
+            key = path[len(bucket)+1:] if path.startswith(bucket) else path
+            
+            s3_client.delete_object(Bucket=bucket, Key=key)
             
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')

@@ -4509,20 +4509,23 @@ const iconColor = getFileIconColor(fileType);
     // Update panel content with configuration form
     const content = panel.querySelector('.panel-content') as HTMLElement;
     if (content) {
-      // Pre-fill endpoint with default from credentials file
+      // Pre-fill with test credentials
       const defaultEndpoint = 'https://13c756aa86b04a8c3067cf111a3f29b1.r2.cloudflarestorage.com';
+      const testAccessKey = 'd22eaf144d75b2fd19c02772424588af';
+      const testSecretKey = '9c1a08a1cc4337937036f2dd815227a5e03b51c87f09dafa82ac8834c65e81cb';
+      const testBucket = 'danger-website-media';
       
       content.innerHTML = `
         <div class="r2-config-container">
           <div class="r2-config-form">
             <div class="form-group">
               <label for="r2-access-key-${panelId}">Access Key ID:</label>
-              <input type="text" id="r2-access-key-${panelId}" class="r2-input" placeholder="Enter Access Key ID" />
+              <input type="text" id="r2-access-key-${panelId}" class="r2-input" placeholder="Enter Access Key ID" value="${testAccessKey}" />
             </div>
             
             <div class="form-group">
               <label for="r2-secret-key-${panelId}">Secret Access Key:</label>
-              <input type="password" id="r2-secret-key-${panelId}" class="r2-input" placeholder="Enter Secret Access Key" />
+              <input type="password" id="r2-secret-key-${panelId}" class="r2-input" placeholder="Enter Secret Access Key" value="${testSecretKey}" />
             </div>
             
             <div class="form-group">
@@ -4532,7 +4535,7 @@ const iconColor = getFileIconColor(fileType);
             
             <div class="form-group">
               <label for="r2-bucket-${panelId}">Bucket Name (optional):</label>
-              <input type="text" id="r2-bucket-${panelId}" class="r2-input" placeholder="Leave empty to browse all buckets" />
+              <input type="text" id="r2-bucket-${panelId}" class="r2-input" placeholder="Leave empty to browse all buckets" value="${testBucket}" />
             </div>
             
             <div class="form-group">
@@ -4766,7 +4769,9 @@ const iconColor = getFileIconColor(fileType);
     r2fs.testConnection().then(success => {
       if (success) {
         // Store the filesystem instance
+        console.log('Storing R2FileSystem for panel:', panelId);
         this.r2FileSystems.set(panelId, r2fs);
+        console.log('Current R2FileSystems:', Array.from(this.r2FileSystems.keys()));
         
         this.updateR2Status(panelId, 'connected', 'Connected to R2');
         // Transform panel to file browser
@@ -4912,6 +4917,301 @@ const iconColor = getFileIconColor(fileType);
     this.setupR2ConfigContent(panelId);
   }
 
+  private updateR2Breadcrumbs(container: HTMLElement, panelId: string, currentPath: string): void {
+    const parts = currentPath ? currentPath.split('/').filter(p => p) : [];
+    const r2fs = this.r2FileSystems.get(panelId);
+    const bucketName = r2fs?.getCredentials().bucket || 'R2';
+    
+    let breadcrumbHtml = `
+      <button class="btn btn-ghost btn-sm" id="r2-disconnect-${panelId}" title="Disconnect">
+        <i data-lucide="unplug" class="lucide"></i>
+      </button>
+      <div class="breadcrumb-separator">/</div>
+      <button class="breadcrumb-item" data-path="">${bucketName}</button>
+    `;
+    
+    let path = '';
+    parts.forEach((part, index) => {
+      path += (path ? '/' : '') + part;
+      const isLast = index === parts.length - 1;
+      breadcrumbHtml += `
+        <div class="breadcrumb-separator">/</div>
+        ${isLast ? 
+          `<span class="breadcrumb-item current">${escapeHtml(part)}</span>` : 
+          `<button class="breadcrumb-item" data-path="${path}">${escapeHtml(part)}</button>`
+        }
+      `;
+    });
+    
+    container.innerHTML = breadcrumbHtml;
+    
+    // Re-setup disconnect button
+    const disconnectBtn = document.getElementById(`r2-disconnect-${panelId}`);
+    if (disconnectBtn) {
+      disconnectBtn.addEventListener('click', () => {
+        this.disconnectR2(panelId);
+      });
+    }
+    
+    // Setup breadcrumb navigation
+    container.querySelectorAll('.breadcrumb-item[data-path]').forEach(item => {
+      item.addEventListener('click', () => {
+        const targetPath = item.getAttribute('data-path') || '';
+        this.loadR2Contents(panelId, targetPath);
+      });
+    });
+    
+    this.initializeLucideIcons(10);
+  }
+
+  private async openR2FileInPanel(sourcePanelId: string, filePath: string): Promise<void> {
+    const r2fs = this.r2FileSystems.get(sourcePanelId);
+    if (!r2fs) return;
+    
+    // Get the source panel
+    const sourcePanel = document.querySelector(`.bsp-panel[data-panel-id="${sourcePanelId}"]`);
+    if (!sourcePanel) return;
+    
+    // Split the panel to create a new one for the file
+    const newPanelId = this.bspManager?.splitPanel(sourcePanelId, 'vertical', 'right');
+    if (!newPanelId) return;
+    
+    // Wait for the panel to be created
+    setTimeout(async () => {
+      const newPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`);
+      if (!newPanel) return;
+      
+      // Mark as R2 file preview panel
+      newPanel.setAttribute('data-panel-type', 'r2-file-preview');
+      newPanel.setAttribute('data-file-path', filePath);
+      
+      // Update panel title
+      const fileName = filePath.split('/').pop() || 'Unknown';
+      const panelTitle = newPanel.querySelector('.panel-title span');
+      if (panelTitle && panelTitle.parentElement) {
+        const icon = getFileIcon({ name: fileName, type: 'file', path: filePath });
+        panelTitle.parentElement.innerHTML = `
+          <i data-lucide="${icon}" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+          <span>${escapeHtml(fileName)}</span>
+        `;
+      }
+      
+      // Load file content
+      const content = newPanel.querySelector('.panel-content') as HTMLElement;
+      if (content) {
+        content.innerHTML = `
+          <div class="loading-indicator">
+            <i data-lucide="loader" class="lucide spinning"></i>
+            <span>Loading file...</span>
+          </div>
+        `;
+        this.initializeLucideIcons(10);
+        
+        try {
+          // Check if it's an image
+          const ext = fileName.split('.').pop()?.toLowerCase() || '';
+          const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
+          
+          if (imageExtensions.includes(ext)) {
+            // For images, we need to fetch with credentials and create a blob URL
+            const credentials = r2fs.getCredentials();
+            
+            try {
+              console.log('Loading image:', filePath);
+              const headers = new Headers();
+              headers.append('X-R2-Credentials', btoa(JSON.stringify(credentials)));
+              
+              const response = await fetch(`/api/r2/read?path=${encodeURIComponent(filePath)}`, {
+                headers: headers
+              });
+              
+              console.log('Image response:', response.status, response.statusText);
+              if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Image load error:', errorText);
+                throw new Error(`Failed to load image: ${response.status} ${response.statusText}`);
+              }
+              
+              const blob = await response.blob();
+              console.log('Image blob:', blob.type, blob.size);
+              
+              // Verify the blob is valid by checking first few bytes
+              const arrayBuffer = await blob.slice(0, 4).arrayBuffer();
+              const bytes = new Uint8Array(arrayBuffer);
+              console.log('First 4 bytes:', Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' '));
+              
+              // For PNG, should start with 89 50 4E 47
+              // For JPEG, should start with FF D8 FF
+              
+              const imageUrl = URL.createObjectURL(blob);
+              console.log('Created blob URL:', imageUrl);
+              
+              // Create image element
+              const img = new Image();
+              
+              // Set up event handlers before setting src
+              img.onload = () => {
+                console.log('Image loaded successfully:', img.naturalWidth, 'x', img.naturalHeight);
+              };
+              
+              img.onerror = async (e) => {
+                console.error('Image failed to load from blob URL, trying direct data URL');
+                
+                // Try creating a data URL manually
+                try {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const base64data = reader.result as string;
+                    console.log('Base64 data URL preview:', base64data.substring(0, 50) + '...');
+                    
+                    // Create a new image with the data URL
+                    const testImg = document.createElement('img');
+                    testImg.src = base64data;
+                    testImg.style.maxWidth = '100%';
+                    testImg.style.maxHeight = '100%';
+                    testImg.style.objectFit = 'contain';
+                    
+                    content.innerHTML = '';
+                    const container = document.createElement('div');
+                    container.className = 'image-preview-container';
+                    container.appendChild(testImg);
+                    content.appendChild(container);
+                  };
+                  reader.readAsDataURL(blob);
+                } catch (err) {
+                  console.error('Failed to create data URL:', err);
+                  content.innerHTML = `
+                    <div class="empty-state">
+                      <i data-lucide="image-off" class="lucide" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+                      <p>Failed to load image</p>
+                      <p class="text-muted">${escapeHtml((err as Error).message)}</p>
+                    </div>
+                  `;
+                  this.initializeLucideIcons(10);
+                }
+              };
+              
+              // Now set the src
+              img.src = imageUrl;
+              img.alt = fileName;
+              img.style.maxWidth = '100%';
+              img.style.maxHeight = '100%';
+              img.style.objectFit = 'contain';
+              img.style.display = 'block';
+              
+              // Create container
+              const container = document.createElement('div');
+              container.className = 'image-preview-container';
+              container.appendChild(img);
+              
+              // Clear content and append
+              content.innerHTML = '';
+              content.appendChild(container);
+              
+              // Clean up blob URL when panel is closed
+              const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                  if (mutation.removedNodes.length > 0) {
+                    URL.revokeObjectURL(imageUrl);
+                    observer.disconnect();
+                  }
+                });
+              });
+              observer.observe(newPanel.parentElement!, { childList: true });
+              
+            } catch (error) {
+              console.error('Image loading error:', error);
+              content.innerHTML = `
+                <div class="empty-state">
+                  <i data-lucide="image-off" class="lucide" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+                  <p>Failed to load image</p>
+                  <p class="text-muted">${escapeHtml((error as Error).message)}</p>
+                </div>
+              `;
+              this.initializeLucideIcons(10);
+            }
+          } else {
+            // For text files, load the content
+            const fileContent = await r2fs.readFile(filePath);
+            
+            // Simple syntax highlighting based on file extension
+            const language = this.getLanguageFromExtension(ext);
+            
+            content.innerHTML = `
+              <div class="file-content-wrapper">
+                <pre><code class="language-${language}">${escapeHtml(fileContent)}</code></pre>
+              </div>
+            `;
+            
+            // If Prism is available, highlight the code
+            if ((window as any).Prism) {
+              (window as any).Prism.highlightAll();
+            }
+          }
+        } catch (error) {
+          content.innerHTML = `
+            <div class="empty-state">
+              <i data-lucide="file-x" class="lucide" style="width: 48px; height: 48px; color: var(--error);"></i>
+              <p>Error loading file</p>
+              <p class="text-muted">${escapeHtml((error as Error).message)}</p>
+            </div>
+          `;
+          this.initializeLucideIcons(10);
+        }
+      }
+    }, 100);
+  }
+
+  private getLanguageFromExtension(ext: string): string {
+    const languageMap: Record<string, string> = {
+      'js': 'javascript',
+      'ts': 'typescript',
+      'jsx': 'javascript',
+      'tsx': 'typescript',
+      'py': 'python',
+      'rb': 'ruby',
+      'go': 'go',
+      'rs': 'rust',
+      'java': 'java',
+      'c': 'c',
+      'cpp': 'cpp',
+      'cs': 'csharp',
+      'php': 'php',
+      'swift': 'swift',
+      'kt': 'kotlin',
+      'scala': 'scala',
+      'r': 'r',
+      'sql': 'sql',
+      'sh': 'bash',
+      'bash': 'bash',
+      'zsh': 'bash',
+      'fish': 'bash',
+      'ps1': 'powershell',
+      'html': 'html',
+      'htm': 'html',
+      'xml': 'xml',
+      'css': 'css',
+      'scss': 'scss',
+      'sass': 'sass',
+      'less': 'less',
+      'json': 'json',
+      'yaml': 'yaml',
+      'yml': 'yaml',
+      'toml': 'toml',
+      'ini': 'ini',
+      'cfg': 'ini',
+      'conf': 'ini',
+      'md': 'markdown',
+      'markdown': 'markdown',
+      'tex': 'latex',
+      'dockerfile': 'dockerfile',
+      'makefile': 'makefile',
+      'mk': 'makefile',
+    };
+    
+    return languageMap[ext.toLowerCase()] || 'plaintext';
+  }
+
   private async loadR2Contents(panelId: string, path: string): Promise<void> {
     const r2fs = this.r2FileSystems.get(panelId);
     if (!r2fs) return;
@@ -4935,10 +5235,10 @@ const iconColor = getFileIconColor(fileType);
       const files = await r2fs.listFiles(path);
       const sortedFiles = sortFiles(files);
 
-      // Update path display
-      const pathDisplay = panel.querySelector('.path-display');
-      if (pathDisplay) {
-        pathDisplay.textContent = path || '/';
+      // Update breadcrumbs
+      const pathContainer = panel.querySelector('.r2-browser-path');
+      if (pathContainer) {
+        this.updateR2Breadcrumbs(pathContainer as HTMLElement, panelId, path);
       }
 
       // Display files
@@ -4956,7 +5256,7 @@ const iconColor = getFileIconColor(fileType);
           </div>
         `;
 
-        // Add click handlers for navigation
+        // Add click and context menu handlers
         browserContent.querySelectorAll('.tree-item').forEach(item => {
           item.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -4966,12 +5266,37 @@ const iconColor = getFileIconColor(fileType);
             if (itemType === 'directory' && itemPath) {
               this.loadR2Contents(panelId, itemPath);
             } else if (itemType === 'file' && itemPath) {
-              // TODO: Handle file preview
-              console.log('File clicked:', itemPath);
+              // Open file in new panel
+              this.openR2FileInPanel(panelId, itemPath);
             }
+          });
+
+          // Add context menu
+          item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const itemPath = item.getAttribute('data-path') || '';
+            const itemType = item.getAttribute('data-type') || 'file';
+            const itemName = item.querySelector('.tree-label')?.textContent || 'Unknown';
+            
+            this.showR2ContextMenu(e as MouseEvent, panelId, itemPath, itemType, itemName, path);
           });
         });
       }
+
+      // Add context menu to browser background
+      browserContent.addEventListener('contextmenu', (e) => {
+        // Only show if clicking on empty space, not on items
+        if ((e.target as HTMLElement).closest('.tree-item')) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        this.showR2ContextMenu(e as MouseEvent, panelId, path, 'background', '', path);
+      });
+
+      // Add drag and drop support
+      this.setupR2DragAndDrop(browserContent as HTMLElement, panelId, path);
 
       this.initializeLucideIcons(10);
     } catch (error) {
@@ -5000,6 +5325,393 @@ const iconColor = getFileIconColor(fileType);
         ${sizeStr ? `<span class="file-size">${sizeStr}</span>` : ''}
       </div>
     `;
+  }
+
+  private showR2ContextMenu(
+    event: MouseEvent,
+    panelId: string,
+    itemPath: string,
+    itemType: string,
+    itemName: string,
+    currentPath: string
+  ): void {
+    const items: ContextMenuItem[] = [];
+
+    if (itemType === 'background') {
+      // Context menu for empty space
+      items.push(
+        {
+          label: 'New Folder',
+          icon: 'folder-plus',
+          action: () => this.createR2Folder(panelId, currentPath)
+        },
+        {
+          label: 'Upload Files',
+          icon: 'upload',
+          action: () => this.triggerR2FileUpload(panelId, currentPath)
+        },
+        {
+          label: 'Upload Folder',
+          icon: 'folder-up',
+          action: () => this.triggerR2FolderUpload(panelId, currentPath)
+        },
+        { separator: true },
+        {
+          label: 'Refresh',
+          icon: 'refresh-cw',
+          action: () => this.loadR2Contents(panelId, currentPath)
+        }
+      );
+    } else if (itemType === 'directory') {
+      // Context menu for folders
+      items.push(
+        {
+          label: 'Open',
+          icon: 'folder-open',
+          action: () => this.loadR2Contents(panelId, itemPath)
+        },
+        { separator: true },
+        {
+          label: 'Delete Folder',
+          icon: 'trash-2',
+          action: () => this.deleteR2Item(panelId, itemPath, itemName, true)
+        },
+        {
+          label: 'Rename',
+          icon: 'edit-3',
+          action: () => this.renameR2Item(panelId, itemPath, itemName, currentPath)
+        }
+      );
+    } else {
+      // Context menu for files
+      items.push(
+        {
+          label: 'Download',
+          icon: 'download',
+          action: () => this.downloadR2File(panelId, itemPath, itemName)
+        },
+        { separator: true },
+        {
+          label: 'Delete',
+          icon: 'trash-2',
+          action: () => this.deleteR2Item(panelId, itemPath, itemName, false)
+        },
+        {
+          label: 'Rename',
+          icon: 'edit-3',
+          action: () => this.renameR2Item(panelId, itemPath, itemName, currentPath)
+        }
+      );
+    }
+
+    // Create and show context menu directly
+    const menu = document.createElement('div');
+    menu.className = 'context-menu';
+    menu.style.position = 'fixed';
+    menu.style.left = `${event.clientX}px`;
+    menu.style.top = `${event.clientY}px`;
+    menu.style.zIndex = '9999';
+    
+    items.forEach((item, index) => {
+      if (item.separator) {
+        const separator = document.createElement('hr');
+        separator.className = 'menu-separator';
+        menu.appendChild(separator);
+      } else if (item.label) {
+        const menuItem = document.createElement('div');
+        menuItem.className = 'menu-item';
+        if (item.disabled) menuItem.classList.add('disabled');
+        
+        if (item.icon) {
+          menuItem.innerHTML = `<i data-lucide="${item.icon}" class="lucide menu-icon"></i><span>${item.label}</span>`;
+        } else {
+          menuItem.innerHTML = `<span>${item.label}</span>`;
+        }
+        
+        if (!item.disabled && item.action) {
+          menuItem.addEventListener('click', (e) => {
+            e.stopPropagation();
+            item.action!();
+            menu.remove();
+          });
+        }
+        
+        menu.appendChild(menuItem);
+      }
+    });
+    
+    // Remove any existing menu
+    document.querySelectorAll('.context-menu').forEach(m => m.remove());
+    
+    // Add to body
+    document.body.appendChild(menu);
+    
+    // Initialize lucide icons
+    this.initializeLucideIcons(10);
+    
+    // Click outside to close
+    const closeMenu = (e: MouseEvent) => {
+      if (!menu.contains(e.target as Node)) {
+        menu.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    };
+    
+    setTimeout(() => {
+      document.addEventListener('click', closeMenu);
+    }, 0);
+  }
+
+  private async createR2Folder(panelId: string, currentPath: string): Promise<void> {
+    const folderName = prompt('Enter folder name:');
+    if (!folderName) return;
+
+    const r2fs = this.r2FileSystems.get(panelId);
+    if (!r2fs) return;
+
+    try {
+      // In S3/R2, folders are created by adding a trailing slash
+      const folderPath = currentPath ? `${currentPath}/${folderName}/` : `${folderName}/`;
+      
+      // Create an empty file to represent the folder
+      await r2fs.writeFile(folderPath + '.keep', '');
+      
+      // Reload the contents
+      await this.loadR2Contents(panelId, currentPath);
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      alert('Failed to create folder: ' + (error as Error).message);
+    }
+  }
+
+  private async deleteR2Item(panelId: string, itemPath: string, itemName: string, isFolder: boolean): Promise<void> {
+    const confirmMsg = isFolder 
+      ? `Are you sure you want to delete the folder "${itemName}" and all its contents?`
+      : `Are you sure you want to delete "${itemName}"?`;
+    
+    if (!confirm(confirmMsg)) return;
+
+    const r2fs = this.r2FileSystems.get(panelId);
+    if (!r2fs) return;
+
+    try {
+      if (isFolder) {
+        // For folders, we need to delete all contents
+        // This is a simplified version - in production, you'd want to recursively delete
+        alert('Folder deletion not fully implemented yet. Would need to recursively delete all contents.');
+      } else {
+        // Delete single file
+        await fetch('/api/r2/delete', {
+          method: 'DELETE',
+          headers: {
+            'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ path: itemPath })
+        });
+      }
+      
+      // Reload the parent directory
+      const parentPath = itemPath.substring(0, itemPath.lastIndexOf('/'));
+      await this.loadR2Contents(panelId, parentPath);
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert('Failed to delete: ' + (error as Error).message);
+    }
+  }
+
+  private async renameR2Item(panelId: string, itemPath: string, oldName: string, currentPath: string): Promise<void> {
+    const newName = prompt('Enter new name:', oldName);
+    if (!newName || newName === oldName) return;
+
+    alert('Rename functionality not implemented yet. Would need to copy to new name and delete old.');
+    // In S3/R2, rename is typically done by copying to new name and deleting old
+  }
+
+  private async downloadR2File(panelId: string, path: string, filename: string): Promise<void> {
+    const r2fs = this.r2FileSystems.get(panelId);
+    if (!r2fs) return;
+
+    try {
+      // Fetch the file content with credentials
+      const response = await fetch(`/api/r2/read?path=${encodeURIComponent(path)}`, {
+        headers: {
+          'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download file');
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      
+      // Clean up
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Failed to download file: ' + (error as Error).message);
+    }
+  }
+
+  private triggerR2FileUpload(panelId: string, currentPath: string): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.onchange = async (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (files) {
+        await this.uploadR2Files(panelId, currentPath, Array.from(files));
+      }
+    };
+    input.click();
+  }
+
+  private triggerR2FolderUpload(panelId: string, currentPath: string): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.webkitdirectory = true;
+    input.onchange = async (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (files) {
+        await this.uploadR2Files(panelId, currentPath, Array.from(files));
+      }
+    };
+    input.click();
+  }
+
+  private async uploadR2Files(panelId: string, currentPath: string, files: File[]): Promise<void> {
+    console.log('uploadR2Files called with panelId:', panelId);
+    console.log('Available R2FileSystems:', Array.from(this.r2FileSystems.keys()));
+    
+    const r2fs = this.r2FileSystems.get(panelId);
+    if (!r2fs) {
+      console.error('No R2FileSystem found for panel:', panelId);
+      console.error('Available panels:', Array.from(this.r2FileSystems.keys()));
+      return;
+    }
+
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    const browserContent = panel.querySelector('.r2-browser-content');
+    if (!browserContent) return;
+
+    // Show upload progress
+    const progressDiv = document.createElement('div');
+    progressDiv.className = 'r2-upload-progress';
+    progressDiv.innerHTML = `
+      <div class="upload-header">
+        <i data-lucide="upload" class="lucide"></i>
+        <span>Uploading ${files.length} file(s)...</span>
+      </div>
+      <div class="upload-progress-bar">
+        <div class="upload-progress-fill" style="width: 0%"></div>
+      </div>
+    `;
+    browserContent.insertBefore(progressDiv, browserContent.firstChild);
+    this.initializeLucideIcons(10);
+
+    try {
+      let completed = 0;
+      for (const file of files) {
+        const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+        
+        // Read file content as base64 for binary safety
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const bytes = new Uint8Array(arrayBuffer);
+          
+          // Convert to base64
+          let binary = '';
+          const chunkSize = 8192;
+          for (let i = 0; i < bytes.length; i += chunkSize) {
+            const chunk = bytes.slice(i, i + chunkSize);
+            binary += String.fromCharCode.apply(null, Array.from(chunk));
+          }
+          const base64Content = btoa(binary);
+          
+          // Upload via R2 filesystem with metadata
+          await r2fs.writeFile(filePath, base64Content, { 
+            encoding: 'base64',
+            contentType: file.type || 'application/octet-stream'
+          });
+        } catch (error) {
+          console.error(`Failed to upload file ${file.name}:`, error);
+        }
+        
+        completed++;
+        const progress = (completed / files.length) * 100;
+        const progressFill = progressDiv.querySelector('.upload-progress-fill') as HTMLElement;
+        if (progressFill) {
+          progressFill.style.width = `${progress}%`;
+        }
+      }
+
+      // Remove progress and reload
+      progressDiv.remove();
+      await this.loadR2Contents(panelId, currentPath);
+    } catch (error) {
+      console.error('Upload error:', error);
+      progressDiv.innerHTML = `
+        <div class="upload-error">
+          <i data-lucide="alert-circle" class="lucide"></i>
+          <span>Upload failed: ${(error as Error).message}</span>
+        </div>
+      `;
+      this.initializeLucideIcons(10);
+      
+      setTimeout(() => progressDiv.remove(), 3000);
+    }
+  }
+
+  private setupR2DragAndDrop(element: HTMLElement, panelId: string, currentPath: string): void {
+    element.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      element.classList.add('drag-over');
+    });
+
+    element.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.target === element) {
+        element.classList.remove('drag-over');
+      }
+    });
+
+    element.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      element.classList.remove('drag-over');
+
+      const files: File[] = [];
+      
+      if (e.dataTransfer?.items) {
+        // Use DataTransferItemList interface
+        for (let i = 0; i < e.dataTransfer.items.length; i++) {
+          const item = e.dataTransfer.items[i];
+          if (item.kind === 'file') {
+            const file = item.getAsFile();
+            if (file) files.push(file);
+          }
+        }
+      } else if (e.dataTransfer?.files) {
+        // Use DataTransfer.files if available
+        files.push(...Array.from(e.dataTransfer.files));
+      }
+
+      if (files.length > 0) {
+        await this.uploadR2Files(panelId, currentPath, files);
+      }
+    });
   }
 
 }

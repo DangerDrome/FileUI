@@ -15,9 +15,16 @@ export class R2FileSystem implements FileSystemAPI {
     this.credentials = credentials;
   }
 
+  // Expose credentials for operations that need them
+  public getCredentials(): R2Credentials {
+    return this.credentials;
+  }
+
   private getHeaders(): Headers {
     const headers = new Headers();
-    headers.append('X-R2-Credentials', btoa(JSON.stringify(this.credentials)));
+    const credString = btoa(JSON.stringify(this.credentials));
+    headers.append('X-R2-Credentials', credString);
+    console.log('Sending R2 credentials header:', credString.substring(0, 20) + '...');
     return headers;
   }
 
@@ -55,15 +62,20 @@ export class R2FileSystem implements FileSystemAPI {
     }
   }
 
-  async writeFile(path: string, content: string): Promise<void> {
+  async writeFile(path: string, content: string, options?: { encoding?: string; contentType?: string }): Promise<void> {
     try {
+      const headers = this.getHeaders();
+      headers.append('Content-Type', 'application/json');
+      
       const response = await fetch(`${this.baseUrl}/write`, {
         method: 'PUT',
-        headers: {
-          ...this.getHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ path, content }),
+        headers: headers,
+        body: JSON.stringify({ 
+          path, 
+          content,
+          encoding: options?.encoding,
+          contentType: options?.contentType
+        }),
       });
 
       if (!response.ok) {

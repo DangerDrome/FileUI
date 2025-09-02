@@ -3886,10 +3886,23 @@ div.panel {
   flex-direction: column;
 }
 
+/* Override panel body and content padding for R2 browser to match file explorer */
+.bsp-panel[data-panel-type="r2-browser"] .panel-body {
+  padding: var(--spacing-0) !important;
+  overflow: auto !important;
+}
+
+.bsp-panel[data-panel-type="r2-browser"] .panel-content {
+  padding: 0;
+}
+
 .r2-browser-header {
-  padding: var(--spacing-12) var(--spacing-16);
+  padding: var(--space-1) var(--space-2);
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-secondary);
+  min-height: var(--spacing-30);
+  display: flex;
+  align-items: center;
 }
 
 .r2-browser-path {
@@ -3909,6 +3922,24 @@ div.panel {
   color: var(--text-muted);
   font-size: var(--text-sm);
   opacity: 0.5;
+}
+
+.breadcrumb-item.icon-only {
+  background: transparent;
+  border: none;
+  padding: var(--spacing-4);
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-2);
+  transition: background var(--transition-fast);
+}
+
+.breadcrumb-item.icon-only:hover {
+  background: var(--color-white-opacity-5);
+  color: var(--text-primary);
 }
 
 .breadcrumb-item {
@@ -3935,7 +3966,7 @@ div.panel {
 
 .r2-browser-content {
   flex: 1;
-  padding: var(--spacing-16);
+  padding: 0;
   overflow-y: auto;
 }
 
@@ -3973,40 +4004,13 @@ div.panel {
 }
 
 /* R2 File Tree Styles */
-.r2-browser-content .file-tree {
+.r2-browser-content .tree {
   padding: 0;
+  width: 100%;
 }
 
-.r2-browser-content .tree-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-8);
-  padding: var(--spacing-6) var(--spacing-12);
-  cursor: pointer;
-  transition: background-color 0.1s;
-  border-radius: var(--border-radius-2);
-}
-
-.r2-browser-content .tree-item:hover {
-  background: var(--color-white-opacity-5);
-}
-
-.r2-browser-content .tree-item .tree-icon {
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-}
-
-.r2-browser-content .tree-item .tree-label {
-  flex: 1;
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.r2-browser-content .tree-item .file-size {
+/* R2 file size display - matches file explorer */
+.bsp-panel[data-panel-type="r2-browser"] .file-size {
   color: var(--text-tertiary);
   font-size: var(--text-xs);
   margin-left: auto;

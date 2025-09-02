@@ -104,26 +104,34 @@ export class PanelManager {
     // Always prioritize the focused panel first
     const focusedPanel = document.querySelector('.bsp-panel.focused');
     
-    // If there's a focused panel and it's not an explorer panel and not pinned
+    // If there's a focused panel and it's not an explorer panel, not an R2 panel, and not pinned
     if (focusedPanel && !focusedPanel.classList.contains('explorer-panel')) {
-      const panelId = focusedPanel.getAttribute('data-panel-id');
-      if (panelId) {
-        const isPinnedEl = (focusedPanel as HTMLElement).classList.contains('is-pinned');
-        if (!isPinnedEl) {
-          // Use the focused panel only if it's not pinned
-          return panelId;
+      const panelType = focusedPanel.getAttribute('data-panel-type');
+      if (panelType !== 'r2-browser' && panelType !== 'r2-config') {
+        const panelId = focusedPanel.getAttribute('data-panel-id');
+        if (panelId) {
+          const isPinnedEl = (focusedPanel as HTMLElement).classList.contains('is-pinned');
+          if (!isPinnedEl) {
+            // Use the focused panel only if it's not pinned
+            return panelId;
+          }
         }
       }
     }
     
-    // Find the first non-explorer, non-pinned panel
+    // Find the first non-explorer, non-R2, non-pinned panel
     const allPanels = document.querySelectorAll('.bsp-panel:not(.explorer-panel)');
     for (const panel of allPanels) {
+      const panelType = panel.getAttribute('data-panel-type');
+      if (panelType === 'r2-browser' || panelType === 'r2-config') {
+        continue; // Skip R2 panels
+      }
+      
       const panelId = panel.getAttribute('data-panel-id');
       if (panelId) {
         const isPinnedEl = (panel as HTMLElement).classList.contains('is-pinned');
         if (!isPinnedEl) {
-          // Use the first available non-explorer, non-pinned panel
+          // Use the first available non-explorer, non-R2, non-pinned panel
           this.focusPanel(panel);
           return panelId;
         }
@@ -606,6 +614,30 @@ export class PanelManager {
       this.layout();
       this.refreshDividerDragAndDrop();
     });
+
+    // Monitor for panel removals to clean up R2 connections
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.removedNodes.forEach((node) => {
+          if (node instanceof HTMLElement && node.classList.contains('bsp-panel')) {
+            const panelId = node.getAttribute('data-panel-id');
+            const panelType = node.getAttribute('data-panel-type');
+            
+            // Clean up R2 connection if this was an R2 browser panel
+            if (panelId && panelType === 'r2-browser') {
+              console.log('R2 browser panel closed, disconnecting:', panelId);
+              this.r2FileSystems.delete(panelId);
+            }
+          }
+        });
+      });
+    });
+
+    // Observe the BSP container for panel removals
+    const bspContainer = document.getElementById('main-panel');
+    if (bspContainer) {
+      observer.observe(bspContainer, { childList: true, subtree: true });
+    }
     
     
     // Handle toolbar button clicks and menu triggers
@@ -1290,9 +1322,14 @@ export class PanelManager {
   private createR2ConfigPanel(): void {
     if (!this.bspManager) return;
     
-    // Add a new panel on the right side for R2 configuration
-    const newPanelId = this.bspManager.addPanel('right');
+    // Add a new panel on the left side for R2 configuration (like explorer)
+    const newPanelId = this.bspManager.addPanel('left');
     if (!newPanelId) return;
+    
+    // Set the R2 panel to 15vw on initialization (same as explorer)
+    const explorerDefaultRatio = 0.15; // 15% width
+    this.bspManager.setParentSplitForPanelRatio(newPanelId, explorerDefaultRatio);
+    this.bspManager.layout();
     
     // Wait for the panel to be created and then update its content
     setTimeout(() => {
@@ -4874,32 +4911,21 @@ const iconColor = getFileIconColor(fileType);
     // Update panel content to file browser
     const content = panel.querySelector('.panel-content') as HTMLElement;
     if (content) {
+      // Match file explorer structure more closely
       content.innerHTML = `
-        <div class="r2-browser-container">
+        <div class="file-explorer-content r2-browser" data-panel-id="${panelId}">
           <div class="r2-browser-header">
             <div class="r2-browser-path">
-              <button class="btn btn-ghost btn-sm" id="r2-disconnect-${panelId}" title="Disconnect">
-                <i data-lucide="unplug" class="lucide"></i>
+              <button class="breadcrumb-item icon-only" data-path="" title="Root">
+                <i data-lucide="folder-open" class="lucide" style="width: 16px; height: 16px;"></i>
               </button>
-              <span class="path-display">/</span>
             </div>
           </div>
-          <div class="r2-browser-content">
-            <div class="loading-indicator">
-              <i data-lucide="loader" class="lucide spinning"></i>
-              <span>Loading R2 contents...</span>
-            </div>
+          <div class="tree" aria-label="R2 Browser">
+            <div class="loading-indicator">Loading R2 contents...</div>
           </div>
         </div>
       `;
-
-      // Setup disconnect button
-      const disconnectBtn = document.getElementById(`r2-disconnect-${panelId}`);
-      if (disconnectBtn) {
-        disconnectBtn.addEventListener('click', () => {
-          this.disconnectR2(panelId);
-        });
-      }
 
       // Load R2 contents
       this.loadR2Contents(panelId, '');
@@ -4919,15 +4945,11 @@ const iconColor = getFileIconColor(fileType);
 
   private updateR2Breadcrumbs(container: HTMLElement, panelId: string, currentPath: string): void {
     const parts = currentPath ? currentPath.split('/').filter(p => p) : [];
-    const r2fs = this.r2FileSystems.get(panelId);
-    const bucketName = r2fs?.getCredentials().bucket || 'R2';
     
     let breadcrumbHtml = `
-      <button class="btn btn-ghost btn-sm" id="r2-disconnect-${panelId}" title="Disconnect">
-        <i data-lucide="unplug" class="lucide"></i>
+      <button class="breadcrumb-item icon-only" data-path="" title="Root">
+        <i data-lucide="folder-open" class="lucide" style="width: 16px; height: 16px;"></i>
       </button>
-      <div class="breadcrumb-separator">/</div>
-      <button class="breadcrumb-item" data-path="">${bucketName}</button>
     `;
     
     let path = '';
@@ -4945,14 +4967,6 @@ const iconColor = getFileIconColor(fileType);
     
     container.innerHTML = breadcrumbHtml;
     
-    // Re-setup disconnect button
-    const disconnectBtn = document.getElementById(`r2-disconnect-${panelId}`);
-    if (disconnectBtn) {
-      disconnectBtn.addEventListener('click', () => {
-        this.disconnectR2(panelId);
-      });
-    }
-    
     // Setup breadcrumb navigation
     container.querySelectorAll('.breadcrumb-item[data-path]').forEach(item => {
       item.addEventListener('click', () => {
@@ -4968,30 +4982,35 @@ const iconColor = getFileIconColor(fileType);
     const r2fs = this.r2FileSystems.get(sourcePanelId);
     if (!r2fs) return;
     
-    // Get the source panel
-    const sourcePanel = document.querySelector(`.bsp-panel[data-panel-id="${sourcePanelId}"]`);
-    if (!sourcePanel) return;
+    // Use the standard logic: find an existing unpinned panel or create a new one
+    const targetPanelId = this.findOrCreateTargetPanel();
+    if (!targetPanelId) return;
     
-    // Split the panel to create a new one for the file
-    const newPanelId = this.bspManager?.splitPanel(sourcePanelId, 'vertical', 'right');
-    if (!newPanelId) return;
-    
-    // Wait for the panel to be created
+    // Wait for the panel to be ready
     setTimeout(async () => {
-      const newPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`);
+      const newPanel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
       if (!newPanel) return;
+      
+      // Get the file name first
+      const fileName = filePath.split('/').pop() || 'Unknown';
+      
+      // Check if panel has no header (initial empty panel) and add one
+      if (!newPanel.querySelector('.panel-header')) {
+        this.addHeaderToPanel(newPanel as HTMLElement, fileName);
+      }
       
       // Mark as R2 file preview panel
       newPanel.setAttribute('data-panel-type', 'r2-file-preview');
       newPanel.setAttribute('data-file-path', filePath);
       
       // Update panel title
-      const fileName = filePath.split('/').pop() || 'Unknown';
+      const fileType = getFileType(fileName);
       const panelTitle = newPanel.querySelector('.panel-title span');
       if (panelTitle && panelTitle.parentElement) {
-        const icon = getFileIcon({ name: fileName, type: 'file', path: filePath });
+        const icon = getFileIcon(fileType);
+        const iconColor = getFileIconColor(fileType);
         panelTitle.parentElement.innerHTML = `
-          <i data-lucide="${icon}" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+          <i data-lucide="${icon}" class="lucide" style="width: 16px; height: 16px; margin-right: 6px; color: ${iconColor};"></i>
           <span>${escapeHtml(fileName)}</span>
         `;
       }
@@ -5219,11 +5238,11 @@ const iconColor = getFileIconColor(fileType);
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
     if (!panel) return;
 
-    const browserContent = panel.querySelector('.r2-browser-content');
-    if (!browserContent) return;
+    const treeContainer = panel.querySelector('.tree');
+    if (!treeContainer) return;
 
     // Show loading indicator
-    browserContent.innerHTML = `
+    treeContainer.innerHTML = `
       <div class="loading-indicator">
         <i data-lucide="loader" class="lucide spinning"></i>
         <span>Loading...</span>
@@ -5243,21 +5262,17 @@ const iconColor = getFileIconColor(fileType);
 
       // Display files
       if (sortedFiles.length === 0) {
-        browserContent.innerHTML = `
+        treeContainer.innerHTML = `
           <div class="empty-state">
             <i data-lucide="folder-open" class="lucide" style="width: 48px; height: 48px; opacity: 0.3;"></i>
             <p>This folder is empty</p>
           </div>
         `;
       } else {
-        browserContent.innerHTML = `
-          <div class="file-tree">
-            ${sortedFiles.map(file => this.createR2TreeItem(file, panelId)).join('')}
-          </div>
-        `;
+        treeContainer.innerHTML = sortedFiles.map(file => this.createR2TreeItem(file, panelId)).join('');
 
         // Add click and context menu handlers
-        browserContent.querySelectorAll('.tree-item').forEach(item => {
+        treeContainer.querySelectorAll('.tree-item').forEach(item => {
           item.addEventListener('click', (e) => {
             e.stopPropagation();
             const itemPath = item.getAttribute('data-path');
@@ -5266,6 +5281,10 @@ const iconColor = getFileIconColor(fileType);
             if (itemType === 'directory' && itemPath) {
               this.loadR2Contents(panelId, itemPath);
             } else if (itemType === 'file' && itemPath) {
+              // Skip .keep files
+              if (itemPath.endsWith('.keep')) {
+                return;
+              }
               // Open file in new panel
               this.openR2FileInPanel(panelId, itemPath);
             }
@@ -5278,7 +5297,7 @@ const iconColor = getFileIconColor(fileType);
             
             const itemPath = item.getAttribute('data-path') || '';
             const itemType = item.getAttribute('data-type') || 'file';
-            const itemName = item.querySelector('.tree-label')?.textContent || 'Unknown';
+            const itemName = item.querySelector('.tree-item-label')?.textContent || 'Unknown';
             
             this.showR2ContextMenu(e as MouseEvent, panelId, itemPath, itemType, itemName, path);
           });
@@ -5286,7 +5305,7 @@ const iconColor = getFileIconColor(fileType);
       }
 
       // Add context menu to browser background
-      browserContent.addEventListener('contextmenu', (e) => {
+      treeContainer.addEventListener('contextmenu', (e) => {
         // Only show if clicking on empty space, not on items
         if ((e.target as HTMLElement).closest('.tree-item')) return;
         
@@ -5296,12 +5315,12 @@ const iconColor = getFileIconColor(fileType);
       });
 
       // Add drag and drop support
-      this.setupR2DragAndDrop(browserContent as HTMLElement, panelId, path);
+      this.setupR2DragAndDrop(treeContainer as HTMLElement, panelId, path);
 
       this.initializeLucideIcons(10);
     } catch (error) {
       console.error('Error loading R2 contents:', error);
-      browserContent.innerHTML = `
+      treeContainer.innerHTML = `
         <div class="empty-state">
           <i data-lucide="alert-circle" class="lucide" style="width: 48px; height: 48px; color: var(--error);"></i>
           <p>Error loading contents</p>
@@ -5313,16 +5332,20 @@ const iconColor = getFileIconColor(fileType);
   }
 
   private createR2TreeItem(file: FileItem, panelId: string): string {
-    const icon = getFileIcon(file);
-    const iconColor = getFileIconColor(file);
+    // Get the file type using the same system as the rest of the app
+    const fileType = file.type === 'directory' ? 'folder' : getFileType(file.name);
+    const icon = getFileIcon(fileType);
+    const iconColor = getFileIconColor(fileType);
     const displayName = escapeHtml(file.name);
     const sizeStr = file.type === 'file' && file.size !== undefined ? formatFileSize(file.size) : '';
 
     return `
       <div class="tree-item" data-path="${escapeHtml(file.path)}" data-type="${file.type}" data-panel-id="${panelId}">
-        <i data-lucide="${icon}" class="lucide tree-icon" style="color: ${iconColor}"></i>
-        <span class="tree-label">${displayName}</span>
-        ${sizeStr ? `<span class="file-size">${sizeStr}</span>` : ''}
+        <div class="tree-item-content" data-file-type="${fileType}">
+          <i data-lucide="${icon}" class="lucide tree-item-icon" style="color: ${iconColor}"></i>
+          <span class="tree-item-label">${displayName}</span>
+          ${sizeStr ? `<span class="file-size">${sizeStr}</span>` : ''}
+        </div>
       </div>
     `;
   }
@@ -5601,8 +5624,8 @@ const iconColor = getFileIconColor(fileType);
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
     if (!panel) return;
 
-    const browserContent = panel.querySelector('.r2-browser-content');
-    if (!browserContent) return;
+    const treeContainer = panel.querySelector('.tree');
+    if (!treeContainer) return;
 
     // Show upload progress
     const progressDiv = document.createElement('div');
@@ -5616,7 +5639,7 @@ const iconColor = getFileIconColor(fileType);
         <div class="upload-progress-fill" style="width: 0%"></div>
       </div>
     `;
-    browserContent.insertBefore(progressDiv, browserContent.firstChild);
+    treeContainer.insertBefore(progressDiv, treeContainer.firstChild);
     this.initializeLucideIcons(10);
 
     try {

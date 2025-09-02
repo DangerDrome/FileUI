@@ -3516,6 +3516,8 @@ body.is-dragging {
   font-family: monospace;
   font-size: var(--font-size-14);
   line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* Notification animations */
@@ -4016,6 +4018,36 @@ div.panel {
   margin-left: auto;
 }
 
+/* Inline rename input for tree items */
+.tree-item-rename-input {
+  background: var(--bg-input);
+  border: 1px solid var(--accent);
+  border-radius: var(--border-radius-2);
+  padding: 0 var(--spacing-4);
+  font-size: var(--text-sm);
+  line-height: var(--line-height-14);
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  width: auto;
+  min-width: 100px;
+  max-width: 300px;
+}
+
+/* Renaming state */
+.tree-item.renaming {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.tree-item.renaming .tree-item-content::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  cursor: wait;
+}
+
 /* R2 Upload Progress */
 .r2-upload-progress {
   margin: var(--spacing-16);
@@ -4106,6 +4138,8 @@ div.panel {
   background: var(--bg-primary);
   border-radius: var(--radius-4);
   overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .file-content-wrapper code {
@@ -4113,4 +4147,5 @@ div.panel {
   font-size: var(--text-sm);
   line-height: 1.6;
   tab-size: 2;
+  white-space: pre-wrap;
 }

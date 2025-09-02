@@ -5153,18 +5153,24 @@ const iconColor = getFileIconColor(fileType);
             // For text files, load the content
             const fileContent = await r2fs.readFile(filePath);
             
-            // Simple syntax highlighting based on file extension
-            const language = this.getLanguageFromExtension(ext);
-            
-            content.innerHTML = `
-              <div class="file-content-wrapper">
-                <pre><code class="language-${language}">${escapeHtml(fileContent)}</code></pre>
-              </div>
-            `;
-            
-            // If Prism is available, highlight the code
-            if ((window as any).Prism) {
-              (window as any).Prism.highlightAll();
+            // Check if it's markdown
+            if (ext === 'md' || ext === 'markdown') {
+              // Render markdown
+              content.innerHTML = `<div class="markdown-content">${this.md.render(fileContent)}</div>`;
+            } else {
+              // For other text files, use syntax highlighting
+              const language = this.getLanguageFromExtension(ext);
+              
+              content.innerHTML = `
+                <div class="file-content-wrapper">
+                  <pre class="file-content"><code class="language-${language}">${escapeHtml(fileContent)}</code></pre>
+                </div>
+              `;
+              
+              // If Prism is available, highlight the code
+              if ((window as any).Prism) {
+                (window as any).Prism.highlightAll();
+              }
             }
           }
         } catch (error) {
@@ -5544,11 +5550,154 @@ const iconColor = getFileIconColor(fileType);
   }
 
   private async renameR2Item(panelId: string, itemPath: string, oldName: string, currentPath: string): Promise<void> {
-    const newName = prompt('Enter new name:', oldName);
-    if (!newName || newName === oldName) return;
+    const r2fs = this.r2FileSystems.get(panelId);
+    if (!r2fs) return;
 
-    alert('Rename functionality not implemented yet. Would need to copy to new name and delete old.');
-    // In S3/R2, rename is typically done by copying to new name and deleting old
+    // Find the tree item in the DOM
+    const treeItem = document.querySelector(`.tree-item[data-path="${CSS.escape(itemPath)}"]`);
+    if (!treeItem) return;
+
+    const label = treeItem.querySelector('.tree-item-label');
+    if (!label) return;
+
+    // Store original text
+    const originalText = label.textContent || '';
+    
+    // Create input element
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'tree-item-rename-input';
+    input.value = originalText;
+    
+    // Replace label with input
+    label.replaceWith(input);
+    
+    // Focus and select all text
+    input.focus();
+    input.select();
+    
+    // Handle rename completion
+    const completeRename = async () => {
+      const newName = input.value.trim();
+      
+      // Restore label
+      const newLabel = document.createElement('span');
+      newLabel.className = 'tree-item-label';
+      newLabel.textContent = originalText;
+      input.replaceWith(newLabel);
+      
+      // Check if name changed
+      if (!newName || newName === oldName) {
+        return;
+      }
+      
+      // Validate filename
+      if (newName.includes('/') || newName.includes('\\')) {
+        alert('Invalid filename: cannot contain / or \\');
+        return;
+      }
+      
+      try {
+        // Show loading state
+        treeItem.classList.add('renaming');
+        
+        // Calculate new path
+        const pathParts = itemPath.split('/');
+        pathParts[pathParts.length - 1] = newName;
+        const newPath = pathParts.join('/');
+        
+        // In R2/S3, rename = copy + delete
+        // First, read the file
+        const readResponse = await fetch(`/api/r2/read?path=${encodeURIComponent(itemPath)}`, {
+          headers: {
+            'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
+          }
+        });
+        
+        if (!readResponse.ok) {
+          throw new Error('Failed to read file for rename');
+        }
+        
+        const fileContent = await readResponse.blob();
+        
+        // Then write to new location
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const base64Content = (reader.result as string).split(',')[1];
+          
+          const writeResponse = await fetch('/api/r2/write', {
+            method: 'PUT',
+            headers: {
+              'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              path: newPath,
+              content: base64Content,
+              encoding: 'base64',
+              contentType: fileContent.type || 'application/octet-stream'
+            })
+          });
+          
+          if (!writeResponse.ok) {
+            throw new Error('Failed to write file to new location');
+          }
+          
+          // Delete old file
+          const deleteResponse = await fetch('/api/r2/delete', {
+            method: 'DELETE',
+            headers: {
+              'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ path: itemPath })
+          });
+          
+          if (!deleteResponse.ok) {
+            // Try to clean up the new file if delete failed
+            await fetch('/api/r2/delete', {
+              method: 'DELETE',
+              headers: {
+                'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ path: newPath })
+            });
+            throw new Error('Failed to delete old file');
+          }
+          
+          // Success - reload the directory
+          await this.loadR2Contents(panelId, currentPath);
+        };
+        
+        reader.readAsDataURL(fileContent);
+        
+      } catch (error) {
+        console.error('Rename error:', error);
+        alert('Failed to rename: ' + (error as Error).message);
+        treeItem.classList.remove('renaming');
+      }
+    };
+    
+    // Handle escape/enter keys
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        completeRename();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        // Restore original label
+        const newLabel = document.createElement('span');
+        newLabel.className = 'tree-item-label';
+        newLabel.textContent = originalText;
+        input.replaceWith(newLabel);
+      }
+    });
+    
+    // Handle blur
+    input.addEventListener('blur', () => {
+      completeRename();
+    });
   }
 
   private async downloadR2File(panelId: string, path: string, filename: string): Promise<void> {

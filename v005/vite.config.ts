@@ -7,6 +7,12 @@ export default defineConfig({
     fs: {
       // Allow serving files from StyleUI directory
       allow: ['.', '/home/danger/Documents/GitHub/StyleUI']
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      }
     }
   },
   build: {

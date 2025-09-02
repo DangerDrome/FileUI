@@ -12,6 +12,9 @@ from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import argparse
+import boto3
+from botocore.client import Config
+import base64
 
 class FileAPIHandler(BaseHTTPRequestHandler):
     # Class variable to store root directory
@@ -29,6 +32,12 @@ class FileAPIHandler(BaseHTTPRequestHandler):
             self.handle_get_metadata(parsed_path)
         elif parsed_path.path == '/api/sequence':
             self.handle_get_sequence(parsed_path)
+        elif parsed_path.path == '/api/r2/list':
+            self.handle_r2_list(parsed_path)
+        elif parsed_path.path == '/api/r2/read':
+            self.handle_r2_read(parsed_path)
+        elif parsed_path.path == '/api/r2/test':
+            self.handle_r2_test()
         else:
             self.send_error(404, "Not Found")
     
@@ -37,6 +46,8 @@ class FileAPIHandler(BaseHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         if parsed_path.path == '/api/file':
             self.handle_write_file()
+        elif parsed_path.path == '/api/r2/write':
+            self.handle_r2_write()
         else:
             self.send_error(404, "Not Found")
     
@@ -49,8 +60,8 @@ class FileAPIHandler(BaseHTTPRequestHandler):
     def send_cors_headers(self):
         """Send CORS headers to allow Vite dev server access"""
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Methods', 'GET, PUT, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-R2-Credentials')
     
     def handle_list_files(self, parsed_path):
         """List files in a directory"""
@@ -371,6 +382,255 @@ class FileAPIHandler(BaseHTTPRequestHandler):
         except Exception as e:
             self.send_error(500, str(e))
     
+    def handle_r2_test(self):
+        """Test R2 connection"""
+        try:
+            credentials = self._get_r2_credentials()
+            if not credentials:
+                self.send_error(400, "R2 credentials required")
+                return
+            
+            print(f"Testing R2 connection to: {credentials.get('endpoint')}")
+            
+            s3_client = self._create_s3_client(credentials)
+            
+            # If a bucket is specified, try to list its contents instead
+            if credentials.get('bucket'):
+                bucket = credentials['bucket']
+                print(f"Testing access to specific bucket: {bucket}")
+                try:
+                    response = s3_client.list_objects_v2(
+                        Bucket=bucket,
+                        MaxKeys=1  # Just test with 1 object
+                    )
+                    print(f"R2 test successful for bucket '{bucket}'")
+                except Exception as bucket_error:
+                    # If bucket doesn't exist or no access, try to create a test object
+                    print(f"List failed, trying to write test object: {bucket_error}")
+                    try:
+                        test_key = '.fileui-test-' + str(int(datetime.now().timestamp()))
+                        s3_client.put_object(
+                            Bucket=bucket,
+                            Key=test_key,
+                            Body=b'test',
+                            ContentType='text/plain'
+                        )
+                        # Clean up test file
+                        s3_client.delete_object(Bucket=bucket, Key=test_key)
+                        print(f"R2 test successful - write/delete test passed")
+                    except Exception as write_error:
+                        raise write_error
+            else:
+                # Try to list buckets
+                response = s3_client.list_buckets()
+                print(f"R2 test successful, found {len(response.get('Buckets', []))} buckets")
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': True}).encode())
+            
+        except Exception as e:
+            print(f"R2 test failed: {type(e).__name__}: {str(e)}")
+            
+            # Check if it's just a permissions issue with ListBuckets
+            if "Access Denied" in str(e) and "ListBuckets" in str(e):
+                # This might be normal - some R2 tokens only have bucket-specific access
+                print("Note: ListBuckets access denied is normal for bucket-specific tokens")
+                # If no bucket specified, we can't proceed
+                if not credentials.get('bucket'):
+                    error_msg = "Access denied. Please specify a bucket name - your credentials may only have access to specific buckets, not all buckets."
+                else:
+                    error_msg = str(e)
+            else:
+                error_msg = str(e)
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': False, 'error': error_msg, 'type': type(e).__name__}).encode())
+    
+    def handle_r2_list(self, parsed_path):
+        """List R2 bucket contents"""
+        try:
+            credentials = self._get_r2_credentials()
+            if not credentials:
+                self.send_error(400, "R2 credentials required")
+                return
+            
+            query_params = parse_qs(parsed_path.query)
+            path = query_params.get('path', [''])[0]
+            
+            s3_client = self._create_s3_client(credentials)
+            
+            # If no bucket specified, list buckets
+            if not credentials.get('bucket') and not path:
+                response = s3_client.list_buckets()
+                files = []
+                for bucket in response.get('Buckets', []):
+                    files.append({
+                        'name': bucket['Name'],
+                        'path': bucket['Name'],
+                        'type': 'directory',
+                        'modified': bucket['CreationDate'].isoformat() if bucket.get('CreationDate') else None
+                    })
+            else:
+                # List objects in bucket
+                bucket = credentials.get('bucket') or path.split('/')[0]
+                prefix = path[len(bucket)+1:] if path.startswith(bucket) else path
+                
+                response = s3_client.list_objects_v2(
+                    Bucket=bucket,
+                    Prefix=prefix,
+                    Delimiter='/'
+                )
+                
+                files = []
+                
+                # Add folders (CommonPrefixes)
+                for prefix_info in response.get('CommonPrefixes', []):
+                    prefix_path = prefix_info['Prefix']
+                    name = prefix_path.rstrip('/').split('/')[-1]
+                    files.append({
+                        'name': name,
+                        'path': prefix_path,
+                        'type': 'directory'
+                    })
+                
+                # Add files (Contents)
+                for obj in response.get('Contents', []):
+                    if obj['Key'] != prefix:  # Skip the prefix itself
+                        name = obj['Key'][len(prefix):].split('/')[0]
+                        if name:  # Skip empty names
+                            files.append({
+                                'name': name,
+                                'path': obj['Key'],
+                                'type': 'file',
+                                'size': obj['Size'],
+                                'modified': obj['LastModified'].isoformat() if obj.get('LastModified') else None,
+                                'extension': name.split('.')[-1] if '.' in name else ''
+                            })
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(files).encode())
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def handle_r2_read(self, parsed_path):
+        """Read file from R2"""
+        try:
+            credentials = self._get_r2_credentials()
+            if not credentials:
+                self.send_error(400, "R2 credentials required")
+                return
+            
+            query_params = parse_qs(parsed_path.query)
+            path = query_params.get('path', [''])[0]
+            
+            if not path:
+                self.send_error(400, "Path parameter required")
+                return
+            
+            s3_client = self._create_s3_client(credentials)
+            
+            bucket = credentials.get('bucket') or path.split('/')[0]
+            key = path[len(bucket)+1:] if path.startswith(bucket) else path
+            
+            response = s3_client.get_object(Bucket=bucket, Key=key)
+            content = response['Body'].read()
+            
+            # Determine content type
+            content_type = response.get('ContentType', 'application/octet-stream')
+            
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(content)
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def handle_r2_write(self):
+        """Write file to R2"""
+        try:
+            credentials = self._get_r2_credentials()
+            if not credentials:
+                self.send_error(400, "R2 credentials required")
+                return
+            
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode())
+            
+            path = data.get('path')
+            content = data.get('content')
+            
+            if not path or content is None:
+                self.send_error(400, "Path and content required")
+                return
+            
+            s3_client = self._create_s3_client(credentials)
+            
+            bucket = credentials.get('bucket') or path.split('/')[0]
+            key = path[len(bucket)+1:] if path.startswith(bucket) else path
+            
+            # Determine content type
+            content_type = self._get_content_type(path)
+            
+            s3_client.put_object(
+                Bucket=bucket,
+                Key=key,
+                Body=content.encode() if isinstance(content, str) else content,
+                ContentType=content_type
+            )
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': True}).encode())
+            
+        except Exception as e:
+            self.send_error(500, str(e))
+    
+    def _get_r2_credentials(self):
+        """Extract R2 credentials from request header"""
+        creds_header = self.headers.get('X-R2-Credentials')
+        if not creds_header:
+            return None
+        
+        try:
+            # Decode base64 credentials
+            decoded = base64.b64decode(creds_header).decode()
+            return json.loads(decoded)
+        except:
+            return None
+    
+    def _create_s3_client(self, credentials):
+        """Create boto3 S3 client with R2 configuration"""
+        return boto3.client(
+            's3',
+            endpoint_url=credentials['endpoint'],
+            aws_access_key_id=credentials['accessKey'],
+            aws_secret_access_key=credentials['secretKey'],
+            config=Config(
+                signature_version='s3v4',
+                region_name='auto'
+            )
+        )
+    
+    def _get_content_type(self, path):
+        """Get content type for a file path"""
+        mime_type, _ = mimetypes.guess_type(path)
+        return mime_type or 'application/octet-stream'
+    
     def log_message(self, format, *args):
         """Override to customize logging"""
         print(f"{self.address_string()} - {format % args}")
@@ -395,6 +655,10 @@ def main():
     print("  GET  /api/file      - Read file contents")
     print("  PUT  /api/file      - Write file contents")
     print("  GET  /api/metadata  - Get file metadata")
+    print("  GET  /api/r2/test   - Test R2 connection")
+    print("  GET  /api/r2/list   - List R2 bucket contents")
+    print("  GET  /api/r2/read   - Read R2 file")
+    print("  PUT  /api/r2/write  - Write R2 file")
     print("\nPress Ctrl+C to stop the server")
     
     try:

@@ -1,6 +1,7 @@
 // Panel Manager - Simple fixed layout system
 import { BSPPanelManager } from './bsp-manager';
 import { ServerFileSystem, FileItem, sortFiles, getFileType, formatFileSize } from './filemanager';
+import { R2FileSystem } from './r2-filesystem';
 import { escapeHtml } from './utils/strings';
 import { getFileIcon, getFileIconColor } from './utils/ui';
 import { formatTime } from './utils/time';
@@ -41,6 +42,7 @@ export class PanelManager {
   private bspManager: BSPPanelManager | null = null;
   private directoryHandles: Map<string, any> = new Map();
   private fileHandles: Map<string, any> = new Map();
+  private r2FileSystems: Map<string, R2FileSystem> = new Map();
   private md: MarkdownIt;
   private contextMenu: ContextMenuManager;
   private dragDropInitialized: boolean = false;
@@ -1109,6 +1111,9 @@ export class PanelManager {
     } else if (action === 'terminal' && this.bspManager) {
       // Create a new terminal panel
       this.createTerminalBSPPanel();
+    } else if (action === 'r2' && this.bspManager) {
+      // Create R2 configuration panel
+      this.createR2ConfigPanel();
     }
   }
 
@@ -1186,6 +1191,11 @@ export class PanelManager {
             <div class="menu">
               <button class="btn btn-ghost btn-sm" data-action="terminal" title="Terminal">
                 <i data-lucide="terminal" class="lucide"></i>
+              </button>
+            </div>
+            <div class="menu">
+              <button class="btn btn-ghost btn-sm" data-action="r2" title="R2 Bucket">
+                <i data-lucide="cloud" class="lucide"></i>
               </button>
             </div>
           </div>
@@ -1273,6 +1283,24 @@ export class PanelManager {
         // Mark this as a terminal panel
         focusedPanel.setAttribute('data-panel-type', 'terminal');
         this.setupTerminalContent(newPanelId);
+      }
+    }, 100);
+  }
+
+  private createR2ConfigPanel(): void {
+    if (!this.bspManager) return;
+    
+    // Add a new panel on the right side for R2 configuration
+    const newPanelId = this.bspManager.addPanel('right');
+    if (!newPanelId) return;
+    
+    // Wait for the panel to be created and then update its content
+    setTimeout(() => {
+      const focusedPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`) as HTMLElement;
+      if (focusedPanel) {
+        // Mark this as an R2 panel
+        focusedPanel.setAttribute('data-panel-type', 'r2-config');
+        this.setupR2ConfigContent(newPanelId);
       }
     }, 100);
   }
@@ -4462,6 +4490,91 @@ const iconColor = getFileIconColor(fileType);
     this.initializeLucideIcons(10);
   }
 
+  private setupR2ConfigContent(panelId: string): void {
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    // Mark this as an R2 config panel
+    panel.setAttribute('data-panel-type', 'r2-config');
+
+    // Update panel title with icon
+    const panelTitle = panel.querySelector('.panel-title span');
+    if (panelTitle && panelTitle.parentElement) {
+      panelTitle.parentElement.innerHTML = `
+        <i data-lucide="cloud" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+        <span>R2 Bucket Configuration</span>
+      `;
+    }
+
+    // Update panel content with configuration form
+    const content = panel.querySelector('.panel-content') as HTMLElement;
+    if (content) {
+      // Pre-fill endpoint with default from credentials file
+      const defaultEndpoint = 'https://13c756aa86b04a8c3067cf111a3f29b1.r2.cloudflarestorage.com';
+      
+      content.innerHTML = `
+        <div class="r2-config-container">
+          <div class="r2-config-form">
+            <div class="form-group">
+              <label for="r2-access-key-${panelId}">Access Key ID:</label>
+              <input type="text" id="r2-access-key-${panelId}" class="r2-input" placeholder="Enter Access Key ID" />
+            </div>
+            
+            <div class="form-group">
+              <label for="r2-secret-key-${panelId}">Secret Access Key:</label>
+              <input type="password" id="r2-secret-key-${panelId}" class="r2-input" placeholder="Enter Secret Access Key" />
+            </div>
+            
+            <div class="form-group">
+              <label for="r2-endpoint-${panelId}">Endpoint URL:</label>
+              <input type="text" id="r2-endpoint-${panelId}" class="r2-input" value="${defaultEndpoint}" placeholder="R2 Endpoint URL" />
+            </div>
+            
+            <div class="form-group">
+              <label for="r2-bucket-${panelId}">Bucket Name (optional):</label>
+              <input type="text" id="r2-bucket-${panelId}" class="r2-input" placeholder="Leave empty to browse all buckets" />
+            </div>
+            
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="r2-remember-${panelId}" />
+                Remember credentials
+              </label>
+            </div>
+            
+            <div class="form-actions">
+              <button class="btn btn-primary" id="r2-connect-${panelId}">
+                <i data-lucide="link" class="lucide" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+                Connect
+              </button>
+            </div>
+            
+            <div class="r2-status" id="r2-status-${panelId}">
+              <span class="status-disconnected">
+                <i data-lucide="cloud-off" class="lucide" style="width: 16px; height: 16px;"></i>
+                Not connected
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Setup connect button handler
+      const connectBtn = document.getElementById(`r2-connect-${panelId}`);
+      if (connectBtn) {
+        connectBtn.addEventListener('click', () => {
+          this.handleR2Connect(panelId);
+        });
+      }
+
+      // Load saved credentials if remember was checked
+      this.loadR2Credentials(panelId);
+    }
+
+    // Re-initialize Lucide icons
+    this.initializeLucideIcons(10);
+  }
+
   private setupPropertiesContent(panelId: string): void {
     const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
     if (!panel) return;
@@ -4622,6 +4735,271 @@ const iconColor = getFileIconColor(fileType);
 
     // Scroll to bottom
     terminalOutput.scrollTop = terminalOutput.scrollHeight;
+  }
+
+  private handleR2Connect(panelId: string): void {
+    // Get form values
+    const accessKey = (document.getElementById(`r2-access-key-${panelId}`) as HTMLInputElement)?.value;
+    const secretKey = (document.getElementById(`r2-secret-key-${panelId}`) as HTMLInputElement)?.value;
+    const endpoint = (document.getElementById(`r2-endpoint-${panelId}`) as HTMLInputElement)?.value;
+    const bucket = (document.getElementById(`r2-bucket-${panelId}`) as HTMLInputElement)?.value;
+    const remember = (document.getElementById(`r2-remember-${panelId}`) as HTMLInputElement)?.checked;
+
+    // Validate required fields
+    if (!accessKey || !secretKey || !endpoint) {
+      this.updateR2Status(panelId, 'error', 'Please fill in all required fields');
+      return;
+    }
+
+    // Update status to connecting
+    this.updateR2Status(panelId, 'connecting', 'Connecting to R2...');
+
+    // Store credentials if remember is checked
+    if (remember) {
+      this.saveR2Credentials(panelId, { accessKey, secretKey, endpoint, bucket });
+    }
+
+    // Initialize R2FileSystem and test connection
+    const r2fs = new R2FileSystem({ accessKey, secretKey, endpoint, bucket });
+    
+    // Test connection
+    r2fs.testConnection().then(success => {
+      if (success) {
+        // Store the filesystem instance
+        this.r2FileSystems.set(panelId, r2fs);
+        
+        this.updateR2Status(panelId, 'connected', 'Connected to R2');
+        // Transform panel to file browser
+        this.transformR2PanelToBrowser(panelId, { accessKey, secretKey, endpoint, bucket });
+      } else {
+        this.updateR2Status(panelId, 'error', 'Failed to connect to R2 - Check credentials');
+      }
+    }).catch(error => {
+      console.error('R2 connection error:', error);
+      const errorMsg = (error as Error).message || 'Unknown error';
+      // Show a shortened error message in the UI
+      if (errorMsg.length > 100) {
+        this.updateR2Status(panelId, 'error', errorMsg.substring(0, 100) + '...');
+      } else {
+        this.updateR2Status(panelId, 'error', errorMsg);
+      }
+    });
+  }
+
+  private updateR2Status(panelId: string, status: 'connected' | 'disconnected' | 'connecting' | 'error', message: string): void {
+    const statusEl = document.getElementById(`r2-status-${panelId}`);
+    if (!statusEl) return;
+
+    let icon = 'cloud-off';
+    let className = 'status-disconnected';
+
+    switch (status) {
+      case 'connected':
+        icon = 'cloud';
+        className = 'status-connected';
+        break;
+      case 'connecting':
+        icon = 'loader';
+        className = 'status-connecting';
+        break;
+      case 'error':
+        icon = 'alert-circle';
+        className = 'status-error';
+        break;
+    }
+
+    statusEl.innerHTML = `
+      <span class="${className}">
+        <i data-lucide="${icon}" class="lucide" style="width: 16px; height: 16px;"></i>
+        ${message}
+      </span>
+    `;
+
+    // Re-initialize Lucide icons
+    this.initializeLucideIcons(10);
+  }
+
+  private saveR2Credentials(panelId: string, credentials: any): void {
+    // Simple encryption - in production, use a proper encryption library
+    const encrypted = btoa(JSON.stringify(credentials));
+    localStorage.setItem(`fileui-r2-creds-${panelId}`, encrypted);
+  }
+
+  private loadR2Credentials(panelId: string): void {
+    const encrypted = localStorage.getItem(`fileui-r2-creds-${panelId}`);
+    if (!encrypted) return;
+
+    try {
+      const credentials = JSON.parse(atob(encrypted));
+      
+      // Fill form fields
+      const accessKeyInput = document.getElementById(`r2-access-key-${panelId}`) as HTMLInputElement;
+      const secretKeyInput = document.getElementById(`r2-secret-key-${panelId}`) as HTMLInputElement;
+      const endpointInput = document.getElementById(`r2-endpoint-${panelId}`) as HTMLInputElement;
+      const bucketInput = document.getElementById(`r2-bucket-${panelId}`) as HTMLInputElement;
+      const rememberInput = document.getElementById(`r2-remember-${panelId}`) as HTMLInputElement;
+
+      if (accessKeyInput) accessKeyInput.value = credentials.accessKey || '';
+      if (secretKeyInput) secretKeyInput.value = credentials.secretKey || '';
+      if (endpointInput) endpointInput.value = credentials.endpoint || '';
+      if (bucketInput) bucketInput.value = credentials.bucket || '';
+      if (rememberInput) rememberInput.checked = true;
+    } catch (error) {
+      console.error('Failed to load R2 credentials:', error);
+    }
+  }
+
+  private transformR2PanelToBrowser(panelId: string, credentials: any): void {
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    // Update panel type
+    panel.setAttribute('data-panel-type', 'r2-browser');
+
+    // Update panel title
+    const panelTitle = panel.querySelector('.panel-title span');
+    if (panelTitle && panelTitle.parentElement) {
+      const bucketName = credentials.bucket || 'All Buckets';
+      panelTitle.parentElement.innerHTML = `
+        <i data-lucide="cloud" class="lucide" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+        <span>R2: ${bucketName}</span>
+      `;
+    }
+
+    // Update panel content to file browser
+    const content = panel.querySelector('.panel-content') as HTMLElement;
+    if (content) {
+      content.innerHTML = `
+        <div class="r2-browser-container">
+          <div class="r2-browser-header">
+            <div class="r2-browser-path">
+              <button class="btn btn-ghost btn-sm" id="r2-disconnect-${panelId}" title="Disconnect">
+                <i data-lucide="unplug" class="lucide"></i>
+              </button>
+              <span class="path-display">/</span>
+            </div>
+          </div>
+          <div class="r2-browser-content">
+            <div class="loading-indicator">
+              <i data-lucide="loader" class="lucide spinning"></i>
+              <span>Loading R2 contents...</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Setup disconnect button
+      const disconnectBtn = document.getElementById(`r2-disconnect-${panelId}`);
+      if (disconnectBtn) {
+        disconnectBtn.addEventListener('click', () => {
+          this.disconnectR2(panelId);
+        });
+      }
+
+      // Load R2 contents
+      this.loadR2Contents(panelId, '');
+    }
+
+    // Re-initialize Lucide icons
+    this.initializeLucideIcons(10);
+  }
+
+  private disconnectR2(panelId: string): void {
+    // Clean up filesystem instance
+    this.r2FileSystems.delete(panelId);
+    
+    // Transform back to config panel
+    this.setupR2ConfigContent(panelId);
+  }
+
+  private async loadR2Contents(panelId: string, path: string): Promise<void> {
+    const r2fs = this.r2FileSystems.get(panelId);
+    if (!r2fs) return;
+
+    const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+    if (!panel) return;
+
+    const browserContent = panel.querySelector('.r2-browser-content');
+    if (!browserContent) return;
+
+    // Show loading indicator
+    browserContent.innerHTML = `
+      <div class="loading-indicator">
+        <i data-lucide="loader" class="lucide spinning"></i>
+        <span>Loading...</span>
+      </div>
+    `;
+    this.initializeLucideIcons(10);
+
+    try {
+      const files = await r2fs.listFiles(path);
+      const sortedFiles = sortFiles(files);
+
+      // Update path display
+      const pathDisplay = panel.querySelector('.path-display');
+      if (pathDisplay) {
+        pathDisplay.textContent = path || '/';
+      }
+
+      // Display files
+      if (sortedFiles.length === 0) {
+        browserContent.innerHTML = `
+          <div class="empty-state">
+            <i data-lucide="folder-open" class="lucide" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+            <p>This folder is empty</p>
+          </div>
+        `;
+      } else {
+        browserContent.innerHTML = `
+          <div class="file-tree">
+            ${sortedFiles.map(file => this.createR2TreeItem(file, panelId)).join('')}
+          </div>
+        `;
+
+        // Add click handlers for navigation
+        browserContent.querySelectorAll('.tree-item').forEach(item => {
+          item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const itemPath = item.getAttribute('data-path');
+            const itemType = item.getAttribute('data-type');
+            
+            if (itemType === 'directory' && itemPath) {
+              this.loadR2Contents(panelId, itemPath);
+            } else if (itemType === 'file' && itemPath) {
+              // TODO: Handle file preview
+              console.log('File clicked:', itemPath);
+            }
+          });
+        });
+      }
+
+      this.initializeLucideIcons(10);
+    } catch (error) {
+      console.error('Error loading R2 contents:', error);
+      browserContent.innerHTML = `
+        <div class="empty-state">
+          <i data-lucide="alert-circle" class="lucide" style="width: 48px; height: 48px; color: var(--error);"></i>
+          <p>Error loading contents</p>
+          <p class="text-muted">${(error as Error).message}</p>
+        </div>
+      `;
+      this.initializeLucideIcons(10);
+    }
+  }
+
+  private createR2TreeItem(file: FileItem, panelId: string): string {
+    const icon = getFileIcon(file);
+    const iconColor = getFileIconColor(file);
+    const displayName = escapeHtml(file.name);
+    const sizeStr = file.type === 'file' && file.size !== undefined ? formatFileSize(file.size) : '';
+
+    return `
+      <div class="tree-item" data-path="${escapeHtml(file.path)}" data-type="${file.type}" data-panel-id="${panelId}">
+        <i data-lucide="${icon}" class="lucide tree-icon" style="color: ${iconColor}"></i>
+        <span class="tree-label">${displayName}</span>
+        ${sizeStr ? `<span class="file-size">${sizeStr}</span>` : ''}
+      </div>
+    `;
   }
 
 }

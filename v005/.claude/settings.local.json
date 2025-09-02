@@ -29,7 +29,9 @@
       "Bash(sed:*)",
       "Bash(python3:*)",
       "Bash(npx tsc:*)",
-      "Bash(/home/danger/Documents/GitHub/FileUI/v005/devserver.sh logs:*)"
+      "Bash(/home/danger/Documents/GitHub/FileUI/v005/devserver.sh logs:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(pip3 install:*)"
     ],
     "deny": []
   }

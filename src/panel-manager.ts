@@ -6996,7 +6996,7 @@ const iconColor = getFileIconColor(fileType);
         const uploadBlob = new Blob([bytes], { type: fileContent.type || 'application/octet-stream' });
         
         const writeResponse = await fetch(`/api/r2/write?path=${encodeURIComponent(newPath)}`, {
-          method: 'POST',
+          method: 'PUT',
           headers: {
             'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
             'Content-Type': fileContent.type || 'application/octet-stream'

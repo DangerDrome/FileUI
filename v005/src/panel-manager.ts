@@ -5001,6 +5001,13 @@ const iconColor = getFileIconColor(fileType);
               <div class="section-header">
                 <h3>S3-Compatible Storage</h3>
                 <span class="section-subtitle">Connect to S3, R2, or any S3-compatible bucket</span>
+                <div class="service-examples" style="margin: 8px 0 16px 0; font-size: 12px; opacity: 0.7; line-height: 1.5;">
+                  Examples:<br>
+                  • R2: https://[account-id].r2.cloudflarestorage.com<br>
+                  • S3: https://s3.[region].amazonaws.com<br>
+                  • GCS: https://storage.googleapis.com<br>
+                  • MinIO: http://localhost:9000
+                </div>
               </div>
               
               <div class="form-fields">
@@ -5033,7 +5040,7 @@ const iconColor = getFileIconColor(fileType);
                     <span class="label-text">Bucket Name</span>
                     <span class="label-hint">Optional</span>
                   </label>
-                  <input type="text" id="r2-bucket-${panelId}" class="r2-input" placeholder="Leave empty to browse all buckets" value="${testBucket}" />
+                  <input type="text" id="r2-bucket-${panelId}" class="r2-input" placeholder="bucket-name" value="${testBucket}" />
                 </div>
                 
                 <div class="checkbox-group">

@@ -5011,6 +5011,12 @@ const iconColor = getFileIconColor(fileType);
                   • GCS: https://storage.googleapis.com<br>
                   • MinIO: http://localhost:9000
                 </div>
+                ${window.location.hostname === 'fileui.io' || window.location.hostname.includes('pages.dev') ? `
+                <div class="cloudflare-notice" style="margin: 8px 0 16px 0; padding: 12px; background: var(--warning-bg, rgba(255,193,7,0.1)); border: 1px solid var(--warning, #ffc107); border-radius: 6px; font-size: 12px;">
+                  <strong>Cloudflare Pages Notice:</strong><br>
+                  R2 access on fileui.io requires special setup. For full functionality, run FileUI locally or see the <a href="https://github.com/yourusername/fileui/blob/main/docs/cloudflare-r2-setup.md" target="_blank" style="color: var(--warning);">setup guide</a>.
+                </div>
+                ` : ''}
               </div>
               
               <div class="form-fields">
@@ -5587,20 +5593,55 @@ const iconColor = getFileIconColor(fileType);
         this.r2FileSystems.set(panelId, r2fs);
         console.log('Current R2FileSystems:', Array.from(this.r2FileSystems.keys()));
         
-        // Status update removed - redundant UI
         // Transform panel to file browser
         this.transformR2PanelToBrowser(panelId, { accessKey, secretKey, endpoint, bucket });
       } else {
-        // Status update removed - redundant UI
+        // Connection failed - show error in panel
+        const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+        if (panel) {
+          const content = panel.querySelector('.bsp-panel-content');
+          if (content) {
+            // Find or create error div
+            let errorDiv = content.querySelector('.connection-error');
+            if (!errorDiv) {
+              errorDiv = document.createElement('div');
+              errorDiv.className = 'connection-error';
+              errorDiv.style.cssText = 'color: var(--error); margin: 16px; padding: 16px; background: rgba(255,0,0,0.1); border-radius: 8px; border: 1px solid var(--error);';
+              const form = content.querySelector('.connection-form');
+              if (form) {
+                form.insertAdjacentElement('afterend', errorDiv as Element);
+              }
+            }
+            errorDiv.innerHTML = `
+              <strong>Connection Failed</strong><br>
+              R2 access on Cloudflare Pages requires special configuration.<br><br>
+              <strong>Options:</strong><br>
+              1. Run FileUI locally with "npm run dev"<br>
+              2. Configure R2 bucket binding in Cloudflare Pages settings<br>
+              3. Use a different S3-compatible service
+            `;
+          }
+        }
       }
     }).catch(error => {
       console.error('R2 connection error:', error);
-      const errorMsg = (error as Error).message || 'Unknown error';
-      // Show a shortened error message in the UI
-      if (errorMsg.length > 100) {
-        // Status update removed - redundant UI
-      } else {
-        // Status update removed - redundant UI
+      // Show error in panel
+      const panel = document.querySelector(`.bsp-panel[data-panel-id="${panelId}"]`);
+      if (panel) {
+        const content = panel.querySelector('.bsp-panel-content');
+        if (content) {
+          let errorDiv = content.querySelector('.connection-error');
+          if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'connection-error';
+            errorDiv.style.cssText = 'color: var(--error); margin: 16px; padding: 16px; background: rgba(255,0,0,0.1); border-radius: 8px; border: 1px solid var(--error);';
+            const form = content.querySelector('.connection-form');
+            if (form) {
+              form.insertAdjacentElement('afterend', errorDiv as Element);
+            }
+          }
+          errorDiv.textContent = `Connection error: ${(error as Error).message}`;
+        }
       }
     });
   }
@@ -6027,7 +6068,12 @@ const iconColor = getFileIconColor(fileType);
     // Wait for the panel to be ready
     setTimeout(async () => {
       const newPanel = document.querySelector(`.bsp-panel[data-panel-id="${targetPanelId}"]`);
-      if (!newPanel) return;
+      if (!newPanel) {
+        console.error('Could not find panel with ID:', targetPanelId);
+        return;
+      }
+      
+      console.log('Found panel, loading file:', filePath);
       
       // Get the file name first
       const fileName = filePath.split('/').pop() || 'Unknown';
@@ -6076,7 +6122,8 @@ const iconColor = getFileIconColor(fileType);
             const credentials = r2fs.getCredentials();
             
             try {
-              console.log('Loading image:', filePath);
+              console.log('Loading R2 image:', filePath);
+              console.log('Using endpoint:', `/api/r2/download?path=${encodeURIComponent(filePath)}`);
               const headers = new Headers();
               headers.append('X-R2-Credentials', btoa(JSON.stringify(credentials)));
               
@@ -6439,17 +6486,19 @@ const iconColor = getFileIconColor(fileType);
   }
 
   private createR2TreeItem(file: FileItem, panelId: string, level: number = 0): string {
+    // Check if it's a directory - R2 returns isDirectory, not type
+    const isDirectory = file.isDirectory || file.type === 'directory';
+    
     // Get the file type using the same system as the rest of the app
-    const fileType = file.type === 'directory' ? 'folder' : getFileType(file.name);
+    const fileType = isDirectory ? 'folder' : getFileType(file.name);
     const icon = getFileIcon(fileType);
     const iconColor = getFileIconColor(fileType);
     const displayName = escapeHtml(file.name);
-    const sizeStr = file.type === 'file' && file.size !== undefined ? formatFileSize(file.size) : '';
-    const isDirectory = file.type === 'directory';
+    const sizeStr = !isDirectory && file.size !== undefined ? formatFileSize(file.size) : '';
 
     return `
-      <div class="tree-item" data-path="${escapeHtml(file.path)}" data-type="${file.type}" data-panel-id="${panelId}" data-level="${level}">
-        <div class="tree-item-content" data-file-type="${fileType}" draggable="${file.type === 'file' ? 'true' : 'false'}" style="padding-left: ${20 + level * 20}px">
+      <div class="tree-item" data-path="${escapeHtml(file.path)}" data-type="${isDirectory ? 'directory' : 'file'}" data-panel-id="${panelId}" data-level="${level}">
+        <div class="tree-item-content" data-file-type="${fileType}" draggable="${!isDirectory ? 'true' : 'false'}" style="padding-left: ${20 + level * 20}px">
           ${isDirectory ? `
             <button class="tree-item-toggle" aria-label="Toggle folder" data-expanded="false">
               <i data-lucide="chevron-right" class="lucide chevron-icon"></i>

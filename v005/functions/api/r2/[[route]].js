@@ -28,9 +28,10 @@ export async function onRequest(context) {
     const credentials = JSON.parse(atob(credString));
     const { accessKey, secretKey, endpoint, bucket } = credentials;
 
-    // For now, we'll use the bound R2 bucket if available
-    // In the future, we can add support for dynamic buckets
+    // For Cloudflare R2, we need to use the bound R2 bucket
+    // This requires R2 bucket binding in wrangler.toml or Pages configuration
     if (!env.R2_BUCKET) {
+      // Fallback to trying to handle it differently
       return new Response(JSON.stringify({ 
         error: 'R2 bucket not configured. Please configure R2 bucket binding in Cloudflare Pages settings.',
         info: 'Add R2_BUCKET binding pointing to danger-website-media bucket'
@@ -77,8 +78,11 @@ export async function onRequest(context) {
 
           // Add folders (delimited prefixes)
           if (listed.delimitedPrefixes) {
+            console.log('Found folders:', listed.delimitedPrefixes);
             for (const folderPrefix of listed.delimitedPrefixes) {
+              // Remove the current prefix to get just the folder name
               const name = folderPrefix.slice(prefix.length).replace(/\/$/, '');
+              console.log('Folder:', folderPrefix, 'Name:', name);
               if (name && name !== '.keep') {
                 files.push({
                   name,

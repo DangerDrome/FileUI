@@ -1,3 +1,6 @@
+// R2 API implementation that supports dynamic bucket selection
+// Uses AWS Signature V4 signing for S3-compatible API access
+
 export async function onRequest(context) {
   const { request, env, params } = context;
   const url = new URL(request.url);
@@ -28,28 +31,141 @@ export async function onRequest(context) {
     const credentials = JSON.parse(atob(credString));
     const { accessKey, secretKey, endpoint, bucket } = credentials;
 
-    // For Cloudflare R2, we need to use the bound R2 bucket
-    // This requires R2 bucket binding in wrangler.toml or Pages configuration
-    if (!env.R2_BUCKET) {
-      // Fallback to trying to handle it differently
-      return new Response(JSON.stringify({ 
-        error: 'R2 bucket not configured. Please configure R2 bucket binding in Cloudflare Pages settings.',
-        info: 'Add R2_BUCKET binding pointing to danger-website-media bucket'
-      }), {
-        status: 500,
+    if (!bucket) {
+      return new Response(JSON.stringify({ error: 'Bucket name required' }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+
+    // AWS Signature V4 implementation
+    const signRequest = async (method, path, headers = {}, body = null) => {
+      const now = new Date();
+      const dateStamp = now.toISOString().slice(0, 10).replace(/-/g, '');
+      const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, '');
+      
+      const service = 's3';
+      const region = 'auto'; // R2 uses 'auto' region
+      const algorithm = 'AWS4-HMAC-SHA256';
+      const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
+      
+      // Parse endpoint to get host
+      const endpointUrl = new URL(endpoint);
+      const host = endpointUrl.hostname;
+      
+      // Canonical URI
+      const canonicalUri = `/${bucket}${path}`;
+      
+      // Canonical headers
+      const canonicalHeaders = {
+        'host': host,
+        'x-amz-date': amzDate,
+        'x-amz-content-sha256': 'UNSIGNED-PAYLOAD',
+        ...headers
+      };
+      
+      const signedHeaders = Object.keys(canonicalHeaders).sort().join(';');
+      const canonicalHeadersStr = Object.keys(canonicalHeaders)
+        .sort()
+        .map(k => `${k}:${canonicalHeaders[k]}`)
+        .join('\n') + '\n';
+      
+      // Canonical request
+      const canonicalRequest = [
+        method,
+        canonicalUri,
+        '', // query string
+        canonicalHeadersStr,
+        signedHeaders,
+        'UNSIGNED-PAYLOAD'
+      ].join('\n');
+      
+      // String to sign
+      const hashedCanonicalRequest = await crypto.subtle.digest(
+        'SHA-256',
+        new TextEncoder().encode(canonicalRequest)
+      );
+      const stringToSign = [
+        algorithm,
+        amzDate,
+        credentialScope,
+        Array.from(new Uint8Array(hashedCanonicalRequest))
+          .map(b => b.toString(16).padStart(2, '0'))
+          .join('')
+      ].join('\n');
+      
+      // Calculate signature
+      const getSignatureKey = async (key, dateStamp, regionName, serviceName) => {
+        const kDate = await crypto.subtle.importKey(
+          'raw',
+          new TextEncoder().encode('AWS4' + key),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['sign']
+        );
+        const kRegion = await crypto.subtle.sign(
+          'HMAC',
+          kDate,
+          new TextEncoder().encode(dateStamp)
+        );
+        const kService = await crypto.subtle.sign(
+          'HMAC',
+          await crypto.subtle.importKey('raw', kRegion, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']),
+          new TextEncoder().encode(regionName)
+        );
+        const kSigning = await crypto.subtle.sign(
+          'HMAC',
+          await crypto.subtle.importKey('raw', kService, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']),
+          new TextEncoder().encode(serviceName)
+        );
+        return crypto.subtle.sign(
+          'HMAC',
+          await crypto.subtle.importKey('raw', kSigning, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']),
+          new TextEncoder().encode('aws4_request')
+        );
+      };
+      
+      const signingKey = await getSignatureKey(secretKey, dateStamp, region, service);
+      const signature = await crypto.subtle.sign(
+        'HMAC',
+        await crypto.subtle.importKey('raw', signingKey, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']),
+        new TextEncoder().encode(stringToSign)
+      );
+      
+      const signatureHex = Array.from(new Uint8Array(signature))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      
+      // Authorization header
+      const authorizationHeader = `${algorithm} Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signatureHex}`;
+      
+      return {
+        url: `${endpoint}${canonicalUri}`,
+        headers: {
+          ...canonicalHeaders,
+          'Authorization': authorizationHeader
+        }
+      };
+    };
 
     // Handle different routes
     switch (route) {
       case 'test':
         try {
-          // Test by listing with 1 item
-          await env.R2_BUCKET.list({ limit: 1 });
-          return new Response(JSON.stringify({ success: true }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
+          // Test by listing bucket
+          const { url: signedUrl, headers } = await signRequest('GET', '/', {}, null);
+          const response = await fetch(signedUrl + '?max-keys=1', { headers });
+          
+          if (response.ok) {
+            return new Response(JSON.stringify({ success: true }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          } else {
+            const error = await response.text();
+            return new Response(JSON.stringify({ success: false, error }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
         } catch (error) {
           return new Response(JSON.stringify({ success: false, error: error.message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -61,58 +177,56 @@ export async function onRequest(context) {
           const path = url.searchParams.get('path') || '';
           const prefix = path ? path + '/' : '';
           
-          console.log('Listing R2 path:', path, 'prefix:', prefix);
+          const { url: signedUrl, headers } = await signRequest('GET', '/', {}, null);
+          const listUrl = signedUrl + `?list-type=2&prefix=${encodeURIComponent(prefix)}&delimiter=/&max-keys=1000`;
           
-          const listed = await env.R2_BUCKET.list({
-            prefix: prefix,
-            delimiter: '/',
-            limit: 1000
-          });
+          const response = await fetch(listUrl, { headers });
           
-          console.log('R2 list result:', {
-            objects: listed.objects?.length || 0,
-            prefixes: listed.delimitedPrefixes?.length || 0
-          });
+          if (!response.ok) {
+            throw new Error(`List failed: ${response.status} ${await response.text()}`);
+          }
+          
+          const xml = await response.text();
+          
+          // Parse XML response
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(xml, 'text/xml');
           
           const files = [];
-
-          // Add folders (delimited prefixes)
-          if (listed.delimitedPrefixes) {
-            console.log('Found folders:', listed.delimitedPrefixes);
-            for (const folderPrefix of listed.delimitedPrefixes) {
-              // Remove the current prefix to get just the folder name
-              const name = folderPrefix.slice(prefix.length).replace(/\/$/, '');
-              console.log('Folder:', folderPrefix, 'Name:', name);
-              if (name && name !== '.keep') {
-                files.push({
-                  name,
-                  path: folderPrefix.replace(/\/$/, ''),
-                  isDirectory: true,
-                  size: 0,
-                  lastModified: new Date().toISOString()
-                });
-              }
+          
+          // Add folders (CommonPrefixes)
+          const prefixes = doc.querySelectorAll('CommonPrefixes > Prefix');
+          prefixes.forEach(prefixNode => {
+            const folderPath = prefixNode.textContent;
+            const name = folderPath.slice(prefix.length).replace(/\/$/, '');
+            if (name && name !== '.keep') {
+              files.push({
+                name,
+                path: folderPath.replace(/\/$/, ''),
+                isDirectory: true,
+                size: 0,
+                lastModified: new Date().toISOString()
+              });
             }
-          }
-
-          // Add files
-          if (listed.objects) {
-            for (const obj of listed.objects) {
-              const name = obj.key.slice(prefix.length);
-              // Skip files in subdirectories and .keep files
-              if (name && !name.includes('/') && !name.endsWith('.keep')) {
-                files.push({
-                  name,
-                  path: obj.key,
-                  isDirectory: false,
-                  size: obj.size,
-                  lastModified: obj.uploaded.toISOString()
-                });
-              }
+          });
+          
+          // Add files (Contents)
+          const contents = doc.querySelectorAll('Contents');
+          contents.forEach(content => {
+            const key = content.querySelector('Key').textContent;
+            const name = key.slice(prefix.length);
+            
+            if (name && !name.includes('/') && !name.endsWith('.keep')) {
+              files.push({
+                name,
+                path: key,
+                isDirectory: false,
+                size: parseInt(content.querySelector('Size').textContent),
+                lastModified: content.querySelector('LastModified').textContent
+              });
             }
-          }
-
-          console.log('Returning files:', files.length);
+          });
+          
           return new Response(JSON.stringify(files), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
@@ -141,11 +255,20 @@ export async function onRequest(context) {
           const contentType = request.headers.get('Content-Type') || 'application/octet-stream';
           const body = await request.arrayBuffer();
           
-          await env.R2_BUCKET.put(uploadPath, body, {
-            httpMetadata: {
-              contentType: contentType
-            }
+          const { url: signedUrl, headers } = await signRequest('PUT', `/${uploadPath}`, {
+            'content-type': contentType,
+            'content-length': body.byteLength.toString()
+          }, body);
+          
+          const response = await fetch(signedUrl, {
+            method: 'PUT',
+            headers,
+            body
           });
+          
+          if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status} ${await response.text()}`);
+          }
 
           return new Response(JSON.stringify({ success: true }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -167,17 +290,19 @@ export async function onRequest(context) {
             });
           }
 
-          const object = await env.R2_BUCKET.get(downloadPath);
-          if (!object) {
+          const { url: signedUrl, headers } = await signRequest('GET', `/${downloadPath}`, {}, null);
+          const response = await fetch(signedUrl, { headers });
+          
+          if (!response.ok) {
             return new Response('Not found', { status: 404, headers: corsHeaders });
           }
 
           const responseHeaders = {
             ...corsHeaders,
-            'Content-Type': object.httpMetadata?.contentType || 'application/octet-stream',
+            'Content-Type': response.headers.get('Content-Type') || 'application/octet-stream',
           };
 
-          return new Response(object.body, { headers: responseHeaders });
+          return new Response(response.body, { headers: responseHeaders });
         } catch (error) {
           return new Response(JSON.stringify({ error: error.message }), {
             status: 500,
@@ -199,18 +324,14 @@ export async function onRequest(context) {
             });
           }
 
-          // For folders, we need to delete all contents
-          if (deletePath.endsWith('/') || url.searchParams.get('isFolder') === 'true') {
-            const folderPath = deletePath.endsWith('/') ? deletePath : deletePath + '/';
-            const objects = await env.R2_BUCKET.list({ prefix: folderPath });
-            
-            // Delete all objects in the folder
-            for (const obj of objects.objects || []) {
-              await env.R2_BUCKET.delete(obj.key);
-            }
-          } else {
-            // Delete single file
-            await env.R2_BUCKET.delete(deletePath);
+          const { url: signedUrl, headers } = await signRequest('DELETE', `/${deletePath}`, {}, null);
+          const response = await fetch(signedUrl, {
+            method: 'DELETE',
+            headers
+          });
+          
+          if (!response.ok && response.status !== 404) {
+            throw new Error(`Delete failed: ${response.status} ${await response.text()}`);
           }
 
           return new Response(JSON.stringify({ success: true }), {
@@ -238,7 +359,20 @@ export async function onRequest(context) {
           }
 
           // Create a .keep file to make the folder exist
-          await env.R2_BUCKET.put(folderPath + '/.keep', '');
+          const { url: signedUrl, headers } = await signRequest('PUT', `/${folderPath}/.keep`, {
+            'content-type': 'text/plain',
+            'content-length': '0'
+          }, new ArrayBuffer(0));
+          
+          const response = await fetch(signedUrl, {
+            method: 'PUT',
+            headers,
+            body: ''
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Create folder failed: ${response.status} ${await response.text()}`);
+          }
           
           return new Response(JSON.stringify({ success: true }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }

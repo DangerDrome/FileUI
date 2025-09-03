@@ -1,0 +1,291 @@
+/* Style overrides to fix dim interface - Keep original dark theme but improve visibility */
+
+/* GLOBAL FIXES - Force everything to be visible */
+* {
+  opacity: 1 !important;
+}
+
+/* Make icons visible but preserve file type colors */
+.lucide, 
+[data-lucide],
+i[data-lucide],
+svg {
+  opacity: 1 !important;
+  stroke-width: 2 !important;
+}
+
+/* Panel action buttons stay white */
+.panel-action-btn .lucide,
+.panel-actions .lucide {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Fix pin button icon visibility */
+.bsp-panel:not(.is-pinned) .icon-pin-off {
+  display: none !important;
+}
+
+.bsp-panel.is-pinned .icon-pin {
+  display: none !important;
+}
+
+.bsp-panel.is-pinned .icon-pin-off {
+  display: block !important;
+}
+
+/* Highlight pinned state with accent color */
+.bsp-panel.is-pinned .panel-action-btn[data-action="pin"] .lucide {
+  color: #00cc8b !important;
+  stroke: #00cc8b !important;
+}
+
+/* Dim left/right toolbar icons */
+.action-bar-panel .lucide,
+.action-bar-panel .btn {
+  color: rgba(255, 255, 255, 0.5) !important;
+  stroke: rgba(255, 255, 255, 0.5) !important;
+  opacity: 0.5 !important;
+}
+
+.action-bar-panel .btn:hover,
+.action-bar-panel .btn:hover .lucide {
+  color: rgba(255, 255, 255, 0.8) !important;
+  stroke: rgba(255, 255, 255, 0.8) !important;
+  opacity: 0.8 !important;
+}
+
+/* Top toolbar - slightly less dim to match left toolbar appearance */
+.header-toolbar .lucide,
+.header-toolbar .btn,
+.header-toolbar svg {
+  color: rgba(255, 255, 255, 0.6) !important;
+  stroke: rgba(255, 255, 255, 0.6) !important;
+  opacity: 0.6 !important;
+}
+
+.header-toolbar .btn:hover,
+.header-toolbar .btn:hover .lucide,
+.header-toolbar .btn:hover svg {
+  color: rgba(255, 255, 255, 0.9) !important;
+  stroke: rgba(255, 255, 255, 0.9) !important;
+  opacity: 0.9 !important;
+}
+
+/* DO NOT override panel title icon colors - they have inline styles with file type colors */
+.panel-title .lucide {
+  /* Don't set color here - let inline styles work */
+  opacity: 1 !important;
+}
+
+/* Toolbar buttons - keep them visible without changing background */
+.action-bar-panel .btn,
+.panel-action-btn,
+button {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.action-bar-panel .btn:hover,
+.panel-action-btn:hover,
+button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Dim menu items and top menu bar */
+.context-menu-item,
+.menu-item,
+.menu-bar .menu-trigger,
+.menu-bar .btn {
+  color: rgba(255, 255, 255, 0.5) !important;
+  opacity: 0.5 !important;
+}
+
+.context-menu-item:hover,
+.menu-item:hover,
+.menu-bar .menu-trigger:hover,
+.menu-bar .btn:hover {
+  color: rgba(255, 255, 255, 0.9) !important;
+  opacity: 0.9 !important;
+}
+
+/* Panel title text color */
+.panel-title {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Preserve file type icon colors in tree view */
+.tree-item-icon[data-file-type="file-3d"] {
+  color: #f7b2ad !important;
+  stroke: #f7b2ad !important;
+}
+
+.tree-item-icon[data-file-type="file-comp"] {
+  color: #7ec4cf !important;
+  stroke: #7ec4cf !important;
+}
+
+.tree-item-icon[data-file-type="file-image"] {
+  color: #ffe066 !important;
+  stroke: #ffe066 !important;
+}
+
+.tree-item-icon[data-file-type="file-video"] {
+  color: #c3aed6 !important;
+  stroke: #c3aed6 !important;
+}
+
+.tree-item-icon[data-file-type="file-project"] {
+  color: #b5ead7 !important;
+  stroke: #b5ead7 !important;
+}
+
+.tree-item-icon[data-file-type="file-pdf"] {
+  color: #ff9999 !important;
+  stroke: #ff9999 !important;
+}
+
+/* Preserve file type label colors on hover/selection */
+.tree-item-content[data-file-type="file-3d"]:hover .tree-item-label,
+.tree-item-content.selected[data-file-type="file-3d"] .tree-item-label {
+  color: #f7b2ad !important;
+}
+
+.tree-item-content[data-file-type="file-comp"]:hover .tree-item-label,
+.tree-item-content.selected[data-file-type="file-comp"] .tree-item-label {
+  color: #7ec4cf !important;
+}
+
+.tree-item-content[data-file-type="file-image"]:hover .tree-item-label,
+.tree-item-content.selected[data-file-type="file-image"] .tree-item-label {
+  color: #ffe066 !important;
+}
+
+.tree-item-content[data-file-type="file-video"]:hover .tree-item-label,
+.tree-item-content.selected[data-file-type="file-video"] .tree-item-label {
+  color: #c3aed6 !important;
+}
+
+.tree-item-content[data-file-type="file-project"]:hover .tree-item-label,
+.tree-item-content.selected[data-file-type="file-project"] .tree-item-label {
+  color: #b5ead7 !important;
+}
+
+.tree-item-content[data-file-type="file-pdf"]:hover .tree-item-label,
+.tree-item-content.selected[data-file-type="file-pdf"] .tree-item-label {
+  color: #ff9999 !important;
+}
+
+/* Dim file items by default */
+.tree-item-label {
+  color: rgba(255, 255, 255, 0.5) !important;
+  opacity: 0.7 !important;
+}
+
+.tree-item:hover .tree-item-label {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 0.9 !important;
+}
+
+/* Menu icons should also be dimmed */
+.menu-icon,
+.context-menu-item .lucide {
+  opacity: 0.5 !important;
+}
+
+.context-menu-item:hover .lucide,
+.menu-item:hover .menu-icon {
+  opacity: 0.9 !important;
+}
+
+/* Dim Google Drive logo more */
+.toolbar-drive-icon,
+.panel-header-drive-icon,
+.drive-icon {
+  opacity: 0.3 !important;
+  filter: grayscale(80%) brightness(0.7) !important;
+}
+
+.btn:hover .toolbar-drive-icon,
+.panel-header:hover .panel-header-drive-icon {
+  opacity: 0.5 !important;
+  filter: grayscale(60%) brightness(0.8) !important;
+}
+
+/* Remove border radius from panels to fix white background showing */
+.bsp-panel,
+.panel,
+.panel-header,
+.panel-body,
+.panel-content,
+.fileui-panel {
+  border-radius: 0 !important;
+}
+
+/* File explorer - keep transparent backgrounds */
+.tree-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.tree-item.selected,
+.tree-item-content.selected {
+  background: #00cc8b33 !important;
+  color: #ffffff !important;
+}
+
+/* Context menus - subtle hover only */
+.context-menu-item {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.context-menu-item:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Remove all dimming effects */
+.bsp-panel:not(:focus-within) .panel-header,
+.bsp-panel:not(:focus-within) .panel-title {
+  opacity: 1 !important;
+  color: #ffffff !important;
+}
+
+/* Toolbar panel fix */
+.toolbar-panel,
+.action-bar-panel {
+  opacity: 1 !important;
+}
+
+/* Empty panel message */
+.empty-panel-message {
+  color: #999999 !important;
+  opacity: 1 !important;
+}
+
+/* Input fields and forms - keep dark but visible */
+input, textarea, select {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Remove any filters that might be dimming things */
+* {
+  filter: none !important;
+}
+
+/* Ensure no overlays are blocking visibility */
+.overlay,
+.modal-overlay {
+  opacity: 0.9 !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Force bright accent color */
+.accent,
+[class*="accent"] {
+  color: #00cc8b !important;
+  opacity: 1 !important;
+}

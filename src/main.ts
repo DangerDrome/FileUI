@@ -1,5 +1,6 @@
 // Main entry point for FileUI v005
 import './style.css';
+import './style-overrides.css';
 import { PanelManager } from './panel-manager';
 
 // Initialize the application when DOM is ready

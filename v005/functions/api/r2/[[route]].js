@@ -1,6 +1,3 @@
-// AWS SDK v3 imports for S3-compatible operations
-import { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
-
 export async function onRequest(context) {
   const { request, env, params } = context;
   const url = new URL(request.url);
@@ -31,273 +28,232 @@ export async function onRequest(context) {
     const credentials = JSON.parse(atob(credString));
     const { accessKey, secretKey, endpoint, bucket } = credentials;
 
-    // Always use S3-compatible client for flexibility
-    // This works with R2, S3, GCS, MinIO, etc.
-    return handleS3Compatible(route, request, credentials, corsHeaders);
+    // For now, we'll use the bound R2 bucket if available
+    // In the future, we can add support for dynamic buckets
+    if (!env.R2_BUCKET) {
+      return new Response(JSON.stringify({ 
+        error: 'R2 bucket not configured. Please configure R2 bucket binding in Cloudflare Pages settings.',
+        info: 'Add R2_BUCKET binding pointing to danger-website-media bucket'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Handle different routes
+    switch (route) {
+      case 'test':
+        try {
+          // Test by listing with 1 item
+          await env.R2_BUCKET.list({ limit: 1 });
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } catch (error) {
+          return new Response(JSON.stringify({ success: false, error: error.message }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+      case 'list':
+        try {
+          const path = url.searchParams.get('path') || '';
+          const prefix = path ? path + '/' : '';
+          
+          console.log('Listing R2 path:', path, 'prefix:', prefix);
+          
+          const listed = await env.R2_BUCKET.list({
+            prefix: prefix,
+            delimiter: '/',
+            limit: 1000
+          });
+          
+          console.log('R2 list result:', {
+            objects: listed.objects?.length || 0,
+            prefixes: listed.delimitedPrefixes?.length || 0
+          });
+          
+          const files = [];
+
+          // Add folders (delimited prefixes)
+          if (listed.delimitedPrefixes) {
+            for (const folderPrefix of listed.delimitedPrefixes) {
+              const name = folderPrefix.slice(prefix.length).replace(/\/$/, '');
+              if (name && name !== '.keep') {
+                files.push({
+                  name,
+                  path: folderPrefix.replace(/\/$/, ''),
+                  isDirectory: true,
+                  size: 0,
+                  lastModified: new Date().toISOString()
+                });
+              }
+            }
+          }
+
+          // Add files
+          if (listed.objects) {
+            for (const obj of listed.objects) {
+              const name = obj.key.slice(prefix.length);
+              // Skip files in subdirectories and .keep files
+              if (name && !name.includes('/') && !name.endsWith('.keep')) {
+                files.push({
+                  name,
+                  path: obj.key,
+                  isDirectory: false,
+                  size: obj.size,
+                  lastModified: obj.uploaded.toISOString()
+                });
+              }
+            }
+          }
+
+          console.log('Returning files:', files.length);
+          return new Response(JSON.stringify(files), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } catch (error) {
+          console.error('List error:', error);
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+      case 'upload':
+        if (request.method !== 'POST') {
+          return new Response('Method not allowed', { status: 405, headers: corsHeaders });
+        }
+
+        try {
+          const uploadPath = url.searchParams.get('path');
+          if (!uploadPath) {
+            return new Response(JSON.stringify({ error: 'Path required' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+
+          const contentType = request.headers.get('Content-Type') || 'application/octet-stream';
+          const body = await request.arrayBuffer();
+          
+          await env.R2_BUCKET.put(uploadPath, body, {
+            httpMetadata: {
+              contentType: contentType
+            }
+          });
+
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } catch (error) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+      case 'download':
+        try {
+          const downloadPath = url.searchParams.get('path');
+          if (!downloadPath) {
+            return new Response(JSON.stringify({ error: 'Path required' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+
+          const object = await env.R2_BUCKET.get(downloadPath);
+          if (!object) {
+            return new Response('Not found', { status: 404, headers: corsHeaders });
+          }
+
+          const responseHeaders = {
+            ...corsHeaders,
+            'Content-Type': object.httpMetadata?.contentType || 'application/octet-stream',
+          };
+
+          return new Response(object.body, { headers: responseHeaders });
+        } catch (error) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+      case 'delete':
+        if (request.method !== 'DELETE') {
+          return new Response('Method not allowed', { status: 405, headers: corsHeaders });
+        }
+
+        try {
+          const deletePath = url.searchParams.get('path');
+          if (!deletePath) {
+            return new Response(JSON.stringify({ error: 'Path required' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+
+          // For folders, we need to delete all contents
+          if (deletePath.endsWith('/') || url.searchParams.get('isFolder') === 'true') {
+            const folderPath = deletePath.endsWith('/') ? deletePath : deletePath + '/';
+            const objects = await env.R2_BUCKET.list({ prefix: folderPath });
+            
+            // Delete all objects in the folder
+            for (const obj of objects.objects || []) {
+              await env.R2_BUCKET.delete(obj.key);
+            }
+          } else {
+            // Delete single file
+            await env.R2_BUCKET.delete(deletePath);
+          }
+
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } catch (error) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+      case 'create-folder':
+        if (request.method !== 'POST') {
+          return new Response('Method not allowed', { status: 405, headers: corsHeaders });
+        }
+
+        try {
+          const folderPath = url.searchParams.get('path');
+          if (!folderPath) {
+            return new Response(JSON.stringify({ error: 'Path required' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+
+          // Create a .keep file to make the folder exist
+          await env.R2_BUCKET.put(folderPath + '/.keep', '');
+          
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } catch (error) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+      default:
+        return new Response('Not found', { status: 404, headers: corsHeaders });
+    }
   } catch (error) {
     console.error('R2 API error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
-  }
-}
-
-// Handler for S3-compatible endpoints
-async function handleS3Compatible(route, request, credentials, corsHeaders) {
-  const { accessKey, secretKey, endpoint, bucket } = credentials;
-  const url = new URL(request.url);
-  
-  // Configure S3 client
-  const s3Config = {
-    credentials: {
-      accessKeyId: accessKey,
-      secretAccessKey: secretKey,
-    },
-    region: 'auto', // R2 uses 'auto'
-  };
-
-  // Parse endpoint to determine if it's R2, S3, or custom
-  if (endpoint) {
-    if (endpoint.includes('r2.cloudflarestorage.com')) {
-      // R2 endpoint
-      const accountId = endpoint.match(/https:\/\/(\w+)\.r2\.cloudflarestorage\.com/)?.[1];
-      if (accountId) {
-        s3Config.endpoint = `https://${accountId}.r2.cloudflarestorage.com`;
-      }
-    } else if (endpoint.includes('amazonaws.com')) {
-      // AWS S3 - extract region from endpoint
-      const region = endpoint.match(/s3[.-]([^.]+)\.amazonaws\.com/)?.[1] || 'us-east-1';
-      s3Config.region = region;
-    } else if (endpoint.includes('storage.googleapis.com')) {
-      // Google Cloud Storage
-      s3Config.endpoint = 'https://storage.googleapis.com';
-    } else {
-      // Custom endpoint (MinIO, etc.)
-      s3Config.endpoint = endpoint;
-    }
-  }
-
-  const s3 = new S3Client(s3Config);
-  const bucketName = bucket || 'default-bucket';
-
-  switch (route) {
-    case 'test':
-      try {
-        // Test connection by trying to list with max 1 result
-        const command = new ListObjectsV2Command({
-          Bucket: bucketName,
-          MaxKeys: 1
-        });
-        await s3.send(command);
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      } catch (error) {
-        return new Response(JSON.stringify({ 
-          success: false, 
-          error: error.message,
-          type: error.name 
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-    case 'list':
-      try {
-        const path = url.searchParams.get('path') || '';
-        const prefix = path ? path + '/' : '';
-        
-        const command = new ListObjectsV2Command({
-          Bucket: bucketName,
-          Prefix: prefix,
-          Delimiter: '/'
-        });
-        
-        const response = await s3.send(command);
-        const files = [];
-
-        // Add folders
-        if (response.CommonPrefixes) {
-          for (const commonPrefix of response.CommonPrefixes) {
-            const folderPath = commonPrefix.Prefix || '';
-            const name = folderPath.slice(prefix.length).replace(/\/$/, '');
-            if (name && name !== '.keep') {
-              files.push({
-                name,
-                path: folderPath.replace(/\/$/, ''),
-                isDirectory: true,
-                size: 0,
-                lastModified: new Date().toISOString()
-              });
-            }
-          }
-        }
-
-        // Add files
-        if (response.Contents) {
-          for (const object of response.Contents) {
-            const key = object.Key || '';
-            const name = key.slice(prefix.length);
-            if (name && !name.endsWith('.keep')) {
-              files.push({
-                name,
-                path: key,
-                isDirectory: false,
-                size: object.Size || 0,
-                lastModified: object.LastModified?.toISOString() || new Date().toISOString()
-              });
-            }
-          }
-        }
-
-        return new Response(JSON.stringify(files), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-    case 'upload':
-      if (request.method !== 'POST') {
-        return new Response('Method not allowed', { status: 405, headers: corsHeaders });
-      }
-
-      try {
-        const uploadPath = url.searchParams.get('path');
-        if (!uploadPath) {
-          return new Response(JSON.stringify({ error: 'Path required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-
-        const contentType = request.headers.get('Content-Type') || 'application/octet-stream';
-        const body = await request.arrayBuffer();
-        
-        const command = new PutObjectCommand({
-          Bucket: bucketName,
-          Key: uploadPath,
-          Body: new Uint8Array(body),
-          ContentType: contentType
-        });
-        
-        await s3.send(command);
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-    case 'download':
-      try {
-        const downloadPath = url.searchParams.get('path');
-        if (!downloadPath) {
-          return new Response(JSON.stringify({ error: 'Path required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-
-        const command = new GetObjectCommand({
-          Bucket: bucketName,
-          Key: downloadPath
-        });
-        
-        const response = await s3.send(command);
-        const chunks = [];
-        for await (const chunk of response.Body) {
-          chunks.push(chunk);
-        }
-        const body = Buffer.concat(chunks);
-        
-        const responseHeaders = {
-          ...corsHeaders,
-          'Content-Type': response.ContentType || 'application/octet-stream',
-        };
-
-        return new Response(body, { headers: responseHeaders });
-      } catch (error) {
-        if (error.name === 'NoSuchKey') {
-          return new Response('Not found', { status: 404, headers: corsHeaders });
-        }
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-    case 'delete':
-      if (request.method !== 'DELETE') {
-        return new Response('Method not allowed', { status: 405, headers: corsHeaders });
-      }
-
-      try {
-        const deletePath = url.searchParams.get('path');
-        if (!deletePath) {
-          return new Response(JSON.stringify({ error: 'Path required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-
-        const command = new DeleteObjectCommand({
-          Bucket: bucketName,
-          Key: deletePath
-        });
-        
-        await s3.send(command);
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-    case 'create-folder':
-      if (request.method !== 'POST') {
-        return new Response('Method not allowed', { status: 405, headers: corsHeaders });
-      }
-
-      try {
-        const folderPath = url.searchParams.get('path');
-        if (!folderPath) {
-          return new Response(JSON.stringify({ error: 'Path required' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-
-        // Create a .keep file to make the folder exist
-        const command = new PutObjectCommand({
-          Bucket: bucketName,
-          Key: folderPath + '/.keep',
-          Body: '',
-          ContentType: 'text/plain'
-        });
-        
-        await s3.send(command);
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-    default:
-      return new Response('Not found', { status: 404, headers: corsHeaders });
   }
 }

@@ -271,14 +271,17 @@ export class PanelManager {
     }
 
     // Only create a new panel if no non-explorer panels exist
+    console.log('Creating new panel via BSP manager');
     const newPanelId = this.bspManager.addPanel('right');
     
     // Focus the newly created panel
     if (newPanelId) {
+      console.log('New panel created with ID:', newPanelId);
       // Wait for panel to be created in DOM
       setTimeout(() => {
         const newPanel = document.querySelector(`.bsp-panel[data-panel-id="${newPanelId}"]`);
         if (newPanel) {
+          console.log('Panel found in DOM');
           this.focusPanel(newPanel);
           // Ensure panel is ready
           const panelContent = newPanel.querySelector('.panel-content');
@@ -6005,12 +6008,21 @@ const iconColor = getFileIconColor(fileType);
 
 
   private async openR2FileInPanel(sourcePanelId: string, filePath: string): Promise<void> {
+    console.log('Opening R2 file in panel:', filePath);
     const r2fs = this.r2FileSystems.get(sourcePanelId);
-    if (!r2fs) return;
+    if (!r2fs) {
+      console.error('R2 filesystem not found for panel:', sourcePanelId);
+      return;
+    }
     
     // Use the standard logic: find an existing unpinned panel or create a new one
     const targetPanelId = this.findOrCreateTargetPanel();
-    if (!targetPanelId) return;
+    if (!targetPanelId) {
+      console.error('Could not find or create target panel');
+      return;
+    }
+    
+    console.log('Target panel ID:', targetPanelId);
     
     // Wait for the panel to be ready
     setTimeout(async () => {
@@ -6068,7 +6080,7 @@ const iconColor = getFileIconColor(fileType);
               const headers = new Headers();
               headers.append('X-R2-Credentials', btoa(JSON.stringify(credentials)));
               
-              const response = await fetch(`/api/r2/read?path=${encodeURIComponent(filePath)}`, {
+              const response = await fetch(`/api/r2/download?path=${encodeURIComponent(filePath)}`, {
                 headers: headers
               });
               
@@ -6294,10 +6306,14 @@ const iconColor = getFileIconColor(fileType);
     this.initializeLucideIcons(10);
 
     try {
+      console.log('Loading R2 contents for path:', path);
       const files = await r2fs.listFiles(path);
+      console.log('Raw files from R2:', files);
+      
       // Filter out .keep files
       const filteredFiles = files.filter(file => !file.name.endsWith('.keep'));
       const sortedFiles = sortFiles(filteredFiles);
+      console.log('Sorted files:', sortedFiles);
 
       // Display files
       if (sortedFiles.length === 0) {
@@ -6699,13 +6715,11 @@ const iconColor = getFileIconColor(fileType);
         alert('Folder deletion not fully implemented yet. Would need to recursively delete all contents.');
       } else {
         // Delete single file
-        await fetch('/api/r2/delete', {
+        await fetch(`/api/r2/delete?path=${encodeURIComponent(itemPath)}`, {
           method: 'DELETE',
           headers: {
-            'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ path: itemPath })
+            'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
+          }
         });
       }
       
@@ -6777,7 +6791,7 @@ const iconColor = getFileIconColor(fileType);
         
         // In R2/S3, rename = copy + delete
         // First, read the file
-        const readResponse = await fetch(`/api/r2/read?path=${encodeURIComponent(itemPath)}`, {
+        const readResponse = await fetch(`/api/r2/download?path=${encodeURIComponent(itemPath)}`, {
           headers: {
             'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
           }
@@ -6794,18 +6808,21 @@ const iconColor = getFileIconColor(fileType);
         reader.onload = async () => {
           const base64Content = (reader.result as string).split(',')[1];
           
-          const writeResponse = await fetch('/api/r2/write', {
-            method: 'PUT',
+          // Convert base64 back to blob for upload
+          const binaryData = atob(base64Content);
+          const bytes = new Uint8Array(binaryData.length);
+          for (let i = 0; i < binaryData.length; i++) {
+            bytes[i] = binaryData.charCodeAt(i);
+          }
+          const uploadBlob = new Blob([bytes], { type: fileContent.type || 'application/octet-stream' });
+          
+          const writeResponse = await fetch(`/api/r2/upload?path=${encodeURIComponent(newPath)}`, {
+            method: 'POST',
             headers: {
               'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
-              'Content-Type': 'application/json'
+              'Content-Type': fileContent.type || 'application/octet-stream'
             },
-            body: JSON.stringify({
-              path: newPath,
-              content: base64Content,
-              encoding: 'base64',
-              contentType: fileContent.type || 'application/octet-stream'
-            })
+            body: uploadBlob
           });
           
           if (!writeResponse.ok) {
@@ -6813,24 +6830,20 @@ const iconColor = getFileIconColor(fileType);
           }
           
           // Delete old file
-          const deleteResponse = await fetch('/api/r2/delete', {
+          const deleteResponse = await fetch(`/api/r2/delete?path=${encodeURIComponent(itemPath)}`, {
             method: 'DELETE',
             headers: {
-              'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ path: itemPath })
+              'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
+            }
           });
           
           if (!deleteResponse.ok) {
             // Try to clean up the new file if delete failed
-            await fetch('/api/r2/delete', {
+            await fetch(`/api/r2/delete?path=${encodeURIComponent(newPath)}`, {
               method: 'DELETE',
               headers: {
-                'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ path: newPath })
+                'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
+              }
             });
             throw new Error('Failed to delete old file');
           }
@@ -6908,7 +6921,7 @@ const iconColor = getFileIconColor(fileType);
       this.initializeLucideIcons(10);
 
       // Read the file content
-      const response = await fetch(`/api/r2/read?path=${encodeURIComponent(sourcePath)}`, {
+      const response = await fetch(`/api/r2/download?path=${encodeURIComponent(sourcePath)}`, {
         headers: {
           'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
         }
@@ -6925,18 +6938,21 @@ const iconColor = getFileIconColor(fileType);
       reader.onload = async () => {
         const base64Content = (reader.result as string).split(',')[1];
         
-        const writeResponse = await fetch('/api/r2/write', {
-          method: 'PUT',
+        // Convert base64 back to blob for upload
+        const binaryData = atob(base64Content);
+        const bytes = new Uint8Array(binaryData.length);
+        for (let i = 0; i < binaryData.length; i++) {
+          bytes[i] = binaryData.charCodeAt(i);
+        }
+        const uploadBlob = new Blob([bytes], { type: fileContent.type || 'application/octet-stream' });
+        
+        const writeResponse = await fetch(`/api/r2/upload?path=${encodeURIComponent(newPath)}`, {
+          method: 'POST',
           headers: {
             'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
-            'Content-Type': 'application/json'
+            'Content-Type': fileContent.type || 'application/octet-stream'
           },
-          body: JSON.stringify({
-            path: newPath,
-            content: base64Content,
-            encoding: 'base64',
-            contentType: fileContent.type || 'application/octet-stream'
-          })
+          body: uploadBlob
         });
         
         if (!writeResponse.ok) {
@@ -6944,24 +6960,20 @@ const iconColor = getFileIconColor(fileType);
         }
         
         // Delete old file
-        const deleteResponse = await fetch('/api/r2/delete', {
+        const deleteResponse = await fetch(`/api/r2/delete?path=${encodeURIComponent(sourcePath)}`, {
           method: 'DELETE',
           headers: {
-            'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ path: sourcePath })
+            'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
+          }
         });
         
         if (!deleteResponse.ok) {
           // Try to clean up the new file if delete failed
-          await fetch('/api/r2/delete', {
+          await fetch(`/api/r2/delete?path=${encodeURIComponent(newPath)}`, {
             method: 'DELETE',
             headers: {
-              'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ path: newPath })
+              'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
+            }
           });
           throw new Error('Failed to delete old file');
         }
@@ -7285,7 +7297,7 @@ const iconColor = getFileIconColor(fileType);
 
     try {
       // Fetch the file content with credentials
-      const response = await fetch(`/api/r2/read?path=${encodeURIComponent(path)}`, {
+      const response = await fetch(`/api/r2/download?path=${encodeURIComponent(path)}`, {
         headers: {
           'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
         }

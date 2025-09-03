@@ -47,7 +47,7 @@ export class R2FileSystem implements FileSystemAPI {
 
   async readFile(path: string): Promise<string> {
     try {
-      const response = await fetch(`${this.baseUrl}/read?path=${encodeURIComponent(path)}`, {
+      const response = await fetch(`${this.baseUrl}/download?path=${encodeURIComponent(path)}`, {
         headers: this.getHeaders(),
       });
 
@@ -65,17 +65,28 @@ export class R2FileSystem implements FileSystemAPI {
   async writeFile(path: string, content: string, options?: { encoding?: string; contentType?: string }): Promise<void> {
     try {
       const headers = this.getHeaders();
-      headers.append('Content-Type', 'application/json');
       
-      const response = await fetch(`${this.baseUrl}/write`, {
-        method: 'PUT',
+      // Convert content to blob
+      let blob: Blob;
+      if (options?.encoding === 'base64') {
+        // Decode base64 to binary
+        const binaryData = atob(content);
+        const bytes = new Uint8Array(binaryData.length);
+        for (let i = 0; i < binaryData.length; i++) {
+          bytes[i] = binaryData.charCodeAt(i);
+        }
+        blob = new Blob([bytes], { type: options?.contentType || 'application/octet-stream' });
+      } else {
+        // Plain text
+        blob = new Blob([content], { type: options?.contentType || 'text/plain' });
+      }
+      
+      headers.append('Content-Type', options?.contentType || 'application/octet-stream');
+      
+      const response = await fetch(`${this.baseUrl}/upload?path=${encodeURIComponent(path)}`, {
+        method: 'POST',
         headers: headers,
-        body: JSON.stringify({ 
-          path, 
-          content,
-          encoding: options?.encoding,
-          contentType: options?.contentType
-        }),
+        body: blob,
       });
 
       if (!response.ok) {

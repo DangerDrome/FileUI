@@ -6113,9 +6113,10 @@ const iconColor = getFileIconColor(fileType);
         this.initializeLucideIcons(10);
         
         try {
-          // Check if it's an image
+          // Check file type
           const ext = fileName.split('.').pop()?.toLowerCase() || '';
           const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
+          const videoExtensions = ['mov', 'mp4', 'mxf', 'r3d', 'ari', 'webm', 'avi', 'mkv', 'm4v', 'flv', 'wmv', 'mpg', 'mpeg', 'm2v', 'f4v', 'ogg', 'ogv'];
           
           if (imageExtensions.includes(ext)) {
             // For images, we need to fetch with credentials and create a blob URL
@@ -6234,6 +6235,107 @@ const iconColor = getFileIconColor(fileType);
                 <div class="empty-state">
                   <i data-lucide="image-off" class="lucide" style="width: 48px; height: 48px; opacity: 0.3;"></i>
                   <p>Failed to load image</p>
+                  <p class="text-muted">${escapeHtml((error as Error).message)}</p>
+                </div>
+              `;
+              this.initializeLucideIcons(10);
+            }
+          } else if (videoExtensions.includes(ext)) {
+            // For videos, fetch binary and create blob URL
+            const credentials = r2fs.getCredentials();
+            
+            try {
+              console.log('Loading R2 video:', filePath);
+              const headers = new Headers();
+              headers.append('X-R2-Credentials', btoa(JSON.stringify(credentials)));
+              
+              const response = await fetch(`/api/r2/read?path=${encodeURIComponent(filePath)}`, {
+                headers: headers
+              });
+              
+              if (!response.ok) {
+                throw new Error(`Failed to load video: ${response.status} ${response.statusText}`);
+              }
+              
+              const blob = await response.blob();
+              const videoUrl = URL.createObjectURL(blob);
+              
+              content.innerHTML = `
+                <div class="video-player" style="display: flex; flex-direction: column; height: 100%;">
+                  <video autoplay muted preload="metadata"
+                         style="flex: 1; width: 100%; background: #000;">
+                    <source src="${videoUrl}" type="video/${ext === 'mov' ? 'quicktime' : ext}">
+                    Your browser does not support this video format.
+                  </video>
+                  <div class="video-controls" style="display: flex; align-items: center; padding: 8px; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+                    <button class="btn btn-sm" data-action="play">
+                      <i data-lucide="play" width="16" height="16"></i>
+                    </button>
+                    <div class="timeline">
+                      <div class="timeline-ticks"></div>
+                      <div class="timeline-track">
+                        <div class="timeline-progress"></div>
+                        <div class="timeline-handle" style="left: 0%;">
+                          <div class="timeline-playhead-label">0:00</div>
+                          <div class="timeline-playhead-line"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <span class="video-time-label" style="font-size: 12px; color: var(--color-text-secondary); min-width: 90px; margin: 0 8px;">0:00 / 0:00</span>
+                    <div class="volume-control" style="position: relative; display: inline-flex; align-items: center;">
+                      <button class="btn btn-sm" data-action="volume">
+                        <i data-lucide="volume-2" width="16" height="16"></i>
+                      </button>
+                      <div class="volume-slider-popup" style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; background: #161614; border-radius: 6px; padding: 8px 12px; display: none; box-shadow: 0 -4px 12px rgba(0,0,0,0.8); z-index: 1000;">
+                        <input type="range" min="0" max="100" value="0" style="width: 100px;">
+                      </div>
+                    </div>
+                    <button class="btn btn-sm" data-action="fullscreen">
+                      <i data-lucide="maximize" width="16" height="16"></i>
+                    </button>
+                  </div>
+                </div>
+              `;
+              
+              // Setup video player controls
+              this.setupVideoPlayer(content);
+              this.initializeLucideIcons();
+              
+              // Update properties panel
+              this.updatePropertiesPanel(newPanel);
+              
+              // Clean up blob URL when panel is closed
+              const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                  if (mutation.removedNodes.length > 0) {
+                    URL.revokeObjectURL(videoUrl);
+                    observer.disconnect();
+                  }
+                });
+              });
+              observer.observe(newPanel.parentElement!, { childList: true });
+              
+              // Add error handling for video
+              const video = content.querySelector('video');
+              if (video) {
+                video.addEventListener('error', () => {
+                  URL.revokeObjectURL(videoUrl);
+                  content.innerHTML = `
+                    <div class="empty-state">
+                      <i data-lucide="video-off" class="lucide" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+                      <p>Failed to play video</p>
+                      <p class="text-muted">This video format may not be supported by your browser</p>
+                    </div>
+                  `;
+                  this.initializeLucideIcons(10);
+                });
+              }
+            } catch (error) {
+              console.error('Video loading error:', error);
+              content.innerHTML = `
+                <div class="empty-state">
+                  <i data-lucide="video-off" class="lucide" style="width: 48px; height: 48px; opacity: 0.3;"></i>
+                  <p>Failed to load video</p>
                   <p class="text-muted">${escapeHtml((error as Error).message)}</p>
                 </div>
               `;

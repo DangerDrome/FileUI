@@ -6123,11 +6123,11 @@ const iconColor = getFileIconColor(fileType);
             
             try {
               console.log('Loading R2 image:', filePath);
-              console.log('Using endpoint:', `/api/r2/download?path=${encodeURIComponent(filePath)}`);
+              console.log('Using endpoint:', `/api/r2/read?path=${encodeURIComponent(filePath)}`);
               const headers = new Headers();
               headers.append('X-R2-Credentials', btoa(JSON.stringify(credentials)));
               
-              const response = await fetch(`/api/r2/download?path=${encodeURIComponent(filePath)}`, {
+              const response = await fetch(`/api/r2/read?path=${encodeURIComponent(filePath)}`, {
                 headers: headers
               });
               
@@ -6840,7 +6840,7 @@ const iconColor = getFileIconColor(fileType);
         
         // In R2/S3, rename = copy + delete
         // First, read the file
-        const readResponse = await fetch(`/api/r2/download?path=${encodeURIComponent(itemPath)}`, {
+        const readResponse = await fetch(`/api/r2/read?path=${encodeURIComponent(itemPath)}`, {
           headers: {
             'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
           }
@@ -6865,7 +6865,7 @@ const iconColor = getFileIconColor(fileType);
           }
           const uploadBlob = new Blob([bytes], { type: fileContent.type || 'application/octet-stream' });
           
-          const writeResponse = await fetch(`/api/r2/upload?path=${encodeURIComponent(newPath)}`, {
+          const writeResponse = await fetch(`/api/r2/write?path=${encodeURIComponent(newPath)}`, {
             method: 'POST',
             headers: {
               'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
@@ -6970,7 +6970,7 @@ const iconColor = getFileIconColor(fileType);
       this.initializeLucideIcons(10);
 
       // Read the file content
-      const response = await fetch(`/api/r2/download?path=${encodeURIComponent(sourcePath)}`, {
+      const response = await fetch(`/api/r2/read?path=${encodeURIComponent(sourcePath)}`, {
         headers: {
           'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
         }
@@ -6995,7 +6995,7 @@ const iconColor = getFileIconColor(fileType);
         }
         const uploadBlob = new Blob([bytes], { type: fileContent.type || 'application/octet-stream' });
         
-        const writeResponse = await fetch(`/api/r2/upload?path=${encodeURIComponent(newPath)}`, {
+        const writeResponse = await fetch(`/api/r2/write?path=${encodeURIComponent(newPath)}`, {
           method: 'POST',
           headers: {
             'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
@@ -7346,7 +7346,7 @@ const iconColor = getFileIconColor(fileType);
 
     try {
       // Fetch the file content with credentials
-      const response = await fetch(`/api/r2/download?path=${encodeURIComponent(path)}`, {
+      const response = await fetch(`/api/r2/read?path=${encodeURIComponent(path)}`, {
         headers: {
           'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials()))
         }

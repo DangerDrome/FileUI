@@ -47,7 +47,7 @@ export class R2FileSystem implements FileSystemAPI {
 
   async readFile(path: string): Promise<string> {
     try {
-      const response = await fetch(`${this.baseUrl}/download?path=${encodeURIComponent(path)}`, {
+      const response = await fetch(`${this.baseUrl}/read?path=${encodeURIComponent(path)}`, {
         headers: this.getHeaders(),
       });
 
@@ -83,8 +83,8 @@ export class R2FileSystem implements FileSystemAPI {
       
       headers.append('Content-Type', options?.contentType || 'application/octet-stream');
       
-      const response = await fetch(`${this.baseUrl}/upload?path=${encodeURIComponent(path)}`, {
-        method: 'POST',
+      const response = await fetch(`${this.baseUrl}/write?path=${encodeURIComponent(path)}`, {
+        method: 'PUT',
         headers: headers,
         body: blob,
       });

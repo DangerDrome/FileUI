@@ -1370,7 +1370,7 @@ export class PanelManager {
             </div>
             <div class="menu">
               <button class="btn btn-ghost btn-sm" data-action="google-drive" title="Google Drive">
-                <img src="/src/gfx/drive_icon.svg" class="toolbar-drive-icon" alt="Google Drive" />
+                <img src="/drive_icon.svg" class="toolbar-drive-icon" alt="Google Drive" />
               </button>
             </div>
           </div>
@@ -1519,7 +1519,7 @@ export class PanelManager {
     const panelTitle = panel.querySelector('.panel-title span');
     if (panelTitle && panelTitle.parentElement) {
       panelTitle.parentElement.innerHTML = `
-        <img src="/src/gfx/drive_icon.svg" class="panel-header-drive-icon" alt="Google Drive" style="margin-right: 6px;" />
+        <img src="/drive_icon.svg" class="panel-header-drive-icon" alt="Google Drive" style="margin-right: 6px;" />
         <span>Google Drive</span>
       `;
     }
@@ -1532,7 +1532,7 @@ export class PanelManager {
           <div class="google-drive-config-form">
             <!-- Large Icon Header -->
             <div class="config-icon-header">
-              <img src="/src/gfx/drive_icon.svg" class="config-icon drive-icon" alt="Google Drive" />
+              <img src="/drive_icon.svg" class="config-icon drive-icon" alt="Google Drive" />
             </div>
             
             <!-- Service Account Section -->
@@ -5799,7 +5799,7 @@ const iconColor = getFileIconColor(fileType);
     
     if (panelTitle && panelTitle.parentElement) {
       panelTitle.parentElement.innerHTML = `
-        <img src="/src/gfx/drive_icon.svg" class="panel-header-drive-icon" alt="Google Drive" style="margin-right: 6px;" />
+        <img src="/drive_icon.svg" class="panel-header-drive-icon" alt="Google Drive" style="margin-right: 6px;" />
         <span>Google Drive</span>
       `;
     }

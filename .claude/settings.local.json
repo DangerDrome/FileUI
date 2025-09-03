@@ -34,7 +34,8 @@
       "Bash(pip3 install:*)",
       "Bash(pip install:*)",
       "Bash(node:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

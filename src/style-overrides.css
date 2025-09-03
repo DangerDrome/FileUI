@@ -1,16 +1,29 @@
 /* Style overrides to fix dim interface - Keep original dark theme but improve visibility */
 
 /* GLOBAL FIXES - Force everything to be visible */
-* {
+/* Removed global opacity override to allow panel header dimming */
+
+/* Ensure non-panel elements remain visible */
+body, #app, .menu-bar, .context-menu, .modal, .tooltip,
+.bsp-panel .panel-body, .bsp-panel .panel-content {
   opacity: 1 !important;
 }
 
 /* Make icons visible but preserve file type colors */
-.lucide, 
-[data-lucide],
-i[data-lucide],
-svg {
+/* Exclude panel header icons to allow dimming */
+.lucide:not(.panel-header *), 
+[data-lucide]:not(.panel-header *),
+i[data-lucide]:not(.panel-header *),
+svg:not(.panel-header *) {
   opacity: 1 !important;
+  stroke-width: 2 !important;
+}
+
+/* Panel header icons inherit opacity from panel header */
+.panel-header .lucide,
+.panel-header [data-lucide],
+.panel-header i[data-lucide],
+.panel-header svg {
   stroke-width: 2 !important;
 }
 
@@ -75,23 +88,32 @@ svg {
 /* DO NOT override panel title icon colors - they have inline styles with file type colors */
 .panel-title .lucide {
   /* Don't set color here - let inline styles work */
-  opacity: 1 !important;
+  /* Removed opacity override to allow dimming with panel header */
+  stroke-width: 2 !important; /* Keep stroke width consistent */
 }
 
 /* Toolbar buttons - keep them visible without changing background */
 .action-bar-panel .btn,
-.panel-action-btn,
 button {
   color: #ffffff !important;
   opacity: 1 !important;
 }
 
+/* Panel action buttons inherit opacity from panel header */
+.panel-action-btn {
+  color: #ffffff !important;
+}
+
 .action-bar-panel .btn:hover,
-.panel-action-btn:hover,
 button:hover {
   background: rgba(255, 255, 255, 0.1) !important;
   color: #ffffff !important;
   opacity: 1 !important;
+}
+
+.panel-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
 }
 
 /* Dim menu items and top menu bar */
@@ -114,7 +136,7 @@ button:hover {
 /* Panel title text color */
 .panel-title {
   color: #ffffff !important;
-  opacity: 1 !important;
+  /* Removed opacity override to allow dimming */
 }
 
 /* Preserve file type icon colors in tree view */
@@ -225,6 +247,23 @@ button:hover {
   border-radius: 0 !important;
 }
 
+/* Dim panel headers when not focused */
+.bsp-panel .panel-header {
+  opacity: 0.7 !important;
+  transition: opacity 0.2s ease;
+}
+
+/* Bright panel header when panel is focused */
+.bsp-panel.focused .panel-header {
+  opacity: 1 !important;
+}
+
+/* Keep panel content always bright */
+.bsp-panel .panel-content,
+.bsp-panel .panel-body {
+  opacity: 1 !important;
+}
+
 /* File explorer - keep transparent backgrounds */
 .tree-item:hover {
   background: rgba(255, 255, 255, 0.05) !important;
@@ -246,12 +285,7 @@ button:hover {
   background: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Remove all dimming effects */
-.bsp-panel:not(:focus-within) .panel-header,
-.bsp-panel:not(:focus-within) .panel-title {
-  opacity: 1 !important;
-  color: #ffffff !important;
-}
+/* Removed conflicting rules that were preventing panel header dimming */
 
 /* Toolbar panel fix */
 .toolbar-panel,

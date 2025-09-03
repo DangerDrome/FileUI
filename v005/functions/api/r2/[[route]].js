@@ -234,6 +234,15 @@ export async function onRequest(context) {
             }
           }
           
+          // Sort files: folders first, then alphabetically by name
+          files.sort((a, b) => {
+            // Folders first
+            if (a.isDirectory && !b.isDirectory) return -1;
+            if (!a.isDirectory && b.isDirectory) return 1;
+            // Then alphabetically
+            return a.name.localeCompare(b.name);
+          });
+          
           return new Response(JSON.stringify(files), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });

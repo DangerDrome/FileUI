@@ -65,25 +65,60 @@ export class R2FileSystem implements FileSystemAPI {
   async writeFile(path: string, content: string, options?: { encoding?: string; contentType?: string }): Promise<void> {
     try {
       const headers = this.getHeaders();
-      headers.append('Content-Type', 'application/json');
       
-      // Send as JSON to match server expectation
-      const payload = {
-        path: path,
-        content: content,
-        encoding: options?.encoding,
-        contentType: options?.contentType
-      };
+      // Check if we're running on Cloudflare Pages or local
+      const isCloudflare = this.baseUrl.includes('api/r2');
       
-      const response = await fetch(`${this.baseUrl}/write`, {
-        method: 'PUT',
-        headers: headers,
-        body: JSON.stringify(payload),
-      });
+      if (isCloudflare) {
+        // Cloudflare Pages expects path as query param and binary body
+        let body: ArrayBuffer;
+        
+        if (options?.encoding === 'base64') {
+          // Decode base64 to binary
+          const binaryString = atob(content);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          body = bytes.buffer;
+        } else {
+          // Convert string to ArrayBuffer
+          body = new TextEncoder().encode(content).buffer;
+        }
+        
+        headers.append('Content-Type', options?.contentType || 'application/octet-stream');
+        
+        const response = await fetch(`${this.baseUrl}/write?path=${encodeURIComponent(path)}`, {
+          method: 'PUT',
+          headers: headers,
+          body: body,
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to write file: ${errorText}`);
+        }
+      } else {
+        // Local Python server expects JSON
+        headers.append('Content-Type', 'application/json');
+        
+        const payload = {
+          path: path,
+          content: content,
+          encoding: options?.encoding,
+          contentType: options?.contentType
+        };
+        
+        const response = await fetch(`${this.baseUrl}/write`, {
+          method: 'PUT',
+          headers: headers,
+          body: JSON.stringify(payload),
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to write file: ${errorText}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to write file: ${errorText}`);
+        }
       }
     } catch (error) {
       console.error('Error writing R2 file:', error);

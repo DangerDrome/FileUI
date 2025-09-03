@@ -652,11 +652,11 @@ class FileAPIHandler(BaseHTTPRequestHandler):
                 self.send_error(400, "R2 credentials required")
                 return
             
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            data = json.loads(post_data.decode())
+            # Get path from query parameter (matching Cloudflare API)
+            parsed_path = urlparse(self.path)
+            query_params = parse_qs(parsed_path.query)
+            path = query_params.get('path', [None])[0]
             
-            path = data.get('path')
             if not path:
                 self.send_error(400, "Path parameter required")
                 return

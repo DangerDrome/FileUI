@@ -67,7 +67,8 @@ export class R2FileSystem implements FileSystemAPI {
       const headers = this.getHeaders();
       
       // Check if we're running on Cloudflare Pages or local
-      const isCloudflare = this.baseUrl.includes('api/r2');
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const isCloudflare = !isLocal;
       
       if (isCloudflare) {
         // Cloudflare Pages expects path as query param and binary body

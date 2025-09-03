@@ -6910,9 +6910,18 @@ const iconColor = getFileIconColor(fileType);
     input.focus();
     input.select();
     
+    let isRenaming = false;
+    
     // Handle rename completion
     const completeRename = async () => {
+      // Prevent double execution
+      if (isRenaming) return;
+      isRenaming = true;
+      
       const newName = input.value.trim();
+      
+      // Only replace if input still exists in DOM
+      if (!input.parentNode) return;
       
       // Restore label
       const newLabel = document.createElement('span');
@@ -6936,11 +6945,184 @@ const iconColor = getFileIconColor(fileType);
         treeItem.classList.add('renaming');
         
         // Calculate new path
-        const pathParts = itemPath.split('/');
+        // Handle paths that end with '/' (folders)
+        let pathParts = itemPath.split('/');
+        if (pathParts[pathParts.length - 1] === '') {
+          pathParts.pop(); // Remove empty element
+        }
         pathParts[pathParts.length - 1] = newName;
         const newPath = pathParts.join('/');
         
-        // In R2/S3, rename = copy + delete
+        // Check if we're on local server or Cloudflare Pages
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        // Check if it's a folder from the data-type attribute
+        const isFolder = treeItem.getAttribute('data-type') === 'directory';
+        
+        if (isFolder) {
+          // For folders in R2, we need to rename all files with that prefix
+          // This is a batch operation
+          try {
+            // For R2, we need to list the contents of the folder being renamed
+            const allFilesInFolder = await r2fs.listFiles(itemPath);
+            
+            // Filter out directories and only process files
+            const filesInFolder = allFilesInFolder.filter(f => !f.isDirectory);
+            
+            console.log('Files in folder to rename:', filesInFolder);
+            
+            if (filesInFolder.length === 0) {
+              // Empty folder - just create .keep in new location
+              const newKeepPath = (newPath.endsWith('/') ? newPath : newPath + '/') + '.keep';
+              if (isLocal) {
+                await r2fs.writeFile(newKeepPath, '', {
+                  encoding: 'utf-8',
+                  contentType: 'text/plain'
+                });
+              } else {
+                await fetch(`/api/r2/write?path=${encodeURIComponent(newKeepPath)}`, {
+                  method: 'PUT',
+                  headers: {
+                    'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+                    'Content-Type': 'text/plain'
+                  },
+                  body: ''
+                });
+              }
+              
+              // Delete old .keep file if exists
+              const oldKeepPath = (itemPath.endsWith('/') ? itemPath : itemPath + '/') + '.keep';
+              try {
+                await fetch(`/api/r2/delete?path=${encodeURIComponent(oldKeepPath)}`, {
+                  method: 'DELETE',
+                  headers: { 'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())) }
+                });
+              } catch (e) {
+                // Ignore
+              }
+              
+              await this.loadR2Contents(panelId, currentPath);
+              return;
+            }
+            
+            // Ensure proper path normalization
+            const oldPrefix = itemPath.endsWith('/') ? itemPath : itemPath + '/';
+            const newPrefix = newPath.endsWith('/') ? newPath : newPath + '/';
+            
+            // Move each file to the new path
+            for (const file of filesInFolder) {
+              
+              const oldFilePath = file.path;
+              
+              // Skip .keep files - they're just markers
+              if (oldFilePath.endsWith('.keep')) {
+                continue;
+              }
+              
+              // Calculate new file path
+              const newFilePath = oldFilePath.replace(oldPrefix, newPrefix);
+              
+              console.log('Renaming file:', {
+                oldFilePath,
+                newFilePath,
+                itemPath,
+                newPath,
+                oldPrefix,
+                newPrefix
+              });
+              
+              // Read and rewrite each file
+              const readResp = await fetch(`/api/r2/read?path=${encodeURIComponent(oldFilePath)}`, {
+                headers: { 'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())) }
+              });
+              
+              if (!readResp.ok) continue;
+              
+              const fileBlob = await readResp.blob();
+              
+              let writeResp;
+              if (isLocal) {
+                // Local server expects base64 JSON
+                const reader = new FileReader();
+                const base64Content = await new Promise<string>((resolve) => {
+                  reader.onload = () => {
+                    const result = reader.result as string;
+                    resolve(result.split(',')[1] || '');
+                  };
+                  reader.readAsDataURL(fileBlob);
+                });
+                
+                // Skip empty files
+                if (!base64Content) continue;
+                
+                await r2fs.writeFile(newFilePath, base64Content, {
+                  encoding: 'base64',
+                  contentType: fileBlob.type || 'application/octet-stream'
+                });
+                writeResp = { ok: true };
+              } else {
+                // Cloudflare Pages expects binary
+                writeResp = await fetch(`/api/r2/write?path=${encodeURIComponent(newFilePath)}`, {
+                  method: 'PUT',
+                  headers: {
+                    'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+                    'Content-Type': fileBlob.type || 'application/octet-stream'
+                  },
+                  body: fileBlob
+                });
+              }
+              
+              if (writeResp.ok) {
+                // Delete the old file
+                await fetch(`/api/r2/delete?path=${encodeURIComponent(oldFilePath)}`, {
+                  method: 'DELETE',
+                  headers: { 'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())) }
+                });
+              }
+            }
+            
+            // Delete the old .keep file if it exists
+            const oldKeepPath = oldPrefix + '.keep';
+            try {
+              await fetch(`/api/r2/delete?path=${encodeURIComponent(oldKeepPath)}`, {
+                method: 'DELETE',
+                headers: { 'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())) }
+              });
+            } catch (e) {
+              // Ignore errors deleting .keep file
+            }
+            
+            // Create a .keep file in the new folder to maintain it
+            const newKeepPath = newPrefix + '.keep';
+            if (isLocal) {
+              await r2fs.writeFile(newKeepPath, '', {
+                encoding: 'utf-8',
+                contentType: 'text/plain'
+              });
+            } else {
+              await fetch(`/api/r2/write?path=${encodeURIComponent(newKeepPath)}`, {
+                method: 'PUT',
+                headers: {
+                  'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
+                  'Content-Type': 'text/plain'
+                },
+                body: ''
+              });
+            }
+            
+            // Reload the directory
+            await this.loadR2Contents(panelId, currentPath);
+            
+          } catch (error) {
+            console.error('Folder rename error:', error);
+            alert('Failed to rename folder: ' + (error as Error).message);
+          } finally {
+            treeItem.classList.remove('renaming');
+          }
+          return;
+        }
+        
+        // For files, rename = copy + delete
         // First, read the file
         const readResponse = await fetch(`/api/r2/read?path=${encodeURIComponent(itemPath)}`, {
           headers: {
@@ -6967,18 +7149,11 @@ const iconColor = getFileIconColor(fileType);
           }
           const uploadBlob = new Blob([bytes], { type: fileContent.type || 'application/octet-stream' });
           
-          const writeResponse = await fetch(`/api/r2/write?path=${encodeURIComponent(newPath)}`, {
-            method: 'POST',
-            headers: {
-              'X-R2-Credentials': btoa(JSON.stringify(r2fs.getCredentials())),
-              'Content-Type': fileContent.type || 'application/octet-stream'
-            },
-            body: uploadBlob
+          // Use r2fs.writeFile which handles local vs Cloudflare differences
+          await r2fs.writeFile(newPath, base64Content, {
+            encoding: 'base64',
+            contentType: fileContent.type || 'application/octet-stream'
           });
-          
-          if (!writeResponse.ok) {
-            throw new Error('Failed to write file to new location');
-          }
           
           // Delete old file
           const deleteResponse = await fetch(`/api/r2/delete?path=${encodeURIComponent(itemPath)}`, {
@@ -7019,11 +7194,16 @@ const iconColor = getFileIconColor(fileType);
         completeRename();
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        // Restore original label
-        const newLabel = document.createElement('span');
-        newLabel.className = 'tree-item-label';
-        newLabel.textContent = originalText;
-        input.replaceWith(newLabel);
+        isRenaming = true; // Prevent blur handler
+        
+        // Only replace if input still exists in DOM
+        if (input.parentNode) {
+          // Restore original label
+          const newLabel = document.createElement('span');
+          newLabel.className = 'tree-item-label';
+          newLabel.textContent = originalText;
+          input.replaceWith(newLabel);
+        }
       }
     });
     
